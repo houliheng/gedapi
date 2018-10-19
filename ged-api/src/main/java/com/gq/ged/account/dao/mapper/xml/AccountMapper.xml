@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gq.ged.account.dao.mapper.AccountMapper" >
+  <resultMap id="BaseResultMap" type="com.gq.ged.account.dao.model.Account" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="account_code" property="accountCode" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="cust_id" property="custId" jdbcType="VARCHAR" />
+    <result column="corporation_name" property="corporationName" jdbcType="VARCHAR" />
+    <result column="corporation_phone" property="corporationPhone" jdbcType="VARCHAR" />
+    <result column="corporation_card_num" property="corporationCardNum" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="social_credit_code" property="socialCreditCode" jdbcType="VARCHAR" />
+    <result column="company_bank_of_deposit" property="companyBankOfDeposit" jdbcType="VARCHAR" />
+    <result column="company_bank_of_deposit_value" property="companyBankOfDepositValue" jdbcType="VARCHAR" />
+    <result column="company_account" property="companyAccount" jdbcType="VARCHAR" />
+    <result column="company_bank_branch_name" property="companyBankBranchName" jdbcType="VARCHAR" />
+    <result column="province_code" property="provinceCode" jdbcType="VARCHAR" />
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_id" property="createId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_id" property="modifyId" jdbcType="BIGINT" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, account_code, user_id, cust_id, corporation_name, corporation_phone, corporation_card_num, 
+    company_name, social_credit_code, company_bank_of_deposit, company_bank_of_deposit_value, 
+    company_account, company_bank_branch_name, province_code, city_code, area_code, address, 
+    status, create_id, create_time, modify_id, modify_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.gq.ged.account.dao.model.AccountExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ged_account
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ged_account
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ged_account
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.gq.ged.account.dao.model.AccountExample" >
+    delete from ged_account
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.gq.ged.account.dao.model.Account" >
+    insert into ged_account (id, account_code, user_id, 
+      cust_id, corporation_name, corporation_phone, 
+      corporation_card_num, company_name, social_credit_code, 
+      company_bank_of_deposit, company_bank_of_deposit_value, 
+      company_account, company_bank_branch_name, 
+      province_code, city_code, area_code, 
+      address, status, create_id, 
+      create_time, modify_id, modify_time
+      )
+    values (#{id,jdbcType=BIGINT}, #{accountCode,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, 
+      #{custId,jdbcType=VARCHAR}, #{corporationName,jdbcType=VARCHAR}, #{corporationPhone,jdbcType=VARCHAR}, 
+      #{corporationCardNum,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, #{socialCreditCode,jdbcType=VARCHAR}, 
+      #{companyBankOfDeposit,jdbcType=VARCHAR}, #{companyBankOfDepositValue,jdbcType=VARCHAR}, 
+      #{companyAccount,jdbcType=VARCHAR}, #{companyBankBranchName,jdbcType=VARCHAR}, 
+      #{provinceCode,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{areaCode,jdbcType=VARCHAR}, 
+      #{address,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createId,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{modifyId,jdbcType=BIGINT}, #{modifyTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.gq.ged.account.dao.model.Account" useGeneratedKeys="true"
+          keyProperty="id">
+    insert into ged_account
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="accountCode != null" >
+        account_code,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="custId != null" >
+        cust_id,
+      </if>
+      <if test="corporationName != null" >
+        corporation_name,
+      </if>
+      <if test="corporationPhone != null" >
+        corporation_phone,
+      </if>
+      <if test="corporationCardNum != null" >
+        corporation_card_num,
+      </if>
+      <if test="companyName != null" >
+        company_name,
+      </if>
+      <if test="socialCreditCode != null" >
+        social_credit_code,
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        company_bank_of_deposit,
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value,
+      </if>
+      <if test="companyAccount != null" >
+        company_account,
+      </if>
+      <if test="companyBankBranchName != null" >
+        company_bank_branch_name,
+      </if>
+      <if test="provinceCode != null" >
+        province_code,
+      </if>
+      <if test="cityCode != null" >
+        city_code,
+      </if>
+      <if test="areaCode != null" >
+        area_code,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createId != null" >
+        create_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyId != null" >
+        modify_id,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="accountCode != null" >
+        #{accountCode,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="custId != null" >
+        #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationName != null" >
+        #{corporationName,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationPhone != null" >
+        #{corporationPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationCardNum != null" >
+        #{corporationCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null" >
+        #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        #{companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAccount != null" >
+        #{companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankBranchName != null" >
+        #{companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null" >
+        #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null" >
+        #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.gq.ged.account.dao.model.AccountExample" resultType="java.lang.Integer" >
+    select count(*) from ged_account
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update ged_account
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.accountCode != null" >
+        account_code = #{record.accountCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.custId != null" >
+        cust_id = #{record.custId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.corporationName != null" >
+        corporation_name = #{record.corporationName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.corporationPhone != null" >
+        corporation_phone = #{record.corporationPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.corporationCardNum != null" >
+        corporation_card_num = #{record.corporationCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyName != null" >
+        company_name = #{record.companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.socialCreditCode != null" >
+        social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankOfDeposit != null" >
+        company_bank_of_deposit = #{record.companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value = #{record.companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyAccount != null" >
+        company_account = #{record.companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankBranchName != null" >
+        company_bank_branch_name = #{record.companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.provinceCode != null" >
+        province_code = #{record.provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityCode != null" >
+        city_code = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.areaCode != null" >
+        area_code = #{record.areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null" >
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.createId != null" >
+        create_id = #{record.createId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.modifyId != null" >
+        modify_id = #{record.modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="record.modifyTime != null" >
+        modify_time = #{record.modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update ged_account
+    set id = #{record.id,jdbcType=BIGINT},
+      account_code = #{record.accountCode,jdbcType=VARCHAR},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      cust_id = #{record.custId,jdbcType=VARCHAR},
+      corporation_name = #{record.corporationName,jdbcType=VARCHAR},
+      corporation_phone = #{record.corporationPhone,jdbcType=VARCHAR},
+      corporation_card_num = #{record.corporationCardNum,jdbcType=VARCHAR},
+      company_name = #{record.companyName,jdbcType=VARCHAR},
+      social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      company_bank_of_deposit = #{record.companyBankOfDeposit,jdbcType=VARCHAR},
+      company_bank_of_deposit_value = #{record.companyBankOfDepositValue,jdbcType=VARCHAR},
+      company_account = #{record.companyAccount,jdbcType=VARCHAR},
+      company_bank_branch_name = #{record.companyBankBranchName,jdbcType=VARCHAR},
+      province_code = #{record.provinceCode,jdbcType=VARCHAR},
+      city_code = #{record.cityCode,jdbcType=VARCHAR},
+      area_code = #{record.areaCode,jdbcType=VARCHAR},
+      address = #{record.address,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=INTEGER},
+      create_id = #{record.createId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      modify_id = #{record.modifyId,jdbcType=BIGINT},
+      modify_time = #{record.modifyTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.gq.ged.account.dao.model.Account" >
+    update ged_account
+    <set >
+      <if test="accountCode != null" >
+        account_code = #{accountCode,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="custId != null" >
+        cust_id = #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationName != null" >
+        corporation_name = #{corporationName,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationPhone != null" >
+        corporation_phone = #{corporationPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="corporationCardNum != null" >
+        corporation_card_num = #{corporationCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null" >
+        social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        company_bank_of_deposit = #{companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value = #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAccount != null" >
+        company_account = #{companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankBranchName != null" >
+        company_bank_branch_name = #{companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        province_code = #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        area_code = #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null" >
+        create_id = #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null" >
+        modify_id = #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.gq.ged.account.dao.model.Account" >
+    update ged_account
+    set account_code = #{accountCode,jdbcType=VARCHAR},
+      user_id = #{userId,jdbcType=BIGINT},
+      cust_id = #{custId,jdbcType=VARCHAR},
+      corporation_name = #{corporationName,jdbcType=VARCHAR},
+      corporation_phone = #{corporationPhone,jdbcType=VARCHAR},
+      corporation_card_num = #{corporationCardNum,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      company_bank_of_deposit = #{companyBankOfDeposit,jdbcType=VARCHAR},
+      company_bank_of_deposit_value = #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      company_account = #{companyAccount,jdbcType=VARCHAR},
+      company_bank_branch_name = #{companyBankBranchName,jdbcType=VARCHAR},
+      province_code = #{provinceCode,jdbcType=VARCHAR},
+      city_code = #{cityCode,jdbcType=VARCHAR},
+      area_code = #{areaCode,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      create_id = #{createId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_id = #{modifyId,jdbcType=BIGINT},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectBusiNoByCustIdAndMobile" resultType="string">
+    SELECT go.contract_code  from ged_user gu,ged_order go
+    WHERE gu.id=go.user_id AND gu.get_cust_id=#{custId,jdbcType=VARCHAR}
+    AND gu.mobile=#{mobile,jdbcType=VARCHAR};
+  </select>
+</mapper>

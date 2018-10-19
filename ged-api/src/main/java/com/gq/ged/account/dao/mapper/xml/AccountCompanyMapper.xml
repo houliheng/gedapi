@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gq.ged.account.dao.mapper.AccountCompanyMapper" >
+  <resultMap id="BaseResultMap" type="com.gq.ged.account.dao.model.AccountCompany" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="cust_id" property="custId" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="company_card_type" property="companyCardType" jdbcType="VARCHAR" />
+    <result column="social_credit_code" property="socialCreditCode" jdbcType="VARCHAR" />
+    <result column="business_licence" property="businessLicence" jdbcType="VARCHAR" />
+    <result column="organization_code" property="organizationCode" jdbcType="VARCHAR" />
+    <result column="tax_code" property="taxCode" jdbcType="VARCHAR" />
+    <result column="legal_name" property="legalName" jdbcType="VARCHAR" />
+    <result column="legal_mobile" property="legalMobile" jdbcType="VARCHAR" />
+    <result column="legal_card_type" property="legalCardType" jdbcType="INTEGER" />
+    <result column="legal_card_number" property="legalCardNumber" jdbcType="VARCHAR" />
+    <result column="company_contact" property="companyContact" jdbcType="VARCHAR" />
+    <result column="contact_mobile" property="contactMobile" jdbcType="VARCHAR" />
+    <result column="company_bank_of_deposit" property="companyBankOfDeposit" jdbcType="VARCHAR" />
+    <result column="company_bank_of_deposit_value" property="companyBankOfDepositValue" jdbcType="VARCHAR" />
+    <result column="company_account" property="companyAccount" jdbcType="VARCHAR" />
+    <result column="company_bank_branch_name" property="companyBankBranchName" jdbcType="VARCHAR" />
+    <result column="province_code" property="provinceCode" jdbcType="VARCHAR" />
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="id_card_face_url" property="idCardFaceUrl" jdbcType="VARCHAR" />
+    <result column="id_card_back_url" property="idCardBackUrl" jdbcType="VARCHAR" />
+    <result column="id_card_hold_url" property="idCardHoldUrl" jdbcType="VARCHAR" />
+    <result column="business_licence_url" property="businessLicenceUrl" jdbcType="VARCHAR" />
+    <result column="accounts_permits_url" property="accountsPermitsUrl" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_id" property="createId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="account_verify_info" property="accountVerifyInfo" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, user_id, cust_id, company_name, company_card_type, social_credit_code, business_licence, 
+    organization_code, tax_code, legal_name, legal_mobile, legal_card_type, legal_card_number, 
+    company_contact, contact_mobile, company_bank_of_deposit, company_bank_of_deposit_value, 
+    company_account, company_bank_branch_name, province_code, city_code, area_code, address, 
+    id_card_face_url, id_card_back_url, id_card_hold_url, business_licence_url, accounts_permits_url, 
+    status, create_id, create_time, account_verify_info
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.gq.ged.account.dao.model.AccountCompanyExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ged_account_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ged_account_company
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ged_account_company
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.gq.ged.account.dao.model.AccountCompanyExample" >
+    delete from ged_account_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="com.gq.ged.account.dao.model.AccountCompany" useGeneratedKeys="true">
+    insert into ged_account_company (id, user_id, cust_id, 
+      company_name, company_card_type, social_credit_code, 
+      business_licence, organization_code, tax_code, 
+      legal_name, legal_mobile, legal_card_type, 
+      legal_card_number, company_contact, contact_mobile, 
+      company_bank_of_deposit, company_bank_of_deposit_value, 
+      company_account, company_bank_branch_name, 
+      province_code, city_code, area_code, 
+      address, id_card_face_url, id_card_back_url, 
+      id_card_hold_url, business_licence_url, accounts_permits_url, 
+      status, create_id, create_time, 
+      account_verify_info)
+    values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{custId,jdbcType=VARCHAR}, 
+      #{companyName,jdbcType=VARCHAR}, #{companyCardType,jdbcType=VARCHAR}, #{socialCreditCode,jdbcType=VARCHAR}, 
+      #{businessLicence,jdbcType=VARCHAR}, #{organizationCode,jdbcType=VARCHAR}, #{taxCode,jdbcType=VARCHAR}, 
+      #{legalName,jdbcType=VARCHAR}, #{legalMobile,jdbcType=VARCHAR}, #{legalCardType,jdbcType=INTEGER}, 
+      #{legalCardNumber,jdbcType=VARCHAR}, #{companyContact,jdbcType=VARCHAR}, #{contactMobile,jdbcType=VARCHAR}, 
+      #{companyBankOfDeposit,jdbcType=VARCHAR}, #{companyBankOfDepositValue,jdbcType=VARCHAR}, 
+      #{companyAccount,jdbcType=VARCHAR}, #{companyBankBranchName,jdbcType=VARCHAR}, 
+      #{provinceCode,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{areaCode,jdbcType=VARCHAR}, 
+      #{address,jdbcType=VARCHAR}, #{idCardFaceUrl,jdbcType=VARCHAR}, #{idCardBackUrl,jdbcType=VARCHAR}, 
+      #{idCardHoldUrl,jdbcType=VARCHAR}, #{businessLicenceUrl,jdbcType=VARCHAR}, #{accountsPermitsUrl,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{createId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{accountVerifyInfo,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.gq.ged.account.dao.model.AccountCompany" useGeneratedKeys="true">
+    insert into ged_account_company
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="custId != null" >
+        cust_id,
+      </if>
+      <if test="companyName != null" >
+        company_name,
+      </if>
+      <if test="companyCardType != null" >
+        company_card_type,
+      </if>
+      <if test="socialCreditCode != null" >
+        social_credit_code,
+      </if>
+      <if test="businessLicence != null" >
+        business_licence,
+      </if>
+      <if test="organizationCode != null" >
+        organization_code,
+      </if>
+      <if test="taxCode != null" >
+        tax_code,
+      </if>
+      <if test="legalName != null" >
+        legal_name,
+      </if>
+      <if test="legalMobile != null" >
+        legal_mobile,
+      </if>
+      <if test="legalCardType != null" >
+        legal_card_type,
+      </if>
+      <if test="legalCardNumber != null" >
+        legal_card_number,
+      </if>
+      <if test="companyContact != null" >
+        company_contact,
+      </if>
+      <if test="contactMobile != null" >
+        contact_mobile,
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        company_bank_of_deposit,
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value,
+      </if>
+      <if test="companyAccount != null" >
+        company_account,
+      </if>
+      <if test="companyBankBranchName != null" >
+        company_bank_branch_name,
+      </if>
+      <if test="provinceCode != null" >
+        province_code,
+      </if>
+      <if test="cityCode != null" >
+        city_code,
+      </if>
+      <if test="areaCode != null" >
+        area_code,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="idCardFaceUrl != null" >
+        id_card_face_url,
+      </if>
+      <if test="idCardBackUrl != null" >
+        id_card_back_url,
+      </if>
+      <if test="idCardHoldUrl != null" >
+        id_card_hold_url,
+      </if>
+      <if test="businessLicenceUrl != null" >
+        business_licence_url,
+      </if>
+      <if test="accountsPermitsUrl != null" >
+        accounts_permits_url,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createId != null" >
+        create_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="accountVerifyInfo != null" >
+        account_verify_info,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="custId != null" >
+        #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardType != null" >
+        #{companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null" >
+        #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicence != null" >
+        #{businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null" >
+        #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="taxCode != null" >
+        #{taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="legalName != null" >
+        #{legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="legalMobile != null" >
+        #{legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="legalCardType != null" >
+        #{legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="legalCardNumber != null" >
+        #{legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="companyContact != null" >
+        #{companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="contactMobile != null" >
+        #{contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        #{companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAccount != null" >
+        #{companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankBranchName != null" >
+        #{companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardFaceUrl != null" >
+        #{idCardFaceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardBackUrl != null" >
+        #{idCardBackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardHoldUrl != null" >
+        #{idCardHoldUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicenceUrl != null" >
+        #{businessLicenceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="accountsPermitsUrl != null" >
+        #{accountsPermitsUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null" >
+        #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="accountVerifyInfo != null" >
+        #{accountVerifyInfo,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.gq.ged.account.dao.model.AccountCompanyExample" resultType="java.lang.Integer" >
+    select count(*) from ged_account_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update ged_account_company
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.custId != null" >
+        cust_id = #{record.custId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyName != null" >
+        company_name = #{record.companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCardType != null" >
+        company_card_type = #{record.companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.socialCreditCode != null" >
+        social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.businessLicence != null" >
+        business_licence = #{record.businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="record.organizationCode != null" >
+        organization_code = #{record.organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taxCode != null" >
+        tax_code = #{record.taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalName != null" >
+        legal_name = #{record.legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalMobile != null" >
+        legal_mobile = #{record.legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalCardType != null" >
+        legal_card_type = #{record.legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="record.legalCardNumber != null" >
+        legal_card_number = #{record.legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyContact != null" >
+        company_contact = #{record.companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contactMobile != null" >
+        contact_mobile = #{record.contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankOfDeposit != null" >
+        company_bank_of_deposit = #{record.companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value = #{record.companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyAccount != null" >
+        company_account = #{record.companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyBankBranchName != null" >
+        company_bank_branch_name = #{record.companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.provinceCode != null" >
+        province_code = #{record.provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityCode != null" >
+        city_code = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.areaCode != null" >
+        area_code = #{record.areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null" >
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.idCardFaceUrl != null" >
+        id_card_face_url = #{record.idCardFaceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.idCardBackUrl != null" >
+        id_card_back_url = #{record.idCardBackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.idCardHoldUrl != null" >
+        id_card_hold_url = #{record.idCardHoldUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.businessLicenceUrl != null" >
+        business_licence_url = #{record.businessLicenceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.accountsPermitsUrl != null" >
+        accounts_permits_url = #{record.accountsPermitsUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null" >
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.createId != null" >
+        create_id = #{record.createId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.accountVerifyInfo != null" >
+        account_verify_info = #{record.accountVerifyInfo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update ged_account_company
+    set id = #{record.id,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      cust_id = #{record.custId,jdbcType=VARCHAR},
+      company_name = #{record.companyName,jdbcType=VARCHAR},
+      company_card_type = #{record.companyCardType,jdbcType=VARCHAR},
+      social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      business_licence = #{record.businessLicence,jdbcType=VARCHAR},
+      organization_code = #{record.organizationCode,jdbcType=VARCHAR},
+      tax_code = #{record.taxCode,jdbcType=VARCHAR},
+      legal_name = #{record.legalName,jdbcType=VARCHAR},
+      legal_mobile = #{record.legalMobile,jdbcType=VARCHAR},
+      legal_card_type = #{record.legalCardType,jdbcType=INTEGER},
+      legal_card_number = #{record.legalCardNumber,jdbcType=VARCHAR},
+      company_contact = #{record.companyContact,jdbcType=VARCHAR},
+      contact_mobile = #{record.contactMobile,jdbcType=VARCHAR},
+      company_bank_of_deposit = #{record.companyBankOfDeposit,jdbcType=VARCHAR},
+      company_bank_of_deposit_value = #{record.companyBankOfDepositValue,jdbcType=VARCHAR},
+      company_account = #{record.companyAccount,jdbcType=VARCHAR},
+      company_bank_branch_name = #{record.companyBankBranchName,jdbcType=VARCHAR},
+      province_code = #{record.provinceCode,jdbcType=VARCHAR},
+      city_code = #{record.cityCode,jdbcType=VARCHAR},
+      area_code = #{record.areaCode,jdbcType=VARCHAR},
+      address = #{record.address,jdbcType=VARCHAR},
+      id_card_face_url = #{record.idCardFaceUrl,jdbcType=VARCHAR},
+      id_card_back_url = #{record.idCardBackUrl,jdbcType=VARCHAR},
+      id_card_hold_url = #{record.idCardHoldUrl,jdbcType=VARCHAR},
+      business_licence_url = #{record.businessLicenceUrl,jdbcType=VARCHAR},
+      accounts_permits_url = #{record.accountsPermitsUrl,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=INTEGER},
+      create_id = #{record.createId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      account_verify_info = #{record.accountVerifyInfo,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.gq.ged.account.dao.model.AccountCompany" >
+    update ged_account_company
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="custId != null" >
+        cust_id = #{custId,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardType != null" >
+        company_card_type = #{companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null" >
+        social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicence != null" >
+        business_licence = #{businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null" >
+        organization_code = #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="taxCode != null" >
+        tax_code = #{taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="legalName != null" >
+        legal_name = #{legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="legalMobile != null" >
+        legal_mobile = #{legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="legalCardType != null" >
+        legal_card_type = #{legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="legalCardNumber != null" >
+        legal_card_number = #{legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="companyContact != null" >
+        company_contact = #{companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="contactMobile != null" >
+        contact_mobile = #{contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDeposit != null" >
+        company_bank_of_deposit = #{companyBankOfDeposit,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankOfDepositValue != null" >
+        company_bank_of_deposit_value = #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAccount != null" >
+        company_account = #{companyAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="companyBankBranchName != null" >
+        company_bank_branch_name = #{companyBankBranchName,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        province_code = #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        area_code = #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardFaceUrl != null" >
+        id_card_face_url = #{idCardFaceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardBackUrl != null" >
+        id_card_back_url = #{idCardBackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardHoldUrl != null" >
+        id_card_hold_url = #{idCardHoldUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicenceUrl != null" >
+        business_licence_url = #{businessLicenceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="accountsPermitsUrl != null" >
+        accounts_permits_url = #{accountsPermitsUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null" >
+        create_id = #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="accountVerifyInfo != null" >
+        account_verify_info = #{accountVerifyInfo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.gq.ged.account.dao.model.AccountCompany" >
+    update ged_account_company
+    set user_id = #{userId,jdbcType=BIGINT},
+      cust_id = #{custId,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      company_card_type = #{companyCardType,jdbcType=VARCHAR},
+      social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      business_licence = #{businessLicence,jdbcType=VARCHAR},
+      organization_code = #{organizationCode,jdbcType=VARCHAR},
+      tax_code = #{taxCode,jdbcType=VARCHAR},
+      legal_name = #{legalName,jdbcType=VARCHAR},
+      legal_mobile = #{legalMobile,jdbcType=VARCHAR},
+      legal_card_type = #{legalCardType,jdbcType=INTEGER},
+      legal_card_number = #{legalCardNumber,jdbcType=VARCHAR},
+      company_contact = #{companyContact,jdbcType=VARCHAR},
+      contact_mobile = #{contactMobile,jdbcType=VARCHAR},
+      company_bank_of_deposit = #{companyBankOfDeposit,jdbcType=VARCHAR},
+      company_bank_of_deposit_value = #{companyBankOfDepositValue,jdbcType=VARCHAR},
+      company_account = #{companyAccount,jdbcType=VARCHAR},
+      company_bank_branch_name = #{companyBankBranchName,jdbcType=VARCHAR},
+      province_code = #{provinceCode,jdbcType=VARCHAR},
+      city_code = #{cityCode,jdbcType=VARCHAR},
+      area_code = #{areaCode,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      id_card_face_url = #{idCardFaceUrl,jdbcType=VARCHAR},
+      id_card_back_url = #{idCardBackUrl,jdbcType=VARCHAR},
+      id_card_hold_url = #{idCardHoldUrl,jdbcType=VARCHAR},
+      business_licence_url = #{businessLicenceUrl,jdbcType=VARCHAR},
+      accounts_permits_url = #{accountsPermitsUrl,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      create_id = #{createId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      account_verify_info = #{accountVerifyInfo,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

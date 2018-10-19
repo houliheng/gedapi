@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gq.ged.order.dao.mapper.OrderVerifyMapper" >
+  <resultMap id="BaseResultMap" type="com.gq.ged.order.dao.model.OrderVerify" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_id" property="orderId" jdbcType="BIGINT" />
+    <result column="company_info" property="companyInfo" jdbcType="VARCHAR" />
+    <result column="loan_purpose" property="loanPurpose" jdbcType="VARCHAR" />
+    <result column="company_product_info" property="companyProductInfo" jdbcType="VARCHAR" />
+    <result column="borrower_sanction" property="borrowerSanction" jdbcType="VARCHAR" />
+    <result column="borrower_litigation" property="borrowerLitigation" jdbcType="VARCHAR" />
+    <result column="borrower_act_info" property="borrowerActInfo" jdbcType="VARCHAR" />
+    <result column="borrower_debt_info" property="borrowerDebtInfo" jdbcType="VARCHAR" />
+    <result column="bank_loan_info" property="bankLoanInfo" jdbcType="VARCHAR" />
+    <result column="overdue_number" property="overdueNumber" jdbcType="INTEGER" />
+    <result column="assets_info" property="assetsInfo" jdbcType="VARCHAR" />
+    <result column="repay_chanel" property="repayChanel" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, order_id, company_info, loan_purpose, company_product_info, borrower_sanction, 
+    borrower_litigation, borrower_act_info, borrower_debt_info, bank_loan_info, overdue_number, 
+    assets_info, repay_chanel, create_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.gq.ged.order.dao.model.OrderVerifyExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ged_order_verify
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ged_order_verify
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ged_order_verify
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.gq.ged.order.dao.model.OrderVerifyExample" >
+    delete from ged_order_verify
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.gq.ged.order.dao.model.OrderVerify" >
+    insert into ged_order_verify (id, order_id, company_info, 
+      loan_purpose, company_product_info, borrower_sanction, 
+      borrower_litigation, borrower_act_info, borrower_debt_info, 
+      bank_loan_info, overdue_number, assets_info, 
+      repay_chanel, create_time)
+    values (#{id,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, #{companyInfo,jdbcType=VARCHAR}, 
+      #{loanPurpose,jdbcType=VARCHAR}, #{companyProductInfo,jdbcType=VARCHAR}, #{borrowerSanction,jdbcType=VARCHAR}, 
+      #{borrowerLitigation,jdbcType=VARCHAR}, #{borrowerActInfo,jdbcType=VARCHAR}, #{borrowerDebtInfo,jdbcType=VARCHAR}, 
+      #{bankLoanInfo,jdbcType=VARCHAR}, #{overdueNumber,jdbcType=INTEGER}, #{assetsInfo,jdbcType=VARCHAR}, 
+      #{repayChanel,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.gq.ged.order.dao.model.OrderVerify" >
+    insert into ged_order_verify
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderId != null" >
+        order_id,
+      </if>
+      <if test="companyInfo != null" >
+        company_info,
+      </if>
+      <if test="loanPurpose != null" >
+        loan_purpose,
+      </if>
+      <if test="companyProductInfo != null" >
+        company_product_info,
+      </if>
+      <if test="borrowerSanction != null" >
+        borrower_sanction,
+      </if>
+      <if test="borrowerLitigation != null" >
+        borrower_litigation,
+      </if>
+      <if test="borrowerActInfo != null" >
+        borrower_act_info,
+      </if>
+      <if test="borrowerDebtInfo != null" >
+        borrower_debt_info,
+      </if>
+      <if test="bankLoanInfo != null" >
+        bank_loan_info,
+      </if>
+      <if test="overdueNumber != null" >
+        overdue_number,
+      </if>
+      <if test="assetsInfo != null" >
+        assets_info,
+      </if>
+      <if test="repayChanel != null" >
+        repay_chanel,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="orderId != null" >
+        #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="companyInfo != null" >
+        #{companyInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="loanPurpose != null" >
+        #{loanPurpose,jdbcType=VARCHAR},
+      </if>
+      <if test="companyProductInfo != null" >
+        #{companyProductInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerSanction != null" >
+        #{borrowerSanction,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerLitigation != null" >
+        #{borrowerLitigation,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerActInfo != null" >
+        #{borrowerActInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerDebtInfo != null" >
+        #{borrowerDebtInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="bankLoanInfo != null" >
+        #{bankLoanInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="overdueNumber != null" >
+        #{overdueNumber,jdbcType=INTEGER},
+      </if>
+      <if test="assetsInfo != null" >
+        #{assetsInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="repayChanel != null" >
+        #{repayChanel,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.gq.ged.order.dao.model.OrderVerifyExample" resultType="java.lang.Integer" >
+    select count(*) from ged_order_verify
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update ged_order_verify
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderId != null" >
+        order_id = #{record.orderId,jdbcType=BIGINT},
+      </if>
+      <if test="record.companyInfo != null" >
+        company_info = #{record.companyInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.loanPurpose != null" >
+        loan_purpose = #{record.loanPurpose,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyProductInfo != null" >
+        company_product_info = #{record.companyProductInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.borrowerSanction != null" >
+        borrower_sanction = #{record.borrowerSanction,jdbcType=VARCHAR},
+      </if>
+      <if test="record.borrowerLitigation != null" >
+        borrower_litigation = #{record.borrowerLitigation,jdbcType=VARCHAR},
+      </if>
+      <if test="record.borrowerActInfo != null" >
+        borrower_act_info = #{record.borrowerActInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.borrowerDebtInfo != null" >
+        borrower_debt_info = #{record.borrowerDebtInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bankLoanInfo != null" >
+        bank_loan_info = #{record.bankLoanInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.overdueNumber != null" >
+        overdue_number = #{record.overdueNumber,jdbcType=INTEGER},
+      </if>
+      <if test="record.assetsInfo != null" >
+        assets_info = #{record.assetsInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.repayChanel != null" >
+        repay_chanel = #{record.repayChanel,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update ged_order_verify
+    set id = #{record.id,jdbcType=BIGINT},
+      order_id = #{record.orderId,jdbcType=BIGINT},
+      company_info = #{record.companyInfo,jdbcType=VARCHAR},
+      loan_purpose = #{record.loanPurpose,jdbcType=VARCHAR},
+      company_product_info = #{record.companyProductInfo,jdbcType=VARCHAR},
+      borrower_sanction = #{record.borrowerSanction,jdbcType=VARCHAR},
+      borrower_litigation = #{record.borrowerLitigation,jdbcType=VARCHAR},
+      borrower_act_info = #{record.borrowerActInfo,jdbcType=VARCHAR},
+      borrower_debt_info = #{record.borrowerDebtInfo,jdbcType=VARCHAR},
+      bank_loan_info = #{record.bankLoanInfo,jdbcType=VARCHAR},
+      overdue_number = #{record.overdueNumber,jdbcType=INTEGER},
+      assets_info = #{record.assetsInfo,jdbcType=VARCHAR},
+      repay_chanel = #{record.repayChanel,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.gq.ged.order.dao.model.OrderVerify" >
+    update ged_order_verify
+    <set >
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="companyInfo != null" >
+        company_info = #{companyInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="loanPurpose != null" >
+        loan_purpose = #{loanPurpose,jdbcType=VARCHAR},
+      </if>
+      <if test="companyProductInfo != null" >
+        company_product_info = #{companyProductInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerSanction != null" >
+        borrower_sanction = #{borrowerSanction,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerLitigation != null" >
+        borrower_litigation = #{borrowerLitigation,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerActInfo != null" >
+        borrower_act_info = #{borrowerActInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="borrowerDebtInfo != null" >
+        borrower_debt_info = #{borrowerDebtInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="bankLoanInfo != null" >
+        bank_loan_info = #{bankLoanInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="overdueNumber != null" >
+        overdue_number = #{overdueNumber,jdbcType=INTEGER},
+      </if>
+      <if test="assetsInfo != null" >
+        assets_info = #{assetsInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="repayChanel != null" >
+        repay_chanel = #{repayChanel,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.gq.ged.order.dao.model.OrderVerify" >
+    update ged_order_verify
+    set order_id = #{orderId,jdbcType=BIGINT},
+      company_info = #{companyInfo,jdbcType=VARCHAR},
+      loan_purpose = #{loanPurpose,jdbcType=VARCHAR},
+      company_product_info = #{companyProductInfo,jdbcType=VARCHAR},
+      borrower_sanction = #{borrowerSanction,jdbcType=VARCHAR},
+      borrower_litigation = #{borrowerLitigation,jdbcType=VARCHAR},
+      borrower_act_info = #{borrowerActInfo,jdbcType=VARCHAR},
+      borrower_debt_info = #{borrowerDebtInfo,jdbcType=VARCHAR},
+      bank_loan_info = #{bankLoanInfo,jdbcType=VARCHAR},
+      overdue_number = #{overdueNumber,jdbcType=INTEGER},
+      assets_info = #{assetsInfo,jdbcType=VARCHAR},
+      repay_chanel = #{repayChanel,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

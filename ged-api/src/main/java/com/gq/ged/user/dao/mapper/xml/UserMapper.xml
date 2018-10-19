@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gq.ged.user.dao.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="com.gq.ged.user.dao.model.User">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="get_cust_id" jdbcType="VARCHAR" property="getCustId" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="company_name" jdbcType="VARCHAR" property="companyName" />
+    <result column="company_card_type" jdbcType="VARCHAR" property="companyCardType" />
+    <result column="company_card_code" jdbcType="VARCHAR" property="companyCardCode" />
+    <result column="social_credit_code" jdbcType="VARCHAR" property="socialCreditCode" />
+    <result column="business_licence" jdbcType="VARCHAR" property="businessLicence" />
+    <result column="organization_code" jdbcType="VARCHAR" property="organizationCode" />
+    <result column="tax_code" jdbcType="VARCHAR" property="taxCode" />
+    <result column="legal_name" jdbcType="VARCHAR" property="legalName" />
+    <result column="legal_mobile" jdbcType="VARCHAR" property="legalMobile" />
+    <result column="legal_card_type" jdbcType="INTEGER" property="legalCardType" />
+    <result column="legal_card_number" jdbcType="VARCHAR" property="legalCardNumber" />
+    <result column="company_contact" jdbcType="VARCHAR" property="companyContact" />
+    <result column="contact_mobile" jdbcType="VARCHAR" property="contactMobile" />
+    <result column="id_card_num" jdbcType="VARCHAR" property="idCardNum" />
+    <result column="id_card_flag" jdbcType="INTEGER" property="idCardFlag" />
+    <result column="active_flag" jdbcType="INTEGER" property="activeFlag" />
+    <result column="check_account_flag" jdbcType="INTEGER" property="checkAccountFlag" />
+    <result column="company_account_flag" jdbcType="INTEGER" property="companyAccountFlag" />
+    <result column="recommend_code" jdbcType="VARCHAR" property="recommendCode" />
+    <result column="bind_email_flag" jdbcType="INTEGER" property="bindEmailFlag" />
+    <result column="user_type" jdbcType="INTEGER" property="userType" />
+    <result column="user_role" jdbcType="INTEGER" property="userRole" />
+    <result column="guarantee_amount" jdbcType="DECIMAL" property="guaranteeAmount" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="is_enabled" jdbcType="TINYINT" property="isEnabled" />
+    <result column="create_id" jdbcType="BIGINT" property="createId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_id" jdbcType="BIGINT" property="modifyId" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, username, get_cust_id, mobile, company_name, company_card_type, company_card_code, 
+    social_credit_code, business_licence, organization_code, tax_code, legal_name, legal_mobile, 
+    legal_card_type, legal_card_number, company_contact, contact_mobile, id_card_num, 
+    id_card_flag, active_flag, check_account_flag, company_account_flag, recommend_code, 
+    bind_email_flag, user_type, user_role, guarantee_amount, status, is_enabled, create_id, 
+    create_time, modify_id, modify_time
+  </sql>
+  <select id="selectByExample" parameterType="com.gq.ged.user.dao.model.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ged_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from ged_user
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from ged_user
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.gq.ged.user.dao.model.UserExample">
+    delete from ged_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.gq.ged.user.dao.model.User">
+    insert into ged_user (id, username, get_cust_id, 
+      mobile, company_name, company_card_type, 
+      company_card_code, social_credit_code, business_licence, 
+      organization_code, tax_code, legal_name, 
+      legal_mobile, legal_card_type, legal_card_number, 
+      company_contact, contact_mobile, id_card_num, 
+      id_card_flag, active_flag, check_account_flag, 
+      company_account_flag, recommend_code, bind_email_flag, 
+      user_type, user_role, guarantee_amount, 
+      status, is_enabled, create_id, 
+      create_time, modify_id, modify_time
+      )
+    values (#{id,jdbcType=BIGINT}, #{username,jdbcType=VARCHAR}, #{getCustId,jdbcType=VARCHAR}, 
+      #{mobile,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, #{companyCardType,jdbcType=VARCHAR}, 
+      #{companyCardCode,jdbcType=VARCHAR}, #{socialCreditCode,jdbcType=VARCHAR}, #{businessLicence,jdbcType=VARCHAR}, 
+      #{organizationCode,jdbcType=VARCHAR}, #{taxCode,jdbcType=VARCHAR}, #{legalName,jdbcType=VARCHAR}, 
+      #{legalMobile,jdbcType=VARCHAR}, #{legalCardType,jdbcType=INTEGER}, #{legalCardNumber,jdbcType=VARCHAR}, 
+      #{companyContact,jdbcType=VARCHAR}, #{contactMobile,jdbcType=VARCHAR}, #{idCardNum,jdbcType=VARCHAR}, 
+      #{idCardFlag,jdbcType=INTEGER}, #{activeFlag,jdbcType=INTEGER}, #{checkAccountFlag,jdbcType=INTEGER}, 
+      #{companyAccountFlag,jdbcType=INTEGER}, #{recommendCode,jdbcType=VARCHAR}, #{bindEmailFlag,jdbcType=INTEGER}, 
+      #{userType,jdbcType=INTEGER}, #{userRole,jdbcType=INTEGER}, #{guaranteeAmount,jdbcType=DECIMAL}, 
+      #{status,jdbcType=INTEGER}, #{isEnabled,jdbcType=TINYINT}, #{createId,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{modifyId,jdbcType=BIGINT}, #{modifyTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.gq.ged.user.dao.model.User" useGeneratedKeys="true">
+    insert into ged_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="getCustId != null">
+        get_cust_id,
+      </if>
+      <if test="mobile != null">
+        mobile,
+      </if>
+      <if test="companyName != null">
+        company_name,
+      </if>
+      <if test="companyCardType != null">
+        company_card_type,
+      </if>
+      <if test="companyCardCode != null">
+        company_card_code,
+      </if>
+      <if test="socialCreditCode != null">
+        social_credit_code,
+      </if>
+      <if test="businessLicence != null">
+        business_licence,
+      </if>
+      <if test="organizationCode != null">
+        organization_code,
+      </if>
+      <if test="taxCode != null">
+        tax_code,
+      </if>
+      <if test="legalName != null">
+        legal_name,
+      </if>
+      <if test="legalMobile != null">
+        legal_mobile,
+      </if>
+      <if test="legalCardType != null">
+        legal_card_type,
+      </if>
+      <if test="legalCardNumber != null">
+        legal_card_number,
+      </if>
+      <if test="companyContact != null">
+        company_contact,
+      </if>
+      <if test="contactMobile != null">
+        contact_mobile,
+      </if>
+      <if test="idCardNum != null">
+        id_card_num,
+      </if>
+      <if test="idCardFlag != null">
+        id_card_flag,
+      </if>
+      <if test="activeFlag != null">
+        active_flag,
+      </if>
+      <if test="checkAccountFlag != null">
+        check_account_flag,
+      </if>
+      <if test="companyAccountFlag != null">
+        company_account_flag,
+      </if>
+      <if test="recommendCode != null">
+        recommend_code,
+      </if>
+      <if test="bindEmailFlag != null">
+        bind_email_flag,
+      </if>
+      <if test="userType != null">
+        user_type,
+      </if>
+      <if test="userRole != null">
+        user_role,
+      </if>
+      <if test="guaranteeAmount != null">
+        guarantee_amount,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="isEnabled != null">
+        is_enabled,
+      </if>
+      <if test="createId != null">
+        create_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifyId != null">
+        modify_id,
+      </if>
+      <if test="modifyTime != null">
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="getCustId != null">
+        #{getCustId,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null">
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardType != null">
+        #{companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardCode != null">
+        #{companyCardCode,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null">
+        #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicence != null">
+        #{businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null">
+        #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="taxCode != null">
+        #{taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="legalName != null">
+        #{legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="legalMobile != null">
+        #{legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="legalCardType != null">
+        #{legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="legalCardNumber != null">
+        #{legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="companyContact != null">
+        #{companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="contactMobile != null">
+        #{contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardNum != null">
+        #{idCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardFlag != null">
+        #{idCardFlag,jdbcType=INTEGER},
+      </if>
+      <if test="activeFlag != null">
+        #{activeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="checkAccountFlag != null">
+        #{checkAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="companyAccountFlag != null">
+        #{companyAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="recommendCode != null">
+        #{recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bindEmailFlag != null">
+        #{bindEmailFlag,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null">
+        #{userType,jdbcType=INTEGER},
+      </if>
+      <if test="userRole != null">
+        #{userRole,jdbcType=INTEGER},
+      </if>
+      <if test="guaranteeAmount != null">
+        #{guaranteeAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="isEnabled != null">
+        #{isEnabled,jdbcType=TINYINT},
+      </if>
+      <if test="createId != null">
+        #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null">
+        #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.gq.ged.user.dao.model.UserExample" resultType="java.lang.Integer">
+    select count(*) from ged_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update ged_user
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.username != null">
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.getCustId != null">
+        get_cust_id = #{record.getCustId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mobile != null">
+        mobile = #{record.mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyName != null">
+        company_name = #{record.companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCardType != null">
+        company_card_type = #{record.companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCardCode != null">
+        company_card_code = #{record.companyCardCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.socialCreditCode != null">
+        social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.businessLicence != null">
+        business_licence = #{record.businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="record.organizationCode != null">
+        organization_code = #{record.organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.taxCode != null">
+        tax_code = #{record.taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalName != null">
+        legal_name = #{record.legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalMobile != null">
+        legal_mobile = #{record.legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legalCardType != null">
+        legal_card_type = #{record.legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="record.legalCardNumber != null">
+        legal_card_number = #{record.legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyContact != null">
+        company_contact = #{record.companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contactMobile != null">
+        contact_mobile = #{record.contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="record.idCardNum != null">
+        id_card_num = #{record.idCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="record.idCardFlag != null">
+        id_card_flag = #{record.idCardFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.activeFlag != null">
+        active_flag = #{record.activeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.checkAccountFlag != null">
+        check_account_flag = #{record.checkAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.companyAccountFlag != null">
+        company_account_flag = #{record.companyAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.recommendCode != null">
+        recommend_code = #{record.recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bindEmailFlag != null">
+        bind_email_flag = #{record.bindEmailFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.userType != null">
+        user_type = #{record.userType,jdbcType=INTEGER},
+      </if>
+      <if test="record.userRole != null">
+        user_role = #{record.userRole,jdbcType=INTEGER},
+      </if>
+      <if test="record.guaranteeAmount != null">
+        guarantee_amount = #{record.guaranteeAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.isEnabled != null">
+        is_enabled = #{record.isEnabled,jdbcType=TINYINT},
+      </if>
+      <if test="record.createId != null">
+        create_id = #{record.createId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.modifyId != null">
+        modify_id = #{record.modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="record.modifyTime != null">
+        modify_time = #{record.modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update ged_user
+    set id = #{record.id,jdbcType=BIGINT},
+      username = #{record.username,jdbcType=VARCHAR},
+      get_cust_id = #{record.getCustId,jdbcType=VARCHAR},
+      mobile = #{record.mobile,jdbcType=VARCHAR},
+      company_name = #{record.companyName,jdbcType=VARCHAR},
+      company_card_type = #{record.companyCardType,jdbcType=VARCHAR},
+      company_card_code = #{record.companyCardCode,jdbcType=VARCHAR},
+      social_credit_code = #{record.socialCreditCode,jdbcType=VARCHAR},
+      business_licence = #{record.businessLicence,jdbcType=VARCHAR},
+      organization_code = #{record.organizationCode,jdbcType=VARCHAR},
+      tax_code = #{record.taxCode,jdbcType=VARCHAR},
+      legal_name = #{record.legalName,jdbcType=VARCHAR},
+      legal_mobile = #{record.legalMobile,jdbcType=VARCHAR},
+      legal_card_type = #{record.legalCardType,jdbcType=INTEGER},
+      legal_card_number = #{record.legalCardNumber,jdbcType=VARCHAR},
+      company_contact = #{record.companyContact,jdbcType=VARCHAR},
+      contact_mobile = #{record.contactMobile,jdbcType=VARCHAR},
+      id_card_num = #{record.idCardNum,jdbcType=VARCHAR},
+      id_card_flag = #{record.idCardFlag,jdbcType=INTEGER},
+      active_flag = #{record.activeFlag,jdbcType=INTEGER},
+      check_account_flag = #{record.checkAccountFlag,jdbcType=INTEGER},
+      company_account_flag = #{record.companyAccountFlag,jdbcType=INTEGER},
+      recommend_code = #{record.recommendCode,jdbcType=VARCHAR},
+      bind_email_flag = #{record.bindEmailFlag,jdbcType=INTEGER},
+      user_type = #{record.userType,jdbcType=INTEGER},
+      user_role = #{record.userRole,jdbcType=INTEGER},
+      guarantee_amount = #{record.guaranteeAmount,jdbcType=DECIMAL},
+      status = #{record.status,jdbcType=INTEGER},
+      is_enabled = #{record.isEnabled,jdbcType=TINYINT},
+      create_id = #{record.createId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      modify_id = #{record.modifyId,jdbcType=BIGINT},
+      modify_time = #{record.modifyTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.gq.ged.user.dao.model.User">
+    update ged_user
+    <set>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="getCustId != null">
+        get_cust_id = #{getCustId,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null">
+        mobile = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardType != null">
+        company_card_type = #{companyCardType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardCode != null">
+        company_card_code = #{companyCardCode,jdbcType=VARCHAR},
+      </if>
+      <if test="socialCreditCode != null">
+        social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicence != null">
+        business_licence = #{businessLicence,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null">
+        organization_code = #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="taxCode != null">
+        tax_code = #{taxCode,jdbcType=VARCHAR},
+      </if>
+      <if test="legalName != null">
+        legal_name = #{legalName,jdbcType=VARCHAR},
+      </if>
+      <if test="legalMobile != null">
+        legal_mobile = #{legalMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="legalCardType != null">
+        legal_card_type = #{legalCardType,jdbcType=INTEGER},
+      </if>
+      <if test="legalCardNumber != null">
+        legal_card_number = #{legalCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="companyContact != null">
+        company_contact = #{companyContact,jdbcType=VARCHAR},
+      </if>
+      <if test="contactMobile != null">
+        contact_mobile = #{contactMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardNum != null">
+        id_card_num = #{idCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardFlag != null">
+        id_card_flag = #{idCardFlag,jdbcType=INTEGER},
+      </if>
+      <if test="activeFlag != null">
+        active_flag = #{activeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="checkAccountFlag != null">
+        check_account_flag = #{checkAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="companyAccountFlag != null">
+        company_account_flag = #{companyAccountFlag,jdbcType=INTEGER},
+      </if>
+      <if test="recommendCode != null">
+        recommend_code = #{recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bindEmailFlag != null">
+        bind_email_flag = #{bindEmailFlag,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null">
+        user_type = #{userType,jdbcType=INTEGER},
+      </if>
+      <if test="userRole != null">
+        user_role = #{userRole,jdbcType=INTEGER},
+      </if>
+      <if test="guaranteeAmount != null">
+        guarantee_amount = #{guaranteeAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="isEnabled != null">
+        is_enabled = #{isEnabled,jdbcType=TINYINT},
+      </if>
+      <if test="createId != null">
+        create_id = #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null">
+        modify_id = #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.gq.ged.user.dao.model.User">
+    update ged_user
+    set username = #{username,jdbcType=VARCHAR},
+      get_cust_id = #{getCustId,jdbcType=VARCHAR},
+      mobile = #{mobile,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      company_card_type = #{companyCardType,jdbcType=VARCHAR},
+      company_card_code = #{companyCardCode,jdbcType=VARCHAR},
+      social_credit_code = #{socialCreditCode,jdbcType=VARCHAR},
+      business_licence = #{businessLicence,jdbcType=VARCHAR},
+      organization_code = #{organizationCode,jdbcType=VARCHAR},
+      tax_code = #{taxCode,jdbcType=VARCHAR},
+      legal_name = #{legalName,jdbcType=VARCHAR},
+      legal_mobile = #{legalMobile,jdbcType=VARCHAR},
+      legal_card_type = #{legalCardType,jdbcType=INTEGER},
+      legal_card_number = #{legalCardNumber,jdbcType=VARCHAR},
+      company_contact = #{companyContact,jdbcType=VARCHAR},
+      contact_mobile = #{contactMobile,jdbcType=VARCHAR},
+      id_card_num = #{idCardNum,jdbcType=VARCHAR},
+      id_card_flag = #{idCardFlag,jdbcType=INTEGER},
+      active_flag = #{activeFlag,jdbcType=INTEGER},
+      check_account_flag = #{checkAccountFlag,jdbcType=INTEGER},
+      company_account_flag = #{companyAccountFlag,jdbcType=INTEGER},
+      recommend_code = #{recommendCode,jdbcType=VARCHAR},
+      bind_email_flag = #{bindEmailFlag,jdbcType=INTEGER},
+      user_type = #{userType,jdbcType=INTEGER},
+      user_role = #{userRole,jdbcType=INTEGER},
+      guarantee_amount = #{guaranteeAmount,jdbcType=DECIMAL},
+      status = #{status,jdbcType=INTEGER},
+      is_enabled = #{isEnabled,jdbcType=TINYINT},
+      create_id = #{createId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_id = #{modifyId,jdbcType=BIGINT},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,1242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gq.ged.order.dao.mapper.GedOrderMapper">
+  <resultMap id="BaseResultMap" type="com.gq.ged.order.dao.model.GedOrder">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="order_code" jdbcType="VARCHAR" property="orderCode" />
+    <result column="master_order_code" jdbcType="VARCHAR" property="masterOrderCode" />
+    <result column="contract_code" jdbcType="VARCHAR" property="contractCode" />
+    <result column="company_name" jdbcType="VARCHAR" property="companyName" />
+    <result column="company_type" jdbcType="VARCHAR" property="companyType" />
+    <result column="company_card_num" jdbcType="VARCHAR" property="companyCardNum" />
+    <result column="person_card_type" jdbcType="INTEGER" property="personCardType" />
+    <result column="person_card_num" jdbcType="VARCHAR" property="personCardNum" />
+    <result column="loan_purpose" jdbcType="INTEGER" property="loanPurpose" />
+    <result column="loan_type" jdbcType="INTEGER" property="loanType" />
+    <result column="loan_amount" jdbcType="DECIMAL" property="loanAmount" />
+    <result column="other_loan_amount" jdbcType="VARCHAR" property="otherLoanAmount" />
+    <result column="loan_term" jdbcType="INTEGER" property="loanTerm" />
+    <result column="credit_amount" jdbcType="DECIMAL" property="creditAmount" />
+    <result column="reply_amount" jdbcType="DECIMAL" property="replyAmount" />
+    <result column="reply_term" jdbcType="INTEGER" property="replyTerm" />
+    <result column="withdraw_flag" jdbcType="INTEGER" property="withdrawFlag" />
+    <result column="withdraw_amount" jdbcType="DECIMAL" property="withdrawAmount" />
+    <result column="rate_day" jdbcType="DECIMAL" property="rateDay" />
+    <result column="province_id" jdbcType="BIGINT" property="provinceId" />
+    <result column="city_id" jdbcType="BIGINT" property="cityId" />
+    <result column="area_id" jdbcType="BIGINT" property="areaId" />
+    <result column="management_addr" jdbcType="VARCHAR" property="managementAddr" />
+    <result column="contact_phone" jdbcType="VARCHAR" property="contactPhone" />
+    <result column="contract_sign_province" jdbcType="VARCHAR" property="contractSignProvince" />
+    <result column="contract_sign_city" jdbcType="VARCHAR" property="contractSignCity" />
+    <result column="contract_sign_area" jdbcType="VARCHAR" property="contractSignArea" />
+    <result column="guarantee_flag" jdbcType="INTEGER" property="guaranteeFlag" />
+    <result column="recommend_code" jdbcType="VARCHAR" property="recommendCode" />
+    <result column="receivable_cash_deposit" jdbcType="DECIMAL" property="receivableCashDeposit" />
+    <result column="receivable_guarantee_fee" jdbcType="DECIMAL" property="receivableGuaranteeFee" />
+    <result column="cash_deposit" jdbcType="DECIMAL" property="cashDeposit" />
+    <result column="guarantee_fee" jdbcType="DECIMAL" property="guaranteeFee" />
+    <result column="service_fee_way" jdbcType="INTEGER" property="serviceFeeWay" />
+    <result column="service_fee" jdbcType="DECIMAL" property="serviceFee" />
+    <result column="service_fee_flag" jdbcType="INTEGER" property="serviceFeeFlag" />
+    <result column="service_fee_result" jdbcType="INTEGER" property="serviceFeeResult" />
+    <result column="guarantee_fee_flag" jdbcType="INTEGER" property="guaranteeFeeFlag" />
+    <result column="account_manage_fee" jdbcType="DECIMAL" property="accountManageFee" />
+    <result column="repayment_style" jdbcType="VARCHAR" property="repaymentStyle" />
+    <result column="service_province_id" jdbcType="INTEGER" property="serviceProvinceId" />
+    <result column="sys_flag" jdbcType="INTEGER" property="sysFlag" />
+    <result column="branch_office" jdbcType="VARCHAR" property="branchOffice" />
+    <result column="region_office" jdbcType="VARCHAR" property="regionOffice" />
+    <result column="read_flag" jdbcType="INTEGER" property="readFlag" />
+    <result column="repayment_lock_flag" jdbcType="INTEGER" property="repaymentLockFlag" />
+    <result column="stock_flag" jdbcType="INTEGER" property="stockFlag" />
+    <result column="sign_contract_flag" jdbcType="INTEGER" property="signContractFlag" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_id" jdbcType="BIGINT" property="createId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_id" jdbcType="BIGINT" property="modifyId" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="terrace_service_fee" jdbcType="DECIMAL" property="terraceServiceFee" />
+    <result column="consult_service_fee" jdbcType="DECIMAL" property="consultServiceFee" />
+  </resultMap>
+  <resultMap id="JoinOrderRepayResultMap" type="com.gq.ged.order.controller.res.GedOrderRepayResForm">
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="order_code" jdbcType="VARCHAR" property="orderCode" />
+    <result column="repayment_amount" jdbcType="DECIMAL" property="repaymentAmount" />
+    <result column="loan_amount" jdbcType="DECIMAL" property="loanAmount" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="payCreateTime" />
+  </resultMap>
+  <resultMap id="JoinOrderResultMap" type="com.gq.ged.order.controller.res.OrderGroupInfo">
+    <result column="company_count" jdbcType="INTEGER" property="companyCount" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="masterOrderCode" jdbcType="VARCHAR" property="masterOrderCode" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, user_id, order_code, master_order_code, contract_code, company_name, company_type, 
+    company_card_num, person_card_type, person_card_num, loan_purpose, loan_type, loan_amount, 
+    other_loan_amount, loan_term, credit_amount, reply_amount, reply_term, withdraw_flag, 
+    withdraw_amount, rate_day, province_id, city_id, area_id, management_addr, contact_phone, 
+    contract_sign_province, contract_sign_city, contract_sign_area, guarantee_flag, recommend_code, 
+    receivable_cash_deposit, receivable_guarantee_fee, cash_deposit, guarantee_fee, service_fee_way, 
+    service_fee, service_fee_flag, service_fee_result, guarantee_fee_flag, account_manage_fee, 
+    repayment_style, service_province_id, sys_flag, branch_office, region_office, read_flag, 
+    repayment_lock_flag, stock_flag, sign_contract_flag, status, create_id, create_time, 
+    modify_id, modify_time, terrace_service_fee, consult_service_fee
+  </sql>
+  <select id="selectByExample" parameterType="com.gq.ged.order.dao.model.GedOrderExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ged_order
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from ged_order
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from ged_order
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.gq.ged.order.dao.model.GedOrderExample">
+    delete from ged_order
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.gq.ged.order.dao.model.GedOrder">
+    insert into ged_order (id, user_id, order_code, 
+      master_order_code, contract_code, company_name, 
+      company_type, company_card_num, person_card_type, 
+      person_card_num, loan_purpose, loan_type, 
+      loan_amount, other_loan_amount, loan_term, 
+      credit_amount, reply_amount, reply_term, 
+      withdraw_flag, withdraw_amount, rate_day, 
+      province_id, city_id, area_id, 
+      management_addr, contact_phone, contract_sign_province, 
+      contract_sign_city, contract_sign_area, guarantee_flag, 
+      recommend_code, receivable_cash_deposit, receivable_guarantee_fee, 
+      cash_deposit, guarantee_fee, service_fee_way, 
+      service_fee, service_fee_flag, service_fee_result, 
+      guarantee_fee_flag, account_manage_fee, repayment_style, 
+      service_province_id, sys_flag, branch_office, 
+      region_office, read_flag, repayment_lock_flag, 
+      stock_flag, sign_contract_flag, status, 
+      create_id, create_time, modify_id, 
+      modify_time, terrace_service_fee, consult_service_fee
+      )
+    values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, 
+      #{masterOrderCode,jdbcType=VARCHAR}, #{contractCode,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, 
+      #{companyType,jdbcType=VARCHAR}, #{companyCardNum,jdbcType=VARCHAR}, #{personCardType,jdbcType=INTEGER}, 
+      #{personCardNum,jdbcType=VARCHAR}, #{loanPurpose,jdbcType=INTEGER}, #{loanType,jdbcType=INTEGER}, 
+      #{loanAmount,jdbcType=DECIMAL}, #{otherLoanAmount,jdbcType=VARCHAR}, #{loanTerm,jdbcType=INTEGER}, 
+      #{creditAmount,jdbcType=DECIMAL}, #{replyAmount,jdbcType=DECIMAL}, #{replyTerm,jdbcType=INTEGER}, 
+      #{withdrawFlag,jdbcType=INTEGER}, #{withdrawAmount,jdbcType=DECIMAL}, #{rateDay,jdbcType=DECIMAL}, 
+      #{provinceId,jdbcType=BIGINT}, #{cityId,jdbcType=BIGINT}, #{areaId,jdbcType=BIGINT}, 
+      #{managementAddr,jdbcType=VARCHAR}, #{contactPhone,jdbcType=VARCHAR}, #{contractSignProvince,jdbcType=VARCHAR}, 
+      #{contractSignCity,jdbcType=VARCHAR}, #{contractSignArea,jdbcType=VARCHAR}, #{guaranteeFlag,jdbcType=INTEGER}, 
+      #{recommendCode,jdbcType=VARCHAR}, #{receivableCashDeposit,jdbcType=DECIMAL}, #{receivableGuaranteeFee,jdbcType=DECIMAL}, 
+      #{cashDeposit,jdbcType=DECIMAL}, #{guaranteeFee,jdbcType=DECIMAL}, #{serviceFeeWay,jdbcType=INTEGER}, 
+      #{serviceFee,jdbcType=DECIMAL}, #{serviceFeeFlag,jdbcType=INTEGER}, #{serviceFeeResult,jdbcType=INTEGER}, 
+      #{guaranteeFeeFlag,jdbcType=INTEGER}, #{accountManageFee,jdbcType=DECIMAL}, #{repaymentStyle,jdbcType=VARCHAR}, 
+      #{serviceProvinceId,jdbcType=INTEGER}, #{sysFlag,jdbcType=INTEGER}, #{branchOffice,jdbcType=VARCHAR}, 
+      #{regionOffice,jdbcType=VARCHAR}, #{readFlag,jdbcType=INTEGER}, #{repaymentLockFlag,jdbcType=INTEGER}, 
+      #{stockFlag,jdbcType=INTEGER}, #{signContractFlag,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{createId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{modifyId,jdbcType=BIGINT}, 
+      #{modifyTime,jdbcType=TIMESTAMP}, #{terraceServiceFee,jdbcType=DECIMAL}, #{consultServiceFee,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.gq.ged.order.dao.model.GedOrder" useGeneratedKeys="true">
+    insert ignore into ged_order
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="orderCode != null">
+        order_code,
+      </if>
+      <if test="masterOrderCode != null">
+        master_order_code,
+      </if>
+      <if test="contractCode != null">
+        contract_code,
+      </if>
+      <if test="companyName != null">
+        company_name,
+      </if>
+      <if test="companyType != null">
+        company_type,
+      </if>
+      <if test="companyCardNum != null">
+        company_card_num,
+      </if>
+      <if test="personCardType != null">
+        person_card_type,
+      </if>
+      <if test="personCardNum != null">
+        person_card_num,
+      </if>
+      <if test="loanPurpose != null">
+        loan_purpose,
+      </if>
+      <if test="loanType != null">
+        loan_type,
+      </if>
+      <if test="loanAmount != null">
+        loan_amount,
+      </if>
+      <if test="otherLoanAmount != null">
+        other_loan_amount,
+      </if>
+      <if test="loanTerm != null">
+        loan_term,
+      </if>
+      <if test="creditAmount != null">
+        credit_amount,
+      </if>
+      <if test="replyAmount != null">
+        reply_amount,
+      </if>
+      <if test="replyTerm != null">
+        reply_term,
+      </if>
+      <if test="withdrawFlag != null">
+        withdraw_flag,
+      </if>
+      <if test="withdrawAmount != null">
+        withdraw_amount,
+      </if>
+      <if test="rateDay != null">
+        rate_day,
+      </if>
+      <if test="provinceId != null">
+        province_id,
+      </if>
+      <if test="cityId != null">
+        city_id,
+      </if>
+      <if test="areaId != null">
+        area_id,
+      </if>
+      <if test="managementAddr != null">
+        management_addr,
+      </if>
+      <if test="contactPhone != null">
+        contact_phone,
+      </if>
+      <if test="contractSignProvince != null">
+        contract_sign_province,
+      </if>
+      <if test="contractSignCity != null">
+        contract_sign_city,
+      </if>
+      <if test="contractSignArea != null">
+        contract_sign_area,
+      </if>
+      <if test="guaranteeFlag != null">
+        guarantee_flag,
+      </if>
+      <if test="recommendCode != null">
+        recommend_code,
+      </if>
+      <if test="receivableCashDeposit != null">
+        receivable_cash_deposit,
+      </if>
+      <if test="receivableGuaranteeFee != null">
+        receivable_guarantee_fee,
+      </if>
+      <if test="cashDeposit != null">
+        cash_deposit,
+      </if>
+      <if test="guaranteeFee != null">
+        guarantee_fee,
+      </if>
+      <if test="serviceFeeWay != null">
+        service_fee_way,
+      </if>
+      <if test="serviceFee != null">
+        service_fee,
+      </if>
+      <if test="serviceFeeFlag != null">
+        service_fee_flag,
+      </if>
+      <if test="serviceFeeResult != null">
+        service_fee_result,
+      </if>
+      <if test="guaranteeFeeFlag != null">
+        guarantee_fee_flag,
+      </if>
+      <if test="accountManageFee != null">
+        account_manage_fee,
+      </if>
+      <if test="repaymentStyle != null">
+        repayment_style,
+      </if>
+      <if test="serviceProvinceId != null">
+        service_province_id,
+      </if>
+      <if test="sysFlag != null">
+        sys_flag,
+      </if>
+      <if test="branchOffice != null">
+        branch_office,
+      </if>
+      <if test="regionOffice != null">
+        region_office,
+      </if>
+      <if test="readFlag != null">
+        read_flag,
+      </if>
+      <if test="repaymentLockFlag != null">
+        repayment_lock_flag,
+      </if>
+      <if test="stockFlag != null">
+        stock_flag,
+      </if>
+      <if test="signContractFlag != null">
+        sign_contract_flag,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="createId != null">
+        create_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifyId != null">
+        modify_id,
+      </if>
+      <if test="modifyTime != null">
+        modify_time,
+      </if>
+      <if test="terraceServiceFee != null">
+        terrace_service_fee,
+      </if>
+      <if test="consultServiceFee != null">
+        consult_service_fee,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="orderCode != null">
+        #{orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="masterOrderCode != null">
+        #{masterOrderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="contractCode != null">
+        #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyType != null">
+        #{companyType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardNum != null">
+        #{companyCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="personCardType != null">
+        #{personCardType,jdbcType=INTEGER},
+      </if>
+      <if test="personCardNum != null">
+        #{personCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="loanPurpose != null">
+        #{loanPurpose,jdbcType=INTEGER},
+      </if>
+      <if test="loanType != null">
+        #{loanType,jdbcType=INTEGER},
+      </if>
+      <if test="loanAmount != null">
+        #{loanAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="otherLoanAmount != null">
+        #{otherLoanAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="loanTerm != null">
+        #{loanTerm,jdbcType=INTEGER},
+      </if>
+      <if test="creditAmount != null">
+        #{creditAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyAmount != null">
+        #{replyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyTerm != null">
+        #{replyTerm,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawFlag != null">
+        #{withdrawFlag,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawAmount != null">
+        #{withdrawAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="rateDay != null">
+        #{rateDay,jdbcType=DECIMAL},
+      </if>
+      <if test="provinceId != null">
+        #{provinceId,jdbcType=BIGINT},
+      </if>
+      <if test="cityId != null">
+        #{cityId,jdbcType=BIGINT},
+      </if>
+      <if test="areaId != null">
+        #{areaId,jdbcType=BIGINT},
+      </if>
+      <if test="managementAddr != null">
+        #{managementAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="contactPhone != null">
+        #{contactPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignProvince != null">
+        #{contractSignProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignCity != null">
+        #{contractSignCity,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignArea != null">
+        #{contractSignArea,jdbcType=VARCHAR},
+      </if>
+      <if test="guaranteeFlag != null">
+        #{guaranteeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="recommendCode != null">
+        #{recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receivableCashDeposit != null">
+        #{receivableCashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="receivableGuaranteeFee != null">
+        #{receivableGuaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="cashDeposit != null">
+        #{cashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="guaranteeFee != null">
+        #{guaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeWay != null">
+        #{serviceFeeWay,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFee != null">
+        #{serviceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeFlag != null">
+        #{serviceFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFeeResult != null">
+        #{serviceFeeResult,jdbcType=INTEGER},
+      </if>
+      <if test="guaranteeFeeFlag != null">
+        #{guaranteeFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="accountManageFee != null">
+        #{accountManageFee,jdbcType=DECIMAL},
+      </if>
+      <if test="repaymentStyle != null">
+        #{repaymentStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceProvinceId != null">
+        #{serviceProvinceId,jdbcType=INTEGER},
+      </if>
+      <if test="sysFlag != null">
+        #{sysFlag,jdbcType=INTEGER},
+      </if>
+      <if test="branchOffice != null">
+        #{branchOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="regionOffice != null">
+        #{regionOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="readFlag != null">
+        #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="repaymentLockFlag != null">
+        #{repaymentLockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="stockFlag != null">
+        #{stockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="signContractFlag != null">
+        #{signContractFlag,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null">
+        #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null">
+        #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="terraceServiceFee != null">
+        #{terraceServiceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="consultServiceFee != null">
+        #{consultServiceFee,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.gq.ged.order.dao.model.GedOrderExample" resultType="java.lang.Integer">
+    select count(*) from ged_order
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update ged_order
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null">
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderCode != null">
+        order_code = #{record.orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.masterOrderCode != null">
+        master_order_code = #{record.masterOrderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contractCode != null">
+        contract_code = #{record.contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyName != null">
+        company_name = #{record.companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyType != null">
+        company_type = #{record.companyType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCardNum != null">
+        company_card_num = #{record.companyCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="record.personCardType != null">
+        person_card_type = #{record.personCardType,jdbcType=INTEGER},
+      </if>
+      <if test="record.personCardNum != null">
+        person_card_num = #{record.personCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="record.loanPurpose != null">
+        loan_purpose = #{record.loanPurpose,jdbcType=INTEGER},
+      </if>
+      <if test="record.loanType != null">
+        loan_type = #{record.loanType,jdbcType=INTEGER},
+      </if>
+      <if test="record.loanAmount != null">
+        loan_amount = #{record.loanAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.otherLoanAmount != null">
+        other_loan_amount = #{record.otherLoanAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="record.loanTerm != null">
+        loan_term = #{record.loanTerm,jdbcType=INTEGER},
+      </if>
+      <if test="record.creditAmount != null">
+        credit_amount = #{record.creditAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.replyAmount != null">
+        reply_amount = #{record.replyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.replyTerm != null">
+        reply_term = #{record.replyTerm,jdbcType=INTEGER},
+      </if>
+      <if test="record.withdrawFlag != null">
+        withdraw_flag = #{record.withdrawFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.withdrawAmount != null">
+        withdraw_amount = #{record.withdrawAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="record.rateDay != null">
+        rate_day = #{record.rateDay,jdbcType=DECIMAL},
+      </if>
+      <if test="record.provinceId != null">
+        province_id = #{record.provinceId,jdbcType=BIGINT},
+      </if>
+      <if test="record.cityId != null">
+        city_id = #{record.cityId,jdbcType=BIGINT},
+      </if>
+      <if test="record.areaId != null">
+        area_id = #{record.areaId,jdbcType=BIGINT},
+      </if>
+      <if test="record.managementAddr != null">
+        management_addr = #{record.managementAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contactPhone != null">
+        contact_phone = #{record.contactPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contractSignProvince != null">
+        contract_sign_province = #{record.contractSignProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contractSignCity != null">
+        contract_sign_city = #{record.contractSignCity,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contractSignArea != null">
+        contract_sign_area = #{record.contractSignArea,jdbcType=VARCHAR},
+      </if>
+      <if test="record.guaranteeFlag != null">
+        guarantee_flag = #{record.guaranteeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.recommendCode != null">
+        recommend_code = #{record.recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.receivableCashDeposit != null">
+        receivable_cash_deposit = #{record.receivableCashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="record.receivableGuaranteeFee != null">
+        receivable_guarantee_fee = #{record.receivableGuaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.cashDeposit != null">
+        cash_deposit = #{record.cashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="record.guaranteeFee != null">
+        guarantee_fee = #{record.guaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.serviceFeeWay != null">
+        service_fee_way = #{record.serviceFeeWay,jdbcType=INTEGER},
+      </if>
+      <if test="record.serviceFee != null">
+        service_fee = #{record.serviceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.serviceFeeFlag != null">
+        service_fee_flag = #{record.serviceFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.serviceFeeResult != null">
+        service_fee_result = #{record.serviceFeeResult,jdbcType=INTEGER},
+      </if>
+      <if test="record.guaranteeFeeFlag != null">
+        guarantee_fee_flag = #{record.guaranteeFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.accountManageFee != null">
+        account_manage_fee = #{record.accountManageFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.repaymentStyle != null">
+        repayment_style = #{record.repaymentStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="record.serviceProvinceId != null">
+        service_province_id = #{record.serviceProvinceId,jdbcType=INTEGER},
+      </if>
+      <if test="record.sysFlag != null">
+        sys_flag = #{record.sysFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.branchOffice != null">
+        branch_office = #{record.branchOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="record.regionOffice != null">
+        region_office = #{record.regionOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="record.readFlag != null">
+        read_flag = #{record.readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.repaymentLockFlag != null">
+        repayment_lock_flag = #{record.repaymentLockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.stockFlag != null">
+        stock_flag = #{record.stockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.signContractFlag != null">
+        sign_contract_flag = #{record.signContractFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.createId != null">
+        create_id = #{record.createId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.modifyId != null">
+        modify_id = #{record.modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="record.modifyTime != null">
+        modify_time = #{record.modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.terraceServiceFee != null">
+        terrace_service_fee = #{record.terraceServiceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="record.consultServiceFee != null">
+        consult_service_fee = #{record.consultServiceFee,jdbcType=DECIMAL},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update ged_order
+    set id = #{record.id,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      order_code = #{record.orderCode,jdbcType=VARCHAR},
+      master_order_code = #{record.masterOrderCode,jdbcType=VARCHAR},
+      contract_code = #{record.contractCode,jdbcType=VARCHAR},
+      company_name = #{record.companyName,jdbcType=VARCHAR},
+      company_type = #{record.companyType,jdbcType=VARCHAR},
+      company_card_num = #{record.companyCardNum,jdbcType=VARCHAR},
+      person_card_type = #{record.personCardType,jdbcType=INTEGER},
+      person_card_num = #{record.personCardNum,jdbcType=VARCHAR},
+      loan_purpose = #{record.loanPurpose,jdbcType=INTEGER},
+      loan_type = #{record.loanType,jdbcType=INTEGER},
+      loan_amount = #{record.loanAmount,jdbcType=DECIMAL},
+      other_loan_amount = #{record.otherLoanAmount,jdbcType=VARCHAR},
+      loan_term = #{record.loanTerm,jdbcType=INTEGER},
+      credit_amount = #{record.creditAmount,jdbcType=DECIMAL},
+      reply_amount = #{record.replyAmount,jdbcType=DECIMAL},
+      reply_term = #{record.replyTerm,jdbcType=INTEGER},
+      withdraw_flag = #{record.withdrawFlag,jdbcType=INTEGER},
+      withdraw_amount = #{record.withdrawAmount,jdbcType=DECIMAL},
+      rate_day = #{record.rateDay,jdbcType=DECIMAL},
+      province_id = #{record.provinceId,jdbcType=BIGINT},
+      city_id = #{record.cityId,jdbcType=BIGINT},
+      area_id = #{record.areaId,jdbcType=BIGINT},
+      management_addr = #{record.managementAddr,jdbcType=VARCHAR},
+      contact_phone = #{record.contactPhone,jdbcType=VARCHAR},
+      contract_sign_province = #{record.contractSignProvince,jdbcType=VARCHAR},
+      contract_sign_city = #{record.contractSignCity,jdbcType=VARCHAR},
+      contract_sign_area = #{record.contractSignArea,jdbcType=VARCHAR},
+      guarantee_flag = #{record.guaranteeFlag,jdbcType=INTEGER},
+      recommend_code = #{record.recommendCode,jdbcType=VARCHAR},
+      receivable_cash_deposit = #{record.receivableCashDeposit,jdbcType=DECIMAL},
+      receivable_guarantee_fee = #{record.receivableGuaranteeFee,jdbcType=DECIMAL},
+      cash_deposit = #{record.cashDeposit,jdbcType=DECIMAL},
+      guarantee_fee = #{record.guaranteeFee,jdbcType=DECIMAL},
+      service_fee_way = #{record.serviceFeeWay,jdbcType=INTEGER},
+      service_fee = #{record.serviceFee,jdbcType=DECIMAL},
+      service_fee_flag = #{record.serviceFeeFlag,jdbcType=INTEGER},
+      service_fee_result = #{record.serviceFeeResult,jdbcType=INTEGER},
+      guarantee_fee_flag = #{record.guaranteeFeeFlag,jdbcType=INTEGER},
+      account_manage_fee = #{record.accountManageFee,jdbcType=DECIMAL},
+      repayment_style = #{record.repaymentStyle,jdbcType=VARCHAR},
+      service_province_id = #{record.serviceProvinceId,jdbcType=INTEGER},
+      sys_flag = #{record.sysFlag,jdbcType=INTEGER},
+      branch_office = #{record.branchOffice,jdbcType=VARCHAR},
+      region_office = #{record.regionOffice,jdbcType=VARCHAR},
+      read_flag = #{record.readFlag,jdbcType=INTEGER},
+      repayment_lock_flag = #{record.repaymentLockFlag,jdbcType=INTEGER},
+      stock_flag = #{record.stockFlag,jdbcType=INTEGER},
+      sign_contract_flag = #{record.signContractFlag,jdbcType=INTEGER},
+      status = #{record.status,jdbcType=INTEGER},
+      create_id = #{record.createId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      modify_id = #{record.modifyId,jdbcType=BIGINT},
+      modify_time = #{record.modifyTime,jdbcType=TIMESTAMP},
+      terrace_service_fee = #{record.terraceServiceFee,jdbcType=DECIMAL},
+      consult_service_fee = #{record.consultServiceFee,jdbcType=DECIMAL}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.gq.ged.order.dao.model.GedOrder">
+    update ged_order
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="orderCode != null">
+        order_code = #{orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="masterOrderCode != null">
+        master_order_code = #{masterOrderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="contractCode != null">
+        contract_code = #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyType != null">
+        company_type = #{companyType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardNum != null">
+        company_card_num = #{companyCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="personCardType != null">
+        person_card_type = #{personCardType,jdbcType=INTEGER},
+      </if>
+      <if test="personCardNum != null">
+        person_card_num = #{personCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="loanPurpose != null">
+        loan_purpose = #{loanPurpose,jdbcType=INTEGER},
+      </if>
+      <if test="loanType != null">
+        loan_type = #{loanType,jdbcType=INTEGER},
+      </if>
+      <if test="loanAmount != null">
+        loan_amount = #{loanAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="otherLoanAmount != null">
+        other_loan_amount = #{otherLoanAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="loanTerm != null">
+        loan_term = #{loanTerm,jdbcType=INTEGER},
+      </if>
+      <if test="creditAmount != null">
+        credit_amount = #{creditAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyAmount != null">
+        reply_amount = #{replyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyTerm != null">
+        reply_term = #{replyTerm,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawFlag != null">
+        withdraw_flag = #{withdrawFlag,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawAmount != null">
+        withdraw_amount = #{withdrawAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="rateDay != null">
+        rate_day = #{rateDay,jdbcType=DECIMAL},
+      </if>
+      <if test="provinceId != null">
+        province_id = #{provinceId,jdbcType=BIGINT},
+      </if>
+      <if test="cityId != null">
+        city_id = #{cityId,jdbcType=BIGINT},
+      </if>
+      <if test="areaId != null">
+        area_id = #{areaId,jdbcType=BIGINT},
+      </if>
+      <if test="managementAddr != null">
+        management_addr = #{managementAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="contactPhone != null">
+        contact_phone = #{contactPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignProvince != null">
+        contract_sign_province = #{contractSignProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignCity != null">
+        contract_sign_city = #{contractSignCity,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignArea != null">
+        contract_sign_area = #{contractSignArea,jdbcType=VARCHAR},
+      </if>
+      <if test="guaranteeFlag != null">
+        guarantee_flag = #{guaranteeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="recommendCode != null">
+        recommend_code = #{recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receivableCashDeposit != null">
+        receivable_cash_deposit = #{receivableCashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="receivableGuaranteeFee != null">
+        receivable_guarantee_fee = #{receivableGuaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="cashDeposit != null">
+        cash_deposit = #{cashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="guaranteeFee != null">
+        guarantee_fee = #{guaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeWay != null">
+        service_fee_way = #{serviceFeeWay,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFee != null">
+        service_fee = #{serviceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeFlag != null">
+        service_fee_flag = #{serviceFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFeeResult != null">
+        service_fee_result = #{serviceFeeResult,jdbcType=INTEGER},
+      </if>
+      <if test="guaranteeFeeFlag != null">
+        guarantee_fee_flag = #{guaranteeFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="accountManageFee != null">
+        account_manage_fee = #{accountManageFee,jdbcType=DECIMAL},
+      </if>
+      <if test="repaymentStyle != null">
+        repayment_style = #{repaymentStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceProvinceId != null">
+        service_province_id = #{serviceProvinceId,jdbcType=INTEGER},
+      </if>
+      <if test="sysFlag != null">
+        sys_flag = #{sysFlag,jdbcType=INTEGER},
+      </if>
+      <if test="branchOffice != null">
+        branch_office = #{branchOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="regionOffice != null">
+        region_office = #{regionOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="readFlag != null">
+        read_flag = #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="repaymentLockFlag != null">
+        repayment_lock_flag = #{repaymentLockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="stockFlag != null">
+        stock_flag = #{stockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="signContractFlag != null">
+        sign_contract_flag = #{signContractFlag,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null">
+        create_id = #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null">
+        modify_id = #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="terraceServiceFee != null">
+        terrace_service_fee = #{terraceServiceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="consultServiceFee != null">
+        consult_service_fee = #{consultServiceFee,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.gq.ged.order.dao.model.GedOrder">
+    update ged_order
+    set user_id = #{userId,jdbcType=BIGINT},
+      order_code = #{orderCode,jdbcType=VARCHAR},
+      master_order_code = #{masterOrderCode,jdbcType=VARCHAR},
+      contract_code = #{contractCode,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      company_type = #{companyType,jdbcType=VARCHAR},
+      company_card_num = #{companyCardNum,jdbcType=VARCHAR},
+      person_card_type = #{personCardType,jdbcType=INTEGER},
+      person_card_num = #{personCardNum,jdbcType=VARCHAR},
+      loan_purpose = #{loanPurpose,jdbcType=INTEGER},
+      loan_type = #{loanType,jdbcType=INTEGER},
+      loan_amount = #{loanAmount,jdbcType=DECIMAL},
+      other_loan_amount = #{otherLoanAmount,jdbcType=VARCHAR},
+      loan_term = #{loanTerm,jdbcType=INTEGER},
+      credit_amount = #{creditAmount,jdbcType=DECIMAL},
+      reply_amount = #{replyAmount,jdbcType=DECIMAL},
+      reply_term = #{replyTerm,jdbcType=INTEGER},
+      withdraw_flag = #{withdrawFlag,jdbcType=INTEGER},
+      withdraw_amount = #{withdrawAmount,jdbcType=DECIMAL},
+      rate_day = #{rateDay,jdbcType=DECIMAL},
+      province_id = #{provinceId,jdbcType=BIGINT},
+      city_id = #{cityId,jdbcType=BIGINT},
+      area_id = #{areaId,jdbcType=BIGINT},
+      management_addr = #{managementAddr,jdbcType=VARCHAR},
+      contact_phone = #{contactPhone,jdbcType=VARCHAR},
+      contract_sign_province = #{contractSignProvince,jdbcType=VARCHAR},
+      contract_sign_city = #{contractSignCity,jdbcType=VARCHAR},
+      contract_sign_area = #{contractSignArea,jdbcType=VARCHAR},
+      guarantee_flag = #{guaranteeFlag,jdbcType=INTEGER},
+      recommend_code = #{recommendCode,jdbcType=VARCHAR},
+      receivable_cash_deposit = #{receivableCashDeposit,jdbcType=DECIMAL},
+      receivable_guarantee_fee = #{receivableGuaranteeFee,jdbcType=DECIMAL},
+      cash_deposit = #{cashDeposit,jdbcType=DECIMAL},
+      guarantee_fee = #{guaranteeFee,jdbcType=DECIMAL},
+      service_fee_way = #{serviceFeeWay,jdbcType=INTEGER},
+      service_fee = #{serviceFee,jdbcType=DECIMAL},
+      service_fee_flag = #{serviceFeeFlag,jdbcType=INTEGER},
+      service_fee_result = #{serviceFeeResult,jdbcType=INTEGER},
+      guarantee_fee_flag = #{guaranteeFeeFlag,jdbcType=INTEGER},
+      account_manage_fee = #{accountManageFee,jdbcType=DECIMAL},
+      repayment_style = #{repaymentStyle,jdbcType=VARCHAR},
+      service_province_id = #{serviceProvinceId,jdbcType=INTEGER},
+      sys_flag = #{sysFlag,jdbcType=INTEGER},
+      branch_office = #{branchOffice,jdbcType=VARCHAR},
+      region_office = #{regionOffice,jdbcType=VARCHAR},
+      read_flag = #{readFlag,jdbcType=INTEGER},
+      repayment_lock_flag = #{repaymentLockFlag,jdbcType=INTEGER},
+      stock_flag = #{stockFlag,jdbcType=INTEGER},
+      sign_contract_flag = #{signContractFlag,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      create_id = #{createId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_id = #{modifyId,jdbcType=BIGINT},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      terrace_service_fee = #{terraceServiceFee,jdbcType=DECIMAL},
+      consult_service_fee = #{consultServiceFee,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectOrderRepayList" parameterType="java.lang.Long" resultMap="JoinOrderRepayResultMap">
+    select
+    a.loan_amount,a.create_time,a.order_code,b.repayment_amount,b.create_time as payCreate_time
+    from
+    ged_order a,ged_order_repayment_plan b
+    where
+    a.order_code=b.order_no and b.repayment_flag=2
+    and a.user_id=#{userId,jdbcType=BIGINT}
+    order by b.create_time ASC
+  </select>
+  <update id="updateByOrderCodeSelective" parameterType="com.gq.ged.order.dao.model.GedOrder">
+    update ged_order
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="orderCode != null">
+        order_code = #{orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="masterOrderCode != null">
+        master_order_code = #{masterOrderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="contractCode != null">
+        contract_code = #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyType != null">
+        company_type = #{companyType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCardNum != null">
+        company_card_num = #{companyCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="personCardType != null">
+        person_card_type = #{personCardType,jdbcType=INTEGER},
+      </if>
+      <if test="personCardNum != null">
+        person_card_num = #{personCardNum,jdbcType=VARCHAR},
+      </if>
+      <if test="loanPurpose != null">
+        loan_purpose = #{loanPurpose,jdbcType=INTEGER},
+      </if>
+      <if test="loanType != null">
+        loan_type = #{loanType,jdbcType=INTEGER},
+      </if>
+      <if test="loanAmount != null">
+        loan_amount = #{loanAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="otherLoanAmount != null">
+        other_loan_amount = #{otherLoanAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="loanTerm != null">
+        loan_term = #{loanTerm,jdbcType=INTEGER},
+      </if>
+      <if test="creditAmount != null">
+        credit_amount = #{creditAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyAmount != null">
+        reply_amount = #{replyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="replyTerm != null">
+        reply_term = #{replyTerm,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawFlag != null">
+        withdraw_flag = #{withdrawFlag,jdbcType=INTEGER},
+      </if>
+      <if test="withdrawAmount != null">
+        withdraw_amount = #{withdrawAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="rateDay != null">
+        rate_day = #{rateDay,jdbcType=DECIMAL},
+      </if>
+      <if test="provinceId != null">
+        province_id = #{provinceId,jdbcType=BIGINT},
+      </if>
+      <if test="cityId != null">
+        city_id = #{cityId,jdbcType=BIGINT},
+      </if>
+      <if test="areaId != null">
+        area_id = #{areaId,jdbcType=BIGINT},
+      </if>
+      <if test="managementAddr != null">
+        management_addr = #{managementAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="contactPhone != null">
+        contact_phone = #{contactPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignProvince != null">
+        contract_sign_province = #{contractSignProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignCity != null">
+        contract_sign_city = #{contractSignCity,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSignArea != null">
+        contract_sign_area = #{contractSignArea,jdbcType=VARCHAR},
+      </if>
+      <if test="guaranteeFlag != null">
+        guarantee_flag = #{guaranteeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="recommendCode != null">
+        recommend_code = #{recommendCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receivableCashDeposit != null">
+        receivable_cash_deposit = #{receivableCashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="receivableGuaranteeFee != null">
+        receivable_guarantee_fee = #{receivableGuaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="cashDeposit != null">
+        cash_deposit = #{cashDeposit,jdbcType=DECIMAL},
+      </if>
+      <if test="guaranteeFee != null">
+        guarantee_fee = #{guaranteeFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeWay != null">
+        service_fee_way = #{serviceFeeWay,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFee != null">
+        service_fee = #{serviceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceFeeFlag != null">
+        service_fee_flag = #{serviceFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="serviceFeeResult != null">
+        service_fee_result = #{serviceFeeResult,jdbcType=INTEGER},
+      </if>
+      <if test="guaranteeFeeFlag != null">
+        guarantee_fee_flag = #{guaranteeFeeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="accountManageFee != null">
+        account_manage_fee = #{accountManageFee,jdbcType=DECIMAL},
+      </if>
+      <if test="repaymentStyle != null">
+        repayment_style = #{repaymentStyle,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceProvinceId != null">
+        service_province_id = #{serviceProvinceId,jdbcType=INTEGER},
+      </if>
+      <if test="sysFlag != null">
+        sys_flag = #{sysFlag,jdbcType=INTEGER},
+      </if>
+      <if test="branchOffice != null">
+        branch_office = #{branchOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="regionOffice != null">
+        region_office = #{regionOffice,jdbcType=VARCHAR},
+      </if>
+      <if test="readFlag != null">
+        read_flag = #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="repaymentLockFlag != null">
+        repayment_lock_flag = #{repaymentLockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="stockFlag != null">
+        stock_flag = #{stockFlag,jdbcType=INTEGER},
+      </if>
+      <if test="signContractFlag != null">
+        sign_contract_flag = #{signContractFlag,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createId != null">
+        create_id = #{createId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyId != null">
+        modify_id = #{modifyId,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="terraceServiceFee != null">
+        terrace_service_fee = #{terraceServiceFee,jdbcType=DECIMAL},
+      </if>
+      <if test="consultServiceFee != null">
+        consult_service_fee = #{consultServiceFee,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where order_code = #{orderCode,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateOrderByContractNo">
+    UPDATE ged_order set sign_contract_flag=1
+    where contract_code=#{contractNo}
+  </update>
+
+  <update id="updateOtherLoanAmount" parameterType="com.gq.ged.order.dao.model.GedOrder">
+    UPDATE ged_order set other_loan_amount = #{otherLoanAmount,jdbcType=VARCHAR}
+    where order_code = #{orderCode}
+  </update>
+</mapper>
