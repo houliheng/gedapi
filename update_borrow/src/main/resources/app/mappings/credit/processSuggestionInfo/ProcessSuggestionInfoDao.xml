@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.credit.processSuggestionInfo.dao.ProcessSuggestionInfoDao">
+
+	<sql id="processSuggestionInfoColumns">
+		a.id AS "id",
+		a.task_def_key AS "taskDefKey",
+		a.apply_no AS "applyNo",
+		a.is_abnormal AS "isAbnormal",
+		a.is_abnormal2 AS "isAbnormal2",
+		a.suggestion_desc AS "suggestionDesc",
+		a.ANALYSIS_DESC as "analysisDesc",
+		a.CREDIT_DESC AS "creditDesc",
+		a.reserve_time AS "reserveTime",
+		a.create_by AS "createBy.id",
+		b.login_name as "createBy.loginName",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="processSuggestionInfoJoins">
+	left join sys_user b on a.create_by = b.id 
+	</sql>
+
+	<select id="findTopComApproveSugg" resultType="String">
+		SELECT
+		SUGGESTION_DESC
+		FROM cre_process_suggestion_info B
+		WHERE B.APPLY_NO = #{applyNo}
+		AND B.TASK_DEF_KEY IN
+		('utask_zgszjlsh','utask_zgsjlsh')
+		ORDER BY B.TASK_DEF_KEY DESC
+		LIMIT 1
+	</select>
+
+	<select id="get" resultType="ProcessSuggestionInfo">
+		SELECT
+		<include refid="processSuggestionInfoColumns" />
+		FROM cre_process_suggestion_info a
+		<include refid="processSuggestionInfoJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ProcessSuggestionInfo">
+		SELECT
+		<include refid="processSuggestionInfoColumns" />
+		FROM cre_process_suggestion_info a
+		<include refid="processSuggestionInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_process_suggestion_info a
+		<include refid="processSuggestionInfoJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ProcessSuggestionInfo">
+		SELECT
+		<include refid="processSuggestionInfoColumns" />
+		FROM cre_process_suggestion_info a
+		<include refid="processSuggestionInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_process_suggestion_info(
+			id,
+			task_def_key,
+			apply_no,
+			is_abnormal,
+			is_abnormal2,
+			suggestion_desc,
+			ANALYSIS_DESC,
+			CREDIT_DESC,
+			reserve_time,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{taskDefKey},
+			#{applyNo},
+			#{isAbnormal},
+			#{isAbnormal2},
+			#{suggestionDesc},
+			#{analysisDesc},
+			#{creditDesc},
+			#{reserveTime},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_process_suggestion_info SET
+		task_def_key = #{taskDefKey},
+		apply_no = #{applyNo},
+		is_abnormal = #{isAbnormal},
+		is_abnormal2 = #{isAbnormal2},
+		<if test="suggestionDesc != null and suggestionDesc != ''">
+			suggestion_desc = #{suggestionDesc},
+		</if>
+		<if test="analysisDesc != null and analysisDesc != ''">
+			ANALYSIS_DESC = #{analysisDesc},
+		</if>
+		<if test="creditDesc != null and creditDesc != ''">
+			CREDIT_DESC = #{creditDesc},
+		</if>
+		reserve_time = #{reserveTime},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_process_suggestion_info
+		WHERE id =
+		#{id}
+	</update>
+
+	<select id="findByApplyNo" resultType="ProcessSuggestionInfo">
+		SELECT
+		<include refid="processSuggestionInfoColumns" />
+		FROM cre_process_suggestion_info a
+		<include refid="processSuggestionInfoJoins" />
+		<where>
+			a.apply_no = #{applyNo}
+			AND a.task_def_key = #{taskDefKey}
+		</where>
+	</select>
+
+	<update id="updateByApplyNo">
+		UPDATE cre_process_suggestion_info SET
+		task_def_key = #{taskDefKey},
+		apply_no = #{applyNo},
+		is_abnormal = #{isAbnormal},
+		is_abnormal2 = #{isAbnormal2},
+		<if test="suggestionDesc != null and suggestionDesc != ''">
+			suggestion_desc = #{suggestionDesc},
+		</if>
+		<if test="analysisDesc != null and analysisDesc != ''">
+			ANALYSIS_DESC = #{analysisDesc},
+		</if>
+		<if test="creditDesc != null and creditDesc != ''">
+			CREDIT_DESC = #{creditDesc},
+		</if>
+		reserve_time = #{reserveTime},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE apply_no = #{applyNo} and task_def_key = #{taskDefKey}
+	</update>
+
+	<select id="getDataInActRuExecution" resultType="java.util.Map">
+	select REV_
+		from act_ru_execution 
+		where IS_SCOPE_ = 1 and PROC_INST_ID_ = #{procInstId}
+	</select>
+
+	<update id="updateDataInActRuExecution">
+		update act_ru_execution set
+		REV_ = #{rev},
+		ACT_ID_ = #{actId},
+		IS_ACTIVE_ = #{isActive}
+		where IS_SCOPE_ = 1 and PROC_INST_ID_ = #{procInstId}
+	</update>
+
+	<update id="deleteParallelData">
+		delete from act_ru_execution where IS_SCOPE_ = 0 and PROC_INST_ID_ = #{procInstId}
+	</update>
+
+	<update id="updateRuExecutionId">
+		update act_ru_task set EXECUTION_ID_ = #{executionId} where TASK_DEF_KEY_ = 'utask_sqlr' and PROC_INST_ID_ = #{procInstId}
+	</update>
+
+	<insert id="insertDate">
+		INSERT INTO cre_sta_task_result(
+			id,
+			task_def_key,
+			apply_no,
+			pass_flag,
+			create_by,
+			create_date,
+			ITEM_CREATE_DATE,
+			org_Id,
+			START_TIME,
+			END_TIME,
+			OFFICE_ID
+		) VALUES (
+			#{id},
+			#{taskDefKey},
+			#{applyNo},
+			#{passFlag},
+			#{updateBy.id},
+			#{endTime},
+			#{itemCreateDate},
+			#{orgId},
+			#{startTime},
+			#{endTime},
+			#{officeId}
+		)
+	</insert>
+		 <select id="getStartTimeToo" resultType="java.util.Map">
+			SELECT
+					b.start_time_  as "startTime",
+					NOW() as "endTime",
+					END_TIME_ as "reDoEndTime"
+			FROM
+				cre_apply_register a
+			INNER JOIN act_hi_taskinst b ON a.PROC_INS_ID = b.PROC_INST_ID_
+			WHERE
+				APPLY_NO = #{applyNo}
+			AND b.TASK_DEF_KEY_ = #{taskDefKey}
+			ORDER BY
+				b.END_TIME_ DESC
+			LIMIT 1
+			</select>
+		 	<select id="getStartTime" resultType="java.util.Map">
+				SELECT
+					b.CREATE_TIME_  as "startTime",
+					NOW() as "endTime"
+			FROM
+				cre_apply_register a
+			INNER JOIN act_ru_task b ON a.PROC_INS_ID = b.PROC_INST_ID_
+			WHERE
+				APPLY_NO = #{applyNo}
+			AND b.TASK_DEF_KEY_ = #{taskDefKey}
+			ORDER BY
+				b.CREATE_TIME_ DESC
+			LIMIT 1
+			</select> 
+			
+			<select id="getOrg" resultType="java.util.Map">
+			SELECT
+				ORG_ID AS orgId,
+				CREATE_DATE AS itemCreateDate
+			FROM
+				cre_apply_register
+			WHERE
+				APPLY_NO = #{applyNo}
+		</select>
+		
+		<select id="getMyTimeCliam" resultType="java.util.Map">
+		SELECT
+			T.START_TIME_ AS startTime
+		FROM
+			ACT_HI_TASKINST T
+		LEFT JOIN SYS_USER U ON T.ASSIGNEE_ = U.LOGIN_NAME
+		LEFT JOIN SYS_OFFICE O ON U.OFFICE_ID = O.ID
+		LEFT JOIN (
+			SELECT
+				ARR.TASK_ID,
+				ARR.TYPE,
+				SU. NAME AS FROMNAME,
+				SUT. NAME AS TONAME,
+				ARR.CREATE_TIME AS RCTIME,
+				ARR.CREATE_FROM AS CFROMCODE,
+				ARR.CREATE_TO AS CTOCODE
+			FROM
+				ACT_RETURN_RECORD ARR
+			INNER JOIN SYS_USER SU ON ARR.CREATE_FROM = SU.LOGIN_NAME
+			INNER JOIN SYS_USER SUT ON ARR.CREATE_TO = SUT.LOGIN_NAME
+			WHERE
+				(ARR.TYPE = '2' OR ARR.TYPE = '3')
+			ORDER BY
+				ARR.CREATE_TIME DESC
+		) R ON R.TASK_ID = T.ID_
+		WHERE
+			T.PROC_INST_ID_ = (SELECT PROC_INS_ID from cre_apply_register  where APPLY_NO = #{applyNo})
+		AND T.END_TIME_ IS NULL
+		AND R.TASK_ID IS NOT NULL ORDER BY T.START_TIME_ LIMIT 1
+		</select>
+</mapper>

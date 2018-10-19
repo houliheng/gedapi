@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.checkAccount.dao.CheckAccountHisDao">
+
+    <sql id="checkAccountHisColumns">
+        id,
+        contract_no as"contractNo",
+        apply_id as "applyId",
+        node_name as "nodeName",
+        content as "content",
+        remark as "remark",
+        create_id as "createBy.id",
+        create_name as "createBy.name",
+        create_time as "createDate"
+    </sql>
+
+    <sql id="checkAccountHisJoins">
+    </sql>
+
+    <select id="list" resultType="com.resoft.accounting.checkAccount.entity.CheckAccountHistory">
+      select
+        <include refid="checkAccountHisColumns" />
+      from acc_check_account_his
+      <where>
+          <choose>
+              <when test="contractNo != null and contractNo != ''">
+                  contract_no = #{contractNo}
+              </when>
+              <when test="applyId != null">
+                  apply_id = #{applyId}
+              </when>
+              <otherwise>
+                  0 = 1
+              </otherwise>
+          </choose>
+      </where>
+    </select>
+
+    <insert id="insert" parameterType="com.resoft.accounting.checkAccount.entity.CheckAccountHistory"
+        keyProperty="id" useGeneratedKeys="true">
+        insert into acc_check_account_his (
+          contract_no,
+          apply_id,
+          node_name,
+          content,
+          remark,
+          create_id,
+          create_name,
+          create_time
+        ) values (
+          #{contractNo},
+          #{applyId},
+          #{nodeName},
+          #{content},
+          #{remark},
+          #{createBy.id},
+          #{createBy.name},
+          #{createDate}
+        )
+    </insert>
+
+
+</mapper>

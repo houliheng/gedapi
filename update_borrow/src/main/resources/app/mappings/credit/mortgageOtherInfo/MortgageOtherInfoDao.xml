@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.mortgageOtherInfo.dao.MortgageOtherInfoDao">
+    
+	<sql id="mortgageOtherInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.property_right AS "propertyRight",
+		a.assets_name AS "assetsName",
+		a.count_num AS "countNum",
+		ifnull(a.value_num,0) AS "valueNum",
+		a.cont_details AS "contDetails",
+		a.description AS "description",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="mortgageOtherInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="MortgageOtherInfo">
+		SELECT 
+			<include refid="mortgageOtherInfoColumns"/>
+		FROM cre_mortgage_other_info a
+		<include refid="mortgageOtherInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="MortgageOtherInfo">
+		SELECT 
+			<include refid="mortgageOtherInfoColumns"/>
+		FROM cre_mortgage_other_info a
+		<include refid="mortgageOtherInfoJoins"/>
+		<where>
+			 a.del_flag = '0'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_mortgage_other_info a
+		<include refid="mortgageOtherInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MortgageOtherInfo">
+		SELECT 
+			<include refid="mortgageOtherInfoColumns"/>
+		FROM cre_mortgage_other_info a
+		<include refid="mortgageOtherInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_mortgage_other_info(
+			id,
+			apply_no,
+			<!-- property_right,  -->
+			assets_name,
+			 count_num,
+			value_num,
+			cont_details, 
+			description,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+		   <!--  #{propertyRight},  -->
+			#{assetsName},
+		    #{countNum},
+			#{valueNum},
+			#{contDetails}, 
+			#{description},
+			'0',
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_mortgage_other_info SET 	
+			apply_no = #{applyNo},
+			<!-- property_right = #{propertyRight}, -->
+			assets_name = #{assetsName},
+			count_num = #{countNum},
+			value_num = #{valueNum},
+			cont_details = #{contDetails},
+			description = #{description},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_mortgage_other_info
+		WHERE id = #{id}
+	</update>
+	
+	<update id="batchDelete">
+		update  cre_mortgage_other_info set del_flag = '1'
+		where id in 
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>
+	</update>
+	
+	<select id="getOtherCount" resultType="long">
+		select count(1)
+		from cre_mortgage_other_info b
+		where b.APPLY_NO = #{applyNo}
+		and b.DEL_FLAG = '0'
+	</select>
+	
+	<select id="getPageByApplyNo" resultType="MortgageOtherInfo">
+		SELECT 
+			<include refid="mortgageOtherInfoColumns"/>
+		FROM cre_mortgage_other_info a
+		<where>
+				AND a.apply_no = #{applyNo} and a.DEL_FLAG = '0'
+		</where>		
+	</select>
+	
+	<select id="getOtherData" resultType="MortgageOtherInfo">
+		SELECT 
+			<include refid="mortgageOtherInfoColumns"/>
+		FROM cre_mortgage_other_info a
+		where a.del_flag = '0' and a.apply_no =#{applyNo} 
+	</select>
+</mapper>

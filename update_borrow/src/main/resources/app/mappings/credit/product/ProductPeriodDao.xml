@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.product.dao.ProductPeriodDao">
+	
+	 <sql id="columns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.period_value AS "periodValue",
+		a.period_type AS "periodType",
+		a.year_rate AS "yearRate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks"
+	</sql>
+	<sql id="jointables">
+	</sql>
+	<select id="getById" resultType="ProductPeriod">
+		SELECT 
+			<include refid="columns"/>
+		FROM CRE_PRODUCT_PERIOD a
+		<include refid="jointables"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findList" resultType="ProductPeriod">
+		SELECT 
+			<include refid="columns"/>
+		FROM CRE_PRODUCT_PERIOD a
+		<include refid="jointables"/>
+		<where>
+			a.product_id=#{productId}
+		</where>
+		ORDER BY a.period_type,a.period_value
+	</select>
+	<insert id="insert">
+		INSERT INTO CRE_PRODUCT_PERIOD(id,product_id,period_value,period_type,year_rate,del_flag,remarks) 
+		VALUES (#{id},#{productId},#{periodValue},#{periodType},#{yearRate},#{delFlag},#{remarks})
+	</insert>
+	<update id="update">
+		UPDATE CRE_PRODUCT_PERIOD SET 	
+			period_value = #{periodValue},
+			period_type = #{periodType},
+			year_rate = #{yearRate},
+			del_flag = #{delFlag},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findUseablePeriodByProductId" resultType="ProductPeriod">
+		SELECT 
+			a.ID as id,
+			a.PERIOD_VALUE as periodValue,
+			a.PERIOD_TYPE as periodType,
+			b.label as periodTypeName,
+			a.year_rate as yearRate
+		FROM CRE_PRODUCT_PERIOD a
+			LEFT JOIN SYS_DICT b on a.PERIOD_TYPE=b.value
+		WHERE	a.product_id=#{productId} and a.DEL_FLAG='1' and b.TYPE='PRODUCT_PERIOD_TYPE'
+		ORDER BY a.period_type,a.period_value
+	</select>
+	
+	<select id="get" resultType="ProductPeriod">
+		SELECT 
+			a.ID as id,
+			a.PERIOD_VALUE as periodValue,
+			a.PERIOD_TYPE as periodType,
+			b.label as periodTypeName,
+			a.year_rate as yearRate
+		FROM CRE_PRODUCT_PERIOD a
+			LEFT JOIN SYS_DICT b on a.PERIOD_TYPE=b.value
+		WHERE	a.ID=#{productId} and a.DEL_FLAG='1' and b.TYPE='PRODUCT_PERIOD_TYPE'
+		ORDER BY a.period_type,a.period_value
+	</select>
+	
+	<select id="findPeriodByApplyNo" resultType="ProductPeriod">
+		SELECT 
+			<include refid="columns"/>
+		FROM cre_product_period a
+		INNER JOIN cre_product p ON p.ID = a.PRODUCT_ID AND p.DEL_FLAG='0'
+		INNER JOIN cre_apply_register ar ON ar.APPLY_PRODUCT_ID = p.ID
+		WHERE ar.APPLY_NO = #{applyNo} and a.DEL_FLAG='1'
+		ORDER BY a.period_value
+	</select>
+</mapper>

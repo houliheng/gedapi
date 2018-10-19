@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.contract.dao.AccContractDao">
+
+	<sql id="contractColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		d.name as "orgLevel4.name",
+		e.id as "orgLevel3.id",
+		e.name as "orgLevel3.name",
+		f.id as "orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.apply_no AS "applyNo",
+		a.contract_amount
+		AS "contractAmount",
+		a.id_type AS "idType",
+		a.loan_amount AS "loanAmount",
+		a.id_num AS
+		"idNum",
+		a.appro_product_type_id AS "approProductTypeId",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS
+		"approProductName",
+		a.appro_period_id AS "approPeriodId",
+		a.appro_period_value AS "approPeriodValue",
+		a.appro_year_rate AS
+		"approYearRate",
+		a.loan_model AS "loanModel",
+		a.service_fee_type AS
+		"serviceFeeType",
+		a.occur_date AS "occurDate",
+		a.service_fee AS
+		"serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.margin_amount AS "marginAmount",
+		a.appro_loan_repay_type AS
+		"approLoanRepayType",
+		a.rep_bankcard_no AS "repBankcardNo",
+		a.cust_id AS
+		"custId",
+		a.rep_bankcard_name AS "repBankcardName",
+		a.cust_name AS
+		"custName",
+		a.rep_bank_name AS
+		"repBankName",
+		a.rep_bank_mobile AS
+		"repBankMobile",
+		a.rep_bank_id_num AS "repBankIdNum",
+		a.operate_org_id
+		AS "operateOrgId",
+		a.rep_bank_detail AS "repBankDetail",
+		a.operate_name
+		AS "operateName",
+		a.operate_org_name AS "operateOrgName",
+		a.operate_id
+		AS "operateId",
+		a.con_start_date AS "conStartDate",
+		a.con_end_date AS
+		"conEndDate",
+		a.rep_bank AS "repBank",
+		a.rep_bank_province AS
+		"repBankProvince",
+		x.name as "repBankProvinceName",
+		a.rep_bank_city AS "repBankCity",
+		y.name as "repBankCityName",
+		a.rep_bank_distinct AS "repBankDistinct",
+		z.name
+		as "repBankDistinctName",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.margin_rate AS "marginRate",
+		b.ta_Times AS "staContractStatus.taTimes",
+		b.curr_Overdue_Amount AS
+		"staContractStatus.currOverdueAmount",
+		b.repay_Contract_Status AS
+		"staContractStatus.repayContractStatus",
+		a.CAPITAL_TERRACE_NO as
+		"capitalTerraceNo",
+		a.FACT_GUARANTEE_GOLD as factGuaranteeGold,
+		a.FACT_GUARANTEE_FEE as factGuaranteeFee,
+		ifnull(a.FACT_SERVICE_FEE,0) as factServiceFee
+	</sql>
+
+
+	<!--根据申请编号查询合同表中的信息-->
+	<select id="queryContractByContractNo" resultType="Contract" >
+       select
+      a.FACT_GUARANTEE_FEE AS "factGuaranteeFee",
+      a.FACT_GUARANTEE_GOLD AS "factGuaranteeGold",
+      a.SERVICE_FEE AS  "serviceFee",
+      a.APPRO_PERIOD_VALUE AS "approPeriodValue",
+      a.LOAN_AMOUNT AS "loanAmount",
+      a.LOAN_PLATFORM AS "loanPlatform",
+      a.LOAN_DATE AS "loanDate",
+      a.CONTRACT_AMOUNT AS  "contractAmount"
+       from acc_contract a
+		where a.contract_no = #{contractNo}
+
+	</select>
+
+
+ <!--根据合同号增加申请编号-->
+ <update id="updateContactByContractNo">
+     update acc_contract set apply_no = #{applyNo} where contract_no = #{contractNo}
+
+ </update>
+
+
+	<sql id="contractJoins">
+		left join sys_area x on a.REP_BANK_PROVINCE = x.id
+		left join sys_area y on a.REP_BANK_CITY = y.id
+		left join sys_area z on a.REP_BANK_DISTINCT = z.id
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join sys_office e on d.parent_id = e.id
+		left join sys_office f on e.parent_id = f.id
+		left join ACC_STA_CONTRACT_STATUS b on a.contract_no = b.contract_no
+	</sql>
+
+	<select id="get" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<select id="findContractByContractNo" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		WHERE a.contract_no = #{contractNo}
+	</select>
+	
+	<select id="findContractByApplyNo" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="findContractBySonApplyNo" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		WHERE a.CONTRACT_NO = #{contractNo}
+	</select>
+
+	<select id="findList" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		inner join
+		sys_office o on a.OPERATE_ORG_ID = o.id
+		<where>
+			<if test="idNum != null and idNum != ''">
+				a.id_num like CONCAT(#{idNum},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and d.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id = #{orgLevel2.id}
+		</if>
+			and (a.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		<where>
+			<if test="idNum != null and idNum != ''">
+				a.id_num like CONCAT(#{idNum},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="Contract">
+		SELECT
+		<include refid="contractColumns" />
+		FROM acc_contract a
+		<include refid="contractJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_contract(
+		id,
+		contract_no,
+		org_level2,
+		org_level3,
+		org_level4,
+		apply_no,
+		contract_amount,
+		id_type,
+		loan_amount,
+		id_num,
+		appro_product_type_id,
+		appro_product_type_name,
+		appro_product_id,
+		appro_product_name,
+		appro_period_id,
+		appro_period_value,
+		appro_year_rate,
+		loan_model,
+		service_fee_type,
+		occur_date,
+		service_fee,
+		special_service_fee,
+		margin_amount,
+		appro_loan_repay_type,
+		rep_bankcard_no,
+		cust_id,
+		rep_bankcard_name,
+		cust_name,
+		rep_bank_name,
+		rep_bank_mobile,
+		rep_bank_id_num,
+		operate_org_id,
+		rep_bank_detail,
+		operate_name,
+		operate_org_name,
+		operate_id,
+		con_start_date,
+		con_end_date,
+		rep_bank,
+		rep_bank_province,
+		rep_bank_city,
+		rep_bank_distinct,
+		CAPITAL_TERRACE_NO
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{orgLevel2.id},
+		#{orgLevel3.id},
+		#{orgLevel4.id},
+		#{applyNo},
+		#{contractAmount},
+		#{idType},
+		#{loanAmount},
+		#{idNum},
+		#{approProductTypeId},
+		#{approProductTypeName},
+		#{approProductId},
+		#{approProductName},
+		#{approPeriodId},
+		#{approPeriodValue},
+		#{approYearRate},
+		#{loanModel},
+		#{serviceFeeType},
+		#{occurDate},
+		#{serviceFee},
+		#{specialServiceFee},
+		#{marginAmount},
+		#{approLoanRepayType},
+		#{repBankcardNo},
+		#{custId},
+		#{repBankcardName},
+		#{custName},
+		#{repBankName},
+		#{repBankMobile},
+		#{repBankIdNum},
+		#{operateOrgId},
+		#{repBankDetail},
+		#{operateName},
+		#{operateOrgName},
+		#{operateId},
+		#{conStartDate},
+		#{conEndDate},
+		#{repBank},
+		#{repBankProvince},
+		#{repBankCity},
+		#{repBankDistinct},
+		#{capitalTerraceNo}
+		)
+	</insert>
+
+	<insert id="importContract">
+		INSERT INTO acc_contract(
+		id,
+		<if test= " loanDate != null and loanDate != ''">
+		LOAN_DATE,
+		</if>
+		<if test= " orgLevel2 != null and orgLevel2 != ''">
+		org_level2,
+		</if>
+		<if test= " orgLevel3 != null and orgLevel3 != ''">
+		org_level3,
+		</if>
+		<if test= " orgLevel4 != null and orgLevel4 != ''">
+		org_level4,
+		</if>
+		<if test= " applyNo != null and applyNo != ''">
+		apply_no,
+		</if>
+		<if test= " contractAmount != null and contractAmount != ''">
+		contract_amount,
+		</if>
+		<if test= " idType != null and idType != ''">
+		id_type,
+		</if>
+		<if test= " loanAmount != null and loanAmount != ''">
+		loan_amount,
+		</if>
+		<if test= " idNum != null and idNum != ''">
+		id_num,
+		</if>
+		<if test= " approProductTypeId != null and approProductTypeId != ''">
+		appro_product_type_id,
+		</if>
+		<if test= " approProductTypeName != null and approProductTypeName != ''">
+		appro_product_type_name,
+		</if>
+		<if test= " approProductId != null and approProductId != ''">
+		appro_product_id,
+		</if>
+		<if test= " approProductName != null and approProductName != ''">
+		appro_product_name,
+		</if>
+		<if test= " approPeriodId != null and approPeriodId != ''">
+		appro_period_id,
+		</if>
+		<if test= " approPeriodValue != null and approPeriodValue != ''">
+		appro_period_value,
+		</if>
+		<if test= " approYearRate != null and approYearRate != ''">
+		appro_year_rate,
+		</if>
+		<if test= " loanModel != null and loanModel != ''">
+		loan_model,
+		</if>
+		<if test= " serviceFeeType != null and serviceFeeType != ''">
+		service_fee_type,
+		</if>
+		<if test= " occurDate != null and occurDate != ''">
+		occur_date,
+		</if>
+		<if test= " serviceFee != null and serviceFee != ''">
+		service_fee,
+		</if>
+		<if test= " specialServiceFee != null and specialServiceFee != ''">
+		special_service_fee,
+		</if>
+		<if test= " marginAmount != null and marginAmount != ''">
+		margin_amount,
+		</if>
+		<if test= " approLoanRepayType != null and approLoanRepayType != ''">
+		appro_loan_repay_type,
+		</if>
+		<if test= " repBankcardNo != null and repBankcardNo != ''">
+		rep_bankcard_no,
+		</if>
+		<if test= " custId != null and custId != ''">
+		cust_id,
+		</if>
+		<if test= " repBankcardName != null and repBankcardName != ''">
+		rep_bankcard_name,
+		</if>
+		<if test= " custName != null and custName != ''">
+		cust_name,
+		</if>
+		<if test= " repBankName != null and repBankName != ''">
+		rep_bank_name,
+		</if>
+		<if test= " repBankMobile != null and repBankMobile != ''">
+		rep_bank_mobile,
+		</if>
+		<if test= " repBankIdNum != null and repBankIdNum != ''">
+		rep_bank_id_num,
+		</if>
+		<if test= " operateOrgId != null and operateOrgId != ''">
+		operate_org_id,
+		</if>
+		<if test= " repBankDetail != null and repBankDetail != ''">
+		rep_bank_detail,
+		</if>
+		<if test= " operateName != null and operateName != ''">
+		operate_name,
+		</if>
+		<if test= " operateOrgName != null and operateOrgName != ''">
+		operate_org_name,
+		</if>
+		<if test= " operateId != null and operateId != ''">
+		operate_id,
+		</if>
+		<if test= " conStartDate != null and conStartDate != ''">
+		con_start_date,
+		</if>
+		<if test= " conEndDate != null and conEndDate != ''">
+		con_end_date,
+		</if>
+		<if test= " repBank != null and repBank != ''">
+		rep_bank,
+		</if>
+		<if test= " repBankProvince != null and repBankProvince != ''">
+		rep_bank_province,
+		</if>
+		<if test= " repBankCity != null and repBankCity != ''">
+		rep_bank_city,
+		</if>
+		<if test= " repBankDistinct != null and repBankDistinct != ''">
+		rep_bank_distinct,
+		</if>
+		<if test= " capitalTerraceNo != null and capitalTerraceNo != ''">
+		CAPITAL_TERRACE_NO,
+		</if>
+		<if test= " serviceFeeRate != null and serviceFeeRate != ''">
+		SERVICE_FEE_RATE,
+		</if>
+		<if test= " marginRate != null and marginRate != ''">
+		MARGIN_RATE,
+		</if>
+		<if test= " mortgageeCapTerNo != null and mortgageeCapTerNo != ''">
+		MORTGAGEE_CAP_TER_NO,
+		</if>
+		<if test= " loanPlatform != null and loanPlatform != ''">
+		LOAN_PLATFORM,
+		</if>
+		<if test= " remark != null and remark != ''">
+		REMARK,
+		</if>
+		contract_no
+		) VALUES (
+		REPLACE(UUID(),'-',''),
+		<if test= " loanDate != null and loanDate != ''">
+		#{loanDate},
+		</if>
+		<if test= " orgLevel2 != null and orgLevel2 != ''">
+		#{orgLevel2},
+		</if>
+		<if test= " orgLevel3 != null and orgLevel3 != ''">
+		#{orgLevel3},
+		</if>
+		<if test= " orgLevel4 != null and orgLevel4 != ''">
+		#{orgLevel4},
+		</if>
+		<if test= " applyNo != null and applyNo != ''">
+		#{applyNo},
+		</if>
+		<if test= " contractAmount != null and contractAmount != ''">
+		#{contractAmount},
+		</if>
+		<if test= " idType != null and idType != ''">
+		#{idType},
+		</if>
+		<if test= " loanAmount != null and loanAmount != ''">
+		#{loanAmount},
+		</if>
+		<if test= " idNum != null and idNum != ''">
+		#{idNum},
+		</if>
+		<if test= " approProductTypeId != null and approProductTypeId != ''">
+		#{approProductTypeId},
+		</if>
+		<if test= " approProductTypeName != null and approProductTypeName != ''">
+		#{approProductTypeName},
+		</if>
+		<if test= " approProductId != null and approProductId != ''">
+		#{approProductId},
+		</if>
+		<if test= " approProductName != null and approProductName != ''">
+		#{approProductName},
+		</if>
+		<if test= " approPeriodId != null and approPeriodId != ''">
+		#{approPeriodId},
+		</if>
+		<if test= " approPeriodValue != null and approPeriodValue != ''">
+		#{approPeriodValue},
+		</if>
+		<if test= " approYearRate != null and approYearRate != ''">
+		#{approYearRate},
+		</if>
+		<if test= " loanModel != null and loanModel != ''">
+		#{loanModel},
+		</if>
+		<if test= " serviceFeeType != null and serviceFeeType != ''">
+		#{serviceFeeType},
+		</if>
+		<if test= " occurDate != null and occurDate != ''">
+		#{occurDate},
+		</if>
+		<if test= " serviceFee != null and serviceFee != ''">
+		#{serviceFee},
+		</if>
+		<if test= " specialServiceFee != null and specialServiceFee != ''">
+		#{specialServiceFee},
+		</if>
+		<if test= " marginAmount != null and marginAmount != ''">
+		#{marginAmount},
+		</if>
+		<if test= " approLoanRepayType != null and approLoanRepayType != ''">
+		#{approLoanRepayType},
+		</if>
+		<if test= " repBankcardNo != null and repBankcardNo != ''">
+		#{repBankcardNo},
+		</if>
+		<if test= " custId != null and custId != ''">
+		#{custId},
+		</if>
+		<if test= " repBankcardName != null and repBankcardName != ''">
+		#{repBankcardName},
+		</if>
+		<if test= " custName != null and custName != ''">
+		#{custName},
+		</if>
+		<if test= " repBankName != null and repBankName != ''">
+		#{repBankName},
+		</if>
+		<if test= " repBankMobile != null and repBankMobile != ''">
+		#{repBankMobile},
+		</if>
+		<if test= " repBankIdNum != null and repBankIdNum != ''">
+		#{repBankIdNum},
+		</if>
+		<if test= " operateOrgId != null and operateOrgId != ''">
+		#{operateOrgId},
+		</if>
+		<if test= " repBankDetail != null and repBankDetail != ''">
+		#{repBankDetail},
+		</if>
+		<if test= " operateName != null and operateName != ''">
+		#{operateName},
+		</if>
+		<if test= " operateOrgName != null and operateOrgName != ''">
+		#{operateOrgName},
+		</if>
+		<if test= " operateId != null and operateId != ''">
+		#{operateId},
+		</if>
+		<if test= " conStartDate != null and conStartDate != ''">
+		#{conStartDate},
+		</if>
+		<if test= " conEndDate != null and conEndDate != ''">
+		#{conEndDate},
+		</if>
+		<if test= " repBank != null and repBank != ''">
+		#{repBank},
+		</if>
+		<if test= " repBankProvince != null and repBankProvince != ''">
+		#{repBankProvince},
+		</if>
+		<if test= " repBankCity != null and repBankCity != ''">
+		#{repBankCity},
+		</if>
+		<if test= " repBankDistinct != null and repBankDistinct != ''">
+		#{repBankDistinct},
+		</if>
+		<if test= " capitalTerraceNo != null and capitalTerraceNo != ''">
+		#{capitalTerraceNo},
+		</if>
+		<if test= " serviceFeeRate != null and serviceFeeRate != ''">
+		#{serviceFeeRate},
+		</if>
+		<if test= " marginRate != null and marginRate != ''">
+		#{marginRate},
+		</if>
+		<if test= " mortgageeCapTerNo != null and mortgageeCapTerNo != ''">
+		#{mortgageeCapTerNo},
+		</if>
+		<if test= " loanPlatform != null and loanPlatform != ''">
+		#{loanPlatform},
+		</if>
+		<if test= " remark != null and remark != ''">
+		#{remark},
+		</if>
+		#{contractNo}
+		)
+	</insert>
+
+
+	<update id="updateImportedContract">
+		UPDATE acc_contract SET
+		contract_no = #{contractNo},
+		LOAN_DATE = #{loanDate},
+		org_level2 = #{orgLevel2},
+		org_level3 = #{orgLevel3},
+		org_level4 = #{orgLevel4},
+		apply_no = #{applyNo},
+		contract_amount = #{contractAmount},
+		id_type = #{idType},
+		loan_amount = #{loanAmount},
+		id_num = #{idNum},
+		appro_product_type_id = #{approProductTypeId},
+		appro_product_type_name = #{approProductTypeName},
+		appro_product_id = #{approProductId},
+		appro_product_name = #{approProductName},
+		appro_period_id = #{approPeriodId},
+		appro_period_value = #{approPeriodValue},
+		appro_year_rate = #{approYearRate},
+		loan_model = #{loanModel},
+		service_fee_type = #{serviceFeeType},
+		occur_date = #{occurDate},
+		service_fee = #{serviceFee},
+		special_service_fee = #{specialServiceFee},
+		margin_amount = #{marginAmount},
+		appro_loan_repay_type = #{approLoanRepayType},
+		rep_bankcard_no = #{repBankcardNo},
+		cust_id = #{custId},
+		rep_bankcard_name = #{repBankcardName},
+		cust_name = #{custName},
+		rep_bank_name = #{repBankName},
+		rep_bank_mobile = #{repBankMobile},
+		rep_bank_id_num = #{repBankIdNum},
+		operate_org_id = #{operateOrgId},
+		rep_bank_detail = #{repBankDetail},
+		operate_name = #{operateName},
+		operate_org_name = #{operateOrgName},
+		operate_id = #{operateId},
+		con_start_date = #{conStartDate},
+		con_end_date = #{conEndDate},
+		rep_bank = #{repBank},
+		rep_bank_province = #{repBankProvince},
+		rep_bank_city = #{repBankCity},
+		rep_bank_distinct = #{repBankDistinct},
+		CAPITAL_TERRACE_NO = #{capitalTerraceNo},
+		SERVICE_FEE_RATE = #{serviceFeeRate},
+		MARGIN_RATE = #{marginRate},
+		MORTGAGEE_CAP_TER_NO = #{mortgageeCapTerNo},
+		LOAN_PLATFORM = #{loanPlatform},
+		REMARK = #{remark}
+		WHERE contract_no = #{contractNo}
+	</update>
+	
+
+	<update id="update">
+		UPDATE acc_contract SET
+		contract_no = #{contractNo},
+		org_level2 = #{orgLevel2.id},
+		org_level3 = #{orgLevel3.id},
+		org_level4 = #{orgLevel4.id},
+		apply_no = #{applyNo},
+		contract_amount = #{contractAmount},
+		id_type = #{idType},
+		loan_amount = #{loanAmount},
+		id_num =
+		#{idNum},
+		appro_product_type_id = #{approProductTypeId},
+		appro_product_type_name = #{approProductTypeName},
+		appro_product_id = #{approProductId},
+		appro_product_name = #{approProductName},
+		appro_period_id = #{approPeriodId},
+		appro_period_value = #{approPeriodValue},
+		appro_year_rate = #{approYearRate},
+		loan_model = #{loanModel},
+		service_fee_type = #{serviceFeeType},
+		occur_date = #{occurDate},
+		service_fee = #{serviceFee},
+		special_service_fee = #{specialServiceFee},
+		margin_amount = #{marginAmount},
+		appro_loan_repay_type =
+		#{approLoanRepayType},
+		rep_bankcard_no = #{repBankcardNo},
+		cust_id = #{custId},
+		rep_bankcard_name = #{repBankcardName},
+		cust_name = #{custName},
+		rep_bank_name = #{repBankName},
+		rep_bank_mobile = #{repBankMobile},
+		rep_bank_id_num = #{repBankIdNum},
+		operate_org_id =
+		#{operateOrgId},
+		rep_bank_detail = #{repBankDetail},
+		operate_name = #{operateName},
+		operate_org_name = #{operateOrgName},
+		operate_id = #{operateId},
+		con_start_date = #{conStartDate},
+		con_end_date = #{conEndDate},
+		rep_bank = #{repBank},
+		rep_bank_province = #{repBankProvince},
+		rep_bank_city = #{repBankCity},
+		rep_bank_distinct = #{repBankDistinct}
+		WHERE contract_no = #{contractNo}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_contract
+		WHERE id = #{id}
+	</update>
+
+	 
+	
+
+
+	<select id="findContractInfoByContractNo" resultType="Contract">
+		SELECT
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.org_level2 AS "orgLevel2",
+		a.org_level3 AS "orgLevel3",
+		a.org_level4 AS "orgLevel4",
+		a.apply_no AS "applyNo",
+		a.contract_amount AS "contractAmount",
+		a.id_type AS
+		"idType",
+		a.loan_amount AS "loanAmount",
+		a.id_num AS "idNum",
+		a.appro_product_type_id AS "approProductTypeId",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS "approProductName",
+		a.appro_period_id AS
+		"approPeriodId",
+		a.appro_period_value AS "approPeriodValue",
+		a.appro_year_rate AS "approYearRate",
+		a.loan_model AS "loanModel",
+		a.service_fee_type AS "serviceFeeType",
+		a.occur_date AS "occurDate",
+		a.service_fee AS "serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.margin_amount AS "marginAmount",
+		a.appro_loan_repay_type AS
+		"approLoanRepayType",
+		a.rep_bankcard_no AS "repBankcardNo",
+		a.cust_id AS "custId",
+		a.rep_bankcard_name AS "repBankcardName",
+		a.cust_name AS "custName",
+		a.rep_bank_name AS "repBankName",
+		a.rep_bank_mobile AS
+		"repBankMobile",
+		a.rep_bank_id_num AS "repBankIdNum",
+		a.operate_org_id
+		AS "operateOrgId",
+		a.rep_bank_detail AS "repBankDetail",
+		a.operate_name AS "operateName",
+		a.operate_org_name AS "operateOrgName",
+		a.operate_id AS "operateId",
+		a.con_start_date AS "conStartDate",
+		a.con_end_date AS "conEndDate",
+		a.rep_bank AS "repBank",
+		a.rep_bank_province AS
+		"repBankProvince",
+		a.rep_bank_city AS "repBankCity",
+		a.rep_bank_distinct AS "repBankDistinct",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.margin_rate AS "marginRate",
+		b.ta_Times AS
+		"staContractStatus.taTimes",
+		b.curr_Overdue_Amount AS "staContractStatus.currOverdueAmount",
+		b.repay_Contract_Status AS "staContractStatus.repayContractStatus",
+		a.CAPITAL_TERRACE_NO as "capitalTerraceNo",
+		a.FACT_GUARANTEE_FEE as "factGuaranteeFee",
+		a.FACT_GUARANTEE_GOLD as "factGuaranteeGold",
+		ifnull(a.FACT_SERVICE_FEE,0) as "factServiceFee"
+		FROM acc_contract a
+		left join ACC_STA_CONTRACT_STATUS b on
+		a.contract_no = b.contract_no
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+	<select id="getHasAccContract" resultType="String">
+		select id from acc_contract where contract_no = #{contractNo}
+	</select>
+	
+	<select id="queryContractMoney" resultType="Contract">
+		select IFNULL(CONTRACT_AMOUNT,0) as contractAmount,CONTRACT_NO as contractNo from acc_contract where CONTRACT_NO = #{contractNo}
+	</select>
+	
+	<select id="findContractSituation" resultType="Contract">
+		select CONTRACT_NO as contractNo,CONTRACT_AMOUNT as contractAmount,APPRO_PERIOD_VALUE as approPeriodValue,LOAN_DATE as loanDate from acc_contract where CONTRACT_NO = #{contractNo}
+	</select>
+	
+	<update id="confirmGuranteeRelation">
+		update ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract set GURANTEE_RELATION = '1' where contract_no =#{contractNo}
+	</update>
+	
+	<select id="queryIsConfirm" resultType="Contract">
+		select 
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		a.apply_no AS "applyNo",
+		a.contract_amount
+		AS "contractAmount",
+		a.id_type AS "idType",
+		a.loan_amount AS "loanAmount",
+		a.id_num AS
+		"idNum",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS
+		"approProductName",
+		a.appro_period_id AS "approPeriodId",
+		a.appro_period_value AS "approPeriodValue",
+		a.appro_year_rate AS
+		"approYearRate",
+		a.loan_model AS "loanModel",
+		a.service_fee_type AS
+		"serviceFeeType",
+		a.occur_date AS "occurDate",
+		a.service_fee AS
+		"serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.margin_amount AS "marginAmount",
+		a.appro_loan_repay_type AS
+		"approLoanRepayType",
+		a.rep_bankcard_no AS "repBankcardNo",
+		a.cust_id AS
+		"custId",
+		a.rep_bankcard_name AS "repBankcardName",
+		a.cust_name AS
+		"custName",
+		a.rep_bank_name AS
+		"repBankName",
+		a.rep_bank_mobile AS
+		"repBankMobile",
+		a.rep_bank_id_num AS "repBankIdNum",
+		a.operate_org_id
+		AS "operateOrgId",
+		a.rep_bank_detail AS "repBankDetail",
+		a.operate_name
+		AS "operateName",
+		a.operate_org_name AS "operateOrgName",
+		a.operate_id
+		AS "operateId",
+		a.con_start_date AS "conStartDate",
+		a.con_end_date AS
+		"conEndDate",
+		a.rep_bank AS "repBank",
+		a.rep_bank_province AS
+		"repBankProvince",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.margin_rate AS "marginRate",
+		a.CAPITAL_TERRACE_NO as
+		"capitalTerraceNo",
+		a.GURANTEE_RELATION as 
+		"guaranteeRelation"
+		from gq_cre.cre_contract a 
+		<where>
+			<if test = "applySubNo != null and applySubNo != ''">
+			 and a.APPRO_ID = #{applySubNo}
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+			and  a.apply_no = #{applyNo} 
+			</if>
+		</where>
+	</select>
+	
+	<update id="updateFactGuarantee">
+		update ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract
+		set FACT_GUARANTEE_FEE = #{factGuaranteeFee} , FACT_GUARANTEE_GOLD= #{factGuaranteeGold},FACT_SERVICE_FEE=#{factServiceFee}
+		WHERE contract_no=#{contractNo}
+	</update>
+
+	<!-- 根据合同编号查询大区 分公司-->
+	<select id="queryOrglevel" resultType="Contract" >
+		select
+		a.LOAN_PLATFORM as "loanPlatform",
+		x.NAME AS "orgLevel4.name",
+		y.NAME AS "orgLevel3.name",
+		z.NAME AS "orgLevel2.name"
+		from acc_contract a
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office x ON a.ORG_LEVEL4 = x.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office y ON x.parent_id = y.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office z ON y.parent_id = z.id
+		where a.CONTRACT_NO= #{contractNo}
+	</select>
+
+
+</mapper>

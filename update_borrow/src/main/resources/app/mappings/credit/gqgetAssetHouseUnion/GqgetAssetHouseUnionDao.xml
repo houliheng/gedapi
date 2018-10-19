@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetAssetHouseUnion.dao.GqgetAssetHouseUnionDao">
+
+	<sql id="gqgetAssetHouseUnionColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.approve_id AS "approveId",
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.evaluate_price AS "evaluatePrice",
+		a.market_price AS "marketPrice",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="gqgetAssetHouseUnionJoins">
+	</sql>
+
+	<select id="get" resultType="GqgetAssetHouseUnion">
+		SELECT
+		<include refid="gqgetAssetHouseUnionColumns" />
+		FROM cre_gqget_asset_house_union a
+		<include refid="gqgetAssetHouseUnionJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="GqgetAssetHouseUnion">
+		SELECT
+		<include refid="gqgetAssetHouseUnionColumns" />
+		FROM cre_gqget_asset_house_union a
+		<include refid="gqgetAssetHouseUnionJoins" />
+		<where>
+			a.apply_no = #{applyNo} and
+			a.approve_id = #{approveId}
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_gqget_asset_house_union a
+		<include refid="gqgetAssetHouseUnionJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="GqgetAssetHouseUnion">
+		SELECT
+		<include refid="gqgetAssetHouseUnionColumns" />
+		FROM cre_gqget_asset_house_union a
+		<include refid="gqgetAssetHouseUnionJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_gqget_asset_house_union(
+		id,
+		apply_no,
+		approve_id,
+		cont_details,
+		building_area,
+		evaluate_price,
+		market_price,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{approveId},
+		#{contDetails},
+		#{buildingArea},
+		#{evaluatePrice},
+		#{marketPrice},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+
+	<insert id="insertGqgetAssetHouseUnionData">
+		INSERT INTO cre_gqget_asset_house_union(
+		id,
+		apply_no,
+		approve_id,
+		cont_details,
+		building_area,
+		evaluate_price,
+		market_price,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES
+		<foreach item="GqgetAssetHouse" collection="GqgetAssetHouses" index="index" separator=",">
+			(
+			UUID_SHORT(),
+			#{GqgetAssetHouse.applyNo},
+			#{checkApproveId},
+			#{GqgetAssetHouse.contDetails},
+			#{GqgetAssetHouse.buildingArea},
+			#{GqgetAssetHouse.evaluatePrice},
+			#{GqgetAssetHouse.marketPrice},
+			#{GqgetAssetHouse.createBy.id},
+			#{GqgetAssetHouse.createDate},
+			#{GqgetAssetHouse.updateBy.id},
+			#{GqgetAssetHouse.updateDate}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE cre_gqget_asset_house_union SET
+		apply_no = #{applyNo},
+		approve_id = #{approveId},
+		cont_details = #{contDetails},
+		building_area = #{buildingArea},
+		evaluate_price = #{evaluatePrice},
+		market_price = #{marketPrice},
+		update_by = #{updateBy.id},
+		update_date =
+		#{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_gqget_asset_house_union
+		WHERE id = #{id}
+	</update>
+
+	<update id="deleteGqgetAssetHouseUnionData">
+		DELETE FROM cre_gqget_asset_house_union WHERE apply_no = #{applyNo}
+	</update>
+
+</mapper>

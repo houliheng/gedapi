@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.advanceGed.dao.AccAdvanceGedDao">
+    
+	<sql id="accAdvanceGedColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.advance_flag AS "advanceFlag",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.DATA_DATE as "DataDate"
+	</sql>
+	
+	<sql id="accAdvanceGedJoins">
+	</sql>
+    
+	<select id="get" resultType="AccAdvanceGed">
+		SELECT 
+			<include refid="accAdvanceGedColumns"/>
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AccAdvanceGed">
+		SELECT 
+			<include refid="accAdvanceGedColumns"/>
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccAdvanceGed">
+		SELECT 
+			<include refid="accAdvanceGedColumns"/>
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_advance_ged(
+			id,
+			contract_no,
+			period_num,
+			advance_flag,
+			create_date,
+			create_by,
+			update_by,
+			update_date,
+			DATA_DATE
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{advanceFlag},
+			#{createDate},
+			#{createBy.id},
+			#{updateBy.id},
+			#{updateDate},
+			#{dataDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_advance_ged SET 	
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			advance_flag = #{advanceFlag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM acc_advance_ged
+		WHERE id = #{id}
+	</update>
+	
+	<select id="queryMaxPeriodNumAdvance" resultType="AccAdvanceGed">
+		SELECT 
+			<include refid="accAdvanceGedColumns"/>
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		where a.contract_no = #{contractNo} and a.period_num = (select max(period_num) from acc_advance_ged where contract_no = #{contractNo} and advance_flag in ('0','2'))
+	</select>
+	
+	<select id="queryAdvance" resultType="AccAdvanceGed">
+		SELECT 
+			<include refid="accAdvanceGedColumns"/>
+		FROM acc_advance_ged a
+		<include refid="accAdvanceGedJoins"/>
+		where a.contract_no = #{contractNo} 
+		<if test="periodNum != null and periodNum !=''">
+		and a.period_num = #{periodNum}
+		</if> 
+		<if test="advanceFlag != null and advanceFlag != ''">
+		and a.ADVANCE_FLAG = #{advanceFlag}
+		</if>
+		
+	</select>
+</mapper>

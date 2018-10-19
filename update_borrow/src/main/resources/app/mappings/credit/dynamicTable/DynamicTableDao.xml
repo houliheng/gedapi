@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.dynamicTable.dao.DynamicTableDao">
+    <!--  
+	@reqno:H1510170007
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:查询出所有list数据的方法
+	@db-z:SYS_DICT:label,value,type
+	@db-j:CRE_DATA_GROUP_TABLE:Id,DATA_GROUP,DATA_TABLE_NAME,SHOW_POSITION,SORT,COMPANY_ID
+    -->
+<select id="findList" resultType="CreDataGroupTable">
+	SELECT
+		z.label AS dataGroupLabel,
+		y.id AS id,
+		y.dataGroup AS dataGroup,
+		y.dataGroupLabel AS dataGroupLabel1,
+		y.dataTableName AS dataTableName,
+		y.showPosition AS showPosition,
+		y.showPositionValue AS showPositionValue,
+		y.sort AS sort,
+		y.companyId AS companyId,
+		z.value AS dataGroupValue
+	FROM
+		SYS_DICT z
+	left JOIN (
+			SELECT
+				a.Id AS id,
+				a.DATA_GROUP AS dataGroup,
+				t.label AS dataGroupLabel,
+				a.DATA_TABLE_NAME AS dataTableName,
+				a.SHOW_POSITION AS showPosition,
+				(
+					SELECT
+						label
+					FROM
+						SYS_DICT t
+					WHERE
+						t.VALUE= a.SHOW_POSITION
+					AND t.type = 'SHOW_POSITION'
+				) AS showPositionValue,
+				a.SORT AS sort,
+				a.COMPANY_ID AS companyId,
+				t.VALUE AS dataGroupValue
+			FROM
+				SYS_DICT t
+			LEFT JOIN CRE_DATA_GROUP_TABLE a ON t.VALUE = a.data_group
+			WHERE
+				1 = 1
+			AND t.type = 'DATA_GROUP' 
+	 		and a.COMPANY_ID = #{companyId}
+		) y ON 
+	z.VALUE = y.dataGroupValue
+	WHERE
+		1 = 1
+	AND z.type = 'DATA_GROUP'
+	<if test="dataGroup != null and dataGroup != ''" >
+		AND z.value = #{dataGroup} 
+	</if>
+	<if test="showPosition != null and showPosition != '' ">   
+		AND y.showPosition = #{showPosition} 
+	</if>	
+	order by y.SORT asc
+	</select>
+	<!--  
+	@reqno:H1510170007
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:查询出所有list数据count的方法
+	@db-z:SYS_DICT:label,value,type
+	@db-j:CRE_DATA_GROUP_TABLE:Id,DATA_GROUP,DATA_TABLE_NAME,SHOW_POSITION,SORT,COMPANY_ID
+    -->
+	<!-- 获得分页总数 -->
+	<select id="getCount" resultType="long">
+		SELECT count(1) from (
+			SELECT
+				z.label AS dataGroupLabel,
+				y.id AS id,
+				y.dataGroup AS dataGroup,
+				y.dataGroupLabel AS dataGroupLabel1,
+				y.dataTableName AS dataTableName,
+				y.showPosition AS showPosition,
+				y.showPositionValue AS showPositionValue,
+				y.sort AS sort,
+				y.companyId AS companyId,
+				z.value AS dataGroupValue
+			FROM
+				SYS_DICT z
+			left JOIN (
+					SELECT
+						a.Id AS id,
+						a.DATA_GROUP AS dataGroup,
+						t.label AS dataGroupLabel,
+						a.DATA_TABLE_NAME AS dataTableName,
+						a.SHOW_POSITION AS showPosition,
+						(
+							SELECT
+								label
+							FROM
+								SYS_DICT t
+							WHERE
+								t.VALUE= a.SHOW_POSITION
+							AND t.type = 'SHOW_POSITION'
+						) AS showPositionValue,
+						a.SORT AS sort,
+						a.COMPANY_ID AS companyId,
+						t.VALUE AS dataGroupValue
+					FROM
+						SYS_DICT t
+					LEFT JOIN CRE_DATA_GROUP_TABLE a ON t.VALUE = a.data_group
+					WHERE
+						1 = 1
+					AND t.type = 'DATA_GROUP' 
+			 		and a.COMPANY_ID = #{companyId}
+				) y ON 
+			z.VALUE = y.dataGroupValue
+			WHERE
+				1 = 1
+			AND z.type = 'DATA_GROUP'
+			<if test="dataGroup != null and dataGroup != ''" >
+				AND z.value = #{dataGroup} 
+			</if>
+			<if test="showPosition != null and showPosition != '' ">   
+				AND y.showPosition = #{showPosition} 
+			</if>	
+			order by y.SORT asc
+		) tmp_count
+	</select>
+	<!--  
+	@reqno:H1510170007
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:查询出所有list数据count的方法
+	@db-z:SYS_DICT:label,value,type
+	@db-j:CRE_DATA_GROUP_TABLE:Id,DATA_GROUP,DATA_TABLE_NAME,SHOW_POSITION,SORT,COMPANY_ID
+    -->
+	<select id="get" resultType="CreDataGroupTable">
+		SELECT 
+			a.Id as id,
+			a.DATA_GROUP as dataGroup,
+			t.label as dataGroupLabel,
+		  	a.DATA_TABLE_NAME as dataTableName,
+		  	a.SHOW_POSITION as showPosition,
+			(SELECT label FROM SYS_DICT t where t.value=a.SHOW_POSITION and t.type = 'SHOW_POSITION') as showPositionValue,
+		  	a.SORT as sort,
+		 	a.COMPANY_ID as companyId,
+		  	t.value as dataGroupValue
+ 		FROM SYS_DICT t left join CRE_DATA_GROUP_TABLE a
+		    on t.value = a.data_group
+		    where 1=1
+		    and t.type = 'DATA_GROUP'
+		    and a.id = #{id }
+	</select>
+	<!--  
+	@reqno:H1510170007
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:delete单条数据
+	@db-z:CRE_DATA_GROUP_TABLE:id
+    -->
+	<delete id="delete">
+		DELETE FROM CRE_DATA_GROUP_TABLE 
+		WHERE id = #{id } 
+	</delete>
+	<!--  
+	@reqno:H1510170007
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:delete单条数据
+	@db-z:CRE_DATA_GROUP_TABLE:id
+    -->
+	<delete id="deleteMulti">
+		DELETE FROM CRE_DATA_GROUP_TABLE 
+		WHERE id in 
+		<foreach item="idsList" collection="list" open="(" close=")" separator=",">
+		 #{idsList} 
+		</foreach>
+	</delete>
+	<!--  
+	@reqno:H1510170008
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:delete单条数据
+	@db-z:CRE_DATA_GROUP_TABLE:id,DATA_GROUP,DATA_TABLE_NAME,SORT,COMPANY_ID
+    -->
+	<insert id="insert">
+		INSERT INTO CRE_DATA_GROUP_TABLE(
+			ID,
+			DATA_GROUP,
+			DATA_TABLE_NAME,
+			SHOW_POSITION,
+			SORT,
+			COMPANY_ID
+		) VALUES (
+			#{id },
+			#{dataGroup },
+			#{dataTableName },
+			#{showPosition },
+			#{sort },
+			#{companyId }
+		)
+	</insert>
+	<!--  
+	@reqno:H1510170008
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:delete单条数据
+	@db-z:CRE_DATA_GROUP_TABLE:id,DATA_GROUP,DATA_TABLE_NAME,SORT,COMPANY_ID
+    -->
+	<update id="update">
+		UPDATE CRE_DATA_GROUP_TABLE 
+		set 
+		ID=#{id },
+		DATA_GROUP=#{dataGroup },
+		DATA_TABLE_NAME=#{dataTableName },
+		SHOW_POSITION=#{showPosition },
+		SORT=#{sort },
+		COMPANY_ID=#{companyId }
+		WHERE id = #{id } 
+	</update>
+    <!--  
+	@reqno:H1511300032
+	@date-designer:20151202-huangxuecheng
+	@date-author:20151202-huangxuecheng:开发原因：CRE_信贷审批_系统管理_表单栏目配置_修改功能，当后台数据库名不是“mcp”时，"物理表名"对应的下拉列表框无法把数据库中的表名加载出来
+    -->
+	<!-- 获取指定数据库下的所有table -->
+	<select id="selectAllTableName" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			TABLE_NAME,
+			TABLE_COMMENT 
+	    FROM 
+	        information_schema.TABLES 
+	    WHERE 
+	    	TABLE_SCHEMA = #{schemaName }
+	</select>
+	<!--  
+	@reqno:H1510170008
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:根据类型和公司类型获取ID
+	@db-z:CRE_DATA_GROUP_TABLE:id,DATA_GROUP,COMPANY_ID
+    -->
+	<!-- 根据类型和公司类型获取ID -->
+	<select id="selectIdByDataGroupAndCompanyid" resultType="string">
+		SELECT
+			a.Id AS id
+		FROM
+			CRE_DATA_GROUP_TABLE a
+		where 1=1
+			and a.DATA_GROUP = #{dataGroup } 
+			and a.COMPANY_ID = #{companyId }
+	</select>
+	<!--  
+	@reqno:H1510170008
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:查询顶级机构
+	@db-z:sys_office:id
+    -->
+	<select id="selectParentIdsByCompanyid" parameterType="string" resultType="string">
+		SELECT
+			parent_ids
+		FROM
+			sys_office
+		where id=#{id }
+	</select>
+</mapper>

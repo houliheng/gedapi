@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetAssertHouse.dao.GqgetAssetHouseDao">
+    
+	<sql id="gqgetAssetHouseColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.evaluate_price AS "evaluatePrice",
+		a.market_price AS "marketPrice",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="gqgetAssetHouseJoins">
+	</sql>
+    
+	<select id="get" resultType="GqgetAssetHouse">
+		SELECT 
+			<include refid="gqgetAssetHouseColumns"/>
+		FROM cre_gqget_asset_house a
+		<include refid="gqgetAssetHouseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByApplyNo" resultType="GqgetAssetHouse">
+		SELECT
+		<include refid="gqgetAssetHouseColumns"/>
+		FROM cre_gqget_asset_house a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="findList" resultType="GqgetAssetHouse">
+		SELECT 
+			<include refid="gqgetAssetHouseColumns"/>
+		FROM cre_gqget_asset_house a
+		<include refid="gqgetAssetHouseJoins"/>
+		<where>
+			apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	<select id="findGqgetAssetHouseDataByApplyNo" resultType="GqgetAssetHouse">
+		SELECT 
+			<include refid="gqgetAssetHouseColumns"/>
+		FROM cre_gqget_asset_house a
+		<where>
+			a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_gqget_asset_house a
+		<include refid="gqgetAssetHouseJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="GqgetAssetHouse">
+		SELECT 
+			<include refid="gqgetAssetHouseColumns"/>
+		FROM cre_gqget_asset_house a
+		<include refid="gqgetAssetHouseJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_gqget_asset_house(
+			id,
+			apply_no,
+			cont_details,
+			building_area,
+			evaluate_price,
+			market_price,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{contDetails},
+			#{buildingArea},
+			#{evaluatePrice},
+			#{marketPrice},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_gqget_asset_house SET 	
+			apply_no = #{applyNo},
+			cont_details = #{contDetails},
+			building_area = #{buildingArea},
+			evaluate_price = #{evaluatePrice},
+			market_price = #{marketPrice},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_gqget_asset_house
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

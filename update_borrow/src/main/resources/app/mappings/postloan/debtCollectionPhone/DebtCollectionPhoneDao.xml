@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.postloan.debtCollectionPhone.dao.DebtCollectionPhoneDao">
+
+	<sql id="debtCollectionPhoneColumns">
+		a.id as "id",
+		a.debt_id as "debtId",
+		a.contract_no AS
+		"contractNo",
+		a.collection_date AS
+		"collectionDate",
+		a.collector AS
+		"collector",
+		u.name AS "collectorName",
+		a.cust_type AS "custType",
+		a.cust_name
+		AS
+		"custName",
+		a.risk_lelve AS
+		"riskLelve",
+		a.call_source AS
+		"callSource",
+		a.call_type AS "callType",
+		a.call_num AS "callNum",
+		a.call_target AS
+		"callTarget",
+		a.call_result AS
+		"callResult",
+		a.call_receiver AS
+		"callReceiver",
+		a.risk_abnormal AS
+		"riskAbnormal",
+		a.description AS
+		"description"
+	</sql>
+
+	<sql id="debtCollectionPhoneJoins">
+		left join sys_user u on u.id = a.collector
+	</sql>
+
+	<select id="get" resultType="DebtCollectionPhone">
+		SELECT
+		<include refid="debtCollectionPhoneColumns" />
+		FROM pl_debt_collection_phone a
+		<include refid="debtCollectionPhoneJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getDataCountByContractNo" resultType="int">
+		SELECT
+		ifnull(count(a.id),0)
+		FROM
+		pl_debt_collection_phone a
+		WHERE a.debt_id
+		=
+		#{debtId}
+	</select>
+
+	<select id="findList" resultType="DebtCollectionPhone">
+		SELECT
+		<include refid="debtCollectionPhoneColumns" />
+		FROM pl_debt_collection_phone a
+		<include refid="debtCollectionPhoneJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_debt_collection_phone a
+		<include refid="debtCollectionPhoneJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollectionPhone">
+		SELECT
+		<include refid="debtCollectionPhoneColumns" />
+		FROM pl_debt_collection_phone a
+		<include refid="debtCollectionPhoneJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_debt_collection_phone(
+		id,
+		debt_id,
+		contract_no,
+		collection_date,
+		collector,
+		cust_type,
+		cust_name,
+		risk_lelve,
+		call_source,
+		call_type,
+		call_num,
+		call_target,
+		call_result,
+		call_receiver,
+		risk_abnormal,
+		description
+		) VALUES (
+		#{id},
+		#{debtId},
+		#{contractNo},
+		#{collectionDate},
+		#{createBy.id},
+		#{custType},
+		#{custName},
+		#{riskLelve},
+		#{callSource},
+		#{callType},
+		#{callNum},
+		#{callTarget},
+		#{callResult},
+		#{callReceiver},
+		#{riskAbnormal},
+		#{description}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_debt_collection_phone SET
+		contract_no =
+		#{contractNo},
+		collection_date = #{collectionDate},
+		collector =
+		#{collector},
+		cust_type = #{custType},
+		cust_name = #{custName},
+		risk_lelve = #{riskLelve},
+		call_source = #{callSource},
+		call_type =
+		#{callType},
+		call_num = #{callNum},
+		call_target = #{callTarget},
+		call_result = #{callResult},
+		call_receiver = #{callReceiver},
+		risk_abnormal = #{riskAbnormal},
+		description = #{description}
+		WHERE id =
+		#{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_debt_collection_phone
+		WHERE id = #{id}
+	</update>
+
+</mapper>

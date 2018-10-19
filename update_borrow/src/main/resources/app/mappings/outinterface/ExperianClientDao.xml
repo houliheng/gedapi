@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.cn.com.experian.dao.ExperianClientDao">
+
+	<!-- 共借人信息 -->
+	<select id="getCoAppInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.CoAppInfo">
+		select b.children_son as "coAppMChildNum"<!-- /*共借人.儿子个数Y*/ -->
+		,b.wed_status as "coAppMaritalStatus"<!-- /*共借人.婚姻状况Y*/ -->
+		,b.living_status as "coAppLiveStatus"<!-- /*共借人.居住状况Y*/ -->
+		,b.is_fixedhouse as "coAppIsHaveHouse"<!-- /*共借人.名下是否有房产Y*/ -->
+		,b.age_no as "coAppAge"<!-- /*共借人.年龄Y*/ -->
+		,b.children_girl as "coAppFChildNum"<!-- /*共借人.女儿个数Y*/ -->
+		,c.zhixing_court_gov_flg as "coAppIsInvolved"<!-- /*共借人.人民法院是否涉案Y*/ -->
+		<!-- ,'' as "coAppIDStart"/*共借人.身份证开始日期_留白*/
+		,'' as "coAppIBLFlag"黑名单' /*共借人.是否在内部黑名单中，留白*/ -->
+		,b.mobile_num as "coAppMobilPhoone"<!-- /*共借人.手机号码Y*/ -->
+		,case when b.sex_no = '1' then 'M' else 'F' end as "coAppSex" <!-- /*共借人.性别Y*/ -->
+		<!-- ,'' as "coAppIsFixHouse"/*共借人.有无固定住所_留白*/ -->
+		,b.person_id_end_date as "coAppIDDueDate"<!-- /*共借人.证件到期日Y*/ -->
+		from cre_apply_relation a left join cre_cust_info b on a.cust_id =b.id
+		left join cre_check_web c
+		on a.apply_no = c.apply_no and a.cust_id =
+		c.cust_id left join cre_mortgage_house_info d on a.apply_no =
+		d.apply_no where a.apply_no = #{applyNo} and a.role_type= '2' and b.DEL_FLAG = '0';
+	</select>
+
+	<!-- 征信共借人信息 -->
+	<select id="getPBOCCoAppByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.PBOCCoAppInfo">
+		select a.printing_date as "pbocCoAppRCTime"<!-- /*征信.共借人.报告采集时间*/ -->
+		<!-- ,a.query_report_date_minus as "pbocCoAppQueryTime"/*征信.共借人.查询用时*/ -->
+		,case when b.overdue_amount > 0 then '1'
+		else '0' end as "pbocCoAppLoanCLStatus"<!-- /*征信.共借人.贷款当前逾期状态*/ -->
+		,max(b.loan_status) as "pbocCoAppWorstFC"<!-- /*征信.共借人.当前最差五级分类*/ -->
+		<!-- ,'' as "pbocCoAppPhoneBillAmount"/*征信.共借人.电信费欠缴金额_留白*/
+		,'' as "pbocCoAppPhonebillMonth"/*征信.共借人.电信费欠缴月数_留白*/
+		,'' as "pbocCoAppWorstFCForeign"对外担保的贷款当前最差五级分类状态，留白 -->
+		,a.query_num_season as "pbocCoAppQueryPQnum"<!-- /*征信.共借人.个人季度查询次数*/ -->
+		,a.query_num_year as "pbocCoAppQueryPYnum"<!-- /*征信.共借人.个人年度查询次数*/ -->
+		,a.all_overdue_num as "pbocCoAppTotalCL"<!-- /*征信.共借人.累计逾期期数*/ -->
+		<!-- ,'' as "pbocCoAppLoanl50Due"/*征信.共借人.其他不高于50万的贷款最近到期日_留白*/
+		,'' as "pbocCoAppLoanh50Due"/*征信.共借人.其他高于50万的贷款最近到期日_留白*/
+		,'' as "pbocCoAppUCloseAmount"/*征信.共借人.人法未结案的案件金额_留白*/
+		,'' as "pbocCoAppIsInvolved"/*征信.共借人.人民法院是否涉案_留白*/ -->
+		,a.mobile_no as "pbocCoAppMobilPhoone"<!-- /*征信.共借人.手机号码*/ -->
+		<!-- ,'' as "pbocCoAppDCCLStatus"/*征信.共借人.信用卡当前逾期状态，留白*/
+		,'' as "pbocCoAppDCWorstFC"/*征信.共借人.信用卡当前最差五级分类_留白*/ -->
+		,a.used_credit_card_rate as "pbocCoAppDCAmountRate"<!-- /*征信.共借人.信用卡额度使用率*/ -->
+		,max(a.credit_card_status) as "pbocCoAppDCWorstState"<!-- /*征信.共借人.信用卡最差状态*/ -->
+		,a.credit_months as "pbocCoAppCHMonth"<!-- /*征信.共借人.信用历史月份数*/ -->
+		,a.query_num_month as "pbocCoAppQueryMnum"<!-- /*征信.共借人.月度查询次数*/ -->
+		,a.continue_overdue_num as "pbocCoAppMaxCL"<!-- /*征信.共借人.最高逾期期数*/ -->
+		,b.balance_amount as "pbocCoAppLateDueLAmount"<!-- /*征信.共借人.最近到期贷款到期金额*/ -->
+		,b.expire_date as "pbocCoAppLateDueLTime"<!-- /*征信.共借人.最近到期贷款到期日*/ -->
+		<!-- ,'' as "pbocCoAppIsHistoryLoan" 当前或历史有无银行贷款 ，留白 -->
+		from cre_credit_cust a
+		left join
+		cre_credit_cust_loan b
+		on a.id = b.credit_cust_id
+		where a.apply_no =
+		#{applyNo}
+		and a.role_type = '2' ;
+	</select>
+
+	<!-- 征信借款人信息 -->
+	<select id="getPBOCAppInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.PBOCAppInfo">
+		select a.printing_date as "pbocAppRCTime"<!-- /*征信.借款人.报告采集时间Y*/ -->
+		<!-- ,a.query_report_date_minus as "pbocAppQueryTime"/*征信.借款人.查询用时，去掉*/ -->
+		<!-- ,b.overdue_amount as "pbocAppLoanOverrideAmount"/*征信.借款人.贷款当前逾期金额，留白*/ -->
+		<!-- ,case when b.overdue_amount > 0 then '1'
+		else '0' end as
+		"pbocAppLoanCLStatus"/*征信.借款人.贷款当前逾期状态，留白*/ -->
+		<!-- ,max(b.loan_status) as "pbocAppLoanWS"/*征信.借款人.贷款当前最差状态，留白*/ -->
+		,a.is_white as "pbocAppIsWhite" <!-- 是否为白户 ,新加的字段Y-->
+		<!-- ,'' as "pbocAppOfficePhone"/*征信.借款人.单位电话_留白*/
+		,'' as "pbocAppDCUserate"/*征信.借款人.当前信用卡使用率_留白*/ -->
+		,SUBSTRING(max(b.loan_status),2,1) as "pbocAppSWorstFCOL"<!-- /*征信.借款人.贷款当前最差五级分类Y,截取一下1,2,3,4,5*/  -->
+		<!--  ,'' as "pbocAppWorstFCForeign" 对外担保的贷款当前最差的五级分类 ，留白 -->
+		,a.mortgage_House_Num as "pbocAppMortgageNum"<!-- /*征信.借款人.房贷笔数Y*/ -->
+		,a.query_num_season as "pbocAppQueryPQnum"<!-- /*征信.借款人.个人季度查询次数Y*/ -->
+		,a.query_num_year as "pbocAppQueryPynum"<!-- /*征信.借款人.个人年度查询次数Y*/ -->
+		<!-- ,'' as "pbocAppMAXDPDCLL12M"/*征信.借款人.过去12个月信贷产品最大逾期期数_留白*/
+		,'' as "pbocAppSELFQueryL12M"/*征信.借款人.近12个月本人查询次数_留白*/
+		,'' as "pbocAppAppQueryNumL12M"/*征信.借款人.近12个月审批查询次数_留白*/
+		,'' as "pbocAppSELFQueryL1M"/*征信.借款人.近1个月本人查询次数_留白*/
+		,'' as "pbocAppAppQueryNumL1M"/*征信.借款人.近1个月审批查询次数_留白*/
+		,'' as "pbocAppSELFQueryL3M"/*征信.借款人.近3个月本人查询次数_留白*/
+		,'' as "pbocAppAppQueryNumL3M"/*征信.借款人.近3个月审批查询次数_留白*/
+		,'' as "pbocAppSELFQueryL6M"/*征信.借款人.近6个月本人查询次数_留白*/
+		,'' as "pbocAppAppQueryyNumL6M"/*征信.借款人.近6个月审批查询次数_留白*/ -->
+		,a.all_overdue_num as "pbocAppTotalCL"<!-- /*征信.借款人.累计逾期期数Y*/ -->
+		<!-- ,'' as "pbocAppSLoanCLStatus" 配偶.贷款当前逾期状态（贷款五级分类） -->
+		<!-- ,'' as "pbocAppSDCCLStatus" 配偶.信用卡当前逾期状态（信用卡的使用金额） -->
+		<!-- ,'' as "pbocAppWorstFCOL"/*征信.借款人.其他贷款当前最差五级分类_留白*/ -->
+		<!-- ,'' as "pbocAppSWorstFCOL" 配偶.贷款当前最差五级分类，新增的？？？？？？？ -->
+		,case when (a.ALL_OVERDUE_AMOUNT - a.SUM_OVERDUE_AMOUNT) <![CDATA[<0]]>  then '0' else (a.ALL_OVERDUE_AMOUNT - a.SUM_OVERDUE_AMOUNT) end as "pbocAppDCOverrideAmount" <!-- 借款人.信用卡当前逾期金额，Y -->
+		,a.mobile_no as "pbocAppMobilePhone"<!-- /*征信.借款人.手机号码Y*/ -->
+		,a.query_num_year as "pbocAppEDAPPQueryL12M"<!-- /*征信.借款人.剔除重复查询近12个月审批查询次数Y*/ -->
+		<!-- ,'' as "pbocAppEDAPPQueryL1M"/*征信.借款人.剔除重复查询近1个月审批查询次数_留白*/
+		,'' as "pbocAppEDAPPQueryL3M"/*征信.借款人.剔除重复查询近3个月审批查询次数_留白*/
+		,'' as "pbocAppEDAPPQueryL6M"/*征信.借款人.剔除重复查询近6个月审批查询次数_留白*/
+		,'' as "pbocAppDCOverrideAmount"/*征信.借款人.信用卡当前逾期金额_留白*/ -->
+		<!-- ,b.LOAN_STATUS as "pbocAppDCCLStatus" /*征信.借款人.信用卡当前逾期状态（信用卡当前使用金额）。留白*/ -->
+		,a.used_credit_card_rate as "pbocAppDCAmountRate"<!-- /*征信.借款人.信用卡额度使用率（信用卡是用占比Y）*/ -->
+		,max(SUBSTRING(a.credit_card_status,2,1)) as "pbocAppDCWS"<!-- /*征信.借款人.信用卡最差状态Y库里的值是0010,0020...益博睿需要的值是1,2,3,4,5*/ -->
+		,a.credit_months as "pbocAppCHMonth"<!-- /*征信.借款人.信用历史月份数Y*/ -->
+		,a.query_num_month as "pbocAppQueryMnum"<!-- /*征信.借款人.月度查询次数Y*/ -->
+		<!-- ,'' as "pbocAppDueAmountLoanMonth"/*征信.借款人.月内贷款到期金额_留白*/ -->
+		,a.continue_overdue_num as "pbocAppCLMaxnum"<!-- /*征信.借款人.最高逾期期数Y*/ -->
+		,b.MONTH_EXPIRE_AMOUNT as "pbocAppLateDueLAmount"<!-- /*征信.借款人.最近到期贷款到期金额Y*/ -->
+		,b.expire_date as "pbocAppLateDueTime"<!-- /*征信.借款人.最近到期贷款到期日Y*/ -->
+		<!-- ,a.SUM_LOAN_AMOUNT as "pbocAppIsHistoryLoan" 当前或历史有无银行贷款（使用银行贷款金额,留白） -->
+		from cre_credit_cust a left join
+		cre_credit_cust_loan b on a.id =
+		b.credit_cust_id
+		where a.apply_no =
+		#{applyNo} and a.role_type = '1' ;
+	</select>
+<!-- 征信借款人配偶信息 -->
+<select id="getCoupleInfoByApplyNo" resultType="java.util.Map">
+	SELECT
+	substring(max(b.LOAN_STATUS),2,1) as "loanStatus",
+	a.ALL_USED_AMOUNT as "allUsedAmount",
+	a.USED_CREDIT_CARD_RATE as "usedCreditCardRate",
+	case when (a.ALL_OVERDUE_AMOUNT - a.SUM_OVERDUE_AMOUNT) <![CDATA[<0]]>  then '0' else (a.ALL_OVERDUE_AMOUNT - a.SUM_OVERDUE_AMOUNT) end as "overrideAmount" <!-- 借款人.信用卡当前逾期金额，Y -->
+	FROM
+	cre_credit_cust a
+	LEFT JOIN cre_credit_cust_loan b ON a.id = b.credit_cust_id
+	WHERE
+	a.apply_no = #{applyNo} and a.role_type = '4' ;
+</select>
+	<!-- 征信中担保人信息 -->
+	<select id="getPBOCGuAppInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.PBOCGuAppInfo">
+		select a.printing_date as "pbocGuAppRCTime"<!-- /*征信.担保人.报告采集时间*/ -->
+		<!-- ,a.query_report_date_minus as "pbocGuAppQueryTime"/*征信.担保人.查询用时*/ -->
+		,b.overdue_amount as "pbocGuAppLoanOverrideAmount"<!-- /*征信.担保人.贷款当前逾期金额*/ -->
+		,case when b.overdue_amount > 0 then '1'
+		else '0' end as
+		"pbocGuAppLoanCLStatus"<!-- /*征信.担保人.贷款当前逾期状态*/ -->
+		,max(b.loan_status) as "pbocGuAppLoanWS"<!-- /*征信.担保人.贷款当前最差状态*/ -->
+		<!-- ,'' as "pbocGuAppOfficePhone"/*征信.担保人.单位电话_留白*/
+		,'' as "pbocGuAppDCUserate"/*征信.担保人.当前信用卡使用率_留白*/ -->
+		,max(b.loan_status) as "pbocGuAppWorstFC"<!-- /*征信.担保人.当前最差五级分类*/ -->
+		<!-- ,'' as "pbocGuAppWorstFCForeign" 对外担保的贷款当前最差的五级分类，留白
+		,'' as "pbocGuAppMortgageNum"/*征信.担保人.房贷笔数_留白*/ -->
+		,a.query_num_season as "pbocGuAppQueryPQnum"<!-- /*征信.担保人.个人季度查询次数*/ -->
+		,a.query_num_year as "pbocGuAppQueryPynum"<!-- /*征信.担保人.个人年度查询次数*/ -->
+		<!-- ,'' as "pbocGuAppMAXDPDCLL12M"/*征信.担保人.过去12个月信贷产品最大逾期期数_留白*/
+		,'' as "pbocGuAppSELFQueryL12M"/*征信.担保人.近12个月本人查询次数_留白*/
+		,'' as "pbocGuAppAppQueryNumL12M"/*征信.担保人.近12个月审批查询次数_留白*/
+		,'' as "pbocGuAppSELFQueryL1M"/*征信.担保人.近1个月本人查询次数_留白*/
+		,'' as "pbocGuAppAppQueryNumL1M"/*征信.担保人.近1个月审批查询次数_留白*/
+		,'' as "pbocGuAppSELFQueryL3M"/*征信.担保人.近3个月本人查询次数_留白*/
+		,'' as "pbocGuAppAppQueryNumL3M"/*征信.担保人.近3个月审批查询次数_留白*/
+		,'' as "pbocGuAppSELFQueryL6M"/*征信.担保人.近6个月本人查询次数_留白*/
+		,'' as "pbocGuAppAppQueryyNumL6M"/*征信.担保人.近6个月审批查询次数_留白*/ -->
+		,a.all_overdue_num as "pbocGuAppTotalCL"<!-- /*征信.担保人.累计逾期期数*/ -->
+		<!-- ,'' as "pbocGuAppSLoanCLStatus" 配偶.贷款当前逾期状态 ，留白
+		,'' as "pbocGuAppSDCCLStatus"配偶.信用卡当前逾期状态，留白
+		,'' as "pbocGuAppWorstFCOL"/*征信.担保人.其他贷款当前最差五级分类_留白*/ -->
+		,a.mobile_no as "pbocGuAppMobilePhone"<!-- /*征信.担保人.手机号码*/ -->
+		,a.query_num_year as "pbocGuAppEDAPPQueryL12M"<!-- /*征信.担保人.剔除重复查询近12个月审批查询次数*/ -->
+		<!-- ,'' as "pbocGuAppEDAPPQueryL1M"/*征信.担保人.剔除重复查询近1个月审批查询次数_留白*/
+		,'' as "pbocGuAppEDAPPQueryL3M"/*征信.担保人.剔除重复查询近3个月审批查询次数_留白*/
+		,'' as "pbocGuAppEDAPPQueryL6M"/*征信.担保人.剔除重复查询近6个月审批查询次数_留白*/
+		,'' as "pbocGuAppDCOverrideAmount"/*征信.担保人.信用卡当前逾期金额_留白*/ -->
+		,a.SUM_OVERDUE_AMOUNT as "pbocGuAppDCCLStatus"<!-- /*征信.担保人.信用卡当前逾期状态(逾期金额)*/ -->
+		,a.used_credit_card_rate as "pbocGuAppDCAmountRate"<!-- /*征信.担保人.信用卡额度使用率*/ -->
+		,max(a.credit_card_status) as "pbocGuAppDCWS"<!-- /*征信.担保人.信用卡最差状态*/ -->
+		,a.credit_months as "pbocGuAppCHMonth"<!-- /*征信.担保人.信用历史月份数*/ -->
+		,a.query_num_month as "pbocGuAppQueryMnum"<!-- /*征信.担保人.月度查询次数*/ -->
+		<!-- ,'' as "pbocGuAppDueAmountLoanMonth"/*征信.担保人.月内贷款到期金额_留白*/ -->
+		,a.continue_overdue_num as "pbocGuAppCLMaxnum" <!-- /*征信.担保人.最高逾期期数，留白*/ -->
+		,b.balance_amount as "pbocGuAppLateDueLAmount"<!-- /*征信.担保人.最近到期贷款到期金额*/ -->
+		,b.expire_date as "pbocGuAppLateDueTime"<!-- /*征信.担保人.最近到期贷款到期日*/ -->
+		<!-- ,'' as "pbocGuAppPhoneBillAmount"  电信费欠缴金额 ，留白
+		,'' as "pbocGuAppPhonebillMonth"  电信费欠缴月数，留白
+		,'' as "pbocGuAppIsHistoryLoan" 当前或历史有无银行贷款，留白 -->
+		from cre_credit_cust a left join cre_credit_cust_loan b on a.id =
+		b.credit_cust_id where a.apply_no = #{applyNo} and a.role_type = '3' ;
+	</select>
+
+	<!-- 征信中企业信息 -->
+	<select id="getPBOCFirmInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.PBOCFirmInfo">
+		select
+		A.PRINTING_TIME as "pbocfirmrcTime"<!-- '征信.企业.报告采集时间Y' -->
+		<!-- ,'' as "pbocfirmQueryTime"'征信.企业.查询用时，留白' -->
+		,A.COMPANY_PHONE as "pbocfirmOfficePhone"<!-- '征信.企业.单位电话'Y -->
+		,<![CDATA[substring(max(CASE WHEN d.CON_START_DATE < b.EXPIRE_DATE AND PERIOD_DIFF(DATE_FORMAT(b.EXPIRE_DATE,'%y%m'),DATE_FORMAT(D.CON_START_DATE,'%y%m'))<= 12 THEN B.LOAN_STATUS END ),2,1)]]>
+		as "pbocfirmWorstFC"<!-- '征信.企业.贷款当前最差五级分类Y' -->
+		,<![CDATA[substring(max(CASE WHEN d.CON_START_DATE < b.EXPIRE_DATE AND PERIOD_DIFF(DATE_FORMAT(b.EXPIRE_DATE,'%y%m'),DATE_FORMAT(D.CON_START_DATE,'%y%m'))<= 12 THEN B.GUARANTEE_OUT_STAT END),2,1)]]>
+		as "pbocfirmWorstFCForeign"<!-- '征信.企业.对外担保的贷款当前最差的五级分类状态Y' -->
+		,A.CREDIT_MONTHS as "pbocfirmchMonth"<!-- '征信.企业.信用历史月份数Y' -->
+		,MIN(B.BALANCE_AMOUNT) as "pbocfirmLateDueAmount"<!-- '征信.企业.最近到期贷款到期金额Y' -->
+		,MIN(B.EXPIRE_DATE) as "pbocfirmLateDueLTime"<!-- '征信.企业.最近到期贷款到期日Y' -->
+		<!-- ,'' as "pbocGuFirmWorstFC"'征信.担保企业.当前最差五级分类，留白' -->
+		<!-- ,max(case when b.CREDIT_COMPANY_ID is null then '0' else '1' end) as
+		"pbocfirmIsHistoryLoan"'征信.当前或历史有无银行贷款,留白' -->
+		from cre_apply_relation c inner join cre_credit_company a on
+		a.APPLY_NO = c.APPLY_NO and a.ROLE_TYPE =C.ROLE_TYPE
+		left join
+		cre_credit_company_loan b on a.ID = b.CREDIT_COMPANY_ID LEFT
+		join
+		cre_contract D on c.APPLY_NO = D.APPLY_NO WHERE C.APPLY_NO =
+		#{applyNo}
+		group by
+		c.APPLY_NO,C.ROLE_TYPE,C.CUST_NAME,A.CREDIT_MONTHS,A.PRINTING_TIME
+	</select>
+
+	<!-- 征信中企业信息  贷款账户数,是否有贷款信息-->
+	<select id="getPBOCFirmNumInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.PBOCFirmInfo">
+		select count(1) as "pbocfirmLoanNum"
+		,'' as "pbocfirmDCNum"
+		,'' as "pbocfirmForeignNum"
+		,case when count(1) 
+		<![CDATA[<>]]>
+		0 then 1
+		else 0 end as "pbocfirmIsHavePL"
+		from cre_credit_company a
+		inner join cre_credit_company_loan b
+		on a.ID = b.CREDIT_COMPANY_ID
+		where a.ROLE_TYPE = '1'
+		and a.APPLY_NO = #{applyNo};
+	</select>
+
+	<!-- 借款信息 -->
+	<select id="getLoanInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.LoanInfo">
+		SELECT
+		c.apply_No as "loanId"
+		<!-- ,'' as "assureWay"借款担保方式 ,留白 -->
+		,A.APPLY_AMOUNT as "loanaAmount"<!-- 贷款金额(申请额度) -->
+		,B.REGISTER_DATE as "loanApplyDate"<!-- 贷款申请日期 -->
+		,a.APPLY_PRODUCT_TYPE_CODE as "assureType"<!-- 抵押担保类型：字典表:1,2,4 -->
+		<!-- ,c.LOAN_REPAY_TYPE as "refundWay"'贷款.还款方式，留白' -->
+		,a.CON_END_DATE as "loanDueDate"<!-- '贷款.借款到期日' -->
+		<!-- ,c.APPLY_PERIOD_VALUE as "loanTerm"'贷款.申请贷款期限，留白' -->
+		FROM cre_apply_register B 
+		LEFT JOIN cre_apply_info c ON b.APPLY_NO =
+		c.APPLY_NO left join cre_contract A ON A.APPLY_NO = B.APPLY_NO
+		where B.apply_no = #{applyNo}
+	</select>
+
+<!-- 贷款信息    抵押率 -->
+	<select id="getPledgeByApplyNo"
+		resultType="String">
+		select
+		(e.CAR_EVALUATE_PRICE+g.EVALUATE_PRICE+i.EVALUATE_PRICE)/a.CONTRACT_AMOUNT
+		from cre_contract a
+		left join
+		(select
+		c.APPLY_NO,sum(d.CAR_EVALUATE_PRICE) as "CAR_EVALUATE_PRICE"
+		from
+		cre_mortgage_car_info c
+		left join cre_mortgage_car_evaluate_info d on
+		c.ID = d.CAR_ID
+		group by c.APPLY_NO) e on a.APPLY_NO = e.APPLY_NO
+		left
+		join
+		(select f.APPLY_NO,sum(f.EVALUATE_PRICE) as EVALUATE_PRICE
+		from
+		cre_mortgage_house_info f
+		group by f.APPLY_NO) g on a.APPLY_NO =
+		g.APPLY_NO
+		left join
+		(select h.APPLY_NO,sum(h.VALUE_NUM) as
+		EVALUATE_PRICE
+		from cre_mortgage_other_info h
+		group by h.APPLY_NO) i on
+		a.APPLY_NO = i.APPLY_NO where a.apply_no=#{applyNo}
+	</select>
+    <!-- 抵押车辆信息 -->
+	<select id="getVehiclesInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.VehicleInfo">
+		select 
+		<!-- a.APPLY_NO as "loanId" -->
+		<!-- a.MORTGAGE_TYPE抵押类型：测试时留白 -->
+		b.IS_KEEP_PAPERS as "isCarKeepPaper"<!-- 车辆相关证件是否留存 -->
+		,b.CAR_EVALUATE_PRICE as "carValue"<!-- 抵押车辆估值 -->
+		,b.USED_CHANGES as "transferNum"<!-- 过户次数 -->
+		,b.USE_PROPERTY as "carType"<!-- '抵押车辆.抵押车辆类型' -->
+		,b.ANNUAL_INSPECTION_STATUS as "asFraud"<!-- '抵押车辆.抵押车辆年检及违规情况' -->
+		,b.USED_YEARS as "carUsedYear"<!-- '抵押车辆.抵押车辆使用年限' -->
+		,a.is_Procedure_Complete as "isProcedureCom" <!-- '抵押车辆.抵押车辆手续是否齐全'-->
+		,b.CAR_STATUS as "isCarstatusNormal"<!-- '抵押车辆.抵押车辆状态是否正常：正常，查封，抵质押，监管，锁定，其他' -->
+		<!-- ,b.USE_PROPERTY as "carQuality"'抵押车辆.抵押车使用性质,留白' -->
+		,b.IS_HANDLE as "dueDispos"<!-- '抵押车辆.逾期处置能力（有无处置能力）' -->
+		,a.mortgage_rate as "pledge"<!-- 抵押率-->
+		from cre_mortgage_car_info a
+		left join cre_mortgage_car_evaluate_info b
+		on a.ID = b.CAR_ID where
+		a.apply_no =#{applyNo}
+	</select>
+	<!-- 抵押房产信息 -->
+	<select id="getHouseInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.HouseInfo">
+		select 
+		<!-- a.APPLY_NO -->
+		a.PROPERTY_STATUS as "houseES"<!-- '贷款.抵押房产产权状态Y' -->
+		,a.SERVICE_LIFE as "houseUsedYear"<!-- '贷款.抵押房产使用年限，Y' --> 
+		,a.CONT_DISTINCT as "houseCity"<!-- '贷款.抵押房产所在城市Y' -->
+		<!-- ,'' as "houseCityLevel" 抵押房产所在城市等级,留白 -->
+		,a.LAND_USE_PROPERTY as "houseUse"<!-- '贷款.抵押房产用途Y' -->
+		,a.IS_PROPERTY_LINE as "isDispute"<!-- '贷款.房产产权人或公司是否有纠纷Y' -->
+		<!-- ,a.IS_KEEP_PAPERS as "isHouseKeepPaper"'贷款.房产是否留存证件，留白，N' -->
+		,a.HOUSE_TYPE as "houseMortgageType"<!-- '贷款.房屋种类'Y -->
+		<!-- ,'1' as "isQueryFiles" '贷款.房屋是否查询档案，留白N' -->
+		,a.IS_SHIFT_RECORD as "isTransfRec"<!-- '贷款.有无房产调档记录Y' -->
+		,a.IS_UNIQUE_HOUSE as "isHouseOnly"<!-- '贷款.抵押物是否为唯一住房Y' -->
+		,a.MORTGAGE_RATE as "pledge" <!-- Y -->
+		from cre_mortgage_house_info a where a.apply_no=#{applyNo}
+	</select>
+
+	<!-- 借款人 -->
+	<select id="getAppInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.AppInfo">
+		select
+		b.cust_name as "custName" <!-- 借款人姓名，xsd中 没有的，用来在head中显示 -->
+		,e.MAIN_MAN_OF_STOCK as "appSharePropertion" <!-- 借款人.申请人在企业的持股比例-->
+		,e.capital_Contribution_Period as "appContributYear" <!-- 借款人.申请人在用款企业的出资年限  -->
+		<!-- '' as "appLoanBalance"借款人.贷款余额_留白 -->
+		,b.children_son as "appMChildNum"<!--借款人.儿子个数 Y-->
+		<!-- ,d.service_life as "appHouseYear"借款人.房屋使用年限，没有这个字段，用抵押房产中的 -->
+		<!-- ,'' as "appAmountMultiple" 借款人.夫妻资产覆盖借款金额倍数，留白
+		,'' as "appWorkYear"借款人.工作年限_留白 -->
+		,b.wed_status as "appMaritalStatus"<!--借款人.婚姻状况 Y-->
+		,b.living_status as "appLiveStatus"<!-- 借款人.居住状况Y -->
+		,b.is_fixedhouse as"appIsHaveHouse"<!-- 借款人.名下是否有房产Y -->
+		,b.age_no as "appAge"<!--借款人.年龄 Y-->
+		,b.children_girl as "appFchildNum"<!--借款人.女儿个数 Y-->
+		<!-- ,'' as "appSpouseIsIBL"借款人.配偶.内部黑名单标识_留白 -->
+		<!-- ,'' as "appSpouseAge" 配偶年龄 -->
+		,c.zhixing_court_gov_flg as "appIsInvolved"<!--借款人.人民法院是否涉案Y -->
+		<!-- ,'' as "appIDStart"借款人.身份证开始日期_留白
+		,'' as "appIsIBL" 借款人.是否在内部黑名单中 ，留白 -->
+		,b.mobile_num as "appMobilePhone"<!--借款人.手机号码Y -->
+		<!-- ,'' as "appCity" 借款人.所在城市，留白 -->
+		<!-- ,'' as "appIndustry"借款人.行业_留白  -->
+		,case when b.sex_no = '1' then 'M' else 'F' end as "appSex" <!-- /*借款人.性别Y*/ -->
+		<!-- ,'' as "appIsFixHouse"借款人.有无固定住所_留白 -->
+		,b.person_id_end_date as "appIDDueTime"<!--借款人.证件到期日Y -->
+		,b.top_education_no as "appEducation"<!--借款人.最高学历Y-->
+		from cre_apply_relation a left join cre_cust_info b on a.cust_id = b.id
+		left join (select apply_no,cust_id,MAX(create_date),zhixing_court_gov_flg from cre_check_web group by apply_no,cust_id)
+		c on a.apply_no = c.apply_no and a.cust_id = c.cust_id  left join cre_credit_other_info e on a.apply_no = e.apply_no
+		where a.apply_no = #{applyNo} and a.role_type = '1' and b.DEL_FLAG = '0';
+	</select>
+
+        <!--    担保人信息 -->
+	<select id="getGuAppInfoByApplyNo" resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.GuAppInfo">
+	select 
+		<!-- '' as "guAppSharePropertion" 担保人.申请人在企业的持股比例，留白
+		,'' as "guAppContributYear" 担保人.申请人在用款企业的出资年限，留白
+		,'' as "guAppLoanBalance"担保人.贷款余额_留白 -->
+		b.children_son as "guAppMChildNum"<!--担保人.儿子个数Y -->
+		<!-- ,d.service_life as "guAppHouseYear"担保人.房屋使用年限，留白N -->
+		<!-- ,'' as "guAppAmountMultiple" 担保人.夫妻资产覆盖借款金额倍数，留白
+		,'' as "guAppWorkYear"担保人.工作年限_留白 -->
+		,b.wed_status as "guAppMaritalStatus"<!--担保人.婚姻状况 Y-->
+		,b.living_status as "guAppLiveStatus"<!--担保人.居住状况 Y-->
+		,b.is_fixedhouse as"guAppIsHaveHouse"<!--担保人.名下是否有房产Y -->
+		,b.age_no as "guAppAge"<!--担保人.年龄Y -->
+		,b.children_girl as "guAppFchildNum"<!--担保人.女儿个数Y-->
+		<!-- ,'' as "guAppSpouseIsIBL"担保人.配偶.内部黑名单标识_留白 -->
+		<!-- ,'' as "guAppSpouseAge" 配偶年龄 -->
+		,c.zhixing_court_gov_flg as "guAppIsInvolved"<!--担保人.人民法院是否涉案Y -->
+		<!-- ,'' as "guAppIDStart"担保人.身份证开始日期_留白
+		,'' as "guAppIsIBL" 担保人.是否在内部黑名单中，留白 -->
+		,b.mobile_num as "guAppMobilePhone"<!--担保人.手机号码Y -->
+		<!-- ,'' as "guAppCity"担保人.所在城市_留白
+		,'' as "guAppIndustry"担保人.行业_留白 -->
+		,b.sex_no as "guAppSex" <!--担保人.性别 Y-->
+		<!-- ,'' as "guAppIsFixHouse"担保人.有无固定住所_留白 -->
+		,b.person_id_end_date as "guAppIDDueTime"<!--担保人.证件到期日 Y-->
+		,b.top_education_no as "guAppEducation"<!--担保人.最高学历Y-->
+		from cre_apply_relation a left join cre_cust_info
+		b on a.cust_id = b.id
+		left join cre_check_web c
+		on a.apply_no = c.apply_no and a.cust_id = c.cust_id left join
+		cre_mortgage_house_info d on a.apply_no = d.apply_no 
+		where a.apply_no = #{applyNo} and a.role_type = '3' and b.DEL_FLAG = '0'; 
+
+	</select>
+
+	<!-- 企业信息 -->
+	<select id="getFirmInfoByApplyNo"
+		resultType="com.resoft.outinterface.cn.com.experian.entry.request.body.FirmInfo">
+		select 
+		 <!-- a.APPLY_NO
+		,a.ROLE_TYPE
+		,a.CUST_ID -->
+		a.CUST_ID as "custId"
+		,c.total_payment_one_year_amount as "totalRepaymentOneyear" <!-- 一年内已还贷款总额Y -->
+		,'' as "isinIBL"<!-- 是否在内部黑名单中，留白,先用来接收roleType-->
+		,c.IS_COMPANY_UP_DOWN as  "isMajorIndustry"<!-- 企业.是否为大型企业的上下游Y -->
+		,c.SIX_MONTH_COMPANY_INCOME_AVG as "aveMonthRevenueL6M"<!-- 企业.企业近六个月的月均营业收入Y -->
+		,b.CURR_OFFICE_LIFETIME as "officeUseYear"<!-- 企业.办公环境使用年限Y -->
+		,d.PAY_TAX_STATUS as "repayStatus" <!-- 新增的缴税情况Y -->
+		,c.COMPANY_PHONE as "firmOfficePhone"<!-- 企业.单位电话Y -->
+		<!-- , '' as "firmPayAmountL6MMon"近6个月月纳税金额，留白 -->
+		,b.IS_HAVE_HOUSES as "firmIsHaveHouse"<!-- 企业.名下是否有房产Y -->
+		,c.STATE_OF_TAXATION as "firmPayQueMon"<!-- 企业.纳税逾期月数Y -->
+		<!-- ,b.REGISTER_DATE as "firmBuildDate"企业.企业的成立日期
+		,b.CURR_STAFF_NUM as "firmEmployee"企业.企业的员工人数 -->
+		,RPAD(b.CATEGORY_SMALL,5,0) as "industry"<!-- 企业所属行业 -->
+		<!-- ,b.REG_CITY as "firmCity"企业.企业所在城市 ，留白N-->
+		,b.COMPANY_LAND_USE as "firmFirmLand"<!-- 企业.企业用地Y -->
+		,'' as "firmArtemisRank"<!-- 赛弥斯财务评级 （赛弥斯报表返回值中有）-->
+		,b.UN_SOC_CREDIT_END_DATE as "firmUnifyCreCodeEnd"<!-- '统一社会信用代码终止日期'Y, -->
+		,b.UN_SOC_CREDIT_START_DATE as "firmUnifyCreCodeStart"<!-- '统一社会信用代码起始日期'Y, -->
+		<!-- ,d.MAIN_MAN_OF_STOCK as "firmShareProportion"企业.申请人在企业的持股比例，留白' -->
+		<!-- ,'' as  "isHaveArtemis"是否提供赛弥斯报表，留白 -->
+		,b.REGISTER_NAT_TAX_END_DATE as "firmtrcEnd"<!--登记税号（国）终止日期 Y-->
+		,b.REGISTER_NAT_TAX_START_DATE as "firmtrcStart"<!--登记税号（国）起始日期 Y-->
+		<!-- ,'' as "quickRatio"速动比率，留白 -->
+		,b.SPECIAL_OPERATE_END_DATE as "firmLicenceEnd"<!--特殊经营许可证结束日期Y -->
+		,b.SPECIAL_OPERATE_START_DATE as "firmLicenceStart"<!--特殊经营许可证开始日期 Y-->
+		<!-- ,'' as "freeBufRank"同盾等级 ，留白 -->
+		,d.MANAGEMENT_FEE_STATUS as "firmPropertyArrearsMon"<!--企业.物业费欠缴月数Y' -->
+		,b.BUSI_LIC_REG_END_DATE as "firmCharterEnd"<!--营业执照注册号终止日期 Y-->
+		,b.BUSI_LIC_REG_START_DATE as "firnCharterStart"<!--营业执照注册号起始日期 Y-->
+		,case when (REG_PROVINCE = OPERATE_PROVINCE and REG_CITY = OPERATE_CITY and REG_DISTINCT = OPERATE_DISTINCT and REG_DETAILS = OPERATE_DETAILS) then '1' else '0' end as "firmIsDomieqaddress"<!-- 企业.注册地和实际经营地是否相符,Y' -->
+		<!-- ,'' as "firmReceivables"总应收款，留白 -->
+		,b.ORGANIZATION_START_DATE as "firmOrganStart"<!--组织机构代码起始日期 Y-->
+		,b.ORGANIZATION_END_DATE as "firmOrganEnd"<!--组织机构代码终止日期 Y-->
+		,case when d.LAST_YEAR_STOCK_CHANGE = '9+' then '10' else  d.LAST_YEAR_STOCK_CHANGE end as "firmShareTransNumLY"<!--企业.最近一年股权变更次数Y' -->
+		<!-- ,b.CATEGORY_MEDIUM as ""行业中类 ,b.CATEGORY_SMALL as ""行业小类 -->
+		from cre_apply_relation a
+		inner join cre_company_info b on a.CUST_ID = b.ID
+		inner join cre_credit_company c on a.ROLE_TYPE = c.ROLE_TYPE and
+		a.CUST_ID = c.COMPANY_ID
+		left join cre_credit_other_info d on a.APPLY_NO = d.APPLY_NO where a.apply_no=#{applyNo} and b.del_flag = '0'
+
+	</select>
+	
+	<!-- 企业信息 114查证 -->
+	<select id="getQueryResult114ByApplyNoAndRoles" resultType="String">
+	select a.IS_114_CHECK from cre_check_phone a where a.role_type=#{custId} and a.apply_no=#{applyNo}
+	</select>
+	<!-- 企业信息  百度网查结果 -->
+	<select id="getPhoneResultBDByApplyNoAndRoles" resultType="String">
+	  select a.BAIDU_FLG from cre_check_web  a where a.cust_id=#{custId} and a.apply_no=#{applyNo} ORDER BY a.CHECK_DATE desc limit 1
+	</select>
+	<!-- 借款人信息 配偶年龄 -->
+	<select id="getCoupleAgeByApplyNoAndRoles" resultType="String">
+      SELECT b.age_no from cre_apply_relation a INNER JOIN cre_cust_info b  on a.CUST_ID = b.ID where a.ROLE_TYPE = #{roleType} and a.APPLY_NO = #{applyNo}	and b.DEL_FLAG = '0'
+	</select>
+	
+	<!-- 借款人信息  申请人在企业的持股比例，出资年限 -->
+	<select id="getCreditOtherInfoByApplyNo" resultType="java.util.Map">
+	  select t.MAIN_MAN_OF_STOCK as "appSharePropertion",t.MAIN_MAN_OF_ASSETS as "appContributYear" from cre_credit_other_info t where t.apply_no = #{applyNo}
+	</select>
+	<!-- 企业信息-获取赛弥斯返回值 -->
+	<select id="getThemisReturnValueByApplyNo" resultType="String">
+	  select score from ift_themis_return_score where apply_no = #{applyNo} and  return_index_code='S017' order by report_year_month desc  limit 1
+	</select>
+	<select id="getSOSRandomNumberByApplyNo" resultType = "String">
+	   select SOSRandomNumber from ift_experian_head where loanId =  #{loanId} and RequestNumber = (select max(RequestNumber) from ift_experian_head where loanId = #{loanId})
+	</select>
+	
+	<!-- 保存报文头的值 -->
+	<insert id="insertExperianResponseHead" parameterType="com.resoft.outinterface.cn.com.experian.entry.response.ExperianResponseHeader">
+		insert into
+		ift_experian_head(id,Version,LoanID,RequestNumber,BorrowerName,SendDate,SendTime,LoginUserName,SOSRandomNumber,ResultCode,ResultInfo)
+		values(
+		#{id},
+		#{sosWebserviceVersion},
+		#{loanId},
+		#{requestNumber},
+		#{borrowerName},
+		#{sendDate},
+		#{sendTime},
+		#{loginUserName},
+		#{sosRandomNumber},
+		#{resultCode},
+		#{resultInfo}
+		)
+	</insert>
+	<!-- 保存body的值 -->
+	<insert id="insertExperianResponseBody" parameterType="com.resoft.outinterface.cn.com.experian.entry.response.Resinfo">
+		insert into
+		ift_experian_return(AppDataCheckDecisionCategory,AppDataCheckDecisionTable,AppDataCheckDecisionText,AppDataCheckReasonCode,AppDataCheckRulesName,CreditPolicyCheckDecisionCategory,CreditPolicyCheckDecisionTable,CreditPolicyCheckDecisionText,CreditPolicyCheckReasonCode,CreditPolicyCheckRulesName,ScoringIndex,ScoringRAReasonCodeTable,ScoringRSDeviationTable,ScoringRiskGrade,ScoringScore,ScoringScorecardID,ScoringScorecardName,ScoringScorecardResultsTable,headId)
+		values(
+		#{appDataCheckDecisionCategory},
+		#{appDataCheckDecisionTable},
+		#{appDataCheckDecisionText},
+		#{appDataCheckReasonCode},
+		#{appDataCheckRulesName},
+		#{creditPolicyCheckDecisionCategory},
+		#{creditPolicyCheckDecisionTable},
+		#{creditPolicyCheckDecisionText},
+		#{creditPolicyCheckReasonCode},
+		#{creditPolicyCheckRulesName},
+		#{scoringIndex},
+		#{scoringRAReasonCodeTable},
+		#{scoringRSDeviationTable},
+		#{scoringRiskGrade},
+		#{scoringScore},
+		#{scoringScorecardID},
+		#{scoringScorecardName},
+		#{scoringScorecardResultsTable},
+		#{headId}
+		)
+	</insert>
+	
+	<!-- 征信.借款人.信用卡总数量 -->
+	<select id="findCreditBankNumByApplyNo" resultType="String">
+		SELECT count(1)
+		FROM cre_credit_line_bank a
+		<where>
+			a.del_flag = '0' AND a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="getExperianResponseHeaderByApplyNo"  resultType ="com.resoft.outinterface.cn.com.experian.entry.response.ExperianResponseHeader">
+	        SELECT * FROM ift_experian_head WHERE LoanID = #{applyNo} and RequestNumber = (select max(RequestNumber) from
+	  ift_experian_head where LoanID = #{applyNo})
+	</select>
+	
+	<select id="getResinfoById" resultType="com.resoft.outinterface.cn.com.experian.entry.response.Resinfo">
+		SELECT
+		scoringScore,
+		CASE 
+		WHEN scoringScore <![CDATA[>=]]> '350' AND scoringScore <![CDATA[<=]]> '449' THEN 'HR'
+		WHEN scoringScore <![CDATA[>=]]> '450' AND scoringScore <![CDATA[<=]]> '549' THEN 'E'
+		WHEN scoringScore <![CDATA[>=]]> '550' AND scoringScore <![CDATA[<=]]> '649' THEN 'D'
+		WHEN scoringScore <![CDATA[>=]]> '650' AND scoringScore <![CDATA[<=]]> '699' THEN 'C'
+		WHEN scoringScore <![CDATA[>=]]> '700' AND scoringScore <![CDATA[<=]]> '729' THEN 'B'
+		WHEN scoringScore <![CDATA[>=]]> '730' AND scoringScore <![CDATA[<=]]> '749' THEN 'A'
+		WHEN scoringScore <![CDATA[>=]]> '750' AND scoringScore <![CDATA[<=]]> '800' THEN 'AA'
+		END AS scoringIndex
+		FROM ift_experian_return
+		WHERE headId = #{id}
+	</select>
+</mapper>

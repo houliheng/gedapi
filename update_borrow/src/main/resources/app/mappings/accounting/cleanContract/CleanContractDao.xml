@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.cleanContract.dao.CleanContractDao">
+    
+	<sql id="cleanContractColumns">
+		a.data_dt AS "dataDt",
+		a.org_level2 AS "orgLevel2",
+		a.org_level3 AS "orgLevel3",
+		a.org_level4 AS "orgLevel4",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.repay_period_status AS "repayPeriodStatus",
+		a.capital_interest_repay_date AS "capitalInterestRepayDate",
+		a.all_repay_date AS "allRepayDate",
+		a.fact_repay_amount AS "factRepayAmount",
+		a.fact_service_fee AS "factServiceFee",
+		a.fact_management_fee AS "factManagementFee",
+		a.fact_capital_amount AS "factCapitalAmount",
+		a.fact_interest_amount AS "factInterestAmount",
+		a.fact_penalty_amount AS "factPenaltyAmount",
+		a.fact_fine_amount AS "factFineAmount",
+		a.fact_add_amount AS "factAddAmount",
+		a.fact_break_amount AS "factBreakAmount",
+		a.back_amount AS "backAmount"
+	</sql>
+	
+	<sql id="cleanContractJoins">
+	</sql>
+    
+	<select id="get" resultType="CleanContract">
+		SELECT 
+			<include refid="cleanContractColumns"/>
+		FROM acc_sta_repay_plan_status a
+		<include refid="cleanContractJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	 
+	<select id="findCleanContractByContractNoAndPeriodNum" resultType="CleanContract">
+		SELECT 
+			<include refid="cleanContractColumns"/>
+		FROM acc_sta_repay_plan_status a
+		<include refid="cleanContractJoins"/>
+		WHERE a.contract_no = #{contractNo} 
+		<if test="periodNum != null and periodNum != ''" >
+		and a.period_num = #{periodNum}
+		</if>
+		order by a.period_num desc
+		limit 1
+	</select>
+	
+	
+	<select id="findList" resultType="CleanContract">
+		SELECT 
+			<include refid="cleanContractColumns"/>
+		FROM acc_sta_repay_plan_status a
+		<include refid="cleanContractJoins"/>
+		<where>
+			contract_no = #{contractNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(*)
+		FROM acc_sta_repay_plan_status a
+		<include refid="cleanContractJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CleanContract">
+		SELECT 
+			<include refid="cleanContractColumns"/>
+		FROM acc_sta_repay_plan_status a
+		<include refid="cleanContractJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_sta_repay_plan_status(
+			data_dt,
+			org_level2,
+			org_level3,
+			org_level4,
+			contract_no,
+			period_num,
+			repay_period_status,
+			<if test="capitalInterestRepayDate != null and capitalInterestRepayDate != ''" >
+			capital_interest_repay_date,
+			</if>
+			<if test="allRepayDate != null and allRepayDate != ''" >
+			all_repay_date,
+			</if>
+			fact_repay_amount,
+			fact_service_fee,
+			fact_management_fee,
+			fact_capital_amount,
+			fact_interest_amount,
+			fact_penalty_amount,
+			fact_fine_amount,
+			fact_add_amount,
+			fact_break_amount,
+			back_amount
+		) VALUES (
+			#{dataDt},
+			#{orgLevel2},
+			#{orgLevel3},
+			#{orgLevel4},
+			#{contractNo},
+			#{periodNum},
+			#{repayPeriodStatus},
+			<if test="capitalInterestRepayDate != null and capitalInterestRepayDate != ''" >
+			#{capitalInterestRepayDate},
+			</if>
+			<if test="allRepayDate != null and allRepayDate != ''" >
+			#{allRepayDate},
+			</if>
+			#{factRepayAmount},
+			#{factServiceFee},
+			#{factManagementFee},
+			#{factCapitalAmount},
+			#{factInterestAmount},
+			#{factPenaltyAmount},
+			#{factFineAmount},
+			#{factAddAmount},
+			#{factBreakAmount},
+			#{backAmount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_sta_repay_plan_status SET 	
+			data_dt = #{dataDt},
+			org_level2 = #{orgLevel2},
+			org_level3 = #{orgLevel3},
+			org_level4 = #{orgLevel4},
+			repay_period_status = #{repayPeriodStatus},
+			capital_interest_repay_date = #{capitalInterestRepayDate},
+			all_repay_date = #{allRepayDate},
+			fact_repay_amount = #{factRepayAmount},
+			fact_service_fee = #{factServiceFee},
+			fact_management_fee = #{factManagementFee},
+			fact_capital_amount = #{factCapitalAmount},
+			fact_interest_amount = #{factInterestAmount},
+			fact_penalty_amount = #{factPenaltyAmount},
+			fact_fine_amount = #{factFineAmount},
+			fact_add_amount = #{factAddAmount},
+			fact_break_amount = #{factBreakAmount},
+			back_amount = #{backAmount}
+		WHERE contract_no = #{contractNo} and period_num = #{periodNum}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM acc_sta_repay_plan_status
+		WHERE contract_no = #{contractNo} and period_num = #{periodNum}
+	</update>
+	
+	<update id="cleanAccStaPenaltyFineExempt">
+		delete from acc_sta_penalty_fine_exempt where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccApplyPenaltyFineExempt">
+		delete from acc_apply_penalty_fine_exempt where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccStaRepayPlanStatus">
+		delete from acc_sta_repay_plan_status where  CONTRACT_NO =#{contractNo}
+	</update>
+	<update id="cleanAccDeductApply">
+		delete from acc_deduct_apply where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccDeductResult">
+		delete from acc_deduct_result where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccRepayDetail">
+		delete from acc_repay_detail where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccOverdueDetail">
+		delete from acc_overdue_detail  where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccStaOverdueStatus">
+		delete from acc_sta_overdue_status where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccStaOverdueStatusTmp">
+		delete from acc_sta_overdue_status_tmp where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccApplyChangeRepay">
+		delete from acc_apply_change_repay where  CONTRACT_NO = #{contractNo}
+	</update>
+	<update id="cleanAccReturnDeductResult">
+		DELETE FROM ift_acc_return_deduct_result WHERE contract_no = #{contractNo}
+	</update>
+		
+</mapper>

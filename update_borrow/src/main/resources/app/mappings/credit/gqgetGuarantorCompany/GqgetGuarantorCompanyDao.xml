@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetGuarantorCompany.dao.GqgetGuarantorCompanyDao">
+    
+	<sql id="gqgetGuarantorCompanyColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.relaton AS "relaton",
+		a.company_desc AS "companyDesc",
+		a.income_state AS "incomeState",
+		a.operation_state AS "operationState",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="gqgetGuarantorCompanyJoins">
+	</sql>
+    
+	<select id="get" resultType="GqgetGuarantorCompany">
+		SELECT 
+			<include refid="gqgetGuarantorCompanyColumns"/>
+		FROM cre_mortgaged_company a
+		<include refid="gqgetGuarantorCompanyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GqgetGuarantorCompany">
+		SELECT 
+			<include refid="gqgetGuarantorCompanyColumns"/>
+		FROM cre_mortgaged_company a
+		<include refid="gqgetGuarantorCompanyJoins"/>
+		<where>
+			and a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findGqgetGuarantorCompanyDataByApplyNo" resultType="GqgetGuarantorCompany">
+		SELECT 
+			<include refid="gqgetGuarantorCompanyColumns"/>
+		FROM cre_mortgaged_company a
+		<where>
+			and a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_mortgaged_company a
+		<include refid="gqgetGuarantorCompanyJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="GqgetGuarantorCompany">
+		SELECT 
+			<include refid="gqgetGuarantorCompanyColumns"/>
+		FROM cre_mortgaged_company a
+		<include refid="gqgetGuarantorCompanyJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_mortgaged_company(
+			id,
+			apply_no,
+			relaton,
+			company_desc,
+			income_state,
+			operation_state,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{relaton},
+			#{companyDesc},
+			#{incomeState},
+			#{operationState},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_mortgaged_company SET 	
+			apply_no = #{applyNo},
+			relaton = #{relaton},
+			company_desc = #{companyDesc},
+			income_state = #{incomeState},
+			operation_state = #{operationState},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_mortgaged_company
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.accounting.applyPenaltyFineExempt.dao.ApplyPenaltyFineExemptDao">
+
+	<sql id="applyPenaltyFineExemptColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS
+		"periodNum",
+		a.PENALTY_EXEMPT_AMOUNT AS "penaltyExemptAmount",
+		a.fine_exempt_amount AS "fineExemptAmount",
+		a.through_time AS
+		"throughTime",
+		a.through_time2 AS
+		"throughTime2",
+		a.description AS
+		"description",
+		a.create_by AS
+		"createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS
+		"updateBy.id",
+		a.update_date AS
+		"updateDate",
+		a.del_flag as "delFlag",
+		a.APPLY_STATUS as "applyStatus"
+	</sql>
+
+	<sql id="applyPenaltyFineExemptJoins">
+	</sql>
+
+	<select id="get" resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getApplyPenaltyFineExemptByContractNo" resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		WHERE a.contract_no = #{contractNo} and a.APPLY_STATUS = '0'
+	</select>
+	<!-- 分公司结算审核用 -->
+	<select id="getApplyingApplyPenaltyFineExemptByContractNoAndPeriodNum"
+		resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		WHERE
+		<if test="doneOrDoFlag == null">
+			A.CONTRACT_NO = #{contractNo}
+			and a.APPLY_STATUS = '0' and
+			a.period_num = #{periodNum}
+			order by CREATE_DATE limit 1
+		</if>
+		<if test="doneOrDoFlag != null ">
+			a.PROC_INS_ID = #{procInsId}
+		</if>
+	</select>
+	<!-- 结算中心审核用 -->
+	<select id="getCompanyPassApplyPenaltyFineExemptByContractNoAndPeriodNum"
+		resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		WHERE
+		<if test="doneOrDoFlag == null">
+			A.CONTRACT_NO = #{contractNo} and a.through_time is not
+			null
+			and a.APPLY_STATUS = '0' and a.period_num = #{periodNum}
+			order by
+			CREATE_DATE limit 1
+		</if>
+		<if test="doneOrDoFlag != null ">
+			a.PROC_INS_ID = #{procInsId}
+		</if>
+	</select>
+
+	<select id="getOldApplyPenaltyFineExemptSumBycontractNoAndPeriodNum"
+		resultType="java.util.Map">
+		select a.PENALTY_EXEMPT_AMOUNT as "penaltyExemptAmount"
+		,a.FINE_EXEMPT_AMOUNT as "fineExemptAmount"
+		from
+		acc_sta_penalty_fine_exempt a
+		where A.CONTRACT_NO = #{contractNo}
+		AND
+		A.PERIOD_NUM = #{periodNum}
+	</select>
+
+	<select id="findApplyPenaltyFineExempt" resultType="java.util.Map">
+		SELECT CASE
+		WHEN B.FINE_AMOUNT IS NOT NULL THEN A.OVERDUE_PENALTY -
+		IFNULL(D.FACT_PENALTY_AMOUNT ,0)- IFNULL(C.PENALTY_EXEMPT_AMOUNT ,0)
+		ELSE 0 END AS "amount2"
+		,IFNULL(B.FINE_AMOUNT ,0) -
+		IFNULL(D.FACT_FINE_AMOUNT ,0) - IFNULL(C.FINE_EXEMPT_AMOUNT ,0)
+		AS
+		"amount1"
+		FROM ACC_REPAY_PLAN A
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS D
+		ON
+		A.CONTRACT_NO = D.CONTRACT_NO
+		AND A.PERIOD_NUM = D.PERIOD_NUM
+		LEFT JOIN
+		ACC_STA_OVERDUE_STATUS B
+		ON A.CONTRACT_NO = B.CONTRACT_NO
+		AND
+		A.PERIOD_NUM = B.PERIOD_NUM
+		LEFT JOIN ACC_STA_PENALTY_FINE_EXEMPT C
+		ON
+		A.CONTRACT_NO = C.CONTRACT_NO
+		AND A.PERIOD_NUM = C.PERIOD_NUM
+		WHERE
+		A.CONTRACT_NO = #{contractNo}
+		AND A.PERIOD_NUM = #{periodNum}
+	</select>
+
+	<select id="findApplyPenaltyFineExemptOnStaRepayPlanStatus"
+		resultType="java.util.Map">
+		select a.FINE_AMOUNT - ifnull(c.FINE_EXEMPT_AMOUNT,0) as
+		"amount1"
+		,b.OVERDUE_PENALTY - ifnull(c.PENALTY_EXEMPT_AMOUNT,0) as
+		"amount2"
+		from acc_sta_overdue_status a
+		left join acc_repay_plan b
+		on a.CONTRACT_NO = b.CONTRACT_NO
+		and a.PERIOD_NUM = b.PERIOD_NUM
+		left
+		join acc_sta_penalty_fine_exempt c
+		on a.CONTRACT_NO = c.CONTRACT_NO
+		and
+		a.PERIOD_NUM = c.PERIOD_NUM
+		WHERE
+		A.CONTRACT_NO = #{contractNo}
+		AND
+		A.PERIOD_NUM = #{periodNum}
+	</select>
+
+	<select id="findList" resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		<where>
+
+			<if test="periodNum != null and periodNum != ''">
+				AND a.period_num = #{periodNum}
+			</if>
+			<if test="penaltyExemptAmount != null and penaltyExemptAmount != ''">
+				AND a.PENALTY_EXEMPT_AMOUNT = #{penaltyExemptAmount}
+			</if>
+			<if test="fineExemptAmount != null and fineExemptAmount != ''">
+				AND a.fine_exempt_amount = #{fineExemptAmount}
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description = #{description}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		<where>
+
+			<if test="periodNum != null and periodNum != ''">
+				AND a.period_num = #{periodNum}
+			</if>
+			<if test="penaltyExemptAmount != null and penaltyExemptAmount != ''">
+				AND a.PENALTY_EXEMPT_AMOUNT = #{penaltyExemptAmount}
+			</if>
+			<if test="fineExemptAmount != null and fineExemptAmount != ''">
+				AND a.fine_exempt_amount = #{fineExemptAmount}
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description = #{description}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyPenaltyFineExempt">
+		SELECT
+		<include refid="applyPenaltyFineExemptColumns" />
+		FROM acc_apply_penalty_fine_exempt a
+		<include refid="applyPenaltyFineExemptJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_apply_penalty_fine_exempt(
+		id,
+		contract_no,
+		period_num,
+		PENALTY_EXEMPT_AMOUNT,
+		fine_exempt_amount,
+		through_time,
+		through_time2,
+		description,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		del_flag,
+		APPLY_STATUS
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{periodNum},
+		#{penaltyExemptAmount},
+		#{fineExemptAmount},
+		#{throughTime},
+		#{throughTime2},
+		#{description},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{delFlag},
+		#{applyStatus}
+		)
+	</insert>
+
+	<insert id="saveStaPenaltyFineExempt">
+		INSERT INTO acc_sta_penalty_fine_exempt(
+		DATA_DT,
+		contract_no,
+		period_num,
+		PENALTY_EXEMPT_AMOUNT,
+		fine_exempt_amount
+		)
+		VALUES (
+		#{dataDt},
+		#{contractNo},
+		#{periodNum},
+		#{penaltyExemptAmount},
+		#{fineExemptAmount}
+		)
+	</insert>
+
+	<update id="updateStaPenaltyFineExempt">
+		UPDATE acc_sta_penalty_fine_exempt SET
+		PENALTY_EXEMPT_AMOUNT = #{penaltyExemptAmount},
+		fine_exempt_amount =
+		#{fineExemptAmount}
+		WHERE contract_no =#{contractNo} and period_num =
+		#{periodNum}
+	</update>
+
+	<update id="update">
+		UPDATE acc_apply_penalty_fine_exempt SET
+		id = #{id}
+		<if test="applyStatus !=null and applyStatus != '' ">
+			,APPLY_STATUS = #{applyStatus}
+		</if>
+		<if test="throughTime !=null and throughTime != '' ">
+			,through_time = #{throughTime}
+		</if>
+		<if test="throughTime2 != null and throughTime2 != ''">
+			,through_time2 = #{throughTime2}
+		</if>
+		<if test="penaltyExemptAmount !=null and penaltyExemptAmount != '' ">
+			,PENALTY_EXEMPT_AMOUNT =#{penaltyExemptAmount}
+		</if>
+		<if test="fineExemptAmount !=null and fineExemptAmount != '' ">
+			,fine_exempt_amount = #{fineExemptAmount}
+		</if>
+		WHERE
+		id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_apply_penalty_fine_exempt
+		WHERE id =
+		#{id}
+	</update>
+	
+		<update id="deleteStaPenaltyFineExempt">
+		DELETE FROM acc_sta_penalty_fine_exempt
+		WHERE contract_no =#{contractNo} and period_num = #{periodNum}
+	</update>
+	
+	<update id="updateProcInsIdById">
+		UPDATE acc_apply_penalty_fine_exempt SET PROC_INS_ID = #{procInsId} WHERE ID = #{id}
+	</update>
+		
+	<update id="updateStaPenaltyFineExemptApplyStatus">
+		UPDATE acc_apply_penalty_fine_exempt SET APPLY_STATUS = '2' WHERE contract_no =#{contractNo} and period_num = #{periodNum}
+	</update>
+	
+
+</mapper>

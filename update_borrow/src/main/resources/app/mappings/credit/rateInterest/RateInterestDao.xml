@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.rateInterest.dao.RateInterestDao">
+ 
+<select id="getLoanRepayType" resultType="RateInterest">
+	select distinct(LOAN_REPAY_TYPE) as "loanRepayType",LOAN_REPAY_DESC as
+	"loanRepayDesc"
+	from cre_rate_interest where
+	PRODUCT_TYPE_CODE = #{productType} 
+	<if test="loanRepayType != null and loanRepayType != ''">
+	   and  LOAN_REPAY_TYPE = #{loanRepayType}
+	</if>
+	order by
+	LOAN_REPAY_TYPE asc
+</select>
+
+<sql id="rateInterestColumns">
+	a.id AS "id",
+	a.loan_repay_type AS "loanRepayType",
+	a.loan_repay_desc AS "loanRepayDesc",
+	a.product_type_code AS "productTypeCode",
+	a.period_value AS "periodValue",
+	a.rate_interest AS "rateInterest",
+	a.start_time AS "startTime",
+	a.end_time AS "endTime"
+</sql>
+
+<sql id="rateInterestJoins">
+</sql>
+   
+<select id="get" resultType="RateInterest">
+	SELECT 
+		<include refid="rateInterestColumns"/>
+	FROM cre_rate_interest a
+	<include refid="rateInterestJoins"/>
+	WHERE a.id = #{id}
+</select>
+
+<select id="findList" resultType="RateInterest">
+	SELECT 
+		<include refid="rateInterestColumns"/>
+	FROM cre_rate_interest a
+	<include refid="rateInterestJoins"/>	
+	<!-- order by 'periodValue' desc -->
+	<where>
+		
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+			AND a.period_value = #{periodValue}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND a.start_time &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND a.end_time &lt;= #{endTime}
+		</if>
+	</where>
+	ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0
+	<choose>
+		<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY ${page.orderBy}
+		</when>
+		<otherwise>
+		</otherwise>
+	</choose>
+</select>
+
+<select id="getCount" resultType="long">
+	SELECT 
+		count(a.id)
+	FROM cre_rate_interest a
+	<include refid="rateInterestJoins"/>
+	<where>
+		
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+			AND a.period_value = #{periodValue}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND a.start_time &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND a.end_time &lt;= #{endTime}
+		</if>
+	</where>
+	ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0
+</select>
+
+<select id="findAllList" resultType="RateInterest">
+	SELECT 
+		<include refid="rateInterestColumns"/>
+	FROM cre_rate_interest a
+	<include refid="rateInterestJoins"/>
+	<where>
+		
+	</where>
+	ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0		
+	<choose>
+		<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY ${page.orderBy}
+		</when>
+		<otherwise>
+		</otherwise>
+	</choose>
+</select>
+
+<select id="checkRateInterestIsDouble" resultType="RateInterest">
+	SELECT
+		a.id AS "id",
+		a.loan_repay_type AS "loanRepayType",
+		a.loan_repay_desc AS "loanRepayDesc",
+		a.product_type_code AS "productTypeCode",
+		a.period_value AS "periodValue",
+		a.rate_interest AS "rateInterest"
+	FROM cre_rate_interest a
+	<where>
+		a.period_value=${periodValue} 
+		and a.loan_repay_type= ${loanRepayType} 
+		and a.product_type_code=${productTypeCode}
+	</where>
+</select>
+
+<insert id="insert">
+	INSERT INTO cre_rate_interest(
+		id,
+		loan_repay_type,
+		loan_repay_desc,
+		product_type_code,
+		period_value,
+		rate_interest,
+		start_time,
+		end_time
+	) VALUES (
+		#{id},
+		#{loanRepayType},
+		#{loanRepayDesc},
+		#{productTypeCode},
+		#{periodValue},
+		#{rateInterest},
+		#{startTime},
+		#{endTime}
+	)
+</insert>
+
+<insert id="saveAll" parameterType="java.util.List">
+		INSERT INTO cre_rate_interest(
+		id,
+		loan_repay_type,
+		loan_repay_desc,
+		product_type_code,
+		period_value,
+		rate_interest,
+		start_time,
+		end_time
+	) VALUES 
+	<foreach item="rateInterestIn" collection="rateInterest" index="index" separator=",">
+	 (
+		 #{rateInterestIn.id},
+		'${rateInterestIn.loanRepayType}',
+		'${rateInterestIn.loanRepayDesc}',
+		'${rateInterestIn.productTypeCode}',
+		'${rateInterestIn.periodValue}',
+		'${rateInterestIn.rateInterest}',
+		#{rateInterestIn.startTime},
+		#{rateInterestIn.endTime}
+	 )
+	</foreach>
+</insert>
+
+<update id="update">
+	UPDATE cre_rate_interest SET 	
+		loan_repay_type = #{loanRepayType},
+		loan_repay_desc = #{loanRepayDesc},
+		product_type_code = #{productTypeCode},
+		period_value = #{periodValue},
+		rate_interest = #{rateInterest},
+		start_time = #{startTime},
+		end_time = #{endTime}
+	WHERE id = #{id}
+</update>
+
+<update id="delete">
+	DELETE FROM cre_rate_interest
+	WHERE id = #{id}
+</update>
+
+<!-- 批量删除 -->
+<update id="banchDelete">
+	DELETE FROM cre_rate_interest
+	where id in
+	<foreach item="idList" collection="idList" open="(" close=")"
+		separator=",">
+		#{idList}
+	</foreach>
+</update>
+
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.contract.dao.ContractTemplateDao">
+
+	<sql id="ContractTemplateColumns">
+		a.id as "id",
+		(select label from SYS_DICT where type =
+		'CONTRACT_TEMPLATE_TYPE' and value = a.TEMPLATE_TYPE) as
+		"templateType",
+		(select label from SYS_DICT where type = 'PRODUCT_TYPE_CONTRACT'
+		and value = a.product_type) as "productType",
+		(select label from SYS_DICT where type = 'yes_no'
+		and value = a.IS_UPLOAD_FILE) as "isuploadfile",
+		a.TEMPLATE_NAME as
+		"templateName"
+	</sql>
+
+	<select id="findList" resultType="ContractTemplate">
+		SELECT
+		<include refid="ContractTemplateColumns" />
+		FROM CRE_CONTRACT_TEMPLATE a
+
+		<where>
+			1=1
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="productType != null and productType != ''">
+				AND a.PRODUCT_TYPE = #{productType}
+			</if>
+			
+			<if test="orgplatform != null and orgplatform != ''">
+				AND a.contract_org_platform = #{orgplatform}
+			</if>
+			
+			<if test="templateType != null and templateType != ''">
+				AND a.TEMPLATE_TYPE = #{templateType}
+			</if>
+			<if test="templateName != null and templateName != ''">
+				AND a.TEMPLATE_NAME LIKE
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix" />
+				#{templateName}
+				<include refid="SYS_PUBLICTAG.stringConcateSuffix" />
+			</if>
+		</where>
+
+		ORDER BY a.PRODUCT_TYPE DESC
+
+	</select>
+
+	<insert id="insert">
+		INSERT INTO CRE_CONTRACT_TEMPLATE(
+		id,
+		TEMPLATE_TYPE,
+		product_type,
+		TEMPLATE_NAME,
+		IS_UPLOAD_FILE,
+		contract_org_platform
+		) VALUES (
+		#{id},
+		#{templateType},
+		#{productType},
+		#{templateName},
+		#{isuploadfile},
+		#{orgplatform}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE CRE_CONTRACT_TEMPLATE SET
+		TEMPLATE_TYPE =
+		#{templateType},
+		product_type = #{productType},
+		TEMPLATE_NAME =
+		#{templateName}
+		WHERE TEMPLATE_TYPE = #{templateType} and
+		product_type=#{productType}
+	</update>
+
+	<update id="delete">
+		delete from CRE_CONTRACT_TEMPLATE
+
+		WHERE id = #{id}
+	</update>
+
+	<select id="get" resultType="ContractTemplate">
+		SELECT
+		id as "id",
+		TEMPLATE_TYPE as "templateType",
+		product_type as "productType",
+		TEMPLATE_NAME as "templateName",
+		IS_UPLOAD_FILE as "isuploadfile"
+		FROM CRE_CONTRACT_TEMPLATE a
+		WHERE a.id=#{id}
+	</select>
+	<!--上传模板之后修改状态 -->
+	<update id="updateName">
+		UPDATE CRE_CONTRACT_TEMPLATE 
+		SET IS_UPLOAD_FILE = #{isuploadfile}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

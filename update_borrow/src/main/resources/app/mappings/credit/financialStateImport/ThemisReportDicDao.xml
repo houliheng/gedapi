@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.financialStateImport.dao.ThemisReportDicDao">
+    
+	<sql id="themisReportDicColumns">
+		a.report_order_col AS "reportOrderCol",
+		a.report_index_code AS "reportIndexCode",
+		a.report_index_name AS "reportIndexName",
+		a.report_table AS "reportTable"
+	</sql>
+	
+	<sql id="themisReportDicJoins">
+	</sql>
+
+	<select id="findByCode" resultType="ThemisReportDic">
+		SELECT
+		<include refid="themisReportDicColumns"/>
+		FROM ift_themis_report_dic a
+		WHERE a.report_index_code=#{code}
+	</select>
+	<select id="get" resultType="ThemisReportDic">
+		SELECT 
+			<include refid="themisReportDicColumns"/>
+		FROM ift_themis_report_dic a
+		<include refid="themisReportDicJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ThemisReportDic">
+		SELECT 
+			<include refid="themisReportDicColumns"/>
+		FROM ift_themis_report_dic a
+		<include refid="themisReportDicJoins"/>
+		<where>
+			
+			<if test="reportOrderCol != null and reportOrderCol != ''">
+				AND a.report_order_col = #{reportOrderCol}
+			</if>
+			<if test="reportIndexCode != null and reportIndexCode != ''">
+				AND a.report_index_code = #{reportIndexCode}
+			</if>
+			<if test="reportIndexName != null and reportIndexName != ''">
+				AND a.report_index_name = #{reportIndexName}
+			</if>
+			<if test="reportTable != null and reportTable != ''">
+				AND a.report_table = #{reportTable}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_themis_report_dic a
+		<include refid="themisReportDicJoins"/>
+		<where>
+			
+			<if test="reportOrderCol != null and reportOrderCol != ''">
+				AND a.report_order_col = #{reportOrderCol}
+			</if>
+			<if test="reportIndexCode != null and reportIndexCode != ''">
+				AND a.report_index_code = #{reportIndexCode}
+			</if>
+			<if test="reportIndexName != null and reportIndexName != ''">
+				AND a.report_index_name = #{reportIndexName}
+			</if>
+			<if test="reportTable != null and reportTable != ''">
+				AND a.report_table = #{reportTable}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ThemisReportDic">
+		SELECT 
+			<include refid="themisReportDicColumns"/>
+		FROM ift_themis_report_dic a
+		<include refid="themisReportDicJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ift_themis_report_dic(
+			report_order_col,
+			report_index_code,
+			report_index_name,
+			report_table
+		) VALUES (
+			#{reportOrderCol},
+			#{reportIndexCode},
+			#{reportIndexName},
+			#{reportTable}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_themis_report_dic SET 	
+			report_order_col = #{reportOrderCol},
+			report_index_code = #{reportIndexCode},
+			report_index_name = #{reportIndexName},
+			report_table = #{reportTable}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_themis_report_dic
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

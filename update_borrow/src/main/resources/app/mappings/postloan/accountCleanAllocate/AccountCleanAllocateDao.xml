@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.accountCleanAllocate.dao.AccountCleanAllocateDao">
+    
+	<sql id="accountCleanAllocateColumns">
+		a.contract_no AS "contractNo",
+		a.allocate_by_id AS "allocateById",
+		a.allocate_by AS "allocateBy",
+		a.checked_by_id AS "checkedById",
+		a.checked_by AS "checkedBy",
+		a.allocate_type AS "allocateType"
+	</sql>
+	
+	<sql id="accountCleanAllocateJoins">
+	</sql>
+    
+	<select id="get" resultType="AccountCleanAllocate">
+		SELECT 
+			<include refid="accountCleanAllocateColumns"/>
+		FROM pl_account_clean_allocate a
+		<include refid="accountCleanAllocateJoins"/>
+		WHERE a.contract_no = #{contractNo}
+	</select>
+	
+	<select id="findList" resultType="AccountCleanAllocate">
+		SELECT 
+			<include refid="accountCleanAllocateColumns"/>
+		FROM pl_account_clean_allocate a
+		<include refid="accountCleanAllocateJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.contract_no)
+		FROM pl_account_clean_allocate a
+		<include refid="accountCleanAllocateJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccountCleanAllocate">
+		SELECT 
+			<include refid="accountCleanAllocateColumns"/>
+		FROM pl_account_clean_allocate a
+		<include refid="accountCleanAllocateJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_account_clean_allocate(
+			contract_no,
+			allocate_by_id,
+			allocate_by,
+			checked_by_id,
+			checked_by,
+			allocate_type
+		) VALUES (
+			#{contractNo},
+			#{allocateById},
+			#{allocateBy},
+			#{checkedById},
+			#{checkedBy},
+			#{allocateType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_account_clean_allocate SET 	
+			contract_no = #{contractNo},
+			allocate_by_id = #{allocateById},
+			allocate_by = #{allocateBy},
+			checked_by_id = #{checkedById},
+			checked_by = #{checkedBy},
+			allocate_type = #{allocateType}
+		WHERE contract_no = #{contractNo}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_account_clean_allocate
+		WHERE contract_no = #{contractNo}
+	</update>
+	
+	<select id="getContractNosByAllocateType" resultType="java.lang.String">
+	  select  contract_no
+	    from pl_account_clean_allocate
+	    <where>
+	    <if test="allocateType != null and allocateType != ''">
+				and allocate_Type = #{allocateType}
+			</if>
+	    </where>
+	</select>
+	
+	<update id="updateAllocateTypeByContractNo">
+	  update pl_account_clean_allocate set ALLOCATE_TYPE = #{allocateType} where contract_no = #{contractNo}
+	</update>
+	<select id="getAccountCleanAllocateByContractNo" resultType="AccountCleanAllocate">
+	select
+	<include refid="accountCleanAllocateColumns" />
+	from pl_account_clean_allocate a  where a.contract_no = #{contractNo}
+	</select>
+	
+	<select id="getAccountCleanPLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+	SELECT
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1 DAY)) AS "monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		b.CHECKED_BY_ID AS "checkedById",
+		b.CHECKED_BY AS "checkedBy",
+		b.ALLOCATE_TYPE AS "allocateType"
+		FROM 
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a  inner join pl_account_clean_allocate b on a.contract_no = b.contract_no
+		<where>
+		<if test="contractNo != null and contractNo != ''">
+			and a.CONTRACT_NO like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			and a.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+		<if test="checkedById != null and checkedById != ''">
+			and b.CHECKED_BY_ID = #{checkedById}
+		</if>
+		<if test="allocateTypeList != null and allocateTypeList.size() > 0 ">
+			and b.ALLOCATE_TYPE in
+		<foreach item="allocateType" collection="allocateTypeList" open="(" close=")" separator=",">
+			#{allocateType}
+		</foreach>
+		</if>
+		<if test="allocateById != null and allocateById != ''">
+			and b.ALLOCATE_BY_ID = #{allocateById}
+		</if>
+		</where>
+	</select>
+</mapper>

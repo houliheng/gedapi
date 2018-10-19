@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkCoupleDoubtful.dao.CheckCoupleDoubtfulDao">
+    
+	<sql id="checkCoupleDoubtfulColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.check_type AS "checkType",
+		a.check_date AS "checkDate",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.check_user_dept AS "checkUserDept",
+		a.check_address AS "checkAddress",
+		a.is_check_fee AS "isCheckFee",
+		a.check_km AS "checkKm",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkCoupleDoubtfulJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckCoupleDoubtful">
+		SELECT 
+			<include refid="checkCoupleDoubtfulColumns"/>
+		FROM cre_check_couple_doubtful a
+		<include refid="checkCoupleDoubtfulJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckCoupleDoubtful">
+		SELECT 
+			<include refid="checkCoupleDoubtfulColumns"/>
+		FROM cre_check_couple_doubtful a
+		<include refid="checkCoupleDoubtfulJoins"/>
+		<where>
+			
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name = #{custName}
+			</if>
+			<if test="checkType != null and checkType != ''">
+				AND a.check_type = #{checkType}
+			</if>
+			<if test="checkDate != null and checkDate != ''">
+				AND a.check_date = #{checkDate}
+			</if>
+			<if test="checkAddress != null and checkAddress != ''">
+				AND a.check_address = #{checkAddress}
+			</if>
+			<if test="isCheckFee != null and isCheckFee != ''">
+				AND a.is_check_fee = #{isCheckFee}
+			</if>
+			<if test="checkKm != null and checkKm != ''">
+				AND a.check_km = #{checkKm}
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description = #{description}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_check_couple_doubtful a
+		<include refid="checkCoupleDoubtfulJoins"/>
+		<where>
+			
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name = #{custName}
+			</if>
+			<if test="checkType != null and checkType != ''">
+				AND a.check_type = #{checkType}
+			</if>
+			<if test="checkDate != null and checkDate != ''">
+				AND a.check_date = #{checkDate}
+			</if>
+			<if test="checkAddress != null and checkAddress != ''">
+				AND a.check_address = #{checkAddress}
+			</if>
+			<if test="isCheckFee != null and isCheckFee != ''">
+				AND a.is_check_fee = #{isCheckFee}
+			</if>
+			<if test="checkKm != null and checkKm != ''">
+				AND a.check_km = #{checkKm}
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description = #{description}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckCoupleDoubtful">
+		SELECT 
+			<include refid="checkCoupleDoubtfulColumns"/>
+		FROM cre_check_couple_doubtful a
+		<include refid="checkCoupleDoubtfulJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_check_couple_doubtful(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			check_type,
+			check_date,
+			check_user_id,
+			check_user_name,
+			check_user_dept,
+			check_address,
+			is_check_fee,
+			check_km,
+			description,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{custId},
+			#{custName},
+			#{checkType},
+			#{checkDate},
+			#{checkUserId},
+			#{checkUserName},
+			#{checkUserDept},
+			#{checkAddress},
+			#{isCheckFee},
+			#{checkKm},
+			#{description},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_check_couple_doubtful SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			cust_id = #{custId},
+			cust_name = #{custName},
+			check_type = #{checkType},
+			check_date = #{checkDate},
+			check_user_id = #{checkUserId},
+			check_user_name = #{checkUserName},
+			check_user_dept = #{checkUserDept},
+			check_address = #{checkAddress},
+			is_check_fee = #{isCheckFee},
+			check_km = #{checkKm},
+			description = #{description},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_check_couple_doubtful
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCheckCoupleDoubtfulCount" resultType="String">
+	   select count(*) from cre_check_couple_doubtful t  	   
+	   <where>
+				 t.apply_no = #{applyNo}
+	        <if test="checkUserId != null and checkUserId != ''">
+				AND t.check_user_id = #{checkUserId}
+		    </if>
+		    <if test="custId != null and custId != ''">
+				AND t.cust_id = #{custId}
+		    </if>
+		    <if test="roleType != null and roleType != ''">
+				AND t.role_type = #{roleType}
+		    </if>
+	    </where>
+	</select>
+	
+	<select id="getCheckCoupleDoubtfulCountForNewJob" resultType="String">
+	   select count(*) from cre_check_couple_doubtful t  	   
+	   <where>
+				 t.apply_no = #{applyNo}
+		    <if test="custId != null and custId != ''">
+				AND t.cust_id = #{custId}
+		    </if>
+		    <if test="roleType != null and roleType != ''">
+				AND t.role_type = #{roleType}
+		    </if>
+	    </where>
+	</select>
+	
+	
+	
+	<select id="getCheckCoupleDoubtfulByApplyNo" resultType="CheckCoupleDoubtful">
+		SELECT 
+			<include refid="checkCoupleDoubtfulColumns"/>
+		FROM cre_check_couple_doubtful a  
+		<where>
+		a.apply_no = #{applyNo}
+	        <if test="checkUserId != null and checkUserId != ''">
+				AND a.check_user_id = #{checkUserId}
+		    </if>
+	    </where>
+	</select>
+	
+	<select id="getCheckCoupleDoubtfulByApplyNoForNewJob" resultType="CheckCoupleDoubtful">
+		SELECT 
+			<include refid="checkCoupleDoubtfulColumns"/>
+		FROM cre_check_couple_doubtful a  
+		<where>
+		a.apply_no = #{applyNo}
+	    </where>
+	</select>
+	
+</mapper>

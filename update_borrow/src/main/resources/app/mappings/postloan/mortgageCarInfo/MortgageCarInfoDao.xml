@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.mortgageCarInfo.dao.MortgageCarInfoDao">
+    
+	<sql id="mortgageCarInfoColumns">
+		a.property_right AS "propertyRight",
+		a.property_name AS "propertyName",
+		a.apply_no AS "applyNo",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.mortgage_type AS "mortgageType",
+		a.vehicle_no AS "vehicleNo",
+		a.vehicle_brand AS "vehicleBrand",
+		a.buy_date AS "buyDate",
+		a.id AS "id",
+		a.vehicle_type AS "vehicleType",
+		a.vehicle_series AS "vehicleSeries",
+		a.property_of_com_owners AS "propertyOfComOwners",
+		a.other_information AS "otherInformation",
+		a.busi_reg_name AS "busiRegName",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.corporation_name AS "corporationName",
+		a.corporation_card_id_no AS "corporationCardIdNo",
+		a.client_name AS "clientName",
+		a.client_id_no AS "clientIdNo",
+		a.client_phone AS "clientPhone",
+		a.client_company_relation AS "clientCompanyRelation",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.is_push_data as "isPushData",
+		a.DEAL_AMOUNT as "dealAmount",
+		ifnull(a.DEAL_STATUS,'0') as "dealStatus"
+	</sql>
+	
+	<sql id="mortgageCarInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="MortgageCarInfo">
+		SELECT 
+			<include refid="mortgageCarInfoColumns"/>
+		FROM pl_mortgage_car_info a
+		<include refid="mortgageCarInfoJoins"/>
+		WHERE a.id = #{id} 
+	</select>
+	
+	<select id="findList" resultType="MortgageCarInfo">
+		SELECT 
+			<include refid="mortgageCarInfoColumns"/>
+		FROM pl_mortgage_car_info a
+		<include refid="mortgageCarInfoJoins"/>
+			 where a.del_flag = '0'
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_mortgage_car_info a
+		<include refid="mortgageCarInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MortgageCarInfo">
+		SELECT 
+			<include refid="mortgageCarInfoColumns"/>
+		FROM pl_mortgage_car_info a
+		<include refid="mortgageCarInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_mortgage_car_info(
+			property_right,
+			property_name,
+			apply_no,
+			busi_lic_reg_no,
+			mortgage_type, 
+			<!-- 车辆编号
+			vehicle_no, -->
+			vehicle_brand,
+			buy_date,
+			id, 
+			vehicle_type,
+			vehicle_series,
+			property_of_com_owners,
+			other_information,
+			busi_reg_name,
+			operate_province,
+			operate_city,
+			operate_distinct,
+			operate_details,
+			corporation_name,
+			corporation_card_id_no,
+			client_name,
+			client_id_no,
+			client_phone,
+			client_company_relation,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			is_push_data
+		) VALUES (
+			#{propertyRight},
+			#{propertyName},
+			#{applyNo},
+			#{busiLicRegNo},
+		    #{mortgageType},
+			<!-- #{vehicleNo}, -->
+			#{vehicleBrand},
+			#{buyDate},
+		    #{id}, 
+			#{vehicleType},
+			#{vehicleSeries},
+			#{propertyOfComOwners},
+			#{otherInformation},
+			#{busiRegName},
+			#{operateProvince},
+			#{operateCity},
+			#{operateDistinct},
+			#{operateDetails},
+			#{corporationName},
+			#{corporationCardIdNo},
+			#{clientName},
+			#{clientIdNo},
+			#{clientPhone},
+			#{clientCompanyRelation},
+			'0',
+		    #{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			'1'
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_mortgage_car_info SET 	
+			property_right = #{propertyRight},
+			property_name = #{propertyName},
+			apply_no = #{applyNo},
+			busi_lic_reg_no = #{busiLicRegNo},
+			mortgage_type = #{mortgageType},
+			vehicle_no = #{vehicleNo},
+			vehicle_brand = #{vehicleBrand},
+			buy_date = #{buyDate},
+			vehicle_type = #{vehicleType},
+			vehicle_series = #{vehicleSeries},
+			property_of_com_owners = #{propertyOfComOwners},
+			other_information = #{otherInformation},
+			busi_reg_name = #{busiRegName},
+			operate_province = #{operateProvince},
+			operate_city = #{operateCity},
+			operate_distinct = #{operateDistinct},
+			operate_details = #{operateDetails},
+			corporation_name = #{corporationName},
+			corporation_card_id_no = #{corporationCardIdNo},
+			client_name = #{clientName},
+			client_id_no = #{clientIdNo},
+			client_phone = #{clientPhone},
+			client_company_relation = #{clientCompanyRelation},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			is_push_data = '1'
+		WHERE id = #{id}
+	</update>
+	
+	<update id="batchDelete">
+		update  pl_mortgage_car_info set del_flag = '1'
+		where id in 
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>
+	</update>
+	
+	<select id="getCarCount" resultType="long">
+		SELECT count(1)
+		FROM pl_mortgage_car_info a
+		WHERE a.APPLY_NO = #{applyNo}
+		AND a.DEL_FLAG = '0'
+	</select>
+	
+	<select id="getPageByApplyNo" resultType="MortgageCarInfo">
+		SELECT 
+			<include refid="mortgageCarInfoColumns"/>
+		FROM pl_mortgage_car_info a
+		<where>
+			AND a.apply_no = #{applyNo} AND a.DEL_FLAG = '0'
+		</where>		
+	</select>
+
+	<update id="delete">
+		update  pl_mortgage_car_info set del_flag = '1'
+		where  id = #{id}
+		
+	</update>
+</mapper>

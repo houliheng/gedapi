@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetComInfo.dao.WarehouseGoodsDao">
+
+	<sql id="WarehouseGoodsColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.WARE_TYPE AS "wareType",
+		a.WARE_DESCRIPTION AS "description"
+	</sql>
+
+	<select id="get" resultType="WarehouseGoods">
+		SELECT
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getWarehouseGoods" resultType="WarehouseGoods">
+		SELECT
+		a.APPROVE_ID as "approId",
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods_union a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getPageByApplyNo" resultType="WarehouseGoods">
+		SELECT
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods a
+		<where>
+			and a.apply_no = #{applyNo}
+		</where>
+	</select>
+
+	<select id="getPageByApplyNoUnion" resultType="WarehouseGoods">
+		SELECT
+		a.APPROVE_ID as "approId",
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods_union a
+		<where>
+			and a.apply_no = #{applyNo}
+			and a.APPROVE_ID = #{approId}
+		</where>
+	</select>
+
+	<select id="findList" resultType="WarehouseGoods">
+		SELECT
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods a
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_warehouse_goods a
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="WarehouseGoods">
+		SELECT
+		<include refid="WarehouseGoodsColumns" />
+		FROM cre_warehouse_goods a
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_warehouse_goods(
+		id,
+		apply_no,
+		WARE_TYPE,
+		WARE_DESCRIPTION,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{wareType},
+		#{description},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<insert id="saveWarehouseGoodsUnion">
+		INSERT INTO cre_warehouse_goods_union(
+		id,
+		apply_no,
+		APPROVE_ID,
+		WARE_TYPE,
+		WARE_DESCRIPTION,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{approId},
+		#{wareType},
+		#{description},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<insert id="saveWarehouseGoodsTogether">
+		INSERT INTO cre_warehouse_goods_union(
+		id,
+		apply_no,
+		APPROVE_ID,
+		WARE_TYPE,
+		WARE_DESCRIPTION,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES
+		<foreach item="warehouseGoods" collection="warehouseGoodsList" index="index" separator=",">
+			(
+			#{warehouseGoods.id},
+			#{warehouseGoods.applyNo},
+			#{warehouseGoods.approId},
+			#{warehouseGoods.wareType},
+			#{warehouseGoods.description},
+			#{warehouseGoods.createBy.id},
+			#{warehouseGoods.createDate},
+			#{warehouseGoods.updateBy.id},
+			#{warehouseGoods.updateDate}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE cre_warehouse_goods SET
+		apply_no = #{applyNo},
+		WARE_TYPE = #{wareType},
+		WARE_DESCRIPTION = #{description},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateWarehouseGoodsUnion">
+		UPDATE cre_warehouse_goods_union SET
+		apply_no = #{applyNo},
+		WARE_TYPE = #{wareType},
+		WARE_DESCRIPTION = #{description},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_warehouse_goods
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateByApplyNo">
+		UPDATE cre_warehouse_goods SET
+		apply_no = #{applyNo},
+		model = #{model},
+		buying_price = #{buyingPrice},
+		value_of_assessment = #{valueOfAssessment},
+		maket_value = #{maketValue},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+</mapper>

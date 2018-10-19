@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.reviewedRule.dao.ReviewedRuleDao">
+
+	<select id="findReviewedRule" resultType="reviewedRule">
+		SELECT
+		a.id AS "id",
+		b.reviewed_result AS "passFlag",
+		b.APPLY_NO AS "applyNo",
+		a.reviewed_sheet AS "reviewedSheet",
+		a.reviewed_book AS "reviewedBook",
+		a.reviewed_target AS "reviewedTarget",
+		a.reviewed_tool AS "reviewedTool",
+		a.data_requied AS "dataRequied",
+		a.ban_rule AS "banRule",
+		a.replace_means AS "replaceMeans",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		b.remark AS "remark"
+		FROM
+		cre_reviewed_rule a
+		LEFT JOIN cre_reviewed_result b ON a.ID = b.book_id
+
+		<if test="applyNo != null and applyNo != ''">
+			AND APPLY_NO = #{applyNo}
+		</if>
+
+		<if test="processSequence != null and processSequence != ''">
+			and	 <![CDATA[b.PROCESS_SEQUENCE <= #{processSequence}]]>
+		</if>
+		WHERE a.REVIEWED_SHEET = #{reviewedSheet}
+		<if test="processSequence == null or processSequence == ''">
+			ORDER BY PROCESS_SEQUENCE , a.create_date
+		</if>
+	</select>
+
+	<select id="findRule" resultType="reviewedRule">
+		SELECT
+		a.id AS "id",
+		b.reviewed_result AS "passFlag",
+		b.APPLY_NO AS "applyNo",
+		a.reviewed_sheet AS "reviewedSheet",
+		a.reviewed_book AS "reviewedBook",
+		a.reviewed_target AS "reviewedTarget",
+		a.reviewed_tool AS "reviewedTool",
+		a.data_requied AS "dataRequied",
+		a.ban_rule AS "banRule",
+		a.replace_means AS "replaceMeans",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		b.remark AS "remark"
+		FROM
+		cre_reviewed_rule a
+		LEFT JOIN cre_reviewed_result b ON a.ID = b.book_id AND b.TASK_DEF_KEY = #{taskDefKey}
+		<if test="applyNo != null and applyNo != ''">
+			AND b.APPLY_NO = #{applyNo}
+		</if>
+		WHERE a.REVIEWED_SHEET = #{reviewedSheet}
+		<if test="range != null and range != ''">
+			AND a.RANGE = #{range}
+		</if>
+		<if test="range == ''">
+			AND a.RANGE is null
+		</if>
+	</select>
+
+	<insert id="saveRule" parameterType="java.util.List">
+		INSERT INTO cre_reviewed_result(
+		id,
+		apply_No,
+		TASK_DEF_KEY,
+		PROCESS_SEQUENCE,
+		reviewed_result,
+		remark,
+		BOOK_id,
+		reviewed_office,
+		REVIEWED_SHEET,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES
+		<foreach item="reviewedRulelst" collection="reviewedRulelst" index="index" separator=",">
+			(
+			#{reviewedRulelst.id},
+			#{maps.applyNo},
+			#{maps.taskDefKey},
+			#{maps.processSequence},
+			#{reviewedRulelst.passFlag},
+			#{reviewedRulelst.remark},
+			#{reviewedRulelst.reviewedBook},
+			#{maps.officeId},
+			'1',
+			#{reviewedRulelst.createBy.id},
+			#{reviewedRulelst.createDate},
+			#{reviewedRulelst.updateBy.id},
+			#{reviewedRulelst.updateDate}
+			)
+		</foreach>
+	</insert>
+	<!-- 查询是否存在检查结果 -->
+	<select id="checkReviewedNull" parameterType="java.util.List" resultType="java.lang.String">
+		SELECT
+		a.id AS "id"
+		FROM cre_reviewed_result a
+		where apply_no = #{maps.applyNo}
+		and task_def_key = #{maps.taskDefKey}
+		and BOOK_id = #{maps.bookId}
+		limit 1
+	</select>
+	<!-- 更新检查结果 -->
+	<update id="updataRule" parameterType="java.util.List">
+		<foreach collection="reviewedRulelst" item="reviewedRulelst" open="" close="" index="index" separator=";">
+			UPDATE cre_reviewed_result
+			<set>
+				reviewed_result ='${reviewedRulelst.passFlag}',
+				remark='${reviewedRulelst.remark}',
+				BOOK_id ='${reviewedRulelst.reviewedBook}',
+				reviewed_office='${maps.officeId}',
+				PROCESS_SEQUENCE='${maps.processSequence}',
+				update_by=#{reviewedRule.updateBy.id},
+				update_date=#{reviewedRule.updateDate}
+			</set>
+			WHERE BOOK_id = '${reviewedRulelst.reviewedBook}' and apply_no = '${maps.applyNo}' and task_def_key = '${maps.taskDefKey}'
+		</foreach>
+	</update>
+	<!-- 查询是否存在检查结果 -->
+	<select id="checkReviewed" parameterType="java.util.List" resultType="java.lang.String">
+		SELECT
+		a.id AS "id"
+		FROM cre_reviewed_result a
+		where apply_no = #{maps.applyNo}
+		and task_def_key = #{maps.taskDefKey}
+		and REVIEWED_SHEET = #{maps.reviewedSheet}
+		limit 1
+	</select>
+
+	<select id="findApplyAmont" resultType="java.lang.String">
+		SELECT
+		CASE WHEN <![CDATA[CONTRACT_AMOUNT <= 1000000]]> THEN '1'
+		WHEN <![CDATA[CONTRACT_AMOUNT > 3000000]]> THEN '3'
+		ELSE '2'
+		END AS approAmount
+		FROM
+		cre_check_approve
+		WHERE APPLY_NO = #{applyNo} and task_def_key = #{taskDefKey}
+	</select>
+
+	<select id="getProductId" resultType="java.lang.String">
+		SELECT
+		APPRO_PRODUCT_TYPE_CODE
+		FROM
+		cre_check_approve
+		WHERE APPLY_NO = #{applyNo}
+		AND TASK_DEF_KEY = #{taskDefKey}
+	</select>
+	
+	<select id="getProductIdByRecent" resultType="java.lang.String">
+		SELECT
+		APPRO_PRODUCT_TYPE_CODE
+		FROM
+		cre_check_approve
+		WHERE APPLY_NO = #{applyNo}
+		ORDER  BY  UPDATE_DATE  DESC LIMIT 1
+	</select>
+
+	<delete id="deleteInfo">
+		DELETE
+		FROM
+		cre_reviewed_result
+		WHERE
+			TASK_DEF_KEY = #{maps.taskDefKey}
+		AND
+			APPLY_NO = #{maps.applyNo}
+		AND BOOK_id IN (
+		SELECT ID FROM cre_reviewed_rule
+		WHERE REVIEWED_SHEET = #{maps.sheetId}
+		)
+	</delete>
+
+</mapper>

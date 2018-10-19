@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.repayPlanUnion.dao.RepayPlanUnionDao">
+    
+	<sql id="repayPlanUnionColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.approve_id AS "approveId",
+		a.contract_no AS "contractNo",
+		a.duebill_id AS "duebillId",
+		a.period_num AS "periodNum",
+		a.deduct_date AS "deductDate",
+		a.repay_amount AS "repayAmount",
+		a.service_fee AS "serviceFee",
+		a.management_fee AS "managementFee",
+		a.capital_amount AS "capitalAmount",
+		a.interest_amount AS "interestAmount",
+		a.bid_capital_amount AS "bidCapitalAmount",
+		a.bid_interest_amount AS "bidInterestAmount",
+		a.bid_repay_amount AS "bidRepayAmount",
+		a.dif_capital_amount AS "difCapitalAmount",
+		a.dif_interest_amount AS "difInterestAmount",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.overdue_penalty AS "overduePenalty",
+		a.task_def_key AS "taskDefKey"
+	</sql>
+	
+	<sql id="repayPlanUnionJoins">
+	</sql>
+    
+	<select id="get" resultType="RepayPlanUnion">
+		SELECT 
+			<include refid="repayPlanUnionColumns"/>
+		FROM cre_repay_plan_union a
+		<include refid="repayPlanUnionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="RepayPlanUnion">
+		SELECT 
+			<include refid="repayPlanUnionColumns"/>
+		FROM cre_repay_plan_union a
+		<include refid="repayPlanUnionJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_repay_plan_union a
+		<include refid="repayPlanUnionJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="RepayPlanUnion">
+		SELECT 
+			<include refid="repayPlanUnionColumns"/>
+		FROM cre_repay_plan_union a
+		<include refid="repayPlanUnionJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_repay_plan_union(
+			id,
+			apply_no,
+			approve_id,
+			contract_no,
+			duebill_id,
+			period_num,
+			deduct_date,
+			repay_amount,
+			service_fee,
+			management_fee,
+			capital_amount,
+			interest_amount,
+			bid_capital_amount,
+			bid_interest_amount,
+			bid_repay_amount,
+			dif_capital_amount,
+			dif_interest_amount,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			overdue_penalty,
+			task_def_key
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{approveId},
+			#{contractNo},
+			#{duebillId},
+			#{periodNum},
+			#{deductDate},
+			#{repayAmount},
+			#{serviceFee},
+			#{managementFee},
+			#{capitalAmount},
+			#{interestAmount},
+			#{bidCapitalAmount},
+			#{bidInterestAmount},
+			#{bidRepayAmount},
+			#{difCapitalAmount},
+			#{difInterestAmount},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{overduePenalty},
+			#{taskDefKey}
+		)
+	</insert>
+	
+	<insert id="saveRepayPlanUnionList">
+		INSERT INTO cre_repay_plan_union(
+			id,
+			APPROVE_ID,
+			apply_no,
+			contract_no,
+			period_num,
+			repay_amount,
+			interest_amount,
+			service_fee,
+			management_fee,
+			capital_amount,
+			deduct_date,
+			overdue_penalty,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			task_def_key,
+			bid_capital_amount,
+			bid_interest_amount,
+			bid_repay_amount,
+			dif_capital_amount,
+			dif_interest_amount 
+		) VALUES
+		<foreach item="repayPlanUnion" collection="repayPlanUnions" index="index" separator=",">
+		 (
+			#{repayPlanUnion.id},
+			#{repayPlanUnion.approveId},
+			#{repayPlanUnion.applyNo},
+			#{repayPlanUnion.contractNo},
+			#{repayPlanUnion.periodNum},
+			#{repayPlanUnion.repayAmount},
+			#{repayPlanUnion.interestAmount},
+			#{repayPlanUnion.serviceFee},
+			#{repayPlanUnion.managementFee},
+			#{repayPlanUnion.capitalAmount},
+			#{repayPlanUnion.deductDate},
+			#{repayPlanUnion.overduePenalty},
+			#{repayPlanUnion.createBy.id},
+			#{repayPlanUnion.createDate},
+			#{repayPlanUnion.updateBy.id},
+			#{repayPlanUnion.updateDate}, 
+			#{repayPlanUnion.taskDefKey},
+			#{repayPlanUnion.bidCapitalAmount},
+			#{repayPlanUnion.bidInterestAmount},
+			#{repayPlanUnion.bidRepayAmount},
+			#{repayPlanUnion.difCapitalAmount},
+			#{repayPlanUnion.difInterestAmount}
+		)
+		</foreach>
+	</insert>
+	
+	
+	<update id="update">
+		UPDATE cre_repay_plan_union SET 	
+			apply_no = #{applyNo},
+			approve_id = #{approveId},
+			contract_no = #{contractNo},
+			duebill_id = #{duebillId},
+			period_num = #{periodNum},
+			deduct_date = #{deductDate},
+			repay_amount = #{repayAmount},
+			service_fee = #{serviceFee},
+			management_fee = #{managementFee},
+			capital_amount = #{capitalAmount},
+			interest_amount = #{interestAmount},
+			bid_capital_amount = #{bidCapitalAmount},
+			bid_interest_amount = #{bidInterestAmount},
+			bid_repay_amount = #{bidRepayAmount},
+			dif_capital_amount = #{difCapitalAmount},
+			dif_interest_amount = #{difInterestAmount},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			overdue_penalty = #{overduePenalty},
+			task_def_key = #{taskDefKey}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_repay_plan_union
+		WHERE id = #{id}
+	</update>
+	
+	<update id="deleteRepayPlanUnion">
+		DELETE FROM cre_repay_plan_union
+		WHERE 
+		apply_no = #{applyNo}
+		<if test="taskDefKey != null and taskDefKey != '' ">
+		AND task_def_key = #{taskDefKey}
+		</if>
+		<if test="approId != null and approId != '' ">
+		AND approve_id = #{approId}
+		</if>
+	</update>
+	
+	<select id="getRepayPlanByParam" resultType="RepayPlanUnion">
+		SELECT 
+			<include refid="repayPlanUnionColumns"/>
+		FROM cre_repay_plan_union a
+		WHERE a.task_def_key = #{taskDefKey}  and a.apply_no =#{applyNo} and a.approve_id=#{approId} order by a.period_num 
+	</select>
+	<select id="getRepayAndContract" resultType="com.resoft.outinterface.rest.newged.entity.OrderContractReqForm">
+		SELECT 
+		   sum(ifnull(a.MANAGEMENT_FEE,0)) AS "accountManageFee",
+		   sum(ifnull(a.SERVICE_FEE,0))  AS "serviceFee",
+		   b.CONTRACT_PROVINCE as "contractProvince",
+		   b.CONTRACT_CITY AS "contractCity",
+		   b.CONTRACT_DISTINCT AS "contractDistinct"
+	  FROM cre_repay_plan_union a
+	  left join cre_contract b on a.contract_no = b.contract_no
+	  WHERE a.task_def_key = #{taskDefKey}  and a.apply_no =#{applyNo} and a.approve_id=#{approId} order by a.period_num 
+	 </select>
+	
+	
+	
+	<select id="getByApplyTaskAppro" resultType="com.resoft.outinterface.rest.ged.entity.response.GedRepayPlanResponse">
+		SELECT 
+			a.MANAGEMENT_FEE AS "managementFee",
+			a.PERIOD_NUM AS "periodNum",
+			a.DEDUCT_DATE AS "deductDate",
+			a.SERVICE_FEE AS "serviceFee"
+		FROM cre_repay_plan_union a
+		WHERE a.task_def_key = #{taskDefKey}  and a.apply_no =#{applyNo} and a.approve_id=#{approId} order by a.period_num 
+	</select>
+	
+	
+	
+</mapper>

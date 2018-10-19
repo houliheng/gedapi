@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.stockInfo.dao.StockInfoDao">
+    
+	<sql id="stockInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.target_company AS "targetCompany",
+		a.stock_company AS "stockCompany",
+		a.registered_capital AS "registeredCapital",
+		a.paid_in_capital AS "paidInCapital",
+		a.business_valuation AS "businessValuation",
+		a.stock_service_fee AS "stockServiceFee",
+		a.addition_money AS "additionMoney",
+		a.one_transfer_amount AS "oneTransferAmount",
+		a.quasi_share_ratio AS "quasiShareRatio",
+		a.increase_proportion AS "increaseProportion",
+		a.one_transfer_proportion AS "oneTransferProportion",
+		a.dividend_amount AS "dividendAmount",
+		a.add_service_fee AS "addServiceFee",
+		a.chairman_name AS "chairmanName",
+		a.contract_clause AS "contractClause",
+		a.guarantee_measures AS "guaranteeMeasures",
+		a.other_contro_measures AS "otherControMeasures",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.grade AS "grade",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="stockInfoJoins">
+	</sql>
+	
+	
+	
+	<select id="getStockInfoByApplyGrade" resultType="StockInfo">
+		SELECT 
+			<include refid="stockInfoColumns"/>
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		WHERE a.del_flag = '0'
+			and a.APPLY_NO=#{applyNo}
+			and a.grade=#{grade}
+			order by a.CREATE_DATE desc
+	</select>
+	
+	
+    
+	<select id="get" resultType="StockInfo">
+		SELECT 
+			<include refid="stockInfoColumns"/>
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="StockInfo">
+		SELECT 
+			<include refid="stockInfoColumns"/>
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	
+	<select id="getStockInfoByApplyNo" resultType="StockInfo">
+		SELECT 
+			<include refid="stockInfoColumns"/>
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		<where>
+			a.del_flag = '0'
+			and a.APPLY_NO=#{applyNo}
+			order by a.grade desc limit 1
+		</where>
+	</select>
+	
+	<select id="selectActRuTasKDefKeyByInstId" resultType="java.lang.String">
+		SELECT
+			task_def_key_
+		FROM
+			act_hi_taskinst t1 where t1.PROC_INST_ID_ = #{procInstId}
+			order by START_TIME_ desc LIMIT 0,1
+	</select>
+	
+	<select id="findAllList" resultType="StockInfo">
+		SELECT 
+			<include refid="stockInfoColumns"/>
+		FROM cre_stock_info a
+		<include refid="stockInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="saveOnlyApplyNo">
+		INSERT INTO cre_stock_info(id,apply_no,grade,del_flag,create_by,create_date) 
+		VALUES 
+		(#{id},#{applyNo},#{grade},#{delFlag},#{createBy.id},#{createDate})
+	</insert>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_info(
+			id,
+			apply_no,
+			target_company,
+			stock_company,
+			registered_capital,
+			paid_in_capital,
+			business_valuation,
+			stock_service_fee,
+			addition_money,
+			one_transfer_amount,
+			quasi_share_ratio,
+			increase_proportion,
+			one_transfer_proportion,
+			dividend_amount,
+			add_service_fee,
+			chairman_name,
+			contract_clause,
+			guarantee_measures,
+			other_contro_measures,
+			grade,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{targetCompany},
+			#{stockCompany},
+			#{registeredCapital},
+			#{paidInCapital},
+			#{businessValuation},
+			#{stockServiceFee},
+			#{additionMoney},
+			#{oneTransferAmount},
+			#{quasiShareRatio},
+			#{increaseProportion},
+			#{oneTransferProportion},
+			#{dividendAmount},
+			#{addServiceFee},
+			#{chairmanName},
+			#{contractClause},
+			#{guaranteeMeasures},
+			#{otherControMeasures},
+			#{grade},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_info SET 	
+			apply_no = #{applyNo},
+			target_company = #{targetCompany},
+			stock_company = #{stockCompany},
+			registered_capital = #{registeredCapital},
+			paid_in_capital = #{paidInCapital},
+			business_valuation = #{businessValuation},
+			stock_service_fee = #{stockServiceFee},
+			addition_money = #{additionMoney},
+			one_transfer_amount = #{oneTransferAmount},
+			quasi_share_ratio = #{quasiShareRatio},
+			increase_proportion = #{increaseProportion},
+			one_transfer_proportion = #{oneTransferProportion},
+			dividend_amount = #{dividendAmount},
+			add_service_fee = #{addServiceFee},
+			chairman_name = #{chairmanName},
+			contract_clause = #{contractClause},
+			guarantee_measures = #{guaranteeMeasures},
+			other_contro_measures = #{otherControMeasures},
+			grade=#{grade},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE cre_stock_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<delete id="deleteStockInfoByApplyGrade">
+	delete  from cre_stock_info 
+		WHERE apply_no = #{applyNo}
+				and grade=#{grade}
+	</delete>
+</mapper>

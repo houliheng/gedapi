@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetComInfo.dao.MortageEquipmentDao">
+    
+	<sql id="MortageEquipmentColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.model AS "model",
+		a.buying_price AS "buyingPrice",
+		a.value_of_assessment AS "valueOfAssessment",
+		a.maket_value AS "maketValue"
+	</sql>
+	
+	<sql id="MortageEquipmentJoins">
+	</sql>
+    
+	<select id="get" resultType="MortageEquipment">
+		SELECT 
+			<include refid="MortageEquipmentColumns"/>
+		FROM cre_mortage_equipment a
+		<include refid="MortageEquipmentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getPageByApplyNo" resultType="MortageEquipment">
+		SELECT
+		<include refid="MortageEquipmentColumns" />
+		FROM cre_mortage_equipment a
+		<where>
+			and a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="findList" resultType="MortageEquipment">
+		SELECT 
+			<include refid="MortageEquipmentColumns"/>
+		FROM cre_mortage_equipment a
+		<include refid="MortageEquipmentJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_mortage_equipment a
+		<include refid="MortageEquipmentJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MortageEquipment">
+		SELECT 
+			<include refid="MortageEquipmentColumns"/>
+		FROM cre_mortage_equipment a
+		<include refid="MortageEquipmentJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+	INSERT INTO cre_mortage_equipment(
+		id,
+		apply_no,
+		model,
+		buying_price,
+		value_of_assessment,
+		maket_value,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+	) VALUES (
+	#{id},
+	#{applyNo},
+	#{model},
+	#{buyingPrice},
+	#{valueOfAssessment},
+	#{maketValue},
+	#{createBy.id},
+	#{createDate},
+	#{updateBy.id},
+	#{updateDate}
+	)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_mortage_equipment SET 	
+			apply_no = #{applyNo},
+			model = #{model},
+			buying_price = #{buyingPrice},
+			value_of_assessment = #{valueOfAssessment},
+			maket_value = #{maketValue},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_mortage_equipment
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_mortage_equipment SET 	
+			apply_no = #{applyNo},
+			model = #{model},
+			buying_price = #{buyingPrice},
+			value_of_assessment = #{valueOfAssessment},
+			maket_value = #{maketValue},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+</mapper>

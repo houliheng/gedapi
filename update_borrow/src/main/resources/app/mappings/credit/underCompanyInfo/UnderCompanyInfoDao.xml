@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.underCompanyInfo.dao.UnderCompanyInfoDao">
+    
+	<sql id="underCompanyInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.proc_inst_id AS "procInstId",
+		a.loan_status AS "loanStatus",
+		a.busi_reg_name AS "busiRegName",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.paid_in_capital AS "paidInCapital",
+		a.register_capital AS "registerCapital",
+		a.company_start_date AS "companyStartDate",
+		a.corporation_name AS "corporationName",
+		a.corporation_card_id_no AS "corporationCardIdNo",
+		a.reg_distinct AS "regDistinct",
+		a.category_main AS "categoryMain",
+		a.category_large AS "categoryLarge",
+		a.category_medium AS "categoryMedium",
+		a.category_small AS "categorySmall",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.register_province AS "registerProvince",
+		a.register_city AS "registerCity",
+		a.register_distinct AS "registerDistinct",
+		a.register_details AS "registerDetails",
+		a.office_province AS "officeProvince",
+		a.office_city AS "officeCity",
+		a.office_distinct AS "officeDistinct",
+		a.office_details AS "officeDetails",
+		a.company_info AS "companyInfo",
+		a.company_product_info AS "companyProductInfo",
+		a.stock_info AS "stockInfo",
+		a.credit_corporation AS "creditCorporation",
+		a.other_loanplat_info AS "otherLoanplatInfo",
+		a.is_loan AS "isLoan",
+		a.loan_recode AS "loanRecode",
+		a.is_over_due AS "isOverDue",
+		a.source_of_creregist AS "sourceOfCreregist",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.gq_company_name AS "gqCompanyName",
+		a.gq_area_name AS "gqAreaName",
+		a.loan_be_company AS "loanBeCompany"
+	</sql>
+	
+	<sql id="underCompanyInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="UnderCompanyInfo">
+		SELECT 
+			<include refid="underCompanyInfoColumns"/>
+		FROM cre_under_company_info a
+		<include refid="underCompanyInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByApplyNo" resultType="UnderCompanyInfo">
+		SELECT
+			<include refid="underCompanyInfoColumns"/>
+		FROM cre_under_company_info a
+		<include refid="underCompanyInfoJoins"/>
+		WHERE a.apply_no = #{applyNo}
+	</select>
+
+	<select id="findList" resultType="UnderCompanyInfo">
+		SELECT 
+			<include refid="underCompanyInfoColumns"/>
+		FROM cre_under_company_info a
+		<include refid="underCompanyInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--<select id="getByApplyNo" resultType="UnderCompanyInfo">-->
+		<!--SELECT-->
+		<!--<include refid="underCompanyInfoColumns"/>-->
+		<!--FROM cre_under_company_info a-->
+		<!--<include refid="underCompanyInfoJoins"/>-->
+		<!--<where>-->
+			<!--a.apply_no = #{applyNo}-->
+		<!--</where>-->
+	<!--</select>-->
+
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_under_company_info a
+		<include refid="underCompanyInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="UnderCompanyInfo">
+		SELECT 
+			<include refid="underCompanyInfoColumns"/>
+		FROM cre_under_company_info a
+		<include refid="underCompanyInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_under_company_info(
+			id,
+			apply_no,
+			proc_inst_id,
+			loan_status,
+			busi_reg_name,
+			un_soc_credit_no,
+			busi_lic_reg_no,
+			paid_in_capital,
+			register_capital,
+			company_start_date,
+			corporation_name,
+			corporation_card_id_no,
+			reg_distinct,
+			category_main,
+			category_large,
+			category_medium,
+			category_small,
+			operate_province,
+			operate_city,
+			operate_distinct,
+			operate_details,
+			register_province,
+			register_city,
+			register_distinct,
+			register_details,
+			office_province,
+			office_city,
+			office_distinct,
+			office_details,
+			company_info,
+			company_product_info,
+			stock_info,
+			credit_corporation,
+			other_loanplat_info,
+			is_loan,
+			loan_recode,
+			is_over_due,
+			source_of_creregist,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			gq_company_name,
+			gq_area_name,
+			loan_be_company
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{procInstId},
+			#{loanStatus},
+			#{busiRegName},
+			#{unSocCreditNo},
+			#{busiLicRegNo},
+			#{paidInCapital},
+			#{registerCapital},
+			#{companyStartDate},
+			#{corporationName},
+			#{corporationCardIdNo},
+			#{regDistinct},
+			#{categoryMain},
+			#{categoryLarge},
+			#{categoryMedium},
+			#{categorySmall},
+			#{operateProvince},
+			#{operateCity},
+			#{operateDistinct},
+			#{operateDetails},
+			#{registerProvince},
+			#{registerCity},
+			#{registerDistinct},
+			#{registerDetails},
+			#{officeProvince},
+			#{officeCity},
+			#{officeDistinct},
+			#{officeDetails},
+			#{companyInfo},
+			#{companyProductInfo},
+			#{stockInfo},
+			#{creditCorporation},
+			#{otherLoanplatInfo},
+			#{isLoan},
+			#{loanRecode},
+			#{isOverDue},
+			#{sourceOfCreregist},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{gqCompanyName},
+			#{gqAreaName},
+			#{loanBeCompany}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_under_company_info SET 	
+			apply_no = #{applyNo},
+			proc_inst_id = #{procInstId},
+			loan_status = #{loanStatus},
+			busi_reg_name = #{busiRegName},
+			un_soc_credit_no = #{unSocCreditNo},
+			busi_lic_reg_no = #{busiLicRegNo},
+			paid_in_capital = #{paidInCapital},
+			register_capital = #{registerCapital},
+			company_start_date = #{companyStartDate},
+			corporation_name = #{corporationName},
+			corporation_card_id_no = #{corporationCardIdNo},
+			reg_distinct = #{regDistinct},
+			category_main = #{categoryMain},
+			category_large = #{categoryLarge},
+			category_medium = #{categoryMedium},
+			category_small = #{categorySmall},
+			operate_province = #{operateProvince},
+			operate_city = #{operateCity},
+			operate_distinct = #{operateDistinct},
+			operate_details = #{operateDetails},
+			register_province = #{registerProvince},
+			register_city = #{registerCity},
+			register_distinct = #{registerDistinct},
+			register_details = #{registerDetails},
+			office_province = #{officeProvince},
+			office_city = #{officeCity},
+			office_distinct = #{officeDistinct},
+			office_details = #{officeDetails},
+			company_info = #{companyInfo},
+			company_product_info = #{companyProductInfo},
+			stock_info = #{stockInfo},
+			credit_corporation = #{creditCorporation},
+			other_loanplat_info = #{otherLoanplatInfo},
+			is_loan = #{isLoan},
+			loan_recode = #{loanRecode},
+			is_over_due = #{isOverDue},
+			source_of_creregist = #{sourceOfCreregist},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			gq_company_name = #{gqCompanyName},
+			gq_area_name = #{gqAreaName},
+			loan_be_company = #{loanBeCompany}
+		WHERE id = #{id}
+	</update>
+	<update id="updateByApplyNo">
+		UPDATE cre_under_company_info SET
+		busi_reg_name = #{busiRegName},
+		un_soc_credit_no = #{unSocCreditNo},
+		busi_lic_reg_no = #{busiLicRegNo},
+		register_capital = #{registerCapital},
+		paid_in_capital = #{paidInCapital},
+		company_start_date = #{companyStartDate},
+		corporation_name = #{corporationName},
+		corporation_card_id_no = #{corporationCardIdNo},
+		reg_distinct = #{regDistinct},
+		operate_province = #{operateProvince},
+		operate_city = #{operateCity},
+		operate_distinct = #{operateDistinct},
+		operate_details = #{operateDetails},
+		register_province = #{registerProvince},
+		register_city = #{registerCity},
+		register_distinct = #{registerDistinct},
+		register_details = #{registerDetails},
+		office_province = #{officeProvince},
+		office_city = #{officeCity},
+		office_distinct = #{officeDistinct},
+		office_details = #{officeDetails},
+		category_main = #{categoryMain},
+		category_large = #{categoryLarge},
+		category_medium = #{categoryMedium},
+		category_small = #{categorySmall},
+		company_info = #{companyInfo},
+		company_product_info = #{companyProductInfo},
+		stock_info = #{stockInfo},
+		credit_corporation = #{creditCorporation},
+		other_loanplat_info = #{otherLoanplatInfo},
+		is_loan = #{isLoan},
+		loan_recode = #{loanRecode},
+		is_over_due = #{isOverDue},
+		source_of_creregist = #{sourceOfCreregist}
+		WHERE apply_no = #{applyNo}
+	</update>
+
+	<update id="delete">
+		UPDATE cre_under_company_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updayeStatus">
+		UPDATE cre_under_company_info a
+		SET a.LOAN_STATUS = #{status}
+		WHERE
+		a.APPLY_NO = #{applyNo}
+	</update>
+
+	<update id="updateOrgInfoByApplyNo">
+		UPDATE cre_under_company_info SET
+		gq_company_name = #{gqCompanyName},
+		gq_area_name = #{gqAreaName},
+		loan_be_company = #{loanBeCompany}
+		where apply_no = #{applyNo}
+	</update>
+
+    <update id="updateGedAccount">
+		UPDATE cre_under_company_info SET
+		ged_number = #{gedNumber}
+		where apply_no = #{applyNo}
+	</update>
+
+
+	<select id="pushOrder" resultType="com.resoft.outinterface.rest.newged.entity.AddOrderRequest">
+		select
+			b.CUST_NAME as "custName",
+			b.ID_NUM  as "idNum",
+			a.CREATE_DATE as "applyDate",
+			c.APPRO_PRODUCT_TYPE_CODE  as "productType",
+			c.APPRO_PRODUCT_TYPE_NAME as "productName",
+			c.loan_main_body_type  as "custType",
+			b.MOBILE_NUM as "phoneNo",
+			c.CONTRACT_AMOUNT as "applyAmount",
+			c.APPRO_PERIOD_VALUE as "applyPeriod",
+			a.BUSI_REG_NAME as "companyName",
+			"1" as "companyCardType",
+			a.UN_SOC_CREDIT_NO  as "companyCardNum",
+			a.REGISTER_PROVINCE as "province",
+			a.REGISTER_CITY as "city",
+			a.REGISTER_DISTINCT as "district",
+			a.REGISTER_CITY as "contCity",
+			a.apply_no as "applyId",
+			a.BUSI_LIC_REG_NO as "businessLicence",
+			c.APPRO_YEAR_RATE as "approveMonthRate",
+			c.APPRO_LOAN_REPAY_TYPE as "repaymentStyle",
+			a.CORPORATION_NAME as "legalName",
+			b.MOBILE_NUM as "legalMobile",
+			a.CORPORATION_CARD_ID_NO  as "legalCardNumber",
+			c.loan_usefulness_code as "loanPurpost"
+		from cre_under_company_info a
+		LEFT JOIN cre_under_cust_info	b  on a.apply_no = b.apply_no
+		LEFT JOIN cre_check_approve c on c.apply_no = b.apply_no
+		where a.apply_no = #{applyNo}
+	</select>
+
+
+</mapper>

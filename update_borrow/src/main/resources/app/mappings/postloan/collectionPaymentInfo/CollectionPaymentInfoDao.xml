@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.collectionPaymentInfo.dao.CollectionPaymentInfoDao">
+    
+	<sql id="collectionPaymentInfoColumns">
+		a.contract_no AS "contractNo",
+		a.collection_type AS "collectionType",
+		a.payment_date AS "paymentDate",
+		a.payment_amount AS "paymentAmount",
+		a.payment_type AS "paymentType",
+		a.collector AS "collector"
+	</sql>
+	
+	<sql id="collectionPaymentInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="CollectionPaymentInfo">
+		SELECT 
+			<include refid="collectionPaymentInfoColumns"/>
+		FROM pl_collection_payment_info a
+		<include refid="collectionPaymentInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CollectionPaymentInfo">
+		SELECT 
+			<include refid="collectionPaymentInfoColumns"/>
+		FROM pl_collection_payment_info a
+		<include refid="collectionPaymentInfoJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="collectionType != null and collectionType != ''">
+				AND a.collection_type = #{collectionType}
+			</if>
+			<if test="paymentDate != null and paymentDate != ''">
+				AND a.payment_date = #{paymentDate}
+			</if>
+			<if test="paymentAmount != null and paymentAmount != ''">
+				AND a.payment_amount = #{paymentAmount}
+			</if>
+			<if test="paymentType != null and paymentType != ''">
+				AND a.payment_type = #{paymentType}
+			</if>
+			<if test="collector != null and collector != ''">
+				AND a.collector = #{collector}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_collection_payment_info a
+		<include refid="collectionPaymentInfoJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="collectionType != null and collectionType != ''">
+				AND a.collection_type = #{collectionType}
+			</if>
+			<if test="paymentDate != null and paymentDate != ''">
+				AND a.payment_date = #{paymentDate}
+			</if>
+			<if test="paymentAmount != null and paymentAmount != ''">
+				AND a.payment_amount = #{paymentAmount}
+			</if>
+			<if test="paymentType != null and paymentType != ''">
+				AND a.payment_type = #{paymentType}
+			</if>
+			<if test="collector != null and collector != ''">
+				AND a.collector = #{collector}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CollectionPaymentInfo">
+		SELECT 
+			<include refid="collectionPaymentInfoColumns"/>
+		FROM pl_collection_payment_info a
+		<include refid="collectionPaymentInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_collection_payment_info(
+			contract_no,
+			collection_type,
+			payment_date,
+			payment_amount,
+			payment_type,
+			collector
+		) VALUES (
+			#{contractNo},
+			#{collectionType},
+			#{paymentDate},
+			#{paymentAmount},
+			#{paymentType},
+			#{collector}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_collection_payment_info SET 	
+			contract_no = #{contractNo},
+			collection_type = #{collectionType},
+			payment_date = #{paymentDate},
+			payment_amount = #{paymentAmount},
+			payment_type = #{paymentType},
+			collector = #{collector}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_collection_payment_info
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

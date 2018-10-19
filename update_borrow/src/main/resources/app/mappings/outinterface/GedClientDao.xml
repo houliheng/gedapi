@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.rest.ged.dao.GedClientDao">
+	
+	
+	
+	<select id="queryGuanTInfoByApplyNo" resultType="com.resoft.outinterface.rest.ged.entity.GuanETInfo">
+		select 
+		a.apply_no AS "orderNo",
+		a.introduction_of_company AS "intrOfCompany",
+		a.mix_loan_usage AS "mixLoanUsage",
+		a.other AS "other",
+		a.source_of_pepayment1 AS "sourceOfDepayment1",
+		a.source_of_pepayment2 AS "sourceOfDepayment2",
+		a.source_of_pepayment3 AS "sourceOfDepayment3",
+		a.source_of_pepayment4 AS "sourceOfDepayment4",
+		a.introduction_of_com_production AS "intrOfComProduction",
+		a.borrow_mate_punish    as "borrowAndMatePunish",
+		a.borrow_invole_info    as "borrowInvolveInfo",
+		a.borrow_crima_admin_punish as "borrowCrimaAdminPunish",
+		a.borrow_loan_blance as borrowNewLoanBlance,
+		a.PLATFORM_OVERDUE_TIME as "platformOverdueTime",
+		a.PLATFORM_OVERDUE_MONEY as "platformOverdueMoney",
+		b.label AS "isLoan",
+		f.loan_recode AS "loanRecode",
+		c.label AS "isOverdue",
+		d.label AS "sourceOfCreRegist"
+		from cre_gqget_com_info a 
+		left join cre_bank_loan f on a.apply_no = f.apply_no
+		left join sys_dict b on f.is_loan = b.value and b.type='IS_HAVE'
+		left join sys_dict c on f.is_overdue = c.value and c.type='IS_HAVE'
+		left join sys_dict d on f.source_of_credit_registries = d.value and d.type='CREDIT_REGISTRIES_LEVEL'
+		where a.APPLY_NO =#{applyNo}
+	</select>
+	
+	
+	<select id="queryGetCarInfos" resultType="com.resoft.outinterface.rest.ged.entity.GqgetAssetCarInfo">
+		select 
+		a.gqget_apply_no AS "gqgetApplyNo",
+		a.gqget_vehicle_no AS "gqgetVehicleNo",
+		a.gqget_used_years AS "gqgetUsedYears",
+		a.gqget_car_evaluate_price AS "gqgetCarEvaluatePrice",
+		a.gqget_market_price AS "gqgetMarketPrice"
+		from cre_gqget_asset_car a where a.GQGET_APPLY_NO =#{applyNo} and a.DEL_FLAG = '0'
+	</select>
+	
+	<select id="queryGqHouseInfo" 	resultType="com.resoft.outinterface.rest.ged.entity.GqgetAssetHouseInfo">
+		select 
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.evaluate_price AS "evaluatePrice",
+		a.market_price AS "marketPrice"
+		from cre_gqget_asset_house a where a.apply_no = #{applyNo} 
+	</select>
+	
+	<select id="queryLoanBank" resultType="com.resoft.outinterface.rest.ged.entity.LoanBankInfo">
+		select 
+		b.label AS "isLoan",
+		a.loan_recode AS "loanRecode",
+		c.label AS "isOverdue",
+		d.label AS "sourceOfCreRegist"
+		from cre_bank_loan a left join sys_dict b on a.is_loan = b.value
+		left join sys_dict c on a.is_overdue = b.value
+		left join sys_dict d on a.source_of_credit_registries = b.value
+		where a.APPLY_NO = #{applyNo}
+	</select>
+	
+	<select id="queryGuanTInfoByApplyNoAndApproveId" resultType="com.resoft.outinterface.rest.ged.entity.GuanETInfo">
+		select 
+		a.apply_no AS "orderNo",
+		a.introduction_of_company AS "intrOfCompany",
+		a.mix_loan_usage AS "mixLoanUsage",
+		a.other AS "other",
+		a.source_of_pepayment1 AS "sourceOfDepayment1",
+		a.source_of_pepayment2 AS "sourceOfDepayment2",
+		a.source_of_pepayment3 AS "sourceOfDepayment3",
+		a.source_of_pepayment4 AS "sourceOfDepayment4",
+		a.introduction_of_com_production AS "intrOfComProduction",
+		a.borrow_mate_punish    as "borrowAndMatePunish",
+		a.borrow_invole_info    as "borrowInvolveInfo",
+		a.borrow_crima_admin_punish as "borrowCrimaAdminPunish",
+		a.borrow_loan_blance as borrowNewLoanBlance,
+		a.PLATFORM_OVERDUE_TIME as "platformOverdueTime",
+		a.PLATFORM_OVERDUE_MONEY as "platformOverdueMoney",
+		b.label AS "isLoan",
+		a.loan_recode AS "loanRecode",
+		c.label AS "isOverdue",
+		d.label AS "sourceOfCreRegist",
+		a.APPROVE_ID as "orderSubNo"
+		from cre_gqget_com_info_union a 
+		left join sys_dict b on a.is_loan = b.value and b.type='IS_HAVE'
+		left join sys_dict c on a.is_overdue = c.value and c.type='IS_HAVE'
+		left join sys_dict d on a.source_of_credit_registries = d.value and d.type='CREDIT_REGISTRIES_LEVEL'
+		where a.APPLY_NO =#{applyNo} and a.APPROVE_ID = #{approveId}
+	</select>
+	
+	
+	<select id="queryGetCarInfosUnion" resultType="com.resoft.outinterface.rest.ged.entity.GqgetAssetCarInfo">
+		select 
+		a.gqget_apply_no AS "gqgetApplyNo",
+		a.gqget_vehicle_no AS "gqgetVehicleNo",
+		a.gqget_used_years AS "gqgetUsedYears",
+		a.gqget_car_evaluate_price AS "gqgetCarEvaluatePrice",
+		a.gqget_market_price AS "gqgetMarketPrice"
+		from cre_gqget_asset_car_union a where a.GQGET_APPLY_NO =#{applyNo} and a.APPROVE_ID = #{approveId}
+	</select>
+	
+	<select id="queryGqHouseInfoUnion" 	resultType="com.resoft.outinterface.rest.ged.entity.GqgetAssetHouseInfo">
+		select 
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.evaluate_price AS "evaluatePrice",
+		a.market_price AS "marketPrice"
+		from cre_gqget_asset_house_union a where a.apply_no = #{applyNo} and a.APPROVE_ID = #{approveId}
+	</select>
+</mapper>

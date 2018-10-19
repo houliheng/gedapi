@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.crePurchaseInfo.dao.PurchaseInfoDao">
+    
+	<sql id="purchaseInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.commodity_name AS "commodityName",
+		a.commodity_format AS "commodityFormat",
+		a.commodity_num AS "commodityNum",
+		a.commodity_company AS "commodityCompany",
+		a.commodity_pre_price AS "commodityPrePrice",
+		a.commodity_discount_price AS "commodityDiscountPrice",
+		a.commodity_margin AS "commodityMargin",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="purchaseInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="PurchaseInfo">
+		SELECT 
+			<include refid="purchaseInfoColumns"/>
+		FROM cre_purchase_info a
+		<include refid="purchaseInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PurchaseInfo">
+		SELECT 
+			<include refid="purchaseInfoColumns"/>
+		FROM cre_purchase_info a
+		<include refid="purchaseInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_purchase_info a
+		<include refid="purchaseInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="PurchaseInfo">
+		SELECT 
+			<include refid="purchaseInfoColumns"/>
+		FROM cre_purchase_info a
+		<include refid="purchaseInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_purchase_info(
+			id,
+			apply_no,
+			commodity_name,
+			commodity_format,
+			commodity_num,
+			commodity_company,
+			commodity_pre_price,
+			commodity_discount_price,
+			commodity_margin,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{commodityName},
+			#{commodityFormat},
+			#{commodityNum},
+			#{commodityCompany},
+			#{commodityPrePrice},
+			#{commodityDiscountPrice},
+			#{commodityMargin},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_purchase_info SET 	
+			apply_no = #{applyNo},
+			commodity_name = #{commodityName},
+			commodity_format = #{commodityFormat},
+			commodity_num = #{commodityNum},
+			commodity_company = #{commodityCompany},
+			commodity_pre_price = #{commodityPrePrice},
+			commodity_discount_price = #{commodityDiscountPrice},
+			commodity_margin = #{commodityMargin},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_purchase_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="batchDelete">
+		UPDATE cre_purchase_info SET del_flag = '1'
+		WHERE id IN
+		<foreach item="id" collection="idList" open="(" separator="," close=")">
+	    	#{id}
+    	</foreach>
+	</delete>
+	
+	<select id="findPurchaseByApplyNo" resultType="PurchaseInfo">
+		SELECT 
+			<include refid="purchaseInfoColumns"/>
+		FROM cre_purchase_info a
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	<select id="getInfoByApplyNo" resultType="PurchaseInfo">
+		SELECT 
+			<include refid="purchaseInfoColumns"/>
+		FROM cre_purchase_info a
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+</mapper>

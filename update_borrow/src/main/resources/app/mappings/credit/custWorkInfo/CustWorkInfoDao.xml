@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.custWorkInfo.dao.CustWorkInfoDao">
+
+	<sql id="custWorkInfoColumns">
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.company_name AS
+		"companyName",
+		a.com_nature AS "comNature",
+		a.post_type AS "postType",
+		a.post_level AS "postLevel",
+		a.post_name AS "postName",
+		a.department AS
+		"department",
+		a.com_phone_ar AS "comPhoneAr",
+		a.com_phone_sb AS
+		"comPhoneSb",
+		a.com_phone_ex AS "comPhoneEx",
+		a.work_in_date AS
+		"workInDate",
+		a.salary_mode AS "salaryMode",
+		a.month_income AS
+		"monthIncome",
+		a.other_month_income AS "otherMonthIncome",
+		a.salart_day
+		AS "salartDay",
+		a.company_province AS "companyProvince",
+		a.company_city
+		AS "companyCity",
+		a.company_distinct AS "companyDistinct",
+		a.company_details AS "companyDetails",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id"
+	</sql>
+
+	<sql id="custWorkInfoJoins">
+	</sql>
+
+	<select id="get" resultType="CustWorkInfo">
+		SELECT
+		<include refid="custWorkInfoColumns" />
+		FROM cre_cust_work_info a
+		<include refid="custWorkInfoJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CustWorkInfo">
+		SELECT
+		<include refid="custWorkInfoColumns" />
+		FROM cre_cust_work_info a
+		<include refid="custWorkInfoJoins" />
+		<where>
+
+			<if test="companyName != null and companyName != ''">
+				AND a.company_name = #{companyName}
+			</if>
+			<if test="comNature != null and comNature != ''">
+				AND a.com_nature = #{comNature}
+			</if>
+			<if test="postType != null and postType != ''">
+				AND a.post_type = #{postType}
+			</if>
+			<if test="postLevel != null and postLevel != ''">
+				AND a.post_level = #{postLevel}
+			</if>
+			<if test="postName != null and postName != ''">
+				AND a.post_name = #{postName}
+			</if>
+			<if test="department != null and department != ''">
+				AND a.department = #{department}
+			</if>
+			<if test="comPhoneAr != null and comPhoneAr != ''">
+				AND a.com_phone_ar = #{comPhoneAr}
+			</if>
+			<if test="comPhoneSb != null and comPhoneSb != ''">
+				AND a.com_phone_sb = #{comPhoneSb}
+			</if>
+			<if test="comPhoneEx != null and comPhoneEx != ''">
+				AND a.com_phone_ex = #{comPhoneEx}
+			</if>
+			<if test="workInDate != null and workInDate != ''">
+				AND a.work_in_date = #{workInDate}
+			</if>
+			<if test="salaryMode != null and salaryMode != ''">
+				AND a.salary_mode = #{salaryMode}
+			</if>
+			<if test="monthIncome != null and monthIncome != ''">
+				AND a.month_income = #{monthIncome}
+			</if>
+			<if test="otherMonthIncome != null and otherMonthIncome != ''">
+				AND a.other_month_income = #{otherMonthIncome}
+			</if>
+			<if test="salartDay != null and salartDay != ''">
+				AND a.salart_day = #{salartDay}
+			</if>
+			<if test="companyProvince != null and companyProvince != ''">
+				AND a.company_province = #{companyProvince}
+			</if>
+			<if test="companyCity != null and companyCity != ''">
+				AND a.company_city = #{companyCity}
+			</if>
+			<if test="companyDistinct != null and companyDistinct != ''">
+				AND a.company_distinct = #{companyDistinct}
+			</if>
+			<if test="companyDetails != null and companyDetails != ''">
+				AND a.company_details = #{companyDetails}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_cust_work_info a
+		<include refid="custWorkInfoJoins" />
+		<where>
+
+			<if test="companyName != null and companyName != ''">
+				AND a.company_name = #{companyName}
+			</if>
+			<if test="comNature != null and comNature != ''">
+				AND a.com_nature = #{comNature}
+			</if>
+			<if test="postType != null and postType != ''">
+				AND a.post_type = #{postType}
+			</if>
+			<if test="postLevel != null and postLevel != ''">
+				AND a.post_level = #{postLevel}
+			</if>
+			<if test="postName != null and postName != ''">
+				AND a.post_name = #{postName}
+			</if>
+			<if test="department != null and department != ''">
+				AND a.department = #{department}
+			</if>
+			<if test="comPhoneAr != null and comPhoneAr != ''">
+				AND a.com_phone_ar = #{comPhoneAr}
+			</if>
+			<if test="comPhoneSb != null and comPhoneSb != ''">
+				AND a.com_phone_sb = #{comPhoneSb}
+			</if>
+			<if test="comPhoneEx != null and comPhoneEx != ''">
+				AND a.com_phone_ex = #{comPhoneEx}
+			</if>
+			<if test="workInDate != null and workInDate != ''">
+				AND a.work_in_date = #{workInDate}
+			</if>
+			<if test="salaryMode != null and salaryMode != ''">
+				AND a.salary_mode = #{salaryMode}
+			</if>
+			<if test="monthIncome != null and monthIncome != ''">
+				AND a.month_income = #{monthIncome}
+			</if>
+			<if test="otherMonthIncome != null and otherMonthIncome != ''">
+				AND a.other_month_income = #{otherMonthIncome}
+			</if>
+			<if test="salartDay != null and salartDay != ''">
+				AND a.salart_day = #{salartDay}
+			</if>
+			<if test="companyProvince != null and companyProvince != ''">
+				AND a.company_province = #{companyProvince}
+			</if>
+			<if test="companyCity != null and companyCity != ''">
+				AND a.company_city = #{companyCity}
+			</if>
+			<if test="companyDistinct != null and companyDistinct != ''">
+				AND a.company_distinct = #{companyDistinct}
+			</if>
+			<if test="companyDetails != null and companyDetails != ''">
+				AND a.company_details = #{companyDetails}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CustWorkInfo">
+		SELECT
+		<include refid="custWorkInfoColumns" />
+		FROM cre_cust_work_info a
+		<include refid="custWorkInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="CustWorkInfo">
+		INSERT INTO
+		cre_cust_work_info(
+		id,
+		cust_id,
+		company_name,
+		com_nature,
+		post_type,
+		post_level,
+		post_name,
+		department,
+		com_phone_ar,
+		com_phone_sb,
+		com_phone_ex,
+		work_in_date,
+		salary_mode,
+		month_income,
+		other_month_income,
+		salart_day,
+		company_province,
+		company_city,
+		company_distinct,
+		company_details,
+		create_date,
+		create_by,
+		update_date,
+		update_by
+		) VALUES (
+		#{id},
+		#{custInfo.id},
+		#{companyName},
+		#{comNature},
+		#{postType},
+		#{postLevel},
+		#{postName},
+		#{department},
+		#{comPhoneAr},
+		#{comPhoneSb},
+		#{comPhoneEx},
+		#{workInDate},
+		#{salaryMode},
+		#{monthIncome},
+		#{otherMonthIncome},
+		#{salartDay},
+		#{companyProvince},
+		#{companyCity},
+		#{companyDistinct},
+		#{companyDetails},
+		#{createDate},
+		#{createBy.id},
+		#{updateDate},
+		#{updateBy.id}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_cust_work_info SET
+		cust_id = #{custId},
+		company_name = #{companyName},
+		com_nature = #{comNature},
+		post_type = #{postType},
+		post_level = #{postLevel},
+		post_name = #{postName},
+		<if test="department != null and department != ''">
+				department = #{department},
+		</if>
+		com_phone_ar = #{comPhoneAr},
+		com_phone_sb = #{comPhoneSb},
+		com_phone_ex = #{comPhoneEx},
+		work_in_date = #{workInDate},
+		<if test="salaryMode != null and salaryMode != ''">
+				salary_mode = #{salaryMode},
+		</if>
+		<if test="monthIncome != null and monthIncome != ''">
+				month_income = #{monthIncome},
+		</if>
+		<if test="otherMonthIncome != null and otherMonthIncome != ''">
+				other_month_income = #{otherMonthIncome},
+		</if>
+		<if test="salartDay != null and salartDay != ''">
+				salart_day = #{salartDay},
+		</if>
+		company_province = #{companyProvince},
+		company_city = #{companyCity},
+		company_distinct = #{companyDistinct},
+		company_details = #{companyDetails},
+		update_date = #{updateDate},
+		update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_cust_work_info
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据客户ID查询客户工作信息 -->
+	<select id="findCustWorkInfoByCustId" resultType="CustWorkInfo"
+		parameterType="Map">
+		SELECT
+		<include refid="custWorkInfoColumns" />
+		FROM cre_cust_work_info a
+		<include refid="custWorkInfoJoins" />
+		WHERE a.cust_id = #{custId}
+	</select>
+</mapper>

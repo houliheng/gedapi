@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.companyManagerInfo.dao.CompanyManagerInfoDao">
+    
+	<sql id="companyManagerInfoColumns">
+		a.id AS "id",
+		a.company_id AS "companyId",
+		c.busi_reg_name AS "companyInfo.busiRegName",
+		a.manager_name AS "managerName",
+		a.mobile_num AS "mobileNum",
+		a.post_name AS "postName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="companyManagerInfoJoins">
+		INNER JOIN cre_company_info c ON c.id = a.COMPANY_ID
+		INNER JOIN cre_apply_relation ar ON ar.CUST_ID = c.ID
+	</sql>
+    
+	<select id="get" resultType="CompanyManagerInfo">
+		SELECT 
+			<include refid="companyManagerInfoColumns"/>
+		FROM cre_company_manager_info a
+		<include refid="companyManagerInfoJoins"/>
+		WHERE a.id = #{id} and c.del_flag = '0'
+	</select>
+	
+	<select id="findManagerList" resultType="CompanyManagerInfo">
+		SELECT 
+			<include refid="companyManagerInfoColumns"/>
+		FROM cre_apply_relation ar
+		INNER JOIN cre_company_info c ON ar.CUST_ID = c.ID
+		INNER JOIN cre_company_manager_info a ON c.id = a.COMPANY_ID
+		<where>
+			a.del_flag = '0'
+			AND a.company_id = #{companyId}
+			AND ar.apply_no = #{applyNo}
+			and c.del_flag = '0'
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="findListByParams" resultType="CompanyManagerInfo">
+		SELECT 
+			<include refid="companyManagerInfoColumns"/>
+		FROM cre_company_manager_info a
+		<include refid="companyManagerInfoJoins"/>
+		<where>
+			a.del_flag = '0'
+			AND ar.apply_no = #{applyNo}
+			AND ar.ROLE_TYPE = #{roleType}
+			and c.del_flag = '0'
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_company_manager_info a
+		<include refid="companyManagerInfoJoins"/>
+		<where>
+			c.del_flag = '0'
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CompanyManagerInfo">
+		SELECT 
+			<include refid="companyManagerInfoColumns"/>
+		FROM cre_company_manager_info a
+		<include refid="companyManagerInfoJoins"/>
+		<where>
+			c.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_company_manager_info(
+			id,
+			company_id,
+			manager_name,
+			mobile_num,
+			post_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{companyId},
+			#{managerName},
+			#{mobileNum},
+			#{postName},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_company_manager_info SET 	
+			manager_name = #{managerName},
+			mobile_num = #{mobileNum},
+			post_name = #{postName},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_company_manager_info
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="batchDelete">
+		UPDATE cre_company_manager_info SET del_flag = '1'
+		WHERE id IN
+		<foreach item="id" collection="idList" open="(" separator="," close=")">
+	    	#{id}
+    	</foreach>
+	</delete>
+	
+</mapper>

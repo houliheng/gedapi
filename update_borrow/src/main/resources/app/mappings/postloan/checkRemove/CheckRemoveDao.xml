@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkRemove.dao.CheckRemoveDao">
+
+
+	<select id="get" resultType="CheckRemove">
+		select id as
+		"id",
+		CONTRACT_NO as
+		"contractNo",
+		APPLY_SUGGESTION as
+		"applySuggestion",
+		APPROVE_SUGGESTION_DQSH as "approveSuggestionDQ",
+		APPROVE_SUGGESTION_ZBSH as "approveSuggestionZB",
+		CHECK_REMOVE_STATUS
+		as "checkRemoveStatus"
+		from pl_apply_check_remove a where a.id=#{id}
+	</select>
+
+
+	<select id="findList" resultType="CheckRemove">
+		SELECT DISTINCT L.CONTRACT_NO as "contractNo",
+		C.CUST_NAME as
+		"custName",
+		C.CONTRACT_AMOUNT as "contractAmount",
+		S.CURR_OVERDUE_AMOUNT
+		as"currOverdueAmount",
+		C.CON_START_DATE as
+		"conStartDate",
+		C.CON_END_DATE as "conEndDate",
+		cr.id as "id",
+		ifnull(cr.CHECK_REMOVE_STATUS,"0") as "checkRemoveStatus"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.postloan")}.PL_DEBT_COLLECTION_LEGAL
+		l
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT
+		C on L.CONTRACT_NO=C.CONTRACT_NO
+		LEFT JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_STA_CONTRACT_STATUS
+		S
+		ON L.CONTRACT_NO=S.CONTRACT_NO
+		left join pl_apply_check_remove cr on
+		L.CONTRACT_NO=cr.CONTRACT_NO
+		<where>
+			and L.LEGAL_RESULT= '2'
+			<if test="contractNo != null and contractNo != ''">
+				and L.CONTRACT_NO like concat (#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND C.CUST_NAME like concat ('%',#{custName},'%')
+			</if>
+			<if
+				test="checkRemoveStatus != null and checkRemoveStatus != '' and checkRemoveStatus != 0 ">
+				AND CR.CHECK_REMOVE_STATUS = #{checkRemoveStatus}
+			</if>
+			<if
+				test="checkRemoveStatus != null and checkRemoveStatus != '' and checkRemoveStatus == 0 ">
+				AND (CR.CHECK_REMOVE_STATUS is null or CR.CHECK_REMOVE_STATUS =
+				'0')
+			</if>
+		</where>
+		order by L.CONTRACT_NO
+	</select>
+
+	<select id="findCheckRemoveByContractNo" resultType="CheckRemove">
+		select
+		id as
+		"id",
+		CONTRACT_NO as "contractNo",
+		APPLY_SUGGESTION as
+		"applySuggestion",
+		APPROVE_SUGGESTION_DQSH as "approveSuggestionDQ",
+		APPROVE_SUGGESTION_ZBSH as "approveSuggestionZB",
+		CHECK_REMOVE_STATUS
+		as "checkRemoveStatus"
+		from pl_apply_check_remove a
+		where a.contract_no
+		= #{contractNo} order by CREATE_TIME desc LIMIT 1
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT count(1)
+		FROM PL_DEBT_COLLECTION_LEGAL l
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT
+		C
+		on L.CONTRACT_NO=C.CONTRACT_NO
+		LEFT JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_STA_CONTRACT_STATUS
+		S
+		ON
+		L.CONTRACT_NO=S.CONTRACT_NO
+		<where>
+			and L.LEGAL_RESULT= '2'
+			<if test="contractNo != null and contractNo != ''">
+				and L.CONTRACT_NO like concat (#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND C.CUST_NAME like concat ('%',#{custName},'%')
+			</if>
+			<if
+				test="checkRemoveStatus != null and checkRemoveStatus != '' and checkRemoveStatus != 0 ">
+				AND CR.CHECK_REMOVE_STATUS = #{checkRemoveStatus}
+			</if>
+			<if
+				test="checkRemoveStatus != null and checkRemoveStatus != '' and checkRemoveStatus == 0 ">
+				AND CR.CHECK_REMOVE_STATUS is null
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_apply_check_remove(
+		id,
+		contract_no,
+		APPLY_SUGGESTION,
+		APPROVE_SUGGESTION_DQSH,
+		APPROVE_SUGGESTION_ZBSH,
+		CREATE_TIME,
+		CHECK_REMOVE_STATUS
+		)
+		VALUES (
+		#{id},
+		#{contractNo},
+		#{applySuggestion},
+		#{approveSuggestionDQ},
+		#{approveSuggestionZB},
+		#{createDate},
+		#{checkRemoveStatus}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_apply_check_remove SET
+		CHECK_REMOVE_STATUS =
+		#{checkRemoveStatus}
+		<if test="applySuggestion != null and applySuggestion != ''">
+			,APPLY_SUGGESTION=#{applySuggestion}
+		</if>
+		<if test="approveSuggestionDQ != null and approveSuggestionDQ != ''">
+			,APPROVE_SUGGESTION_DQSH=#{approveSuggestionDQ}
+		</if>
+		<if test=" approveSuggestionZB != null and approveSuggestionZB != ''">
+			,APPROVE_SUGGESTION_ZBSH=#{approveSuggestionZB}
+		</if>
+		<if test=" approverDQSH != null and approverDQSH != ''">
+			,APPROVER_DQSH=#{approverDQSH}
+		</if>
+		<if test=" approverZBSH != null and approverZBSH != ''">
+			,APPROVER_ZBSH=#{approverZBSH}
+		</if>
+		WHERE id =
+		#{id}
+	</update>
+
+</mapper>

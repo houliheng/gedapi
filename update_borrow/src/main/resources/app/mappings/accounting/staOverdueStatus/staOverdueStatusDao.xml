@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.staOverdueStatus.dao.StaOverdueStatusDao">
+    
+	<sql id="staOverdueStatusColumns">
+		   a.FINE_AMOUNT  as "fineAmount"
+          ,a.OVERDUE_DAYS as "overdueDays"
+	</sql>
+	
+	<sql id="staOverdueStatusJoins">
+	</sql>
+    
+	 <select id="findStaOverdueStatusByContractNo" resultType="StaOverdueStatus">
+		SELECT 
+			a.FINE_AMOUNT  as "fineAmount"
+          ,a.OVERDUE_DAYS as "overdueDays"
+		FROM acc_sta_overdue_status a
+		<include refid="staOverdueStatusJoins"/>
+		WHERE a.contract_no = #{contractNo}
+	</select>
+	
+</mapper>

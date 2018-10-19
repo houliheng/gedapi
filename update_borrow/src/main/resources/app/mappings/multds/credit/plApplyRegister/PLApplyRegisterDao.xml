@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.credit.plApplyRegister.dao.PLApplyRegisterDao">
+	<select id="findApplyRegisterByContractNo" resultType="com.resoft.multds.credit.plApplyRegister.entity.PLApplyRegister">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS "applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS "channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS "registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS "company.id",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.pl_borrow_new_flag AS "plBorrowNewFlag"
+		FROM
+		cre_contract b
+		INNER JOIN cre_apply_register a ON b.APPLY_NO = a.APPLY_NO
+		<where>
+			b.CONTRACT_NO = #{contractNo}
+			AND a.del_flag = '0'
+		</where>
+	</select>
+
+	<!-- 新增 -->
+	<insert id="insert" parameterType="com.resoft.multds.credit.plApplyRegister.entity.PLApplyRegister">
+		INSERT INTO
+		cre_apply_register(
+		id,
+		apply_no,
+		cust_type,
+		cust_name,
+		id_type,
+		id_num,
+		mobile_num,
+		apply_product_type_code,
+		apply_product_id,
+		apply_amount,
+		channel_source_type,
+		apply_product_name,
+		channel_other_desc,
+		register_name,
+		register_date,
+		org_id,
+		apply_status,
+		proc_ins_id,
+		serial_number,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		del_flag,
+		pl_borrow_new_flag
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custType},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{applyProductTypeCode},
+		#{applyProductId},
+		#{applyAmount},
+		#{channelSourceType},
+		#{applyProductName},
+		#{channelOtherDesc},
+		#{registerName},
+		#{registerDate},
+		#{company.id},
+		#{applyStatus},
+		#{procInsId},
+		#{serialNumber},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{delFlag},
+		#{plBorrowNewFlag}
+		)
+	</insert>
+</mapper>

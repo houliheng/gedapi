@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.noEntry.dao.OrgNoEntryDao">
+    
+	<sql id="orgNoEntryColumns">
+		a.id AS "id",
+		a.org_id AS "orgId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		so.id AS "office.id",
+		so.code AS "office.code",
+		so.name AS "office.name"
+	</sql>
+	
+	<sql id="orgNoEntryJoins">
+	LEFT JOIN sys_office so ON so.id = a.org_id
+	</sql>
+    
+	<select id="get" resultType="OrgNoEntry">
+		SELECT 
+			<include refid="orgNoEntryColumns"/>
+		FROM cre_org_no_entry a
+		<include refid="orgNoEntryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OrgNoEntry">
+		SELECT 
+			<include refid="orgNoEntryColumns"/>
+		FROM cre_org_no_entry a
+		<include refid="orgNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+			<if test="office != null and office.code != null and office.code != ''">
+				AND so.code LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{office.code}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>			
+			<if test="office != null and office.name != null and office.name != ''">
+				AND so.name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{office.name}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OrgNoEntry">
+		SELECT 
+			<include refid="orgNoEntryColumns"/>
+		FROM cre_org_no_entry a
+		<include refid="orgNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_org_no_entry(
+			id,
+			org_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{orgId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_org_no_entry SET 	
+			org_id = #{orgId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_org_no_entry SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<update id="batchDelete">
+		DELETE FROM  cre_org_no_entry 
+		WHERE id in
+		<foreach item="idList" collection="list" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>		
+	</update>	
+	
+	<select id="findParentOrgNoEntryList" resultType="OrgNoEntry">
+		SELECT
+			*
+		FROM
+			cre_org_no_entry a
+		WHERE
+			FIND_IN_SET(
+				a.ORG_ID,
+				(
+					SELECT
+						b.parent_ids
+					FROM
+						sys_office b
+					WHERE
+						b.id = #{orgId}
+				)
+			);
+	</select>
+	
+	<select id="findListByOrgId" resultType="OrgNoEntry">
+		SELECT 
+			<include refid="orgNoEntryColumns"/>
+		FROM cre_org_no_entry a
+		<include refid="orgNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+			AND a.ORG_ID = #{orgId}			
+		</where>
+	</select>
+	
+	
+</mapper>

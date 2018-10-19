@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.themis.dao.ThemisRequestDao">
+	<select id="findFinancialReport" resultType="String">
+		Select report_index_value 
+		From ift_themis_report_body
+		Where report_table=#{0} 
+			and  report_year_month=#{1}
+			and  apply_no=#{2}
+	</select>
+	<select id="findYearMonthByApply" resultType="String">
+		Select distinct report_year_month 
+		From ift_themis_report_body
+		Where report_table=#{0} 
+			and  apply_no=#{1}
+	</select>
+	<select id="findThemisReportHead" resultType="com.resoft.outinterface.themis.entry.request.ThemisRequestHead">
+		Select 
+			USER_ID AS 'userid',
+			PASSWORD AS 'password',
+			DEPCODE AS 'depcode',
+			COMPANYCODE AS 'companycode',
+			COMPANY_CHN_NAME AS 'companychnname',
+			COMPANY_ENG_NAME AS 'companyengname',
+			CREATEDATE AS 'createdate',
+			COMPANYNATURE AS 'companynature',
+			GB_INDU1 AS 'swindu1',
+			GB_INDU2 AS 'swindu2',
+			MARKET_CLASS AS 'marketclass',
+			POSTCODE AS 'postcode',
+			IS_MERGER AS 'ismerger',
+			REPORT_TYPE AS 'reporttype',
+			REPORT_UNIT AS 'reportunit'
+		From ift_themis_report_head
+		Where  appyl_no=#{0}
+	</select>
+	<insert id="insertIntoThemisReturnHead" parameterType="com.resoft.outinterface.themis.entry.request.ThemisRequestHead" >
+		insert into ift_themis_return_head(
+			COMPANYCODE,
+			RETURNCODE,
+			RETURNMESSAGE,
+			APPLY_NO
+		)VALUE(
+			#{param1.companycode},
+			#{param1.returncode},
+			#{param1.returnmessage},
+			#{param2}
+		);
+	</insert>
+	<update id="deleteThemisReturnHead">
+		delete from ift_themis_return_head where APPLY_NO = #{applyNo}
+	</update>
+	<update id="deleteThemisReview">
+		delete from ift_themis_return_review where APPLY_NO = #{applyNo}
+	</update>
+	<update id="deleteThemisScore">
+		delete from ift_themis_return_score where APPLY_NO = #{applyNo}
+	</update>
+	<insert		id="insertIntoThemisReview"  parameterType ="java.util.List">
+	insert into ift_themis_return_review(
+		companycode,
+		report_year_month,
+		return_order_col,
+		return_index_code,
+		return_index_name,
+		review,
+		apply_no
+		)values
+		<foreach item="list" collection="list" index="index" separator=",">
+		(
+		#{list.companycode},
+		#{list.yearMonth},
+		#{list.orderCol},
+		#{list.indexCode},
+		#{list.indexName},
+		#{list.review},
+		#{list.applyNo}
+		)
+		</foreach>
+	</insert>
+	<insert		id="insertIntoThemisScore"  parameterType ="java.util.List">
+	insert into ift_themis_return_score(
+		companycode,
+		report_year_month,
+		return_order_col,
+		return_index_code,
+		return_index_name,
+		full_marks,
+		score,
+		warnning,
+		apply_no
+		)values
+		<foreach item="list" collection="list" index="index" separator=",">
+		(
+		#{list.companycode},
+		#{list.yearMonth},
+		#{list.orderCol},
+		#{list.indexCode},
+		#{list.indexName},
+		#{list.fullMark},
+		#{list.score},
+		#{list.warnning},
+		#{list.applyNo}
+		)
+		</foreach>
+	</insert>
+</mapper>

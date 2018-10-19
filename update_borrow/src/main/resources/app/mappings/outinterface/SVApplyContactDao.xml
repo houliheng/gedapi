@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVApplyContactDao">
+
+	<sql id="sVApplyContactColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.contact_name AS
+		"contactName",
+		a.contact_mobile AS "contactMobile",
+		a.contact_relations
+		AS "contactRelations",
+		a.create_date AS "createDate"
+	</sql>
+
+	<sql id="sVApplyContactJoins">
+	</sql>
+
+	<select id="get"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVApplyContact">
+		SELECT
+		<include refid="sVApplyContactColumns" />
+		FROM ift_sv_apply_contact a
+		<include refid="sVApplyContactJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVApplyContact">
+		SELECT
+		<include refid="sVApplyContactColumns" />
+		FROM ift_sv_apply_contact a
+		<include refid="sVApplyContactJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM ift_sv_apply_contact a
+		<include refid="sVApplyContactJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVApplyContact">
+		SELECT
+		<include refid="sVApplyContactColumns" />
+		FROM ift_sv_apply_contact a
+		<include refid="sVApplyContactJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_apply_contact(
+		id,
+		apply_no,
+		contact_name,
+		contact_mobile,
+		contact_relations,
+		create_date
+		) VALUES
+		<foreach item="contact" collection="list" index="index" separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{applyNo},
+			#{contact.contactName},
+			#{contact.contactMobile},
+			#{contact.contactRelations},
+			CURRENT_TIMESTAMP
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE ift_sv_apply_contact SET
+		apply_no = #{applyNo},
+		contact_name = #{contactName},
+		contact_mobile = #{contactMobile},
+		contact_relations = #{contactRelations},
+		create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM ift_sv_apply_contact
+		WHERE id = #{id}
+	</update>
+
+</mapper>

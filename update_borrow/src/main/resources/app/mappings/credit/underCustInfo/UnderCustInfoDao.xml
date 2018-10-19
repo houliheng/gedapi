@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.underCustInfo.dao.UnderCustInfoDao">
+    
+	<sql id="underCustInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_name AS "custName",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.birth_day AS "birthDay",
+		a.sex_no AS "sexNo",
+		a.wed_status AS "wedStatus",
+		a.top_education_no AS "topEducationNo",
+		a.plat_overdue_count AS "platOverdueCount",
+		a.plat_overdue_money AS "platOverdueMoney",
+		a.account_province AS "accountProvince",
+		a.account_city AS "accountCity",
+		a.account_distinct AS "accountDistinct",
+		a.account_details AS "accountDetails",
+		a.other_webloan_info AS "otherWebloanInfo",
+		a.executive_penalty_info AS "executivePenaltyInfo"
+	</sql>
+	
+	<sql id="underCustInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="UnderCustInfo">
+		SELECT 
+			<include refid="underCustInfoColumns"/>
+		FROM cre_under_cust_info a
+		<include refid="underCustInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+
+	
+	<select id="findList" resultType="UnderCustInfo">
+		SELECT 
+			<include refid="underCustInfoColumns"/>
+		FROM cre_under_cust_info a
+		<include refid="underCustInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_under_cust_info a
+		<include refid="underCustInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+
+	<!--<select id="getByApplyNo" resultType="UnderCustInfo">-->
+		<!--SELECT-->
+		<!--<include refid="underCustInfoColumns"/>-->
+		<!--FROM cre_under_cust_info a-->
+		<!--<include refid="underCustInfoJoins"/>-->
+		<!--<where>-->
+			<!--a.apply_no = #{applyNo}-->
+		<!--</where>-->
+	<!--</select>-->
+
+	<select id="getByApplyNo" resultType="UnderCustInfo">
+		SELECT
+		<include refid="underCustInfoColumns"/>
+		FROM cre_under_cust_info a
+		<include refid="underCustInfoJoins"/>
+		WHERE a.APPLY_NO = #{applyNo}
+	</select>
+
+	<select id="findAllList" resultType="UnderCustInfo">
+		SELECT 
+			<include refid="underCustInfoColumns"/>
+		FROM cre_under_cust_info a
+		<include refid="underCustInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_under_cust_info(
+			id,
+			apply_no,
+			cust_name,
+			id_num,
+			mobile_num,
+			birth_day,
+			sex_no,
+			wed_status,
+			top_education_no,
+			plat_overdue_count,
+			plat_overdue_money,
+			account_province,
+			account_city,
+			account_distinct,
+			account_details,
+			other_webloan_info,
+			executive_penalty_info
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{custName},
+			#{idNum},
+			#{mobileNum},
+			#{birthDay},
+			#{sexNo},
+			#{wedStatus},
+			#{topEducationNo},
+			#{platOverdueCount},
+			#{platOverdueMoney},
+			#{accountProvince},
+			#{accountCity},
+			#{accountDistinct},
+			#{accountDetails},
+			#{otherWebloanInfo},
+			#{executivePenaltyInfo}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_under_cust_info SET 	
+			apply_no = #{applyNo},
+			cust_name = #{custName},
+			id_num = #{idNum},
+			mobile_num = #{mobileNum},
+			birth_day = #{birthDay},
+			sex_no = #{sexNo},
+			wed_status = #{wedStatus},
+			top_education_no = #{topEducationNo},
+			plat_overdue_count = #{platOverdueCount},
+			plat_overdue_money = #{platOverdueMoney},
+			account_province = #{accountProvince},
+			account_city = #{accountCity},
+			account_distinct = #{accountDistinct},
+			account_details = #{accountDetails},
+			other_webloan_info = #{otherWebloanInfo},
+			executive_penalty_info = #{executivePenaltyInfo}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateByApplyNo">
+		UPDATE cre_under_cust_info SET
+		cust_name = #{custName},
+		id_num = #{idNum},
+		mobile_num = #{mobileNum},
+		sex_no = #{sexNo},
+		birth_day = #{birthDay},
+		wed_status = #{wedStatus},
+		top_education_no = #{topEducationNo},
+		plat_overdue_count = #{platOverdueCount},
+		plat_overdue_money = #{platOverdueMoney},
+		account_province = #{accountProvince},
+		account_city = #{accountCity},
+		account_distinct = #{accountDistinct},
+		account_details = #{accountDetails},
+		other_webloan_info = #{otherWebloanInfo},
+		executive_penalty_info = #{executivePenaltyInfo}
+		WHERE apply_no = #{applyNo}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_under_cust_info
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

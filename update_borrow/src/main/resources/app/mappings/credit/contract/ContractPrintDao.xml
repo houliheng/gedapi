@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.contract.dao.ContractPrintDao">
+	<!-- 保证金退还 -->
+	<select id="findMarginInfo" resultType="java.util.Map">
+		SELECT contract_no AS "contract_no",
+			cust_name AS "cust_name",
+			id_num AS "id_num",
+			contract_amount AS "contract_amount",
+			margin_amount AS "margin_amount",
+			margin_rate AS "margin_rate"
+		FROM CRE_CONTRACT
+		WHERE contract_no = #{contractNo};
+	</select>
+	
+ 	<!-- 担保人 -->
+<!--	<select id="findGurrantorInfo" resultType="java.util.Map">
+	SELECT replace(GROUP_CONCAT(b.cust_name),',','、         ') AS "cust_name_db"
+	,replace(GROUP_CONCAT(b.id_num),',','、         ') AS "id_num_db" 
+	,replace(GROUP_CONCAT(CONCAT(C.name ,D.name
+	,E.name ,B.cont_details)),',','、         ') AS "cont_addr_db"
+	,replace(GROUP_CONCAT(B.email_no),',','、         ') AS "email_no_db" 
+	,replace(GROUP_CONCAT(B.mobile_num),',','、         ') AS "contact_no_db"
+	FROM CRE_APPLY_RELATION A
+	INNER JOIN CRE_CUST_INFO B 
+	ON A.cust_id = B.id
+	INNER JOIN sys_area C on B.cont_province = C.id 
+	INNER JOIN sys_area D ON B.cont_city = D.id
+	INNER JOIN sys_area E on B.cont_distinct = E.id
+	WHERE A.apply_no = #{applyNo}
+	AND A.role_type = '3'
+	AND B.DEL_FLAG = '0';
+	</select> -->
+	<!-- 担保人 -->
+	<select id="findGurrantorInfo" resultType="java.util.Map">
+		select
+			b.cust_name AS "cust_name_db", 
+			b.id_num AS "id_num_db", 
+			CONCAT(C.name ,D.name ,E.name ,B.cont_details) AS "cont_addr_db", 
+			B.email_no AS "email_no_db" , 
+			B.mobile_num AS "contact_no_db" 
+		FROM CRE_APPLY_RELATION A 
+			INNER JOIN CRE_CUST_INFO B ON A.cust_id = B.id 
+			INNER JOIN sys_area C on B.cont_province = C.id 
+			INNER JOIN sys_area D ON B.cont_city = D.id 
+			INNER JOIN sys_area E on B.cont_distinct = E.id 
+		WHERE A.apply_no = #{applyNo} and B.DEL_FLAG = '0' AND A.role_type = '3' 
+	</select>
+	<!-- 担保-合同基本信息 -->
+	<select id="findContractBaseInfo" resultType="java.util.Map">
+		SELECT
+			contract_no AS "contract_no",
+			cust_name AS "cust_name",
+			id_num AS "id_num",
+			contract_amount AS "contract_amount",
+			DATE_FORMAT(
+				occur_date,
+				'%Y年%m月%d日'
+			) AS "occur_date"
+		FROM
+			CRE_CONTRACT
+		WHERE
+			contract_no = #{contractNo};
+	</select>
+	
+	<!-- 联合授信-借款人信息 -->
+	<select id="findUnionCustInfo" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			b.id as companyInfoId,
+			b.BUSI_REG_NAME as busi_reg_name,
+			b.UN_SOC_CREDIT_NO as un_soc_credit_no,
+			b.CORPORATION_NAME as corporation_name,
+			b.CORPORATION_MOBILE as corporation_mobile,
+			b.REG_PROVINCE as reg_province,
+			b.REG_CITY as reg_city,
+			b.REG_DISTINCT as reg_distinct,
+			b.REG_DETAILS as reg_details,
+		  	c.CONTRACT_NO as contract_no,
+		  	c.MIDDLEMAN_NAME middleman_name,
+		  	c.MIDDLEMAN_ID_NUM middleman_id_num,
+		  	c.MIDDLEMAN_MOBILE_NUM middleman_mobile_num,
+		  	c.MIDDLEMAN_BANKCARD_NO as middleman_bankcard_no,
+	  		c.MIDDLEMAN_BANK_DETAIL_NAME as middleman_bank_detail,
+		    c.MIDDLEMAN_CONT_PROVINCE as middleman_cont_province,
+	  		c.MIDDLEMAN_CONT_CITY as middleman_cont_city,
+	  		c.MIDDLEMAN_CONT_DISTINCT as middleman_cont_distinct,
+	  		c.MIDDLEMAN_CONT_DETAILS as middleman_cont_details,
+	  		c.MARGIN_RATE as margin_rate 
+		FROM
+			cre_company_cust_related a , cre_company_info b ,CRE_CONTRACT c 
+		WHERE
+			a.COMPANY_ID = b.id and c.APPRO_ID = a.APPRO_ID and c.apply_no = #{applyNo}
+	</select>
+	<!-- 非联合授信-借款人信息 -->
+	<select id="findLoanCustInfo" resultType="java.util.Map" parameterType="java.util.Map">
+	select 
+		b.BUSI_REG_NAME AS busi_reg_name,
+		b.UN_SOC_CREDIT_NO AS un_soc_credit_no,
+		b.CORPORATION_NAME AS corporation_name,
+		b.CORPORATION_MOBILE AS corporation_mobile,
+		b.REG_PROVINCE AS reg_province,
+		b.REG_CITY AS reg_city,
+		b.REG_DISTINCT AS reg_distinct,
+		b.REG_DETAILS AS reg_details,
+		c.CONTRACT_NO as contract_no,
+	  	c.MIDDLEMAN_NAME as middleman_name,
+	  	c.MIDDLEMAN_ID_NUM as middleman_id_num,
+	  	c.MIDDLEMAN_MOBILE_NUM as middleman_mobile_num,
+	  	c.MIDDLEMAN_BANKCARD_NO as middleman_bankcard_no,
+	  	c.MIDDLEMAN_BANK_DETAIL_NAME as middleman_bank_detail,
+	  	c.MIDDLEMAN_CONT_PROVINCE as middleman_cont_province,
+	  	c.MIDDLEMAN_CONT_CITY as middleman_cont_city,
+	  	c.MIDDLEMAN_CONT_DISTINCT as middleman_cont_distinct,
+	  	c.MIDDLEMAN_CONT_DETAILS as middleman_cont_details
+	  	
+	from cre_apply_relation a, cre_company_info b, CRE_CONTRACT c
+	where a.CUST_ID = b.ID and c.APPLY_NO = a.APPLY_NO AND a.apply_no = #{applyNo} and a.role_type = 5
+	</select>
+	<!-- 担保-借款人信息 -->
+	<select id="findCustInfo" resultType="java.util.Map">
+		SELECT
+			B.cust_name AS "cust_name",
+			B.id_num AS "id_num",
+			B.id_type AS "id_type",
+				B.cont_province,
+				B.cont_city,
+				B.cont_distinct,
+				B.cont_details,
+			B.email_no AS "email_no",
+			CONCAT(
+				B.mobile_num
+			) AS "contact_no"
+		FROM
+			CRE_APPLY_RELATION A 
+		INNER JOIN CRE_CUST_INFO B ON A.cust_id = B.id
+		WHERE A.apply_no = #{applyNo}
+		AND A.role_type IN ('1', '2')
+		AND B.DEL_FLAG = '0';
+	</select>
+	
+	<!-- 抵质押车辆信息 -->
+	<select id="findMortgageCarInfo" resultType="java.util.Map">
+		SELECT
+			A.vehicle_brand AS "vehicle_brand",
+			B.vehicle_no AS "vehicle_no",
+			B.engine_num AS "engine_num",
+			B.vehicle_shelf_no AS "vehicle_shelf_no",
+			A.vehicle_type AS "vehicle_type",
+			B.car_evaluate_price AS "car_evaluate_price"
+		FROM
+			CRE_MORTGAGE_CAR_INFO A
+		INNER JOIN CRE_MORTGAGE_CAR_EVALUATE_INFO B ON A.id = B.car_id
+		WHERE
+			A.apply_no = #{applyNo}
+		AND mortgage_type = '2';
+	</select>
+	
+	<!-- 个人抵质押房屋信息 -->
+	<select id="findCustMortgageHouseInfo" resultType="java.util.Map">
+		SELECT
+				cont_province as "cont_province",
+				cont_city as "cont_city",
+				cont_distinct as "cont_distinct",
+				cont_details AS "house_addr",
+			building_area AS "building_area",
+			evaluate_price AS "evaluate_price"
+		FROM
+			CRE_MORTGAGE_HOUSE_INFO
+		WHERE
+			apply_no = #{applyNo}
+		AND PROPERTY_RIGHT = '1';
+	</select>
+	
+	<!-- 企业抵质押房屋信息 -->
+	<select id="findComMortgageHouseInfo" resultType="java.util.Map">
+		SELECT
+				cont_province as "cont_province",
+				cont_city as "cont_city",
+				cont_distinct as "cont_distinct",
+				cont_details AS "house_addr_com",
+			building_area AS "building_area_com",
+			evaluate_price AS "evaluate_price_com"
+		FROM
+			CRE_MORTGAGE_HOUSE_INFO
+		WHERE
+			apply_no = #{applyNo}
+		AND PROPERTY_RIGHT = '2';
+	</select>
+	
+	<!-- 企业合同信息   大写contract_amount -->
+	<select id="findContractInfo" resultType="java.util.Map">
+		SELECT
+			contract_no AS "contract_no",
+			cust_name AS "cust_name",
+			cust_id AS "cust_id",
+			id_type AS "id_type",
+			id_num AS "id_num",
+			contract_amount AS "contract_amount",
+			rep_bankcard_name AS "rep_bankcard_name",
+			rep_bank AS "rep_bank",
+			rep_bankcard_no AS "rep_bankcard_no",
+			rec_bank_mobile as "rec_bank_mobile",
+			rec_bank_id_num as "rec_bank_id_num",
+			rec_bank_province as "rec_bank_province",
+			rec_bank_city as "rec_bank_city",
+			rec_bank_distinct as "rec_bank_distinct",
+			rec_bank_detail as "rec_bank_detail",
+			
+			DATE_FORMAT(
+				occur_date,
+				'%Y年%m月%d日'
+			) AS "occur_date",
+			mortgagee_name AS "mortgagee_name",
+			mortgagee_id_num AS "mortgagee_id_num",
+			ALL_SERVICE_FEE as "all_service_fee",
+			LOAN_AMOUNT  as "loan_amount",
+					CASE(SERVICE_FEE_TYPE) WHEN '1' THEN (  IFNULL(MARGIN_AMOUNT,0) + IFNULL(ALL_SERVICE_FEE,0)  )
+															WHEN '2' then (MARGIN_AMOUNT)
+												ELSE '0' END as 'money_pay'
+		FROM
+			CRE_CONTRACT
+		WHERE
+			contract_no like CONCAT(#{contractNo},'%' )
+	</select>
+	
+	<!-- 还款计划！！！ -->
+	<select id="findRepayPlanInfo" resultType="java.util.Map">
+		SELECT
+			period_num AS "period_num",
+			deduct_date AS "deduct_date",
+			IFNULL(repay_amount,0)-IFNULL(service_fee,0) AS "repay_amount",
+			IFNULL(capital_amount,0) + IFNULL(interest_amount,0) AS "capital_interest",
+			management_fee AS "management_fee",
+			SERVICE_FEE as "service_fee"
+		FROM
+			CRE_REPAY_PLAN
+		WHERE  TASK_DEF_KEY = 'utask_htmq' and 
+			CONTRACT_NO = #{contractNo} ORDER BY deduct_date;
+	</select>
+	
+	<!-- 还款计划！！！ -->
+	<select id="findRepayPlanInfoUnion" resultType="java.util.Map">
+		SELECT
+			period_num AS "period_num",
+			deduct_date AS "deduct_date",
+			IFNULL(repay_amount,0)-IFNULL(service_fee,0) AS "repay_amount",
+			IFNULL(capital_amount,0) + IFNULL(interest_amount,0) AS "capital_interest",
+			management_fee AS "management_fee",
+			SERVICE_FEE as "service_fee"
+		FROM
+			CRE_REPAY_PLAN_UNION
+		WHERE  TASK_DEF_KEY = 'utask_htmq' and 
+			CONTRACT_NO = #{contractNo} ORDER BY deduct_date;
+	</select>
+	
+	<!-- findRepayPlanInfoUnionNew  还款计划！！！  新直接算出联合授信的还款金额 -->
+	
+	<select id="findRepayPlanInfoUnionNew" resultType="java.util.Map">
+		SELECT
+			period_num AS "period_num",
+			deduct_date AS "deduct_date",
+			sum(IFNULL(repay_amount, 0) - IFNULL(service_fee, 0)) AS "repay_amount"
+		FROM
+			CRE_REPAY_PLAN_UNION
+		WHERE  TASK_DEF_KEY = 'utask_htmq' and 
+			contract_no like CONCAT(#{contractNo},'%' )  GROUP BY	period_num, deduct_date   ORDER BY deduct_date;
+	</select>
+	
+	<!-- 还款计划！ -->
+	<select id="findMainCustInfo" resultType="java.util.Map">
+		SELECT
+				B.cont_province,
+				B.cont_city,
+				B.cont_distinct,
+				B.cont_details,
+			B.email_no AS "email_no",
+			CONCAT(
+				B.mobile_num,
+				',',
+				B.hose_phone_no
+			) AS "contact_no",
+			B.mobile_num AS "mobile_num"
+		FROM
+			CRE_APPLY_RELATION A
+		INNER JOIN CRE_CUST_INFO B ON A.cust_id = B.id
+		WHERE
+			A.apply_no = #{applyNo}
+		AND A.role_type = '1' 
+		AND B.DEL_FLAG = '0';
+	</select>
+	
+	<!-- 借款信息 -->
+	<select id="findApplyInfo" resultType="java.util.Map">
+		SELECT
+			CASE
+		WHEN loan_purpost = '99' THEN
+			IFNULL(A.loan_other_purpose_desc,'  ')
+		ELSE
+			B.label
+		END AS "loan_purpost"
+		FROM
+			CRE_APPLY_INFO A INNER JOIN sys_dict B on A.LOAN_PURPOST = B.value and b.type = 'loan_purpost'
+		WHERE
+			A.apply_no = #{applyNo};
+	</select>
+	
+	<!-- 还款计划 sum_management_fee 大写   -->
+	<select id="findRepayPlanSum" resultType="java.util.Map">
+		SELECT
+			SUM(management_fee) AS "sum_management_fee",
+			DATE_FORMAT(
+				MIN(deduct_date),
+				'%Y年%m月%d日'
+			) AS "start_deduct_date",
+			DATE_FORMAT(
+				MAX(deduct_date),
+				'%Y年%m月%d日'
+			) AS "end_deduct_date",
+			MAX(period_num) AS "period_value"
+		FROM
+			CRE_REPAY_PLAN
+		WHERE    TASK_DEF_KEY = 'utask_htmq' and 
+			contract_no = #{contractNo};
+	</select>
+	
+	<!-- 联合授信  还款计划 sum_management_fee 大写   -->
+	<select id="findRepayPlanSumUnion" resultType="java.util.Map">
+		SELECT
+			SUM(management_fee) AS "sum_management_fee",
+			DATE_FORMAT(
+				MIN(deduct_date),
+				'%Y年%m月%d日'
+			) AS "start_deduct_date",
+			DATE_FORMAT(
+				MAX(deduct_date),
+				'%Y年%m月%d日'
+			) AS "end_deduct_date",
+			MAX(period_num) AS "period_value"
+		FROM
+			CRE_REPAY_PLAN_UNION
+		WHERE TASK_DEF_KEY = 'utask_htmq' and 
+			contract_no = #{contractNo};
+	</select>
+	<!-- 收款确认书  大写loan_amount fact_loan_amount margin_amount  -->
+	<select id="findLoanInfo" resultType="java.util.Map">
+		SELECT
+			A.cust_name AS "cust_name",
+			A.id_num AS "id_num",
+			DATE_FORMAT(
+				A.occur_date,
+				'%Y年%m月%d日'
+			) AS "occur_date",
+			A.contract_no AS "contract_no",
+			A.contract_amount AS "contract_amount",
+			B.fact_loan_amount AS "fact_loan_amount",
+			A.rep_bank_name AS "rep_bank_name",
+			A.margin_amount AS "margin_amount"
+		FROM
+			CRE_CONTRACT A
+		INNER JOIN CRE_APPLY_LOAN_STATUS B ON A.contract_no = B.contract_no
+		WHERE
+			A.apply_no = #{applyNo};
+	</select>
+	
+	<!-- 收款确认书  大写loan_amount fact_loan_amount margin_amount  -->
+	<select id="findCreContractInfo" resultType="java.util.Map">
+		SELECT
+			A.CONTRACT_NO AS "contractNo"
+		FROM
+			CRE_CONTRACT A
+		WHERE
+			A.apply_no = #{applyNo};
+	</select>
+	
+	<!-- 提前还款 -->
+	<select id="findEarlyRepay" resultType="java.util.Map">
+		SELECT
+			CUST_NAME AS "CUST_NAME",
+			ID_NUM AS "ID_NUM"
+		FROM
+			cre_contract
+		WHERE
+			CONTRACT_NO = #{contractNo};
+	</select>
+	
+	<!-- 主借人电话 -->
+	<select id="findMainCustPhone" resultType="java.util.Map">
+		SELECT
+			b.MOBILE_NUM AS "MOBILE_NUM"
+		FROM
+			cre_apply_relation a
+		INNER JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		WHERE
+			a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = '1'
+		AND B.DEL_FLAG = '0';
+	</select>
+	
+		<!-- 取得具体住址 -->
+	<select id="findAddres" resultType="String">
+		SELECT name  from sys_area where id =#{applyNo}
+	</select>
+		
+</mapper>

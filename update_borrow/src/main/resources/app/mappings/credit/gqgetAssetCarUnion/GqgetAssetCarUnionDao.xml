@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetAssetCarUnion.dao.GqgetAssetCarUnionDao">
+
+	<sql id="gqgetAssetCarUnionColumns">
+		a.id AS "id",
+		a.gqget_apply_no AS "gqgetApplyNo",
+		a.approve_id AS "approveId",
+		a.gqget_vehicle_no AS "gqgetVehicleNo",
+		a.gqget_used_years AS "gqgetUsedYears",
+		a.gqget_car_evaluate_price AS "gqgetCarEvaluatePrice",
+		a.gqget_market_price AS "gqgetMarketPrice",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="gqgetAssetCarUnionJoins">
+	</sql>
+
+	<select id="get" resultType="GqgetAssetCarUnion">
+		SELECT
+		<include refid="gqgetAssetCarUnionColumns" />
+		FROM cre_gqget_asset_car_union a
+		<include refid="gqgetAssetCarUnionJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="GqgetAssetCarUnion">
+		SELECT
+		<include refid="gqgetAssetCarUnionColumns" />
+		FROM cre_gqget_asset_car_union a
+		<include refid="gqgetAssetCarUnionJoins" />
+		<where>
+			a.gqget_apply_no = #{gqgetApplyNo} and
+			a.approve_id = #{approveId} and
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_gqget_asset_car_union a
+		<include refid="gqgetAssetCarUnionJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="GqgetAssetCarUnion">
+		SELECT
+		<include refid="gqgetAssetCarUnionColumns" />
+		FROM cre_gqget_asset_car_union a
+		<include refid="gqgetAssetCarUnionJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_gqget_asset_car_union(
+		id,
+		gqget_apply_no,
+		approve_id,
+		gqget_vehicle_no,
+		gqget_used_years,
+		gqget_car_evaluate_price,
+		gqget_market_price,
+		del_flag,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{gqgetApplyNo},
+		#{approveId},
+		#{gqgetVehicleNo},
+		#{gqgetUsedYears},
+		#{gqgetCarEvaluatePrice},
+		#{gqgetMarketPrice},
+		#{delFlag},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<insert id="insertGqgetAssetCarUnionData">
+		INSERT INTO cre_gqget_asset_car_union(
+		id,
+		gqget_apply_no,
+		approve_id,
+		gqget_vehicle_no,
+		gqget_used_years,
+		gqget_car_evaluate_price,
+		gqget_market_price,
+		del_flag,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES
+		<foreach item="GqgetAssetCar" collection="GqgetAssetCars" index="index" separator=",">
+			(
+			UUID_SHORT(),
+			#{GqgetAssetCar.gqgetApplyNo},
+			#{checkApproveId},
+			#{GqgetAssetCar.gqgetVehicleNo},
+			#{GqgetAssetCar.gqgetUsedYears},
+			#{GqgetAssetCar.gqgetCarEvaluatePrice},
+			#{GqgetAssetCar.gqgetMarketPrice},
+			#{GqgetAssetCar.delFlag},
+			#{GqgetAssetCar.createBy.id},
+			#{GqgetAssetCar.createDate},
+			#{GqgetAssetCar.updateBy.id},
+			#{GqgetAssetCar.updateDate}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE cre_gqget_asset_car_union SET
+		gqget_apply_no = #{gqgetApplyNo},
+		approve_id = #{approveId},
+		gqget_vehicle_no = #{gqgetVehicleNo},
+		gqget_used_years = #{gqgetUsedYears},
+		gqget_car_evaluate_price = #{gqgetCarEvaluatePrice},
+		gqget_market_price =
+		#{gqgetMarketPrice},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		delete from  cre_gqget_asset_car_union WHERE id = #{id}
+	</update>
+
+	<update id="deleteGqgetAssetCarUnionData">
+		delete from cre_gqget_asset_car_union WHERE gqget_apply_no = #{applyNo}
+	</update>
+
+</mapper>

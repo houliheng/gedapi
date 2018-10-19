@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+客户申请信息表   SQLMapper  CRE_APPLY_REGISTER
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreApplyRegisterDao">
+	<!-- 
+	 * @reqno:H1509230044
+	 * @date-designer:2015年10月13日-songmin
+	 * @date-author:2015年10月13日-songmin:根据申请ID，查询客户的贷款申请登记信息
+	 *				查询数据：客户名称、证件类型、证件号、移动电话、客户来源、渠道、其他渠道来源、其他渠道来源说明、登记员、登记门店、登记日期
+	 * @db-z:CRE_APPLY_REGISTER:CUST_NAME（客户名称）、ID_TYPE（证件类型：b.label）、ID_NUM（证件号）、MOBILE（移动电话）、
+	 *							CHANNEL_SOURCE_TYPE（客户来源）、CHANNEL_TYPE(渠道)、
+	 *							OTHER_CHANNEL_SOURCE（其他渠道来源）、CHANNEL_DESC（其他渠道来源说明）、CREATOR（登记员）、
+	 *							ORG_ID（登记门店：f.name）、REGISTER_DATE（登记日期）
+	 * @db-j:SYS_DICT:label(属性名)、value（属性值）
+	 -->
+	 <!-- 
+	 * @reqno:H1512210025
+	 * @date-designer:2015年12月31日-songmin
+	 * @date-author:2015年12月31日-songmin:CRE_信贷审批_个人_申请录入_页面重构
+	 * @db-z:CRE_APPLY_REGISTER:LINKMAN_NAME、LINKMAN_INDENTITY_ID、linkManMobile
+	 * 增加企业客户查询字段，再CreApplyRegister实体类中添加字典值的查询字段，不再使用公用查询字段
+	 * 取消关联字段查询，通过字典工具类获取
+	  -->
+	 <!--
+	 * @reqno:H1512210026
+	 * @date-designer:2016年1月4日-songmin
+	 * @date-author:2016年1月4日-songmin:CRE_信贷审批_个人_申请录入_录入结论_录入结论添加“废弃并加入黑名单”功能
+	 * @db-z:CRE_APPLY_REGISTER:ID
+	 * 增加ID查询字段
+	 -->
+	<select id="findApplyRegisterInfoById" resultType="CreApplyRegister">
+		select 
+			a.ID as id,
+			a.CUST_NAME as custName,
+			a.ID_TYPE idType,
+			a.ID_NUM idNum,
+			a.CUST_TYPE custType,
+			a.MOBILE mobile,
+			a.CHANNEL_SOURCE_TYPE channelSourceType,
+			a.CHANNEL_TYPE channelType,
+			a.OTHER_CHANNEL_SOURCE otherChannelSource,
+			a.CHANNEL_DESC channelDesc,
+			a.CREATOR creator,
+			a.ORG_ID,
+			f.name orgName,
+			a.REGISTER_DATE bizDate,
+			a.LINKMAN_NAME as linkManName,
+		    a.LINKMAN_INDENTITY_ID as linkManIndentityId,
+		    a.LINKMAN_MOBILE as linkManMobile
+		from 
+			CRE_APPLY_REGISTER a
+			LEFT JOIN SYS_OFFICE f on a.ORG_ID=f.id
+		where a.ID=#{id}
+	</select>
+	<!-- 
+	 * @reqno:H1509230043
+	 * @date-designer:2015年10月14日-songmin
+	 * @date-author:2015年10月14日-songmin:根据申请ID，查询客户的贷款申请登记信息（只取简要信息，不予其他表进行关联）
+	 *		查询数据项：客户名称、证件类型、证件号
+	 * @db-z:CRE_APPLY_REGISTER:CUST_NAME（客户名称）、ID_TYPE（证件类型）、ID_NUM（证件号）、ID（申请ID）
+	 -->
+	<select id="findSimpleApplyRegisterInfoById" resultType="CreApplyRegister">
+		select 
+			a.ID as id,
+			a.CUST_NAME as custName,
+			a.ID_TYPE idType,
+			a.ID_NUM idNum
+		from CRE_APPLY_REGISTER a
+		where a.ID=#{id}
+	</select>
+
+	<!--根据申请标号查询流程实例id-->
+	<select id="selectApplyRegisterByApplyNo" resultType="CreApplyRegister">
+		select
+	        a.ID as id,
+			a.CUST_NAME as custName,
+			a.ID_TYPE as idType,
+			a.ID_NUM as idNum,
+			a.PROC_INS_ID as procInsId,
+			a.PROC_DEF_KEY as otherChannelSource
+		from CRE_APPLY_REGISTER a
+		where a.APPLY_NO=#{applyNo}
+	</select>
+
+	<!-- 
+	 * @reqno:H1510290045
+	 * @date-designer:2015年11月5日-songmin
+	 * @date-author:2015年11月5日-songmin:CRE_信贷审批_取消审批_审批结论
+	 * @db-z:CRE_APPLY_REGISTER:STATUS、ID（申请ID）
+	 -->
+	<update id="updateStatus">
+		update CRE_APPLY_REGISTER set STATUS =#{status} where ID=#{id}
+	</update>
+	
+	<!-- 
+	 * @reqno:H1511100082
+	 * @date-designer:2015年11月13日-songmin
+	 * @date-author:2015年11月13日-songmin:根据证件类型、证件号码获取最近一次的客户登记信息（这里只获取了ID），查询涉及到本身数据，所以这里一次性查询出2条数据，第二条数据是真实需要的数据
+	 * @db-z:CRE_APPLY_REGISTER:ID_TYPE、ID_NUM、ID
+	 -->
+	<select id="findApplyRegisterByIdCard" resultType="CreApplyRegister">
+		select 
+			a.ID as id
+		from CRE_APPLY_REGISTER a
+		where a.ID_NUM=#{idNum} order by REGISTER_DATE desc limit 0,2
+	</select>
+		<!--
+	@reqno:H1511100047
+	@date-designer:20151118-huangxuecheng
+	@date-author:20151118-huangxuecheng:CRE_信贷审批_进件管理_个人客户登记列表_流程图、流程轨迹.结论comment太长会挤破表单，插入comment
+	@db-z:act_hi_comment:ID_,TYPE_,TIME_,USER_ID_,TASK_ID_,PROC_INST_ID_,ACTION_,MESSAGE_,FULL_MSG_
+	-->
+	<insert id="insertComment" parameterType="com.resoft.credit.taskCenter.entity.ActHiComment">
+		INSERT INTO act_hi_comment (
+			ID_,
+			TYPE_,
+			TIME_,
+			USER_ID_,
+			TASK_ID_,
+			PROC_INST_ID_,
+			ACTION_,
+			MESSAGE_,
+			FULL_MSG_
+		)
+		VALUES(
+			#{id},
+			#{type},
+			#{time},
+			#{userId},
+			#{taskId},
+			#{procInstId},
+			#{action},
+			#{message},
+			#{fullMsg}
+		);
+	</insert>
+</mapper>

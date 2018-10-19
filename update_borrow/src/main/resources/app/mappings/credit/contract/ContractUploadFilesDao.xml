@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.contract.dao.ContractUploadFilesDao">
+
+	<sql id="ContractUploadFilesColumns">
+		a.ID,
+		a.FILE_NAME,
+		a.FILE_PATH,
+		a.VERSION_NO,
+		a.MODULE_ID
+	</sql>
+
+	<select id="findList" resultType="ContractUploadFiles">
+		SELECT
+		<include refid="ContractUploadFilesColumns" />
+		FROM CRE_UPLOAD_FILES a
+		<where>
+			1=1
+			<if test="moduleId != null and moduleId != ''">
+				AND a.MODULE_ID = #{moduleId}
+			</if>
+		</where>
+		ORDER BY a.VERSION_NO DESC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO CRE_UPLOAD_FILES(
+		id,
+		FILE_NAME,
+		FILE_PATH,
+		VERSION_NO,
+		MODULE_ID,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{fileName},
+		#{filePath},
+		#{versionNo},
+		#{moduleId},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="delete">
+		delete from CRE_UPLOAD_FILES
+		WHERE MODULE_ID = #{moduleId}
+	</update>
+
+</mapper>

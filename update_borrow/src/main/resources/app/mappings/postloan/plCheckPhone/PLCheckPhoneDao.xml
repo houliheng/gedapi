@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.plCheckPhone.dao.PLCheckPhoneDao">
+
+	<sql id="plCheckPhoneColumns">
+		a.id AS "id",
+		a.allocate_id as "allocateId",
+		a.contract_no AS "contractNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.mobile_num AS "mobileNum",
+		a.dial_time AS "dialTime",
+		a.phone_src AS "phoneSrc",
+		a.dial_resc AS "dialResc",
+		a.listener_type AS "listenerType",
+		a.risk_point AS "riskPoint",
+		a.is_114_check AS "is114Check",
+		a.description AS "description",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS
+		"updateBy.id",
+		a.update_date AS
+		"updateDate"
+	</sql>
+
+	<sql id="checkPhoneJoins">
+	</sql>
+
+	<select id="get" resultType="PLCheckPhone">
+		SELECT
+		<include refid="plCheckPhoneColumns" />
+		FROM pl_check_phone a
+		<include refid="checkPhoneJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="PLCheckPhone">
+		SELECT
+		<include refid="plCheckPhoneColumns" />
+		FROM pl_check_phone a
+		<include refid="checkPhoneJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_check_phone a
+		<include refid="checkPhoneJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="PLCheckPhone">
+		SELECT
+		<include refid="plCheckPhoneColumns" />
+		FROM pl_check_phone a
+		<include refid="checkPhoneJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_check_phone(
+		id,
+		allocate_id,
+		contract_no,
+		role_type,
+		cust_id,
+		cust_name,
+		mobile_num,
+		dial_time,
+		phone_src,
+		dial_resc,
+		listener_type,
+		risk_point,
+		is_114_check,
+		description,
+		check_user_id,
+		check_user_name,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		)
+		VALUES (
+		#{id},
+		#{allocateId},
+		#{contractNo},
+		#{roleType},
+		#{custId},
+		#{custName},
+		#{mobileNum},
+		#{dialTime},
+		#{phoneSrc},
+		#{dialResc},
+		#{listenerType},
+		#{riskPoint},
+		#{is114Check},
+		#{description},
+		#{checkUserId},
+		#{checkUserName},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_check_phone SET
+		contract_no = #{contractNo},
+		role_type = #{roleType},
+		cust_id = #{custId},
+		cust_name = #{custName},
+		mobile_num = #{mobileNum},
+		dial_time = #{dialTime},
+		phone_src = #{phoneSrc},
+		dial_resc = #{dialResc},
+		listener_type = #{listenerType},
+		risk_point = #{riskPoint},
+		is_114_check = #{is114Check},
+		description = #{description},
+		check_user_id = #{checkUserId},
+		check_user_name = #{checkUserName},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_check_phone
+		WHERE id = #{id}
+	</update>
+
+	<select id="getCheckPhoneByAllocateId" resultType="PLCheckPhone">
+		SELECT
+		<include refid="plCheckPhoneColumns" />
+		FROM pl_check_phone a where a.allocate_id = #{allocateId}
+	</select>
+
+	<select id="findByApplyNoAndRoleTypeList" resultType="PLApplyRelation">
+		select id,apply_no,cust_name,role_type,cust_id from
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_relation
+		<where>
+			del_flag = '0' AND apply_no = #{applyNo}
+			<if test="roleTypeList != null and roleTypeList != ''">
+				AND role_type in
+				<foreach item="roleTypeList" collection="roleTypeList" open="(" close=")" separator=",">
+					#{roleTypeList}
+				</foreach>
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getCheckPhoneCount" resultType="String">
+		select count(*)
+		from pl_CHECK_PHONE t where t.allocate_id = #{allocateId} and cust_id=#{custId}
+		and role_type = #{roleType}
+	</select>
+
+	<select id="findContactInfoByApplyNo" resultType="PLContactInfo">
+		SELECT
+		a.id AS "id",
+		a.relation_id AS "relationId",
+		a.sex_no AS "sexNo",
+		a.contact_name AS "contactName",
+		a.contact_mobile AS "contactMobile",
+		a.contact_relations AS "contactRelations",
+		a.is_know AS "isKnow",
+		a.house_phone_no AS "housePhoneNo",
+		a.house_address_details AS "houseAddressDetails",
+		a.dept_name AS "deptName",
+		a.dept_address_details AS "deptAddressDetails",
+		a.department AS "department",
+		a.post_name AS "postName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_contact_info a
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_relation b ON a.RELATION_ID = b.ID
+		<where>
+			a.DEL_FLAG = '0'
+			AND b.DEL_FLAG = '0'
+			AND b.ROLE_TYPE = #{roleType}
+			AND b.APPLY_NO = #{applyNo}
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<select id="getCheckFaceByApplyNo" resultType="java.lang.String">
+		SELECT
+		DESCRIPTION as "description"
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_check_face a where a.apply_no = #{applyNo}
+	</select>
+</mapper>

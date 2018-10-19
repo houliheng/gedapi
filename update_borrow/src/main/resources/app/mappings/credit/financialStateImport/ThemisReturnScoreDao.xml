@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.financialStateImport.dao.ThemisReturnScoreDao">
+    
+	<sql id="themisReturnScoreColumns">
+		a.companycode AS "companycode",
+		a.report_year_month AS "reportYearMonth",
+		a.return_order_col AS "returnOrderCol",
+		a.return_index_code AS "returnIndexCode",
+		a.return_index_name AS "returnIndexName",
+		a.full_marks AS "fullMarks",
+		a.score AS "score",
+		a.warnning AS "warnning",
+		a.apply_no AS "applyNo"
+	</sql>
+	
+	<sql id="themisReturnScoreJoins">
+	</sql>
+    
+	<select id="get" resultType="ThemisReturnScore">
+		SELECT 
+			<include refid="themisReturnScoreColumns"/>
+		FROM ift_themis_return_score a
+		<include refid="themisReturnScoreJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ThemisReturnScore">
+		SELECT 
+			<include refid="themisReturnScoreColumns"/>
+		FROM ift_themis_return_score a where a.return_index_code != 'S004'
+		<include refid="themisReturnScoreJoins"/>
+			<if test="reportYearMonth != null and reportYearMonth != ''">
+				AND a.report_year_month = #{reportYearMonth}
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+			</if>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.return_order_col
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 根据进件号查询所有企业财报的年月 -->
+	<select id="findDistinctReportYearMonth" resultType="String">
+		SELECT DISTINCT a.report_year_month FROM ift_themis_return_score a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_themis_return_score a
+		<include refid="themisReturnScoreJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ThemisReturnScore">
+		SELECT 
+			<include refid="themisReturnScoreColumns"/>
+		FROM ift_themis_return_score a
+		<include refid="themisReturnScoreJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ift_themis_return_score(
+			companycode,report_year_month,return_order_col
+			,return_index_code,return_index_name,full_marks
+			,score,warnning,apply_no
+		) VALUES (
+			#{companycode},#{reportYearMonth},#{returnOrderCol}
+			,#{returnIndexCode},#{returnIndexName},#{fullMarks}
+			,#{score},#{warnning},#{applyNo}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_themis_return_score SET 	
+			companycode = #{companycode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_themis_return_score
+		WHERE id = #{id}
+	</update>
+	<delete id="deleteByApplyNo">
+		delete FROM ift_themis_return_score WHERE apply_no=#{applyNo};
+	</delete>
+</mapper>

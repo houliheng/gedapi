@@ -1,0 +1,327 @@
+.edit {
+	background-image: url(../images/edit.gif) !important;
+}
+
+.help {
+	background-image: url(../images/help.gif) !important;
+}
+
+.reset_pwd {
+	background-image: url(../images/reset_pwd.gif) !important;
+}
+
+.close {
+	background-image: url(../images/close.gif) !important;
+}
+
+.export_orguser {
+	background-image: url(../images/export_orguser.gif) !important;
+}
+
+.import {
+	background-image: url(../images/import.gif) !important;
+}
+
+.import_orguser {
+	background-image: url(../images/import_orguser.gif) !important;
+}
+
+.query {
+	background-image: url(../images/query.gif) !important;
+}
+
+.rolepriv_edit {
+	background-image: url(../images/rolepriv_edit.gif) !important;
+}
+
+.roleuser_edit {
+	background-image: url(../images/roleuser_edit.gif) !important;
+}
+
+.processtrans_detail {
+	background-image: url(../images/processtrans_detail.gif) !important;
+}
+
+.cancel {
+	background-image: url(../images/cancel.gif) !important;
+}
+
+.delete {
+	background-image: url(../images/delete.gif) !important;
+}
+
+.refresh {
+	background-image: url(../images/refresh.gif) !important;
+}
+
+.select_dept {
+	background-image: url(../images/select_dept.gif) !important;
+}
+
+.select_process {
+	background-image: url(../images/select_process.gif) !important;
+}
+
+.select_user {
+	background-image: url(../images/select_user.gif) !important;
+}
+
+.userrole_edit {
+	background-image: url(../images/userrole_edit.gif) !important;
+}
+
+.userpriv_look {
+	background-image: url(../images/userpriv_look.gif) !important;
+}
+
+.add {
+	background-image: url(../images/add.gif) !important;
+}
+
+.addAll {
+	background-image: url(../images/quanxuan.gif) !important;
+}
+
+.editpage {
+	background-image: url(../images/editpage.gif) !important;
+}
+
+.print {
+	background-image: url(../images/print.gif) !important;
+}
+
+.return {
+	background-image: url(../images/fanhui.gif) !important;
+}
+
+.powerpoint {
+	background-image: url(../images/powerpoint.gif) !important;
+}
+
+.save {
+	background-image: url(../images/save.gif) !important;
+}
+
+.mail {
+	background-image: url(../images/mail.gif) !important;
+}
+
+.word {
+	background-image: url(../images/word.gif) !important;
+}
+
+.excel {
+	background-image: url(../images/excel.gif) !important;
+}
+
+.clean {
+	background-image: url(../images/clean.gif) !important;
+}
+
+.tree_dept_root {
+	background-image: url(../images/tree_dept_root.gif) !important;
+}
+
+.tree_dept_expand {
+	background-image: url(../images/tree_dept_expand.gif) !important;
+}
+
+.tree_dept_leaf {
+	background-image: url(../images/tree_dept_leaf.gif) !important;
+}
+
+.tree_resource_expand {
+	background-image: url(../images/tree_resource_expand.gif) !important;
+}
+
+.tree_resource_leaf {
+	background-image: url(../images/tree_resource_leaf.gif) !important;
+}
+
+.tree_user_expand {
+	background-image: url(../images/tree_user_expand.gif) !important;
+}
+
+.tree_user_open {
+	background-image: url(../images/tree_user_open.gif) !important;
+}
+
+.tree_user_leaf {
+	background-image: url(../images/tree_user_leaf.gif) !important;
+}
+
+.tree_blank {
+	background-image: url(../images/tree_blank.gif) !important;
+}
+
+.folder_add {
+	background-image: url(../images/folder_add.gif) !important;
+}
+
+.wendang_add {
+	background-image: url(../images/wendang_add.gif) !important;
+}
+
+.yidong2 {
+	background-image: url(../images/yidong2.gif) !important;
+}
+
+.copy {
+	background-image: url(../images/copy.gif) !important;
+}
+
+.upload {
+	background-image: url(../images/shangchuanfujian.gif) !important;
+}
+
+.download {
+	background-image: url(../images/download.gif) !important;
+}
+
+.zhuanfa2 {
+	background-image: url(../images/zhuanfa2.gif) !important;
+}
+
+.fabu {
+	background-image: url(../images/fabu.gif) !important;
+}
+
+.chexiao {
+	background-image: url(../images/chexiao.gif) !important;
+}
+
+.fuquan {
+	background-image: url(../images/fuquan.gif) !important;
+}
+
+.xuanze {
+	background-image: url(../images/xuanze.gif) !important;
+}
+
+.fujian {
+	background-image: url(../images/fujian.gif) !important;
+}
+
+.email_jieshou {
+	background-image: url(../images/email_jieshou.gif) !important;
+}
+
+.dafu {
+	background-image: url(../images/dafu.gif) !important;
+}
+
+.dafu_all {
+	background-image: url(../images/dafu_all.gif) !important;
+}
+
+.zhuanfa {
+	background-image: url(../images/zhuanfa.gif) !important;
+}
+
+.zhuanfaliucheng {
+	background-image: url(../images/zhuanfaliucheng.gif) !important;
+}
+
+.shanchu {
+	background-image: url(../images/shanchu.gif) !important;
+}
+
+.yongjiushanchu {
+	background-image: url(../images/yongjiushanchu.gif) !important;
+}
+
+.yidong {
+	background-image: url(../images/yidong.gif) !important;
+}
+
+.email_xiazai {
+	background-image: url(../images/email_xiazai.gif) !important;
+}
+
+.email_liulan {
+	background-image: url(../images/email_liulan.gif) !important;
+}
+
+.qingkongcaogao {
+	background-image: url(../images/qingkongcaogao.gif) !important;
+}
+
+.qingkong {
+	background-image: url(../images/qingkong.gif) !important;
+}
+
+.view {
+	background-image: url(../images/img21.gif) !important;
+}
+
+.menu_wdgz {
+	background-image: url(../images/n_ico_01.gif) !important;
+}
+
+.menu_gwgl {
+	background-image: url(../images/n_ico_02.gif) !important;
+}
+
+.menu_zhxz {
+	background-image: url(../images/n_ico_03.gif) !important;
+}
+
+.menu_cxtj {
+	background-image: url(../images/n_ico_04.gif) !important;
+}
+
+.menu_grsw {
+	background-image: url(../images/n_ico_05.gif) !important;
+}
+
+.menu_ggsw {
+	background-image: url(../images/n_ico_06.gif) !important;
+}
+
+.menu_xxgl {
+	background-image: url(../images/n_ico_07.gif) !important;
+}
+
+.menu_mhgl {
+	background-image: url(../images/n_ico_08.gif) !important;
+}
+
+.menu_wstj {
+	background-image: url(../images/n_ico_09.gif) !important;
+}
+
+.menu_nxjb {
+	background-image: url(../images/n_ico_10.gif) !important;
+}
+
+.menu_rsgl {
+	background-image: url(../images/n_ico_11.gif) !important;
+}
+
+.menu_dagl {
+	background-image: url(../images/n_ico_12.gif) !important;
+}
+
+.menu_wdgl {
+	background-image: url(../images/n_ico_13.gif) !important;
+}
+
+.menu_xxyd {
+	background-image: url(../images/n_ico_14.gif) !important;
+}
+
+.menu_ywgl {
+	background-image: url(../images/n_ico_15.gif) !important;
+}
+
+.menu_xmgl {
+	background-image: url(../images/n_ico_16.gif) !important;
+}
+
+.menu_gjdagl {
+	background-image: url(../images/n_ico_17.gif) !important;
+}
+
+.menu_bmrygl {
+	background-image: url(../images/n_ico_18.gif) !important;
+}

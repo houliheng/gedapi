@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkApprove.dao.CheckApproveDao">
+
+	<sql id="checkApproveColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.appro_product_type_code AS "approProductTypeCode",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS "approProductName",
+		a.contract_amount AS
+		"contractAmount",
+		a.appro_amount AS "approAmount",
+		a.loan_amount AS "loanAmount",
+		a.appro_year_rate AS "approYearRate",
+		a.guanetong_rate AS "guanetongRate",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.special_service_fee_rate AS "specialServiceFeeRate",
+		a.service_fee_type AS
+		"serviceFeeType",
+		a.service_fee AS "serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.QUALITY_SERVICE_MARGIN_AMOUNT as "qualityServiceMarginAmount",
+		a.QUALITY_SERVICE_MARGIN_RATE as "qualityServiceMarginRate",
+		a.all_service_fee AS "allServiceFee",
+		a.appro_period_id AS "approPeriodId",
+		a.appro_period_value AS "approPeriodValue",
+		a.appro_loan_repay_type AS "approLoanRepayType",
+		a.margin_rate AS "marginRate",
+		a.margin_amount AS "marginAmount",
+		a.check_fee AS "checkFee",
+		a.loan_model AS "loanModel",
+		a.is_urgent AS "isUrgent",
+		a.contract_type AS "contractType",
+		a.appro_date AS "approDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.task_def_key AS "taskDefKey",
+		a.process_sequence AS "processSequence",
+		a.remark AS "remark",
+		a.product_category AS "productCategory",
+		a.priced_risk as "pricedRisk",
+		a.TOPSHOP_NAME AS "topShopName",
+		a.DOWNSHOP_NAME AS "downShopName",
+		a.TOPSHOP_BACK_RATE AS "topShopBackRate",
+		a.TOPSHOP_BACK_MONEY AS "topShopBackMoney",
+		a.TOPSHOP_MONEY_RATE AS "topShopMonthRate",
+		a.MEDIACY_SERVICE_FEE AS "mediacyServiceFee",
+		a.INTEREST_RATE_DIFF AS "interestRateDiff",
+		a.REALITY_SERVICE_FEE AS "realityServiceFee",
+		a.ADD_FUND_PERIOD AS "addFundPeriod",
+		a.COMPANY_COST_RATE AS "CompanyCostRate",
+		a.COMPANY_SERVICE_MONEY AS "CompanyServiceMoney",
+		a.discount_interest_rate AS "discountInterestRate",
+		a.interest_monthly_spread AS "interestMonthlySpread",
+		a.loan_main_body_type as "loanMainBodyType",
+		a.under_contract_no as "underContractNo",
+		a.subject_repay_type as "subjectRepayType",
+		a.risk_reserve as "riskReserve",
+		a.guarantee_fee as "guaranteeFee",
+		a.return_service_fee_flag as "returnServiceFeeFlag",
+		a.return_service_fee as "returnServiceFee",
+		a.sign_date as "signDate",
+		a.loan_usefulness as "loanUsefulness",
+		a.loan_usefulness_code as "loanUsefulnessCode",
+		a.contract_year_rate as "contractYearRate"
+	</sql>
+
+	<sql id="checkApproveJoins">
+	</sql>
+
+	<select id="get" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByApplyNo" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		WHERE a.apply_no = #{applyNo}
+		<if test="taskDefKey != null and taskDefKey != ''">
+			and a.task_def_key = #{taskDefKey}
+		</if>
+
+	</select>
+
+	<select id="getByUnderContract" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		WHERE a.under_contract_no = #{underContractNo}
+		  and a.task_def_key = "under_dqglr"
+	</select>
+
+	<select id="findList" resultType="CheckApprove">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.priced_risk as "pricedRisk",
+		a.product_category AS "productCategory",
+		a.appro_product_type_code AS "approProductTypeCode",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.QUALITY_SERVICE_MARGIN_AMOUNT as "qualityServiceMarginAmount",
+		a.QUALITY_SERVICE_MARGIN_RATE as "qualityServiceMarginRate",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS "approProductName",
+		a.contract_amount AS
+		"contractAmount",
+		a.appro_amount AS "approAmount",
+		a.loan_amount AS "loanAmount",
+		a.appro_year_rate AS "approYearRate",
+		a.guanetong_rate AS "guanetongRate",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.special_service_fee_rate AS "specialServiceFeeRate",
+		a.service_fee_type AS
+		"serviceFeeType",
+		a.service_fee AS "serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.all_service_fee AS "allServiceFee",
+		a.appro_period_id AS "approPeriodId",
+		a.appro_period_value AS "approPeriodValue",
+		a.margin_rate AS "marginRate",
+		a.margin_amount AS
+		"marginAmount",
+		a.check_fee AS "checkFee",
+		a.loan_model AS "loanModel",
+		a.is_urgent AS "isUrgent",
+		a.contract_type AS "contractType",
+		a.appro_date AS "approDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS"updateDate",
+		a.task_def_key AS "taskDefKey",
+		a.process_sequence AS "processSequence",
+		a.remark AS "remark",
+		b.LOAN_REPAY_DESC AS "approLoanRepayType",
+		a.COMPANY_COST_RATE AS "CompanyCostRate",
+		a.COMPANY_SERVICE_MONEY AS "CompanyServiceMoney",
+		a.discount_interest_rate AS "discountInterestRate",
+		a.interest_monthly_spread AS "interestMonthlySpread",
+		a.loan_main_body_type as "loanMainBodyType",
+		a.under_contract_no as "underContractNo",
+		a.subject_repay_type as "subjectRepayType",
+		a.risk_reserve as "riskReserve",
+		a.guarantee_fee as "guaranteeFee",
+		a.return_service_fee_flag as "returnServiceFeeFlag",
+		a.return_service_fee as "returnServiceFee",
+		a.sign_date as "signDate",
+		a.loan_usefulness as "loanUsefulness",
+		a.loan_usefulness_code as "loanUsefulnessCode",
+		a.contract_year_rate as "contractYearRate"
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		left join cre_rate_interest b ON a.appro_Product_Type_Code = b.PRODUCT_TYPE_CODE
+		AND a.appro_Period_Value = b.PERIOD_VALUE and b.LOAN_REPAY_TYPE= a.appro_loan_repay_type
+		<where>
+			a.apply_no = #{applyNo}
+			<if test="todoOrDoneFlag == 0">
+				and a.task_def_key != #{taskDefKey}
+				AND (a.PROCESS_SEQUENCE <![CDATA[<=]]>${processSequence} or a.PROCESS_SEQUENCE = 8)
+			</if>
+			<if test="todoOrDoneFlag == 1">
+				AND (a.PROCESS_SEQUENCE <![CDATA[<=]]>${processSequence} or a.PROCESS_SEQUENCE = 8)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.PROCESS_SEQUENCE DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve a
+		<include refid="checkApproveJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_check_approve(
+		id,
+		apply_no,
+		priced_risk,
+		appro_product_type_code,
+		appro_product_type_name,
+		appro_product_id,
+		appro_product_name,
+		contract_amount,
+		appro_amount,
+		loan_amount,
+		appro_year_rate,
+		guanetong_rate,
+		service_fee_rate,
+		special_service_fee_rate,
+		service_fee_type,
+		service_fee,
+		special_service_fee,
+		all_service_fee,
+		appro_period_id,
+		appro_period_value,
+		appro_loan_repay_type,
+		margin_rate,
+		margin_amount,
+		check_fee,
+		loan_model,
+		is_urgent,
+		contract_type,
+		appro_date,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		task_def_key,
+		process_sequence,
+		remark,
+		product_category,
+		QUALITY_SERVICE_MARGIN_AMOUNT,
+		QUALITY_SERVICE_MARGIN_RATE,
+		TOPSHOP_NAME,
+		DOWNSHOP_NAME,
+		TOPSHOP_BACK_RATE,
+		TOPSHOP_BACK_MONEY,
+		TOPSHOP_MONEY_RATE,
+		MEDIACY_SERVICE_FEE,
+		INTEREST_RATE_DIFF,
+		REALITY_SERVICE_FEE,
+		ADD_FUND_PERIOD,
+		COMPANY_COST_RATE ,
+		COMPANY_SERVICE_MONEY,
+		discount_interest_rate,
+		interest_monthly_spread,
+		loan_main_body_type,
+		under_contract_no,
+		subject_repay_type,
+		risk_reserve,
+		guarantee_fee,
+		return_service_fee_flag,
+		return_service_fee,
+		sign_date,
+		loan_usefulness,
+		loan_usefulness_code,
+		contract_year_rate
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{pricedRisk},
+		#{approProductTypeCode},
+		#{approProductTypeName},
+		#{approProductId},
+		#{approProductName},
+		#{contractAmount},
+		#{approAmount},
+		#{loanAmount},
+		#{approYearRate},
+		#{guanetongRate},
+		#{serviceFeeRate},
+		#{specialServiceFeeRate},
+		#{serviceFeeType},
+		#{serviceFee},
+		#{specialServiceFee},
+		#{allServiceFee},
+		#{approPeriodId},
+		#{approPeriodValue},
+		#{approLoanRepayType},
+		#{marginRate},
+		#{marginAmount},
+		#{checkFee},
+		#{loanModel},
+		#{isUrgent},
+		#{contractType},
+		#{approDate},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{taskDefKey},
+		#{processSequence},
+		#{remark},
+		#{productCategory},
+		#{qualityServiceMarginAmount},
+		#{qualityServiceMarginRate},
+		#{topShopName},
+		#{downShopName},
+		#{topShopBackRate},
+		#{topShopBackMoney},
+		#{topShopMonthRate},
+		#{mediacyServiceFee},
+		#{interestRateDiff},
+		#{realityServiceFee},
+		#{addFundPeriod},
+		#{CompanyCostRate},
+		#{CompanyServiceMoney},
+		#{discountInterestRate},
+		#{interestMonthlySpread},
+		#{loanMainBodyType},
+		#{underContractNo},
+		#{subjectRepayType},
+		#{riskReserve},
+		#{guaranteeFee},
+		#{returnServiceFeeFlag},
+		#{returnServiceFee},
+		#{signDate},
+		#{loanUsefulness},
+		#{loanUsefulnessCode},
+		#{contractYearRate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_check_approve SET
+		apply_no = #{applyNo},
+		priced_risk = #{pricedRisk},
+		product_category=#{productCategory},
+		appro_product_type_code = #{approProductTypeCode},
+		appro_product_type_name = #{approProductTypeName},
+		appro_product_id = #{approProductId},
+		appro_product_name = #{approProductName},
+		contract_amount = #{contractAmount},
+		appro_amount = #{approAmount},
+		loan_amount = #{loanAmount},
+		appro_year_rate = #{approYearRate},
+		guanetong_rate = #{guanetongRate},
+		service_fee_rate = #{serviceFeeRate},
+		special_service_fee_rate = #{specialServiceFeeRate},
+		QUALITY_SERVICE_MARGIN_AMOUNT = #{qualityServiceMarginAmount},
+		QUALITY_SERVICE_MARGIN_RATE = #{qualityServiceMarginRate},
+		service_fee_type = #{serviceFeeType},
+		service_fee = #{serviceFee},
+		special_service_fee = #{specialServiceFee},
+		all_service_fee = #{allServiceFee}, 
+		appro_period_id = #{approPeriodId},
+		appro_period_value = #{approPeriodValue},
+		appro_loan_repay_type = #{approLoanRepayType},
+		margin_rate = #{marginRate},
+		margin_amount = #{marginAmount},
+		check_fee = #{checkFee},
+		loan_model = #{loanModel},
+		is_urgent = #{isUrgent},
+		contract_type = #{contractType},
+		appro_date = #{approDate},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		task_def_key = #{taskDefKey},
+		process_sequence = #{processSequence},
+		remark = #{remark},
+		TOPSHOP_NAME = #{topShopName},
+		DOWNSHOP_NAME = #{downShopName},
+		TOPSHOP_BACK_RATE = #{topShopBackRate},
+		TOPSHOP_BACK_MONEY = #{topShopBackMoney},
+		TOPSHOP_MONEY_RATE = #{topShopMonthRate},
+		MEDIACY_SERVICE_FEE = #{mediacyServiceFee},
+		INTEREST_RATE_DIFF = #{interestRateDiff},
+		REALITY_SERVICE_FEE = #{realityServiceFee},
+		ADD_FUND_PERIOD = #{addFundPeriod},
+		COMPANY_COST_RATE =  #{CompanyCostRate},
+		COMPANY_SERVICE_MONEY = #{CompanyServiceMoney},
+		discount_interest_rate = #{discountInterestRate},
+		interest_monthly_spread = #{interestMonthlySpread},
+		loan_main_body_type = #{loanMainBodyType},
+		under_contract_no = #{underContractNo},
+		subject_repay_type = #{subjectRepayType},
+		risk_reserve = #{riskReserve},
+		guarantee_fee = #{guaranteeFee},
+		return_service_fee_flag = #{returnServiceFeeFlag},
+		return_service_fee = #{returnServiceFee},
+		sign_date = #{signDate},
+		loan_usefulness = #{loanUsefulness},
+		loan_usefulness_code = #{loanUsefulnessCode},
+		contract_year_rate = #{contractYearRate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getCheckApproveByApplyNo" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve a
+		WHERE a.apply_no = #{applyNo}
+		<if test="taskDefKey != null and taskDefKey != '' and processSequence != null and processSequence != ''">
+			and (a.task_def_key = #{taskDefKey} or a.PROCESS_SEQUENCE  <![CDATA[<=]]>
+			${processSequence})
+		</if>
+		<if test="taskDefKeyV != null and taskDefKeyV != ''">
+			and a.task_def_key = #{taskDefKeyV}
+		</if>
+
+		order by a.PROCESS_SEQUENCE desc
+	</select>
+	
+	<insert id="insertCheckApproveBackUp">
+		insert into cre_check_approve_backup
+ 		(select * from cre_check_approve where APPLY_NO = #{applyNo} and PROCESS_SEQUENCE = '8');
+	</insert>
+
+	<update id="deleteChekApproveBackUp">
+		delete from cre_check_approve_backup where apply_no = #{applyNo}
+	</update>
+	
+	
+	<select id="getCheckApproveBackUp" resultType="CheckApprove">
+		SELECT
+		<include refid="checkApproveColumns" />
+		FROM cre_check_approve_backup a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	
+</mapper>

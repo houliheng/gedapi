@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.guaranteeCompany.dao.CreGuaranteeCompanyDao">
+    
+	<sql id="creGuaranteeCompanyColumns">
+		a.id AS "id",
+		a.guarantee_company_name AS "guaranteeCompanyName",
+		a.company_type AS "companyType",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.register_capital AS "registerCapital",
+		a.reg_province AS "regProvince",
+		a.reg_city AS "regCity",
+		a.reg_distinct AS "regDistinct",
+		a.operate_address AS "operateAddress",
+		a.corporation_represent AS "corporationRepresent",
+		a.linkman AS "linkman",
+		a.link_mobile AS "linkMobile",
+		a.guarantee_limit AS "guaranteeLimit",
+		a.cost_name AS "costName",
+		a.cost_rate AS "costRate",
+		a.guarantee_state AS "guaranteeState",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.gurantee_details as guranteeDetails,
+		ifnull(a.guaranty,0) as guaranty,
+		ifnull(a.guarantee_amount,0) as guaranteeAmount,
+		ifnull(a.gurantee_count,"0") as guranteeCount,
+		a.GED_NUM_FLAG as gedNumFlag
+	</sql>
+	
+	<sql id="creGuaranteeCompanyJoins">
+	</sql>
+    
+	<select id="get" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+		<include refid="creGuaranteeCompanyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getBycheckAndRelation" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM
+			cre_check_approve_union c
+		LEFT JOIN cre_apply_company_relation b ON c.CUST_ID = b.COMPANY_ID
+		LEFT JOIN cre_guarantee_company a ON a.ID = b.CUST_ID
+		WHERE
+			c.id = #{id}
+		AND b.ROLE_TYPE = '3'
+		AND b.DEL_FLAG='0'	
+
+	</select>
+	
+	
+
+	<select id="getByApplyNoAndRoleType" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+		left join cre_apply_relation b on a.id = b.cust_id
+		WHERE b.APPLY_NO = #{applyNo}
+			and b.ROLE_TYPE=#{roleType}
+	</select>
+
+
+	<select id="findList" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+		<include refid="creGuaranteeCompanyJoins"/>
+		<where> 
+			<if test="guaranteeCompanyName != null and guaranteeCompanyName != ''">
+				AND a.GUARANTEE_COMPANY_NAME like CONCAT(#{guaranteeCompanyName},'%')
+			</if>
+			<if test="guaranteeState != null and guaranteeState != ''">
+				AND a.GUARANTEE_STATE = #{guaranteeState}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.UPDATE_DATE desc
+			</otherwise>
+		</choose>
+	</select>
+
+
+	<select id="queryCompanyList" resultType="CreGuaranteeCompany">
+		SELECT
+		<include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+		<include refid="creGuaranteeCompanyJoins"/>
+		 WHERE
+		a.guarantee_state = '0'
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.UPDATE_DATE desc
+			</otherwise>
+		</choose>
+	</select>
+
+
+
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_guarantee_company a
+		<include refid="creGuaranteeCompanyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+		<include refid="creGuaranteeCompanyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_guarantee_company(
+			id,
+			guarantee_company_name,
+			company_type,
+			un_soc_credit_no,
+			register_capital,
+			reg_province,
+			reg_city,
+			reg_distinct,
+			operate_address,
+			corporation_represent,
+			linkman,
+			link_mobile,
+			guarantee_limit,
+			cost_name,
+			cost_rate,
+			guarantee_state,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			gurantee_details,
+			guaranty
+		) VALUES (
+			#{id},
+			#{guaranteeCompanyName},
+			#{companyType},
+			#{unSocCreditNo},
+			#{registerCapital},
+			#{regProvince},
+			#{regCity},
+			#{regDistinct},
+			#{operateAddress},
+			#{corporationRepresent},
+			#{linkman},
+			#{linkMobile},
+			#{guaranteeLimit},
+			#{costName},
+			#{costRate},
+			#{guaranteeState},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{guranteeDetails},
+			#{guaranteeLimit}
+		)
+	</insert>
+	
+	<update id="update">
+  UPDATE cre_guarantee_company SET  
+   guarantee_company_name = #{guaranteeCompanyName},
+   company_type = #{companyType},
+   un_soc_credit_no = #{unSocCreditNo},
+   register_capital = #{registerCapital},
+   reg_province = #{regProvince},
+   reg_city = #{regCity},
+   reg_distinct = #{regDistinct},
+   operate_address = #{operateAddress},
+   corporation_represent = #{corporationRepresent},
+   linkman = #{linkman},
+   link_mobile = #{linkMobile},
+   guarantee_limit = #{guaranteeLimit},
+   cost_name = #{costName},
+   cost_rate = #{costRate},
+   guarantee_state = #{guaranteeState},
+   update_by = #{updateBy.id},
+   update_date = #{updateDate},
+   gurantee_details = #{guranteeDetails},
+   guaranty =#{guaranteeLimit}
+  WHERE id = #{id}
+ </update>
+	
+	<update id="updateGuranteeInfo">
+		UPDATE cre_guarantee_company SET 	
+			guaranty = #{guaranty},
+			guarantee_amount = #{guaranteeAmount},
+			gurantee_count = #{guranteeCount}
+		WHERE id = #{id} and GUARANTEE_STATE = '0'
+	</update>
+	<update id="delete">
+		UPDATE cre_guarantee_company SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="batchDelete">
+		UPDATE cre_guarantee_company SET del_flag = '1'
+		WHERE id IN
+		<foreach item="id" collection="idList" open="(" separator="," close=")">
+	    	#{id}
+    	</foreach>
+	</delete>
+	
+	<select id="queryCreGuranteeCompanyByUnSocreNo" resultType="CreGuaranteeCompany">
+		select <include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a where UN_SOC_CREDIT_NO = #{unSocCreditNo}
+	</select>
+	
+	<select id="findListCregurantee" resultType="CreGuaranteeCompany">
+		select <include refid="creGuaranteeCompanyColumns"/>
+		FROM cre_guarantee_company a
+	</select>
+	
+	<update id="confirmGuranteeRelation">
+		update ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract set GURANTEE_RELATION = '1' where contract_no =#{contractNo}
+	</update>
+	
+	
+	<update id="updateGuantRelationApply">
+		update cre_apply_relation set IS_CONFIRM = null where APPLY_NO = #{applyNo}
+	</update>
+	<update id="updateGuantRelationGurantee">
+		update cre_apply_company_relation set IS_CONFIRM = null where APPLY_NO = #{applyNo}
+	</update>
+	<update id="updateGuantRelationGuranCompany">
+		update cre_guarantee_relation set IS_CONFIRM = null where APPLY_NO = #{applyNo}
+	</update>
+	
+	<select id="getByApplyNoAndCustId" resultType="com.resoft.credit.checkApproveUnion.entity.CheckApproveUnion">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_id AS "custId",
+		a.priced_risk AS "pricedRisk",
+		a.appro_product_type_code AS "approProductTypeCode",
+		a.appro_product_type_name AS
+		"approProductTypeName",
+		a.appro_product_id AS "approProductId",
+		a.appro_product_name AS
+		"approProductName",
+		a.contract_amount AS "contractAmount",
+		a.appro_amount AS "approAmount",
+		a.loan_amount AS "loanAmount",
+		a.appro_year_rate AS "approYearRate",
+		a.guanetong_rate AS
+		"guanetongRate",
+		a.service_fee_rate AS "serviceFeeRate",
+		a.special_service_fee_rate AS
+		"specialServiceFeeRate",
+		a.service_fee_type AS "serviceFeeType",
+		a.service_fee AS "serviceFee",
+		a.special_service_fee AS "specialServiceFee",
+		a.QUALITY_SERVICE_MARGIN_AMOUNT as "qualityServiceMarginAmount",
+		a.QUALITY_SERVICE_MARGIN_RATE as "qualityServiceMarginRate",
+		a.all_service_fee AS "allServiceFee",
+		a.appro_period_id AS
+		"approPeriodId",
+		a.appro_period_value AS
+		"approPeriodValue",
+		a.appro_loan_repay_type AS "approLoanRepayType",
+		a.margin_rate AS "marginRate",
+		a.margin_amount AS "marginAmount",
+		a.check_fee AS "checkFee",
+		a.loan_model AS "loanModel",
+		a.is_urgent AS "isUrgent",
+		a.contract_type AS
+		"contractType",
+		a.appro_date AS
+		"approDate",
+		a.create_by AS
+		"createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.task_def_key AS "taskDefKey",
+		a.process_sequence AS "processSequence",
+		a.remark AS "remark",
+		a.product_category as "productCategory",
+		a.TOPSHOP_NAME AS "topShopName",
+		a.DOWNSHOP_NAME AS "downShopName",
+		a.TOPSHOP_BACK_RATE AS "topShopBackRate",
+		a.TOPSHOP_BACK_MONEY AS "topShopBackMoney",
+		a.TOPSHOP_MONEY_RATE AS "topShopMonthRate",
+		a.MEDIACY_SERVICE_FEE AS "mediacyServiceFee",
+		a.INTEREST_RATE_DIFF AS "interestRateDiff",
+		a.REALITY_SERVICE_FEE AS "realityServiceFee",
+		a.ADD_FUND_PERIOD AS "addFundPeriod"
+		FROM cre_check_approve_union a
+		WHERE a.CUST_ID = #{custId} and a.APPLY_NO=#{applyNo}
+	</select>
+	
+	<update id="updateGuranteeGedAccount">
+		update cre_guarantee_company set GED_NUM_FLAG = #{gedNumFlag} where UN_SOC_CREDIT_NO = #{unSocCreditNo} and DEL_FLAG = '0'
+	</update>
+	
+	<select id="getGuaranByCompanyIdAndType" resultType="CreGuaranteeCompany">
+		SELECT 
+			<include refid="creGuaranteeCompanyColumns"/>
+		FROM
+			cre_apply_company_relation b
+		LEFT JOIN cre_guarantee_company a ON a.ID = b.CUST_ID
+		WHERE b.COMPANY_ID=#{id}
+		and b.APPLY_NO = #{applyNo}
+		and b.ROLE_TYPE = #{roleType}
+
+	</select>
+	
+	
+	
+</mapper>

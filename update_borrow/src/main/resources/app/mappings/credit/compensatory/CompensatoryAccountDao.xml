@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.compensatory.dao.CompensatoryAccountDao">
+    
+	<sql id="compensatoryAccountColumns">
+		a.id AS "id",
+		a.compensatory_account AS "compensatoryAccount",
+		a.priopity_level AS "priopityLevel",
+		a.account_status AS "accountStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.cust_id AS "custId"
+	</sql>
+	
+	<sql id="compensatoryAccountJoins">
+	</sql>
+    
+	<select id="get" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		<include refid="compensatoryAccountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	
+	<select id="getMostPriopity" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		WHERE
+			a.PRIOPITY_LEVEL = (
+		SELECT
+			max(
+				CAST(PRIOPITY_LEVEL AS SIGNED)
+			)
+		FROM
+			compensatory_account
+		where account_status = '0' 
+	)
+	</select>
+	
+	<select id="getAllAccount" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		WHERE
+			a.account_status = '0' 
+	</select>
+	
+	<select id="findList" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		<where> 
+			<if test="compensatoryAccount != null and compensatoryAccount != ''">
+				AND a.compensatory_account like CONCAT(#{compensatoryAccount},'%')
+			</if>
+			<if test="accountStatus != null and accountStatus != ''">
+				AND a.account_status = #{accountStatus}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM compensatory_account a
+		<include refid="compensatoryAccountJoins"/>
+		<where> 
+			<if test="compensatoryAccount != null and compensatoryAccount != ''">
+				AND a.compensatory_account like CONCAT(#{compensatoryAccount},'%')
+			</if>
+			<if test="accountStatus != null and accountStatus != ''">
+				AND a.account_status = #{accountStatus}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		<include refid="compensatoryAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO compensatory_account(
+			id,
+			compensatory_account,
+			priopity_level,
+			account_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			cust_id
+		) VALUES (
+			#{id},
+			#{compensatoryAccount},
+			#{priopityLevel},
+			#{accountStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{custId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE compensatory_account SET 	
+			compensatory_account = #{compensatoryAccount},
+			priopity_level = #{priopityLevel},
+			account_status = #{accountStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			cust_id = #{custId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE compensatory_account SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<select id="checkDouble" resultType="CompensatoryAccount">
+		SELECT 
+			<include refid="compensatoryAccountColumns"/>
+		FROM compensatory_account a
+		<include refid="compensatoryAccountJoins"/>
+		<where> 
+			a.CUST_ID=#{custId} or a.COMPENSATORY_ACCOUNT=#{compensatoryAccount}
+		</where>
+	</select>
+	
+	
+	<select id="getGRComAccount" resultType="CompensatoryAccount">
+		SELECT
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.LEGAL_PER_NAME AS "compensatoryName"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.id
+		LEFT JOIN cre_ged_account c ON c.LEGAL_PER_PHONE = b.CORPORATION_MOBILE
+		 WHERE a.APPLY_NO=#{applyNo}  and ROLE_TYPE =  #{string1}
+		 and c.status='4' and a.DEL_FLAG = '0'
+	</select>
+		
+	
+	<select id="getGRCustAccount" resultType="CompensatoryAccount">
+		SELECT
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.LEGAL_PER_NAME AS "compensatoryName"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.id
+		LEFT JOIN cre_ged_account c ON c.LEGAL_PER_PHONE = b.MOBILE_NUM
+		 WHERE a.APPLY_NO=#{applyNo}  and ROLE_TYPE = #{string1}
+		 and c.status='4' is not null and a.DEL_FLAG = '0'
+	</select>
+	
+	
+	<select id="getLHCustAccount" resultType="CompensatoryAccount"> 
+		select 
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.LEGAL_PER_NAME AS "compensatoryName"
+		from  cre_apply_company_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c on c.LEGAL_PER_PHONE = b.MOBILE_NUM
+		where 
+		a.APPLY_NO = #{applyNo} 
+		and a.COMPANY_ID = #{companyId}
+		and  a.ROLE_TYPE = '1'
+		AND a.DEL_FLAG = '0'
+		and c.status='4'
+	</select>
+	
+	<select id="getLHComAccount" resultType="CompensatoryAccount">
+		SELECT
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.LEGAL_PER_NAME AS "compensatoryName"
+		FROM
+			cre_apply_company_relation a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c ON c.LEGAL_PER_PHONE = b.CORPORATION_MOBILE
+		WHERE
+			a.APPLY_NO = #{applyNo} 
+		AND a.COMPANY_ID = #{companyId}
+		AND a.ROLE_TYPE = '2'
+		AND a.DEL_FLAG = '0'
+		AND c.status='4'
+	</select>
+	
+	<select id="getGRDBComAccount" resultType="CompensatoryAccount">
+		SELECT
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.legal_name AS "compensatoryName"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c ON c.social_credit_code = b.UN_SOC_CREDIT_NO
+		WHERE
+			a.APPLY_NO = #{applyNo} 
+		AND a.ROLE_TYPE = '8'
+		AND a.DEL_FLAG = '0'
+		AND c.status='7'
+		and b.GUARANTEE_STATE = '0'
+	</select>
+	
+	<select id="getGRPJDBComAccount" resultType="CompensatoryAccount">
+		SELECT
+			c.CUST_ID AS "custId",
+			c.COMPANY_ACCOUNT AS "compensatoryAccount",
+			c.legal_name AS "compensatoryName"
+		FROM
+			cre_apply_company_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c ON c.social_credit_code = b.UN_SOC_CREDIT_NO
+		WHERE
+			a.APPLY_NO = #{applyNo} 
+		AND a.COMPANY_ID = #{companyId}
+		AND a.ROLE_TYPE = '3'
+		AND a.DEL_FLAG = '0'
+		AND c.status='7'
+		and b.GUARANTEE_STATE = '0'
+	</select>
+	
+</mapper>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.dynamicTable.dao.DynamicTableColumnDeployDao">
+	<!--  
+	@reqno:H1510170010
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_数据项配置查询
+	@db-z:cre_pro_from_column:ID,PRODUCT_TYPE,DATA_GROUP_ID,COLUMN_CODE
+	@db-j:cre_data_group_table:id,COMPANY_ID
+	@db-j:sys_dict:value,type
+    -->
+	<select id="findList" resultType="CreProFromColumn">
+		SELECT
+			a.ID as id,
+			a.PRODUCT_TYPE as productType,
+			a.DATA_GROUP_ID as dataGroupId,
+			a.COLUMN_CODE as columnCode,
+			a.COLUMN_NAME as columnName,
+			a.IS_REQUIRED as isRequired,
+			t.label as isRequiredValue,
+			a.COLUMN_LENGTH as columnLength,
+			a.SORT as sort
+		FROM
+			cre_pro_from_column a
+		INNER JOIN
+			cre_data_group_table b
+		on 
+			a.DATA_GROUP_ID = b.id
+		LEFT JOIN
+			sys_dict t 
+		on 
+			t.value = a.IS_REQUIRED
+		WHERE
+			t.type = 'yes_no'
+			and b.id = #{creDataGroupTableId }
+			and b.COMPANY_ID = #{companyId }
+			and a.PRODUCT_TYPE = #{productType }
+		order by a.SORT
+	</select>
+	<!--  
+	@reqno:H1510170010
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_数据项配置查询
+	@db-z:cre_pro_from_column:ID,PRODUCT_TYPE,DATA_GROUP_ID,COLUMN_CODE
+	@db-j:cre_data_group_table:id,COMPANY_ID
+	@db-j:sys_dict:value,type
+    -->	
+	<!-- 获得分页总数 -->
+	<select id="getCount" resultType="long">
+		SELECT count(1) from (
+			SELECT
+				a.ID as id,
+				a.PRODUCT_TYPE as productType,
+				a.DATA_GROUP_ID as dataGroupId,
+				a.COLUMN_CODE as columnCode,
+				a.COLUMN_NAME as columnName,
+				a.IS_REQUIRED as isRequired,
+				t.label as isRequiredValue,
+				a.COLUMN_LENGTH as columnLength,
+				a.SORT as sort
+			FROM
+				cre_pro_from_column a
+			INNER JOIN
+				cre_data_group_table b
+			on 
+				a.DATA_GROUP_ID = b.id
+			LEFT JOIN
+				sys_dict t 
+			on 
+				t.value = a.IS_REQUIRED
+			WHERE
+				t.type = 'yes_no'
+				and b.id = #{creDataGroupTableId }
+				and b.COMPANY_ID = #{companyId }
+				and a.PRODUCT_TYPE = #{productType }
+			order by a.SORT
+				) tmp_count
+	</select>
+    <!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_修改删除,查询出单个pojo方法
+	@db-z:sys_dict:value,label,type
+	@db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP,SHOW_POSITION,COMPANY_ID
+	@db-j:cre_pro_from_column:DATA_GROUP_ID
+    -->
+	<select id="get" resultType="CreProFromColumn">
+		SELECT
+			a.ID as id,
+			a.PRODUCT_TYPE as productType,
+			a.DATA_GROUP_ID as dataGroupId,
+			a.COLUMN_CODE as columnCode,
+			a.COLUMN_NAME as columnName,
+			a.IS_REQUIRED as isRequired,
+			a.COLUMN_LENGTH as columnLength,
+			a.SORT as sort
+		FROM
+			cre_pro_from_column a 
+		WHERE
+			a.ID = #{id }
+	</select>
+    <!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_修改删除,查询出单个pojo方法
+	@db-z:sys_dict:value,label,type
+	@db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP,SHOW_POSITION,COMPANY_ID
+	@db-j:cre_pro_from_column:DATA_GROUP_ID
+    -->	
+	<delete id="delete">
+		DELETE FROM cre_pro_from_column 
+		WHERE id = #{id } 
+	</delete>
+	<!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_删除
+	@db-z:cre_pro_from_column:id
+    -->
+	<delete id="deleteMulti">
+		DELETE FROM cre_pro_from_column 
+		WHERE id in 
+		<foreach item="idsList" collection="list" open="(" close=")" separator=",">
+		 #{idsList} 
+		</foreach>
+	</delete>
+	<!--  
+	@reqno:H1510170011
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_新增
+	@db-z:cre_pro_from_column:id,PRODUCT_TYPE,DATA_GROUP_ID,COLUMN_CODE,COLUMN_NAME,IS_REQUIRED,COLUMN_LENGTH,SORT
+    -->	
+	<insert id="insert">
+		INSERT INTO cre_pro_from_column(
+			ID,
+			PRODUCT_TYPE,
+			DATA_GROUP_ID,
+			COLUMN_CODE,
+			COLUMN_NAME,
+			IS_REQUIRED,
+			COLUMN_LENGTH,
+			SORT
+		) VALUES (
+			#{id },
+			#{productType },
+			#{dataGroupId },
+			#{columnCode },
+			#{columnName },
+			#{isRequired },
+			#{columnLength },
+			#{sort }
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_pro_from_column 
+		set 
+		ID=#{id },
+		PRODUCT_TYPE=#{productType },
+		DATA_GROUP_ID=#{dataGroupId },
+		COLUMN_CODE=#{columnCode },
+		COLUMN_NAME=#{columnName },
+		IS_REQUIRED=#{isRequired },
+		COLUMN_LENGTH=#{columnLength },
+		SORT=#{sort }
+		WHERE id = #{id } 
+	</update>
+	<!--  
+	@reqno:H1511300032
+	@date-designer:20151202-huangxuecheng
+	@date-author:20151202-huangxuecheng:开发原因：CRE_信贷审批_系统管理_表单栏目配置_修改功能，当后台数据库名不是“mcp”时，"物理表名"对应的下拉列表框无法把数据库中的表名加载出来
+    -->
+	<!-- 获取指定数据库下的所有table -->
+	<select id="selectAllTableName" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			TABLE_NAME,
+			TABLE_COMMENT 
+	    FROM 
+	        information_schema.TABLES 
+	    WHERE 
+	    	TABLE_SCHEMA = #{schemaName }
+	</select>
+	
+	<!-- 获取指定公司id下的顶级父机构 -->
+	<select id="selectParentIdsByCompanyid" parameterType="string" resultType="string">
+		SELECT
+			parent_ids
+		FROM
+			sys_office
+		where id=#{id }
+	</select>
+    <!--  
+	@reqno:H1511300032
+	@date-designer:20151202-huangxuecheng
+	@date-author:20151202-huangxuecheng:开发原因：CRE_信贷审批_系统管理_表单栏目配置_修改功能，当后台数据库名不是“mcp”时，"物理表名"对应的下拉列表框无法把数据库中的表名加载出来
+    -->
+	<!-- 获取指定数据库下指定table的column和comment -->
+	<select id="selectColumnAndCommentByTableName" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			COLUMN_NAME,
+			COLUMN_COMMENT 
+	    FROM 
+	    	information_schema.COLUMNS 
+	    where 
+	    	TABLE_SCHEMA = #{schemaName }
+	    and 
+	    	TABLE_NAME = #{tableName } 
+	    and <![CDATA[COLUMN_NAME <> 'ID' and COLUMN_NAME <> 'APPLY_ID']]>
+	</select>
+	
+	<select id="selectColumnNameOrColumnCommentByTableName" parameterType="java.util.Map" resultType="java.util.List">
+		SELECT 
+			#{key } 
+		FROM 
+			information_schema.COLUMNS 
+		where 
+			TABLE_SCHEMA = #{schemaName } 
+		and
+		    TABLE_NAME = #{tableName }
+	</select>
+	
+	<select id="selectTableNameById" parameterType="string" resultType="string">
+		SELECT data_table_name
+			  FROM
+			  	cre_data_group_table
+			  WHERE
+			  	id=#{id }	
+	</select>
+	<!-- 获取唯一记录 -->
+	<select id="selectInforByIdAndProductType" parameterType="java.util.Map" resultType="CreProFromColumn">
+		select 
+			x.value as productType,
+	  		x.label as productTypeValue, 
+			a.DATA_GROUP as dataGroup, 
+			y.label as dataGroupValue,
+			a.SHOW_POSITION as showPosition,
+			z.label as showPositionValue,
+	  		0 as columnCount,
+	  		a.ID as creDataGroupTableId,
+	  		a.COMPANY_ID as companyId
+		from sys_dict x
+			inner join cre_data_group_table a  on 1=1
+			left join sys_dict y on y.value = a.DATA_GROUP and y.type = 'DATA_GROUP'
+			left join sys_dict z on z.value = a.SHOW_POSITION and z.type = 'SHOW_POSITION'
+		WHERE
+	    	x.type = 'product_type'
+			AND a.COMPANY_ID = #{companyId }
+		and a.ID= #{creDataGroupTableId }
+		and x.value= #{productType }
+	</select>
+	<!-- 判断当前的column是否存在 -->
+	<select id="selectColumnCount" parameterType="string" resultType="long">
+		select count(1) from cre_pro_from_column  where  COLUMN_CODE=#{columnCode }
+	</select>
+	<!-- 判断当前的column是否存在 -->
+	<select id="selectColumnCountByColumnCodeAndProductType" parameterType="java.util.Map" resultType="long"> 
+		select count(1) from cre_pro_from_column  where  COLUMN_CODE=#{columnCode } and PRODUCT_TYPE=#{productType } and DATA_GROUP_ID =#{dataGroupId }
+	</select>
+	<!--  
+	@reqno:H1511050008
+	@date-designer:20151109-huangxuecheng
+	@date-author:20151109-huangxuecheng:查询出当前列的所有信息的方法，可以查询出当前column的类型
+    -->
+	<!-- 根据输入的固定表的固定列查询出所有信息 -->
+	<select id="selectColumnInfor" parameterType="java.util.Map" resultType="java.util.Map">
+		show columns from ${tableName } where field = #{columnName }
+	</select>
+</mapper>

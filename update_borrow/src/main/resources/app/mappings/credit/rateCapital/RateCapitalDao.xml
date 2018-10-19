@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.rateCapital.dao.RateCapitalDao">
+
+<sql id="rateCapitalColumns">
+	a.id AS "id",
+	a.product_type_code AS "productTypeCode",
+	a.loan_repay_type AS "loanRepayType",
+	a.loan_repay_desc AS "loanRepayDesc",
+	a.period_value AS "periodValue",
+	a.period_num AS "periodNum",
+	a.rate_capital_curr AS "rateCapitalCurr",
+	a.rate_capital_remain AS "rateCapitalRemain" 
+	
+</sql>
+
+<sql id="rateCapitalJoins">
+</sql>
+   
+<select id="get" resultType="RateCapital">
+	SELECT 
+		<include refid="rateCapitalColumns"/>
+	FROM cre_rate_capital a
+	<include refid="rateCapitalJoins"/>
+	WHERE a.id = #{id}
+</select>
+
+<select id="findList" resultType="RateCapital">
+	SELECT 
+		<include refid="rateCapitalColumns"/>
+	FROM cre_rate_capital a
+	<include refid="rateCapitalJoins"/>	
+	<!-- order by 'periodValue' desc
+		 <![CDATA[ DATE(a.create_date) >= #{createStartTime}  ]]>
+	 -->
+	<where>
+		
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+			AND a.period_value = #{periodValue}
+		</if>
+	</where>
+	<!-- ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0 -->
+	ORDER BY periodValue+0, periodNum+0
+	<choose>
+		<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY ${page.orderBy}
+		</when>
+		<otherwise>
+		</otherwise>
+	</choose>
+</select>
+
+<select id="getCount" resultType="long">
+	SELECT 
+		count(a.id)
+	FROM cre_rate_capital a
+	<include refid="rateCapitalJoins"/>
+	<where>
+		
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+			AND a.period_value = #{periodValue}
+		</if>
+	</where>
+	ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0
+</select>
+
+<select id="findAllList" resultType="RateCapital">
+	SELECT 
+		<include refid="rateCapitalColumns"/>
+	FROM cre_rate_capital a
+	<include refid="rateCapitalJoins"/>
+	<where>
+		
+	</where>
+	ORDER BY productTypeCode+0, loanRepayType+0, periodValue+0		
+	<choose>
+		<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY ${page.orderBy}
+		</when>
+		<otherwise>
+		</otherwise>
+	</choose>
+</select>
+
+<select id="findListAll" resultType="RateCapital">
+	SELECT 
+		<include refid="rateCapitalColumns"/>
+	FROM cre_rate_capital a
+	
+	<where>
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+			AND <![CDATA[ a.period_num <= a.period_value]]>
+	</where>
+	ORDER BY  periodValue+0, periodNum+0		
+</select>
+
+<select id="selectCapitalEdit" resultType="RateCapital">
+	SELECT 
+		<include refid="rateCapitalColumns"/>
+	FROM cre_rate_capital a
+	
+	<where>
+		<if test="loanRepayType != null and loanRepayType != ''">
+			AND a.loan_repay_type = #{loanRepayType}
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.product_type_code = #{productTypeCode}
+		</if>
+			AND a.period_value = #{periodValue}
+	</where>
+	ORDER BY  periodValue+0, periodNum+0		
+</select>
+
+<insert id="insert">
+	INSERT INTO cre_rate_capital(
+		id,
+		product_type_code,
+		loan_repay_type,
+		loan_repay_desc,
+		period_value,
+		period_num,
+		rate_capital_curr,
+		rate_capital_remain
+		
+	) VALUES (
+		#{id},
+		#{productTypeCode},
+		#{loanRepayType},
+		#{loanRepayDesc},
+		#{periodValue},
+		#{periodNum},
+		#{rateCapitalCurr},
+		#{rateCapitalRemain}
+		
+	)
+</insert>
+
+<insert id="saveAll" parameterType="java.util.List">
+		INSERT INTO cre_rate_capital(
+		id,
+		product_type_code,
+		loan_repay_type,
+		loan_repay_desc,
+		period_value,
+		period_num,
+		rate_capital_curr,
+		rate_capital_remain
+	) VALUES 
+	<foreach item="rateCapitalIn" collection="rateCapital" index="index" separator=",">
+	 (
+		 #{rateCapitalIn.id},
+		'${rateCapitalIn.productTypeCode}',
+		'${rateCapitalIn.loanRepayType}',
+		'${rateCapitalIn.loanRepayDesc}',
+		'${rateCapitalIn.periodValue}',
+		'${rateCapitalIn.periodNum}',
+		'${rateCapitalIn.rateCapitalCurr}',
+		'${rateCapitalIn.rateCapitalRemain}'
+	 )
+	</foreach>
+</insert>
+
+<update id="update">
+	UPDATE cre_rate_capital SET 
+		product_type_code = #{productTypeCode},	
+		loan_repay_type = #{loanRepayType},
+		loan_repay_desc = #{loanRepayDesc},
+		period_value = #{periodValue},
+		period_num = #{periodNum},
+		rate_capital_curr = #{rateCapitalCurr},
+		rate_capital_remain = #{rateCapitalRemain}
+		
+	WHERE 	   loan_repay_type = #{loanRepayType}
+		   AND product_type_code = #{productTypeCode}
+		   AND period_value = #{periodValue}
+		   AND period_num = #{periodNum}
+</update>
+
+<update id="delete">
+	DELETE FROM cre_rate_capital
+	WHERE 
+		   loan_repay_type = #{loanRepayType}
+		   AND product_type_code = #{productTypeCode}
+		   AND period_value = #{periodValue}
+</update>
+
+<!-- 批量删除 -->
+<update id="banchDelete">
+	DELETE FROM cre_rate_capital
+	where id in
+	<foreach item="idList" collection="idList" open="(" close=")"
+		separator=",">
+		#{idList}
+	</foreach>
+</update>
+
+</mapper>

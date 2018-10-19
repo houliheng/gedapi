@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.guranteeCompanyRelation.dao.CreApplyCompanyRelationDao">
+
+	<sql id="creApplyCompanyRelationColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.company_id AS "companyId",
+		a.cust_id AS "custId",
+		a.role_type AS "roleType",
+		a.notarize_flag AS "notarizeFlag",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.IS_CONFIRM AS "isConfirm"
+	</sql>
+	
+	<sql id="creApplyCompanyRelationJoins">
+	</sql>
+    
+	<select id="get" resultType="CreApplyCompanyRelation">
+		SELECT 
+			<include refid="creApplyCompanyRelationColumns"/>
+		FROM cre_apply_company_relation a
+		<include refid="creApplyCompanyRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getByApplyNoRoleType" resultType="CreApplyCompanyRelation">
+		SELECT 
+			<include refid="creApplyCompanyRelationColumns"/>
+		FROM
+			cre_apply_company_relation a
+		LEFT JOIN cre_check_approve_union b ON a.APPLY_NO = b.APPLY_NO
+		AND b.CUST_ID = a.COMPANY_ID
+		WHERE a.ROLE_TYPE=#{roleType}
+		and a.APPLY_NO=#{applyNo}
+		and b.ID is not NULL
+	</select>
+	
+
+	<!--根据条件查询关联关系表-->
+     <select id="selectCreapplyCompanyRelation" resultType="CreApplyCompanyRelation" >
+         select
+		 <include refid="creApplyCompanyRelationColumns"/>
+		 from cre_apply_company_relation a
+		  <where>
+			  <if 	test="applyNo != null and applyNo != '' ">
+                   and a.apply_no = #{applyNo}
+			  </if>
+
+			  <if 	test="custId != null and custId != '' ">
+				  and a.company_id = #{custId}
+			  </if>
+
+			  <if 	test="RoleType != null and RoleType != '' ">
+				  and a.role_type = #{RoleType}
+			  </if>
+
+			  <if 	test="DelFlag != null and DelFlag != '' ">
+				  and a.del_flag = #{DelFlag}
+			  </if>
+
+			  <if 	test="custInfo != null and custInfo != '' ">
+				  and a.cust_id = #{custInfo}
+			  </if>
+
+
+		  </where>
+	 </select>
+
+
+
+	<!--根据条件查询关联关系表-->
+	<select id="selectCreapplyCompanyRelationList" resultType="CreApplyCompanyRelation" >
+		select
+		<include refid="creApplyCompanyRelationColumns"/>
+		from cre_apply_company_relation a
+		<where>
+			<if 	test="applyNo != null and applyNo != '' ">
+				and a.apply_no = #{applyNo}
+			</if>
+
+			<if 	test="custId != null and custId != '' ">
+				and a.company_id = #{custId}
+			</if>
+
+			<if 	test="RoleType != null and RoleType != '' ">
+				and a.role_type = #{RoleType}
+			</if>
+
+			<if 	test="DelFlag != null and DelFlag != '' ">
+				and a.del_flag = #{DelFlag}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="findApplyCompanyRelationByXinxi" resultType="CreApplyCompanyRelation" >
+		select
+		<include refid="creApplyCompanyRelationColumns"/>
+		from cre_apply_company_relation a
+        where a.apply_no = #{applyNo} and a.company_id = #{piliId}
+		and a.role_type = #{roleType} and a.del_flag = '0'
+		and a.cust_id in
+		<foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+
+
+	</select>
+
+
+   <delete id="beachDelete" >
+       delete from  cre_apply_company_relation
+       where
+	   APPLY_NO = #{applyNo} and COMPANY_ID = #{companyId} and CUST_ID IN
+	   <foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+		   #{id}
+	   </foreach>
+
+
+   </delete>
+
+
+
+
+
+
+	<select id="findList" resultType="CreApplyCompanyRelation">
+		SELECT 
+			<include refid="creApplyCompanyRelationColumns"/>
+		FROM cre_apply_company_relation a
+		<include refid="creApplyCompanyRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_apply_company_relation a
+		<include refid="creApplyCompanyRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreApplyCompanyRelation">
+		SELECT 
+			<include refid="creApplyCompanyRelationColumns"/>
+		FROM cre_apply_company_relation a
+		<include refid="creApplyCompanyRelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_apply_company_relation(
+			id,
+			apply_no,
+			company_id,
+			cust_id,
+			role_type,
+			notarize_flag,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{companyId},
+			#{custId},
+			#{roleType},
+			#{notarizeFlag},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_apply_company_relation SET 	
+			apply_no = #{applyNo},
+			company_id = #{companyId},
+			cust_id = #{custId},
+			role_type = #{roleType},
+			notarize_flag = #{notarizeFlag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_apply_company_relation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findHasRelation"  resultType="CreApplyCompanyRelation" >
+		  SELECT
+		   <include refid="creApplyCompanyRelationColumns"/>
+		  FROM cre_apply_company_relation a
+		  <where>
+		   a.APPLY_NO = #{applyNo}
+		   and a.COMPANY_ID = #{guaranteeCompanyId}
+		   and a.CUST_ID = #{custId}
+		   and a.ROLE_TYPE = '2'
+		   and a.DEL_FLAG='0'
+		  </where>
+ </select>
+		<select id="findApplyRelationByCustAndRole" resultType="CreApplyCompanyRelation">
+			SELECT
+		   <include refid="creApplyCompanyRelationColumns"/>
+		  	FROM cre_apply_company_relation a
+		  	WHERE a.APPLY_NO = #{applyNo} AND a.COMPANY_ID = #{custId} 
+		  	and a.ROLE_TYPE = '3'
+		   and a.DEL_FLAG='0'
+		</select>
+		
+		<select id="getBatchAll" resultType="com.resoft.credit.guaranteeRelation.entity.GuaranteeRelation">
+			SELECT 
+				a.apply_no AS "applyNo",
+				a.company_id AS "companyId",
+				a.cust_id AS "custId",
+				a.role_type AS "roleType"
+			FROM
+				cre_apply_company_relation a
+			WHERE
+				a.APPLY_NO = #{applyNo}
+			AND a.ROLE_TYPE IN ('1', '2')
+			and a.del_flag='0'
+	</select>
+		<select id="findApplyGuranteeRelations" resultType="CreApplyCompanyRelation">
+			SELECT
+		   <include refid="creApplyCompanyRelationColumns"/>
+		  	FROM cre_apply_company_relation a
+		  	WHERE a.CUST_ID = #{custId} 
+		  	and a.ROLE_TYPE = '3'
+		   and a.DEL_FLAG='0' and a.IS_CONFIRM = '1'
+		</select>
+		
+		
+		<update id="updateApplyGurantee">
+			update cre_apply_company_relation set IS_CONFIRM = '2' where apply_no = #{applyNo} and CUST_ID = #{custId} and COMPANY_ID = #{companyId} and ROLE_TYPE = '3' and DEL_FLAG = '0'
+		</update>
+</mapper>

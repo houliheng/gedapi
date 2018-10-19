@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.CustomUserDao">
+	<select id="findUserList" resultType="User">
+		SELECT
+		a.id,
+		a.login_name,
+		a.name,
+		o.name "office.name",
+		of.name "company.name"
+		FROM sys_user a
+		LEFT JOIN sys_office o ON
+		o.id=a.office_id
+		LEFT JOIN sys_office of ON of.id=a.company_id
+		WHERE a.company_id=#{companyId} and a.id != #{id} and a.login_flag = '1'
+		and a.del_flag = '0'
+		<if test = "loginName != null and loginName != ''">
+		  and a.login_name like concat('%',#{loginName},'%')
+		</if>
+		<if test = "name != null and name != ''">
+		  and a.name like concat('%',#{name},'%')
+		</if>
+	</select>
+
+	<select id="findUserLists" resultType="User">
+		SELECT
+		a.id,
+		a.login_name,
+		a.name,
+		o.name AS "office.name",
+		of.name AS
+		"company.name"
+		FROM sys_user a
+		LEFT JOIN sys_office o ON
+		o.id=a.office_id
+		LEFT JOIN sys_office of ON of.id=a.company_id
+		<where>
+		a.login_flag = '1' and a.del_flag = '0'
+			<if test="userType != null and userType != '' and userType == 'manage'">
+				<if
+					test="currentUser != null and currentUser.company!= null and currentUser.company.id != null and currentUser.company.id != ''">
+					AND (of.id = #{currentUser.company.id} or of.parent_ids like
+					CONCAT('%',#{currentUser.company.id},',%'))
+				</if>
+			</if>
+			<if test="userType != null and userType != '' and userType == 'common'">
+				<if
+					test="currentUser != null and currentUser.id!= null and currentUser.id != ''">
+					AND a.id = #{currentUser.id}
+				</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name like '%${name}%'
+			</if>
+			<if test="company != null and company.id != null and company.id != ''">
+				AND (of.id = #{company.id} or of.parent_ids like
+				CONCAT('%',#{company.id},',%'))
+			</if>
+			<choose>
+				<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+					ORDER BY ${page.orderBy}
+				</when>
+				<otherwise>
+					ORDER BY a.id ASC
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<select id="findAllUserList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.id,
+		a.login_name as "loginName",
+		a.name,
+		o.name "office.name",
+		of.name "company.name"
+		FROM sys_user a
+		LEFT JOIN sys_office o ON
+		o.id=a.office_id
+		LEFT JOIN sys_office of ON of.id=a.company_id
+		WHERE a.id != #{id} and a.login_flag = '1' and a.del_flag = '0'
+		<if test = "loginName != null and loginName != ''">
+		  and a.login_name like concat('%',#{loginName},'%')
+		</if>
+		<if test = "name != null and name != ''">
+		  and a.name like concat('%',#{name},'%')
+		</if>
+		<if test = "companyId != null and companyId != ''">
+		  AND (a.id LIKE concat('%',#{companyId},'%') OR o.parent_ids 
+				LIKE concat('%,',#{companyId},'%'))
+		</if>
+	</select>
+</mapper>

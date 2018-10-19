@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetAssetCar.dao.GqgetAssetCarDao">
+
+	<sql id="gqgetAssetCarColumns">
+		a.id AS "id",
+		a.gqget_apply_no AS "gqgetApplyNo",
+		a.gqget_vehicle_no AS "gqgetVehicleNo",
+		a.gqget_used_years AS "gqgetUsedYears",
+		a.gqget_car_evaluate_price AS "gqgetCarEvaluatePrice",
+		a.gqget_market_price AS "gqgetMarketPrice",
+		a.del_flag AS "delFlag",
+		a.create_by
+		AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="gqgetAssetCarJoins">
+	</sql>
+
+	<select id="get" resultType="GqgetAssetCar">
+		SELECT
+		<include refid="gqgetAssetCarColumns" />
+		FROM cre_gqget_asset_car a
+		<include refid="gqgetAssetCarJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByApplyNo" resultType="GqgetAssetCar">
+		SELECT
+		<include refid="gqgetAssetCarColumns" />
+		FROM cre_gqget_asset_car a
+		<include refid="gqgetAssetCarJoins" />
+		WHERE a.gqget_apply_no = #{applyNo}
+	</select>
+
+	<select id="findList" resultType="GqgetAssetCar">
+		SELECT
+		<include refid="gqgetAssetCarColumns" />
+		FROM cre_gqget_asset_car a
+		<include refid="gqgetAssetCarJoins" />
+		<where>
+			a.gqget_apply_no = #{gqgetApplyNo}
+<!-- 			a.del_flag = #{DEL_FLAG_NORMAL} -->
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findGqgetAssetCarDataByApplyNo" resultType="GqgetAssetCar">
+		SELECT
+		<include refid="gqgetAssetCarColumns" />
+		FROM cre_gqget_asset_car a
+		<where>
+			a.gqget_apply_no = #{gqgetApplyNo}
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_gqget_asset_car a
+		<include refid="gqgetAssetCarJoins" />
+		<where>
+			a.gqget_apply_no = #{gqgetApplyNo}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="GqgetAssetCar">
+		SELECT
+		<include refid="gqgetAssetCarColumns" />
+		FROM cre_gqget_asset_car a
+		<include refid="gqgetAssetCarJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_gqget_asset_car(
+		id,
+		gqget_apply_no,
+		gqget_vehicle_no,
+		gqget_used_years,
+		gqget_car_evaluate_price,
+		gqget_market_price,
+		del_flag,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{gqgetApplyNo},
+		#{gqgetVehicleNo},
+		#{gqgetUsedYears},
+		#{gqgetCarEvaluatePrice},
+		#{gqgetMarketPrice},
+		#{delFlag},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_gqget_asset_car SET
+		gqget_apply_no = #{gqgetApplyNo},
+		gqget_vehicle_no = #{gqgetVehicleNo},
+		gqget_used_years = #{gqgetUsedYears},
+		gqget_car_evaluate_price = #{gqgetCarEvaluatePrice},
+		gqget_market_price = #{gqgetMarketPrice},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+<!-- 		UPDATE cre_gqget_asset_car SET  -->
+<!-- 			del_flag = #{DEL_FLAG_DELETE} -->
+<!-- 		WHERE id = #{id} -->
+		delete from cre_gqget_asset_car WHERE id = #{id}
+	</update>
+
+</mapper>

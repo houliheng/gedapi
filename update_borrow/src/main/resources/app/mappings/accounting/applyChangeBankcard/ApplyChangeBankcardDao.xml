@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyChangeBankcard.dao.ApplyChangeBankcardDao">
+    
+	<sql id="applyChangeBankcardColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.new_rep_bankcard_no AS "newRepBankcardNo",
+		a.new_rep_bankcard_name AS "newRepBankcardName",
+		a.new_rep_bank AS "newRepBank",
+		a.new_rep_bank_name AS "newRepBankName",
+		a.new_rep_bank_mobile AS "newRepBankMobile",
+		a.new_rep_bank_id_num AS "newRepBankIdNum",
+		a.new_rep_bank_province AS "newRepBankProvince",
+		a.new_rep_bank_city AS "newRepBankCity",
+		a.new_rep_bank_distinct AS "newRepBankDistinct",
+		a.new_rep_bank_detail AS "newRepBankDetail", 
+		a.picture_address AS "pictureAddress",
+		a.flow_state AS "flowState",
+		a.reply_time AS "replyTime",
+		a.reply_desc AS "replyDesc",
+		a.create_time AS "createDate",
+		a.CREATOR_ID AS "createBy.id",
+		a.org_id AS "orgId"
+	</sql>
+	
+	<sql id="applyChangeBankcardJoins">
+	</sql>
+    
+	<select id="get" resultType="ApplyChangeBankcard">
+		SELECT 
+			<include refid="applyChangeBankcardColumns"/>
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<!-- 获取已经审核通过的信息 -->
+	<select id="getApplyChangeBankcardByContractNo" resultType="ApplyChangeBankcard">
+		SELECT 
+			<include refid="applyChangeBankcardColumns"/>
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		WHERE a.contract_no = #{contractNo} and a.flow_state = '4' order by REPLY_TIME desc limit 1
+	</select>
+	<!-- 获取正在申请中的信息 -->
+	<select id="getApplyChangeBankcardByContractNoFail" resultType="ApplyChangeBankcard">
+		SELECT 
+			<include refid="applyChangeBankcardColumns"/>
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		WHERE a.contract_no = #{contractNo} and a.flow_state = '2'
+	</select>
+	
+	<select id="findList" resultType="ApplyChangeBankcard">
+		SELECT 
+			<include refid="applyChangeBankcardColumns"/>
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		WHERE a.contract_no = #{contractNo} and a.flow_state != '2'
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ApplyChangeBankcard">
+		SELECT 
+			<include refid="applyChangeBankcardColumns"/>
+		FROM acc_apply_change_bankcard a
+		<include refid="applyChangeBankcardJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_apply_change_bankcard(
+			id,
+			contract_no,
+			new_rep_bankcard_no,
+			new_rep_bankcard_name,
+			new_rep_bank,
+			new_rep_bank_name,
+			new_rep_bank_mobile,
+			new_rep_bank_id_num,
+			new_rep_bank_province,
+			new_rep_bank_city,
+			new_rep_bank_distinct,
+			new_rep_bank_detail,
+			picture_address,
+			flow_state,
+			reply_time,
+			reply_desc,
+			create_time,
+			CREATOR_ID,
+			org_id
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{newRepBankcardNo},
+			#{newRepBankcardName},
+			#{newRepBank},
+			#{newRepBankName},
+			#{newRepBankMobile},
+			#{newRepBankIdNum},
+			#{newRepBankProvince},
+			#{newRepBankCity},
+			#{newRepBankDistinct},
+			#{newRepBankDetail},
+			#{pictureAddress},
+			#{flowState},
+			#{createDate},
+			#{replyDesc},
+			#{createDate},
+			#{createBy.id},
+			#{orgId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_apply_change_bankcard SET 	
+			contract_no = #{contractNo},
+			new_rep_bankcard_no = #{newRepBankcardNo},
+			new_rep_bankcard_name = #{newRepBankcardName},
+			new_rep_bank = #{newRepBank},
+			new_rep_bank_name = #{newRepBankName},
+			new_rep_bank_mobile = #{newRepBankMobile},
+			new_rep_bank_id_num = #{newRepBankIdNum},
+			new_rep_bank_province = #{newRepBankProvince},
+			new_rep_bank_city = #{newRepBankCity},
+			new_rep_bank_distinct = #{newRepBankDistinct},
+			new_rep_bank_detail = #{newRepBankDetail},
+			picture_address = #{pictureAddress},
+			flow_state = #{flowState},
+			reply_time = #{replyTime},
+			reply_desc = #{replyDesc},
+			create_time = #{createDate},
+			CREATOR_ID = #{createBy.id},
+			org_id = #{orgId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM acc_apply_change_bankcard
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.staContractStatus.dao.StaContractStatusDao">
+
+	<sql id="staContractStatusColumns">
+		a.data_dt AS "dataDt",
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		d.name as "orgLevel4.name",
+		<!-- a.ORG_LEVEL3  -->
+		e.id as "orgLevel3.id",
+		e.name
+		<!-- a.ORG_LEVEL2 --> as "orgLevel3.name",
+		f.id as "orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.contract_no AS "contractNo",
+		a.cust_name AS
+		"custName",
+		a.deduct_date AS
+		"deductDate",
+		a.loan_date AS "loanDate",
+		a.repay_contract_status AS
+		"repayContractStatus",
+		a.period_value AS
+		"periodValue",
+		a.contract_amount AS "contractAmount",
+		a.ta_times AS
+		"taTimes",
+		a.curr_overdue_amount AS "currOverdueAmount",
+		a.pay_times AS
+		"payTimes",
+		a.curr_overdue_capital_amount AS
+		"currOverdueCapitalAmount",
+		a.curr_overdue_interest_amount AS
+		"currOverdueInterestAmount",
+		a.overdue_fee AS "overdueFee",
+		a.repay_fine_amount AS "repayFineAmount",
+		a.fine_exempt_amount_sum AS
+		"fineExemptAmountSum"
+	</sql>
+
+	<sql id="staContractStatusJoins">
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join
+		sys_office e on d.parent_id = e.id 
+		<!-- a.ORG_LEVEL3 = e.id -->
+		left join sys_office f on e.parent_id=f.id
+		<!-- a.ORG_LEVEL2 = f.id -->
+	</sql>
+
+	<select id="get" resultType="StaContractStatus">
+		SELECT
+		<include refid="staContractStatusColumns" />
+		FROM acc_sta_contract_status a
+		<include refid="staContractStatusJoins" />
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+	<select id="getStaContractStatusByContractNo" resultType="StaContractStatus">
+		SELECT
+		a.contract_no AS "contractNo"
+		FROM acc_sta_contract_status a
+		WHERE a.contract_no = #{contractNo}
+	</select>
+	<select id="getOfficeLevel" resultType="java.lang.String">
+		select levelnum from
+		sys_office where id = #{id}
+	</select>
+
+	<select id="queryDeductResult" resultType="DeductResultTemp">
+		select a.PERIOD_NUM as
+		"periodNum"
+		,cc.REPAY_PERIOD_STATUS as "repayPeriodStatus"
+		,a.DEDUCT_DATE as "deductDate"
+		,a.REPAY_AMOUNT as "repayAmount"
+		,a.SERVICE_FEE as "serviceFee"
+		,a.MANAGEMENT_FEE as "managementFee"
+		,a.INTEREST_AMOUNT as "interestAmount"
+		,a.CAPITAL_AMOUNT as
+		"capitalAmount"
+		,a.OVERDUE_PENALTY as "penaltyAmount"
+		,b.FINE_AMOUNT as
+		"fineAmount"
+		,cc.FACT_SERVICE_FEE as "factServiceFee"
+		,cc.FACT_MANAGEMENT_FEE as "factManagementFee"
+		,cc.FACT_INTEREST_AMOUNT
+		as
+		"factInterestAmount"
+		,cc.FACT_CAPITAL_AMOUNT as
+		"factOverdueCapialAmount"
+		,cc.FACT_PENALTY_AMOUNT as "factPenaltyAmount"
+		,cc.FACT_FINE_AMOUNT as "factFineAmount"
+		,d.PENALTY_EXEMPT_AMOUNT as
+		"penaltyExemptAmount"
+		,d.FINE_EXEMPT_AMOUNT as "fineExemptAmount"
+		,cc.CAPITAL_INTEREST_REPAY_DATE as "capitalInterestRepayDate"
+		,case when
+		current_date > a.deduct_date then a.CAPITAL_AMOUNT -
+		ifnull(cc.FACT_CAPITAL_AMOUNT ,0)
+		else 0 end as "oweCapitalAmount"
+		,case
+		when current_date > a.deduct_date then a.INTEREST_AMOUNT -
+		ifnull(cc.FACT_INTEREST_AMOUNT ,0)
+		else 0 end as "oweInterestAmount"
+		,b.OVERDUE_DAYS as "overdueDays"
+		,ifnull(cc.FACT_BREAK_AMOUNT,'-') as
+		"factBreakAmount"
+		,cc.ALL_REPAY_DATE as "allRepayDate"
+		,ifnull(cc.back_amount,0) as "backAmount"
+		,cc.FACT_ADD_AMOUNT as "factAddAmount"
+		from
+		acc_repay_plan a
+		left join
+		acc_sta_overdue_status b
+		on a.CONTRACT_NO
+		=
+		b.CONTRACT_NO
+		and
+		a.PERIOD_NUM = b.PERIOD_NUM
+		left join
+		acc_sta_repay_plan_status cc
+		on
+		a.CONTRACT_NO = cc.CONTRACT_NO
+		and
+		a.PERIOD_NUM = cc.PERIOD_NUM
+		left join
+		acc_sta_penalty_fine_exempt d
+		on
+		a.CONTRACT_NO = d.CONTRACT_NO
+		and
+		a.PERIOD_NUM =
+		d.PERIOD_NUM
+		where
+		a.CONTRACT_NO = #{contractNo} 
+		<if test="periodNum != null and periodNum != ''">
+				AND a.PERIOD_NUM = #{periodNum} 
+		</if>
+		order
+		by a.PERIOD_NUM
+	</select>
+	
+	<select id="queryDeductResultByParams" resultType="DeductResultTemp">
+		select a.PERIOD_NUM as
+		"periodNum"
+		,IFNULL(cc.REPAY_PERIOD_STATUS,'0200') as "repayPeriodStatus"
+		,a.DEDUCT_DATE as "deductDate"
+		,ifnull(a.REPAY_AMOUNT,0) as "repayAmount"
+		,ifnull(a.SERVICE_FEE,0) as "serviceFee"
+		,ifnull(a.MANAGEMENT_FEE,0) as "managementFee"
+		,ifnull(a.INTEREST_AMOUNT,0) as "interestAmount"
+		,ifnull(a.CAPITAL_AMOUNT,0) as
+		"capitalAmount"
+		,ifnull(a.OVERDUE_PENALTY,0) as "penaltyAmount"
+		,ifnull(b.FINE_AMOUNT,0) as
+		"fineAmount"
+		,ifnull(cc.FACT_SERVICE_FEE,0) as "factServiceFee"
+		,ifnull(cc.FACT_MANAGEMENT_FEE,0) as "factManagementFee"
+		,ifnull(cc.FACT_INTEREST_AMOUNT,0)
+		as
+		"factInterestAmount"
+		,ifnull(cc.FACT_CAPITAL_AMOUNT,0) as
+		"factOverdueCapialAmount"
+		,ifnull(cc.FACT_PENALTY_AMOUNT,0) as "factPenaltyAmount"
+		,ifnull(cc.FACT_FINE_AMOUNT,0) as "factFineAmount"
+		,d.PENALTY_EXEMPT_AMOUNT as
+		"penaltyExemptAmount"
+		,d.FINE_EXEMPT_AMOUNT as "fineExemptAmount"
+		,cc.CAPITAL_INTEREST_REPAY_DATE as "capitalInterestRepayDate"
+		,case when
+		current_date > a.deduct_date then a.CAPITAL_AMOUNT -
+		ifnull(cc.FACT_CAPITAL_AMOUNT ,0)
+		else 0 end as "oweCapitalAmount"
+		,case
+		when current_date > a.deduct_date then a.INTEREST_AMOUNT -
+		ifnull(cc.FACT_INTEREST_AMOUNT ,0)
+		else 0 end as "oweInterestAmount"
+		,b.OVERDUE_DAYS as "overdueDays"
+		,ifnull(cc.FACT_BREAK_AMOUNT,'-') as
+		"factBreakAmount"
+		,cc.ALL_REPAY_DATE as "allRepayDate"
+		,ifnull(cc.back_amount,0) as "backAmount"
+		,ifnull(cc.FACT_ADD_AMOUNT,0) as "factAddAmount"
+		,ifnull(f.COMPENSATORY_AMOUNT,0) as "compensatoryAmount",
+		f.cust_id as "custId",
+		ifnull(m.DISCOUNT_FEE,0) as stayMoney
+		from
+		acc_repay_plan a
+		left join
+		acc_sta_overdue_status b
+		on a.CONTRACT_NO
+		=
+		b.CONTRACT_NO
+		and
+		a.PERIOD_NUM = b.PERIOD_NUM
+		left join
+		acc_sta_repay_plan_status cc
+		on
+		a.CONTRACT_NO = cc.CONTRACT_NO
+		and
+		a.PERIOD_NUM = cc.PERIOD_NUM
+		left join
+		acc_sta_penalty_fine_exempt d
+		on
+		a.CONTRACT_NO = d.CONTRACT_NO
+		and
+		a.PERIOD_NUM =
+		d.PERIOD_NUM
+		left join 
+			${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_compensatory_detail f
+		on 
+			f.CONTRACT_NO = a.CONTRACT_NO and  a.PERIOD_NUM = f.PERIOD_NUM  and  f.COMPENSATORY_STATUS != '1' 
+		LEFT JOIN acc_discount m on a.CONTRACT_NO = m.CONTRACT_NO and a.PERIOD_NUM =m.PERIOD_NUM 
+		where	
+		a.CONTRACT_NO = #{contractNo} 
+		<if test="startDate != null ">
+			<![CDATA[ 
+				AND a.DEDUCT_DATE >=  #{startDate} 
+			]]>
+		</if>
+		<if test="endDate != null ">
+			<![CDATA[ 
+				AND a.DEDUCT_DATE < #{endDate} 
+			]]>
+		</if>
+		<if test="repayPeriodStatusList != null ">
+			AND cc.REPAY_PERIOD_STATUS in
+			<foreach  item="item" collection="repayPeriodStatusList" index="index"  open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		order by a.PERIOD_NUM
+	</select>
+
+	<select id="findList" resultType="StaContractStatus">
+		SELECT
+		cci.BUSI_REG_NAME as "companyName",
+		<include refid="staContractStatusColumns" />
+		FROM acc_sta_contract_status a
+		<include refid="staContractStatusJoins" />
+		inner join acc_contract cc on cc.contract_no = a.contract_no
+		left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_company_info cci on cci.id  = cc.cust_id
+		inner join
+		sys_office o on cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+<!-- 			<include refid="accDataScope_user.dataScopeFilter" /> -->
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and ( a.loan_date between #{startTime} and #{endTime} )
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[a.loan_date >= #{startTime}]]> 
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[a.loan_date <= #{endTime}]]> 
+			</if>
+			<if test="repayContractStatus != null and repayContractStatus != ''">
+				AND a.repay_contract_status = #{repayContractStatus}
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != '' ">
+				 <!--AND a.ORG_LEVEL2 = #{orgLevel2.id} -->
+				AND f.id = #{orgLevel2.id}
+			</if>
+			<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != '' ">
+				<!-- AND a.ORG_LEVEL3 = #{orgLevel3.id} -->
+					AND e.id = #{orgLevel3.id}
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != '' ">
+				AND a.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_sta_contract_status a
+		<include refid="staContractStatusJoins" />
+		inner join acc_contract cc on cc.contract_no = a.contract_no
+		inner join
+		sys_office o on cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+<!-- 			<include refid="accDataScope_user.dataScopeFilter" /> -->
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and ( a.loan_date between #{startTime} and #{endTime} )
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[a.loan_date >= #{startTime}]]> 
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[a.loan_date <= #{endTime}]]> 
+			</if>
+			<if test="repayContractStatus != null and repayContractStatus != ''">
+				AND a.repay_contract_status = #{repayContractStatus}
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != '' ">
+				AND f.id = #{orgLevel2.id}
+				<!-- a.ORG_LEVEL2=#{orgLevel2.id} -->
+			</if>
+			<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != '' ">
+				AND e.id = #{orgLevel3.id}
+				<!-- a.ORG_LEVEL3=#{orgLevel3.id} -->
+			</if> -->
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != '' ">
+				AND a.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="StaContractStatus">
+		SELECT
+		<include refid="staContractStatusColumns" />
+		FROM acc_sta_contract_status a
+		<include refid="staContractStatusJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_sta_contract_status(
+		data_dt,
+		<!-- org_level2,
+		org_level3, -->
+		org_level4,
+		contract_no,
+		cust_name,
+		deduct_date,
+		loan_date,
+		repay_contract_status,
+		period_value,
+		contract_amount,
+		ta_times,
+		curr_overdue_amount,
+		pay_times,
+		curr_overdue_capital_amount,
+		curr_overdue_interest_amount,
+		overdue_fee,
+		repay_fine_amount,
+		fine_exempt_amount_sum
+		) VALUES (
+		#{dataDt},
+		<!-- #{orgLevel2.id},
+		#{orgLevel3.id}, -->
+		#{orgLevel4.id},
+		#{contractNo},
+		#{custName},
+		#{deductDate},
+		#{loanDate},
+		#{repayContractStatus},
+		#{periodValue},
+		#{contractAmount},
+		#{taTimes},
+		#{currOverdueAmount},
+		#{payTimes},
+		#{currOverdueCapitalAmount},
+		#{currOverdueInterestAmount},
+		#{overdueFee},
+		#{repayFineAmount},
+		#{fineExemptAmountSum}
+		)
+	</insert>
+
+	<insert id="importStaContractStatus">
+		INSERT INTO acc_sta_contract_status(
+		<if  test="dataDt != null and dataDt != ''">
+		data_dt,
+		</if>
+		<!-- <if  test="orgLevel2 != null and orgLevel2 != ''">
+		org_level2,
+		</if>
+		<if  test="orgLevel3 != null and orgLevel3 != ''">
+		org_level3,
+		</if> -->
+		<if  test="orgLevel4 != null and orgLevel4 != ''">
+		org_level4,
+		</if>
+		<if  test="custName != null and custName != ''">
+		cust_name,
+		</if>
+		<if  test="deductDate != null and deductDate != ''">
+		deduct_date,
+		</if>
+		<if  test="loanDate != null and loanDate != ''">
+		loan_date,
+		</if>
+		<if  test="repayContractStatus != null and repayContractStatus != ''">
+		repay_contract_status,
+		</if>
+		<if  test="periodValue != null and periodValue != ''">
+		period_value,
+		</if>
+		<if  test="contractAmount != null and contractAmount != ''">
+		contract_amount,
+		</if>
+		<if  test="taTimes != null and taTimes != ''">
+		ta_times,
+		</if>
+		<if test="settleDate != null and settleDate != ''">
+		SETTLE_DATE,
+		</if>
+		<if  test="currOverdueAmount != null and currOverdueAmount != ''">
+		curr_overdue_amount,
+		</if>
+		<if  test="payTimes != null and payTimes != ''">
+		pay_times,
+		</if>
+		<if  test="currOverdueCapitalAmount != null and currOverdueCapitalAmount != ''">
+		curr_overdue_capital_amount,
+		</if>
+		<if  test="currOverdueInterestAmount != null and currOverdueInterestAmount != ''">
+		curr_overdue_interest_amount,
+		</if>
+		<if  test="overdueFee != null and overdueFee != ''">
+		overdue_fee,
+		</if>
+		<if  test="repayFineAmount != null and repayFineAmount != ''">
+		repay_fine_amount,
+		</if>
+		<if  test="fineExemptAmountSum != null and fineExemptAmountSum != ''">
+		fine_exempt_amount_sum,
+		</if>
+		contract_no
+		) VALUES (
+		<if  test="dataDt != null and dataDt != ''">
+		#{dataDt},
+		</if>
+		<!-- <if  test="orgLevel2 != null and orgLevel2 != ''">
+		#{orgLevel2},
+		</if>
+		<if  test="orgLevel3 != null and orgLevel3 != ''">
+		#{orgLevel3},
+		</if> -->
+		<if  test="orgLevel4 != null and orgLevel4 != ''">
+		#{orgLevel4},
+		</if>
+		<if  test="custName != null and custName != ''">
+		#{custName},
+		</if>
+		<if  test="deductDate != null and deductDate != ''">
+		#{deductDate},
+		</if>
+		<if  test="loanDate != null and loanDate != ''">
+		#{loanDate},
+		</if>
+		<if  test="repayContractStatus != null and repayContractStatus != ''">
+		#{repayContractStatus},
+		</if>
+		<if  test="periodValue != null and periodValue != ''">
+		#{periodValue},
+		</if>
+		<if  test="contractAmount != null and contractAmount != ''">
+		#{contractAmount},
+		</if>
+		<if  test="taTimes != null and taTimes != ''">
+		#{taTimes},
+		</if>
+		<if test="settleDate != null and settleDate != ''">
+		#{settleDate},
+		</if>
+		<if  test="currOverdueAmount != null and currOverdueAmount != ''">
+		#{currOverdueAmount},
+		</if>
+		<if  test="payTimes != null and payTimes != ''">
+		#{payTimes},
+		</if>
+		<if  test="currOverdueCapitalAmount != null and currOverdueCapitalAmount != ''">
+		#{currOverdueCapitalAmount},
+		</if>
+		<if  test="currOverdueInterestAmount != null and currOverdueInterestAmount != ''">
+		#{currOverdueInterestAmount},
+		</if>
+		<if  test="overdueFee != null and overdueFee != ''">
+		#{overdueFee},
+		</if>
+		<if  test="repayFineAmount != null and repayFineAmount != ''">
+		#{repayFineAmount},
+		</if>
+		<if  test="fineExemptAmountSum != null and fineExemptAmountSum != ''">
+		#{fineExemptAmountSum},
+		</if>
+		#{contractNo}
+		)
+	</insert>
+	
+	<update id="updateimportedStaContractStatus">
+		UPDATE acc_sta_contract_status SET
+		data_dt = #{dataDt},
+		<!-- org_level2 = #{orgLevel2.id},
+		org_level3 = #{orgLevel3.id}, -->
+		org_level4 = #{orgLevel4},
+		cust_name =
+		#{custName},
+		deduct_date = #{deductDate},
+		loan_date = #{loanDate},
+		repay_contract_status = #{repayContractStatus},
+		period_value =
+		#{periodValue},
+		contract_amount = #{contractAmount},
+		ta_times =
+		#{taTimes},
+		curr_overdue_amount = #{currOverdueAmount},
+		pay_times =
+		#{payTimes},
+		curr_overdue_capital_amount = #{currOverdueCapitalAmount},
+		curr_overdue_interest_amount = #{currOverdueInterestAmount},
+		overdue_fee = #{overdueFee},
+		repay_fine_amount = #{repayFineAmount},
+		<if test="settleDate != null and settleDate != ''" >
+		SETTLE_DATE =  #{settleDate},
+		</if>
+		fine_exempt_amount_sum = #{fineExemptAmountSum}
+		WHERE contract_no = #{contractNo}
+	</update>
+
+	<update id="update">
+		UPDATE acc_sta_contract_status SET
+		data_dt =
+		#{dataDt},
+		<!-- org_level2 = #{orgLevel2.id},
+		org_level3 = #{orgLevel3.id}, -->
+		org_level4 = #{orgLevel4.id},
+		contract_no = #{contractNo},
+		cust_name =
+		#{custName},
+		deduct_date = #{deductDate},
+		loan_date = #{loanDate},
+		repay_contract_status = #{repayContractStatus},
+		period_value =
+		#{periodValue},
+		contract_amount = #{contractAmount},
+		ta_times =
+		#{taTimes},
+		curr_overdue_amount = #{currOverdueAmount},
+		pay_times =
+		#{payTimes},
+		curr_overdue_capital_amount = #{currOverdueCapitalAmount},
+		curr_overdue_interest_amount = #{currOverdueInterestAmount},
+		overdue_fee = #{overdueFee},
+		repay_fine_amount = #{repayFineAmount},
+		fine_exempt_amount_sum = #{fineExemptAmountSum}
+		WHERE contract_no =
+		#{id}
+	</update>
+
+	<!-- <update id="delete"> -->
+	<!-- DELETE FROM acc_sta_contract_status -->
+	<!-- WHERE contract_no -->
+	<!-- = #{contractNo} -->
+	<!-- </update> -->
+
+	<select id="getAdvanceDetailGED" resultType="com.resoft.outinterface.rest.ged.entity.GedAdvanceRepayDetail">
+		SELECT
+			IFNULL(a.REPAY_AMOUNT,0.00)+IFNULL(a.OVERDUE_PENALTY,0.00)+IFNULL(b.FINE_AMOUNT,0.00) as "allRepayMoney",
+			IFNULL(a.REPAY_AMOUNT,0.00) as "repayAmount",
+-- 			##本  息 服务费  账户管理费
+			IFNULL(a.OVERDUE_PENALTY,0.00) as "overduePenalty",
+-- 			##违约金
+			IFNULL(b.FINE_AMOUNT,0.00) as "fineAmount",
+-- 			##罚息
+			IFNULL(c.DISCOUNT_FEE,0.00) as "discountFee",
+-- 			##贴息
+			IFNULL(d.PENALTY_EXEMPT_AMOUNT,0.00)+IFNULL(d.FINE_EXEMPT_AMOUNT,0.00)+IFNULL(cc.FACT_SERVICE_FEE,0.00)+IFNULL(cc.FACT_MANAGEMENT_FEE,0.00)+IFNULL(cc.FACT_INTEREST_AMOUNT,0.00)+IFNULL(cc.FACT_CAPITAL_AMOUNT,0.00)+IFNULL(cc.FACT_PENALTY_AMOUNT,0.00)+IFNULL(cc.FACT_FINE_AMOUNT,0.00) as "allFactMoney",
+			IFNULL(d.PENALTY_EXEMPT_AMOUNT,0.00) as "penaltyExemptAmount",
+-- 			##罚息减免,
+			IFNULL(d.FINE_EXEMPT_AMOUNT,0.00) as "fineExemptAmount",
+-- 			##违约金减免
+			IFNULL(cc.FACT_SERVICE_FEE,0.00) as "factServiceFee",
+			IFNULL(cc.FACT_MANAGEMENT_FEE,0.00) as "factManagementFee",
+			IFNULL(cc.FACT_INTEREST_AMOUNT,0.00) as "factInterestFee",
+			IFNULL(cc.FACT_CAPITAL_AMOUNT,0.00) as "factCapitalAmount",
+			IFNULL(cc.FACT_PENALTY_AMOUNT,0.00) as "facePenaltyAmount",
+			IFNULL(cc.FACT_FINE_AMOUNT,0.00) as "factFineAmount",
+			e.CONTRACT_NO as "contractNo",
+			e.CONTRACT_AMOUNT as "contractAmount",
+			e.CON_END_DATE as "conEndDate",
+			cc.REPAY_PERIOD_STATUS as "repayPeriodStatus",
+			a.DEDUCT_DATE as "deductDate",
+			a.PERIOD_NUM as "periodNum",
+			a.CAPITAL_AMOUNT as "capitalAmount",
+			a.PERIOD_VALUE as "periodValue",
+			e.LOAN_DATE AS "loanDate"
+		FROM
+			acc_repay_plan a
+		LEFT JOIN acc_sta_overdue_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		AND a.PERIOD_NUM = b.PERIOD_NUM
+		LEFT JOIN acc_discount c ON a.CONTRACT_NO = c.CONTRACT_NO
+		AND a.PERIOD_NUM = c.PERIOD_NUM
+		LEFT JOIN acc_sta_penalty_fine_exempt d ON a.CONTRACT_NO = d.CONTRACT_NO
+		AND a.PERIOD_NUM = d.PERIOD_NUM
+		LEFT JOIN acc_sta_repay_plan_status cc ON a.CONTRACT_NO = cc.CONTRACT_NO
+		AND a.PERIOD_NUM = cc.PERIOD_NUM
+		LEFT JOIN acc_contract e ON a.CONTRACT_NO = e.CONTRACT_NO
+		WHERE
+			(
+				cc.REPAY_PERIOD_STATUS IN ("0200", "0300")
+				OR cc.REPAY_PERIOD_STATUS IS NULL
+			)
+		AND a.CONTRACT_NO = #{contractNo}
+		order  by a.PERIOD_NUM asc
+	</select>
+	
+	
+	
+	<update id="updateContractStatus">
+		UPDATE acc_sta_contract_status
+SET REPAY_CONTRACT_STATUS = '1800'
+WHERE
+	contract_no = #{contractNo}
+	</update>
+	
+		<select id="getContractByContractNo" resultType="StaContractStatus">
+		select a.data_dt AS "dataDt",
+			a.ORG_LEVEL4 AS "orgLevel4.id",
+			a.contract_no AS "contractNo",
+			a.cust_name AS "custName",
+			a.deduct_date AS "deductDate",
+			a.loan_date AS "loanDate",
+			a.repay_contract_status AS "repayContractStatus",
+			a.period_value AS "periodValue",
+			a.contract_amount AS "contractAmount",
+			a.ta_times AS "taTimes",
+			a.curr_overdue_amount AS "currOverdueAmount",
+			a.pay_times AS "payTimes",
+			a.curr_overdue_capital_amount AS "currOverdueCapitalAmount",
+			a.curr_overdue_interest_amount AS "currOverdueInterestAmount",
+			a.overdue_fee AS "overdueFee",
+			a.repay_fine_amount AS "repayFineAmount",
+			a.fine_exempt_amount_sum AS "fineExemptAmountSum",
+			b.APPRO_PRODUCT_TYPE_ID AS "approveProductId"
+		from acc_sta_contract_status a 
+		left join acc_contract b on a.contract_no = b.contract_no
+		where a.contract_no = #{contractNo}
+		</select>
+</mapper>

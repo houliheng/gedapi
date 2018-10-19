@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.GedCompanyAccount.dao.CreGedAccountCompanyDao">
+    
+	<sql id="creGedAccountCompanyColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.company_name AS "companyName",
+		a.company_card_type AS "companyCardType",
+		a.social_credit_code AS "socialCreditCode",
+		a.business_licence AS "businessLicence",
+		a.organization_code AS "organizationCode",
+		a.tax_code AS "taxCode",
+		a.legal_name AS "legalName",
+		a.legal_mobile AS "legalMobile",
+		a.legal_card_type AS "legalCardType",
+		a.legal_card_number AS "legalCardNumber",
+		a.company_contact AS "companyContact",
+		a.contact_mobile AS "contactMobile",
+		a.company_bank_of_deposit AS "companyBankOfDeposit",
+		a.company_bank_of_deposit_value AS "companyBankOfDepositValue",
+		a.company_account AS "companyAccount",
+		a.company_bank_branch_name AS "companyBankBranchName",
+		a.province_code AS "provinceCode",
+		a.city_code AS "cityCode",
+		a.area_code AS "areaCode",
+		a.id_card_face_url AS "idCardFaceUrl",
+		a.id_card_back_url AS "idCardBackUrl",
+		a.id_card_hold_url AS "idCardHoldUrl",
+		a.business_licence_url AS "businessLicenceUrl",
+		a.accounts_permits_url AS "accountsPermitsUrl",
+		a.create_id AS "createId",
+		a.status AS "status",
+		a.account_verify_info AS "accountVerifyInfo",
+		a.create_time AS "createTime",
+		a.return_time AS "returnTime",
+		a.cust_id as "custId"
+	</sql>
+	
+	<sql id="creGedAccountCompanyJoins">
+		LEFT JOIN sys_user u2 ON u2.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="CreGedAccountCompany">
+		SELECT 
+			<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a
+		<include refid="creGedAccountCompanyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="getByApplyNo" resultType="CreGedAccountCompany">
+		SELECT
+		<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a
+		<include refid="creGedAccountCompanyJoins"/>
+		left join  cre_under_company_info  b on a.social_credit_code = b.UN_SOC_CREDIT_NO
+		WHERE b.apply_no = #{applyNo}
+	</select>
+	
+	<select id="findList" resultType="CreGedAccountCompany">
+		SELECT 
+			<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a
+		<include refid="creGedAccountCompanyJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_ged_account_company a
+		<include refid="creGedAccountCompanyJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreGedAccountCompany">
+		SELECT 
+			<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a
+		<include refid="creGedAccountCompanyJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO cre_ged_account_company(
+			id,
+			user_id,
+			company_name,
+			company_card_type,
+			social_credit_code,
+			business_licence,
+			organization_code,
+			tax_code,
+			legal_name,
+			legal_mobile,
+			legal_card_type,
+			legal_card_number,
+			company_contact,
+			contact_mobile,
+			company_bank_of_deposit,
+			company_bank_of_deposit_value,
+			company_account,
+			company_bank_branch_name,
+			province_code,
+			city_code,
+			area_code,
+			id_card_face_url,
+			id_card_back_url,
+			id_card_hold_url,
+			business_licence_url,
+			accounts_permits_url,
+			create_id,
+			create_time,
+			account_verify_info,
+			return_time,
+			status,
+			cust_id
+		) VALUES (
+			#{id},
+			#{userId},
+			#{companyName},
+			#{companyCardType},
+			#{socialCreditCode},
+			#{businessLicence},
+			#{organizationCode},
+			#{taxCode},
+			#{legalName},
+			#{legalMobile},
+			#{legalCardType},
+			#{legalCardNumber},
+			#{companyContact},
+			#{contactMobile},
+			#{companyBankOfDeposit},
+			#{companyBankOfDepositValue},
+			#{companyAccount},
+			#{companyBankBranchName},
+			#{provinceCode},
+			#{cityCode},
+			#{areaCode},
+			#{idCardFaceUrl},
+			#{idCardBackUrl},
+			#{idCardHoldUrl},
+			#{businessLicenceUrl},
+			#{accountsPermitsUrl},
+			#{createId},
+			#{createTime},
+			#{accountVerifyInfo},
+			#{returnTime},
+			#{status},
+			#{custId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_ged_account_company SET 	
+			user_id = #{userId},
+			company_name = #{companyName},
+			company_card_type = #{companyCardType},
+			social_credit_code = #{socialCreditCode},
+			business_licence = #{businessLicence},
+			organization_code = #{organizationCode},
+			tax_code = #{taxCode},
+			legal_name = #{legalName},
+			legal_mobile = #{legalMobile},
+			legal_card_type = #{legalCardType},
+			legal_card_number = #{legalCardNumber},
+			company_contact = #{companyContact},
+			contact_mobile = #{contactMobile},
+			company_bank_of_deposit = #{companyBankOfDeposit},
+			company_bank_of_deposit_value = #{companyBankOfDepositValue},
+			company_account = #{companyAccount},
+			company_bank_branch_name = #{companyBankBranchName},
+			province_code = #{provinceCode},
+			city_code = #{cityCode},
+			area_code = #{areaCode},
+			id_card_face_url = #{idCardFaceUrl},
+			id_card_back_url = #{idCardBackUrl},
+			id_card_hold_url = #{idCardHoldUrl},
+			business_licence_url = #{businessLicenceUrl},
+			accounts_permits_url = #{accountsPermitsUrl},
+			create_id = #{createId},
+			create_time = #{createTime},
+			account_verify_info=#{accountVerifyInfo},
+			return_time=#{returnTime},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_ged_account_company
+		WHERE id = #{id}
+	</update>
+
+	<update id="deleteByCustId">
+		DELETE FROM cre_ged_account_company
+		WHERE cust_id = #{custId}
+	</update>
+	
+	
+	<select id="findCompanyAccountBySocialCreditNo" resultType="CreGedAccountCompany">
+		SELECT 
+			<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a where a.social_credit_code = #{unSocCreditNo}
+		and a.status='7'
+	</select>
+
+	<select id="findCompanyAccountByApproId" resultType="CreGedAccountCompany">
+		SELECT
+		<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_check_approve_union b
+		left join cre_company_info c on c.id=b.cust_id
+		left join cre_ged_account_company a on c.UN_SOC_CREDIT_NO = a.social_credit_code
+		where b.id = #{approId} and a.status='7'
+	</select>
+
+
+	
+	<select id="checkCompanyAccount" resultType="String">
+	 	select c.id from cre_guarantee_relation a
+		LEFT JOIN cre_company_info b on a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c on c.social_credit_code = b.UN_SOC_CREDIT_NO
+		WHERE a.COMPANY_ID=#{custId}
+		and a.ROLE_TYPE = '2'
+		and a.apply_no = #{applyNo}
+		and c.status='7'
+	</select>
+	
+	
+		<select id="checkBatchIsOpenAccount" resultType="String">
+		 	SELECT
+				c.id
+			FROM
+				cre_check_approve_union a
+			LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+			LEFT JOIN cre_ged_account_company c ON c.social_credit_code = b.UN_SOC_CREDIT_NO
+			WHERE
+				a.APPLY_NO = #{applyNo}
+				and c.status='7'
+		</select>
+
+		<select id="checkDanBaoIsOpenAccount" resultType="String">
+	 		SELECT
+				c.id
+			FROM
+				cre_apply_company_relation a
+			LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+			left join cre_check_approve_union d on d.cust_id = a.company_id and d.apply_no = a.apply_no
+			LEFT JOIN cre_ged_account_company c ON c.social_credit_code = b.UN_SOC_CREDIT_NO
+			WHERE
+				a.APPLY_NO = #{applyNo}
+				and a.DEL_FLAG='0'
+				and c.status='7'
+				GROUP BY d.id
+	 	</select>
+	 	
+	 	<select id="getCompanyAccount" resultType="CreGedAccountCompany">
+			SELECT 
+				a.id AS "id",
+				a.user_id AS "userId",
+				a.company_name AS "companyName",
+				"统一社会信用代码" AS "companyCardType",
+				a.social_credit_code AS "socialCreditCode",
+				a.business_licence AS "businessLicence",
+				a.organization_code AS "organizationCode",
+				a.tax_code AS "taxCode",
+				a.legal_name AS "legalName",
+				a.legal_mobile AS "legalMobile",
+				a.legal_card_type AS "legalCardType",
+				a.legal_card_number AS "legalCardNumber",
+				a.company_contact AS "companyContact",
+				a.contact_mobile AS "contactMobile",
+				a.company_bank_of_deposit AS "companyBankOfDeposit",
+				a.company_bank_of_deposit_value AS "companyBankOfDepositValue",
+				a.company_account AS "companyAccount",
+				a.company_bank_branch_name AS "companyBankBranchName",
+				a.province_code AS "provinceCode",
+				a.city_code AS "cityCode",
+				a.area_code AS "areaCode",
+				a.id_card_face_url AS "idCardFaceUrl",
+				a.id_card_back_url AS "idCardBackUrl",
+				a.id_card_hold_url AS "idCardHoldUrl",
+				a.business_licence_url AS "businessLicenceUrl",
+				a.accounts_permits_url AS "accountsPermitsUrl",
+				a.create_id AS "createId",
+				a.create_time AS "createTime",
+				a.cust_id as "custId",
+				c.cust_id as "companyId"
+			FROM cre_ged_account_company a
+			left join cre_company_info b on a.social_credit_code =b.UN_SOC_CREDIT_NO 
+			left join cre_check_approve_union c on c.cust_id = b.id
+			WHERE c.id = #{approId}
+			and a.status='7'
+		</select>
+
+
+	<select id="findAccountCompanyList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a where 1=1
+		<choose>
+		<when test="status!=null and status!=''">
+			and status = #{status}
+		</when>
+			<otherwise>
+			  and status in(6,8,10)
+			</otherwise>
+		</choose>
+			<if test="companyName!=null and companyName!=''">
+				and company_name= #{companyName}
+			</if>
+			<if test="createTime!=null and createTime!=''">
+				and create_time like CONCAT(#{createTime},'%')
+			</if>
+	      order by create_time desc
+	</select>
+
+
+	<select id="findAccountCompanyDoneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company  a where status in(7,9)
+			<if test="companyName!=null and companyName!=''">
+				and company_name= #{companyName}
+			</if>
+			<if test="createTime!=null and createTime!=''">
+				and create_time like CONCAT(#{createTime},'%')
+			</if>
+		order by create_time DESC
+	</select>
+
+	<update id="updateSaveAccount">
+		UPDATE cre_ged_account_company SET
+		status = #{status},create_time=#{createTime},account_verify_info=#{reason}
+		WHERE id = #{id}
+	</update>
+
+	<select id="selectCompanyAccountById" resultType="CreGedAccountCompany">
+		SELECT
+		<include refid="creGedAccountCompanyColumns"/>
+		FROM cre_ged_account_company a
+		where id = #{id}
+	</select>
+</mapper>

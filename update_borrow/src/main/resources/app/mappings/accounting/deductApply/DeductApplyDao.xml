@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.deductApply.dao.DeductApplyDao">
+
+	<sql id="deductApplyColumns">
+		a.data_dt AS "dataDt",
+		a.deduct_cust_id AS "deductCustId",
+		a.DEDUCT_APPLY_NO AS "streamNo",
+		a.deduct_amount AS "deductAmount",
+		a.contract_no AS "contractNo",
+		a.capital_terrace_no AS "capitalTerraceNo",
+		a.MID_CAPITAL_TERRACE_NO AS "midCapitalTerraceNo",
+		a.deduct_time AS "deductTime",
+		a.is_lock AS "isLock" AS "periodNum"
+	</sql>
+
+	<sql id="deductApplyJoins">
+	</sql>
+
+	<select id="get" resultType="DeductApply">
+		SELECT
+		<include refid="deductApplyColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyJoins" />
+		WHERE a.contract_no = #{id}
+	</select>
+
+
+	<select id="validateIsLockByContractNo" resultType="DeductApply">
+		SELECT
+		<include refid="deductApplyColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyJoins" />
+		WHERE a.is_lock = '1' and a.contract_no = #{contractNo}
+	</select>
+
+	<select id="findBankDataList" resultType="java.util.Map">
+		SELECT
+		b.GQGET_CUST_ID AS "custId",
+		a.GQGET_CUST_NAME AS "custName",
+		b.BANKCARD_NO AS "bankcardNo",
+		a.PHONE_NO as "mobileNum",
+		b.BANK_OFFICE AS "bank"
+		FROM ift_acc_gqget_cust_info a
+		INNER JOIN ift_acc_gqget_bankcard_info b on a.GQGET_CUST_ID = b.GQGET_CUST_ID
+		where 1=1
+		<if test="idNum != null and idNum != ''">
+			and a.id_num = #{idNum}
+		</if>
+		<if test="mobileNum != null and mobileNum != '' ">
+			and a.PHONE_NO = #{mobileNum}
+		</if>
+	</select>
+
+	<select id="queryMobileNumAndIdNum" resultType="java.util.Map">
+		SELECT
+		c.contract_no as "contractNo",
+		a.PHONE_NO as "mobileNum",
+		c.id_num as "idNum",
+		a.GQGET_CUST_ID as "mainCustId"
+		FROM acc_contract c
+		INNER JOIN ift_acc_gqget_cust_info a on a.ID_NUM = c.ID_NUM
+		where c.contract_no = #{contractNo}
+	</select>
+
+	<select id="getDeductApplyByContractNoAndPeriodNum" resultType="DeductApply">
+		SELECT CURRENT_DATE as "dataDt"
+		,ARP.CONTRACT_NO as "contractNo"
+		,ARP.PERIOD_NUM as "periodNum"
+		,SUM(ARP.SERVICE_FEE -
+		ifnull(ASRPS.FACT_SERVICE_FEE,0))
+		+SUM(ARP.MANAGEMENT_FEE -
+		ifnull(ASRPS.FACT_MANAGEMENT_FEE,0))
+		+SUM(ARP.CAPITAL_AMOUNT - ifnull(ASRPS.FACT_CAPITAL_AMOUNT,0))
+		+SUM(ARP.INTEREST_AMOUNT - ifnull(ASRPS.FACT_INTEREST_AMOUNT,0))
+		+SUM(if(ASOS.FINE_AMOUNT is null ,0,ARP.OVERDUE_PENALTY) -
+		ifnull(ASPFE.PENALTY_EXEMPT_AMOUNT,0)
+		-IFNULL(ASRPS.FACT_PENALTY_AMOUNT,0))
+		+SUM(ifnull(ASOS.FINE_AMOUNT,0) - ifnull(ASPFE.FINE_EXEMPT_AMOUNT,0) -
+		IFNULL(ASRPS.FACT_FINE_AMOUNT,0)) as "deductAmount"
+		,AC.OPERATE_ID as "deductCustId"
+		FROM
+		ACC_CONTRACT AC
+		INNER JOIN
+		ACC_REPAY_PLAN ARP
+		ON AC.CONTRACT_NO =
+		ARP.CONTRACT_NO
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS ASRPS
+		ON ARP.CONTRACT_NO = ASRPS.CONTRACT_NO
+		AND ARP.PERIOD_NUM = ASRPS.PERIOD_NUM
+		LEFT JOIN ACC_STA_OVERDUE_STATUS ASOS
+		ON ARP.CONTRACT_NO = ASOS.CONTRACT_NO
+		AND ARP.PERIOD_NUM =
+		ASOS.PERIOD_NUM
+		LEFT JOIN
+		ACC_STA_PENALTY_FINE_EXEMPT ASPFE
+		ON ARP.CONTRACT_NO =
+		ASPFE.CONTRACT_NO
+		AND ARP.PERIOD_NUM = ASPFE.PERIOD_NUM
+		WHERE AC.CONTRACT_NO = #{contractNo} and ARP.PERIOD_NUM = #{periodNum}
+	</select>
+
+	<select id="findList" resultType="DeductApply">
+		SELECT
+		<include refid="deductApplyColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_deduct_apply a
+		<include refid="deductApplyJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DeductApply">
+		SELECT
+		<include refid="deductApplyColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_deduct_apply_tmp(
+		data_dt,
+		deduct_cust_id,
+		DEDUCT_APPLY_NO,
+		deduct_amount,
+		contract_no,
+		capital_terrace_no,
+		MID_CAPITAL_TERRACE_NO,
+		deduct_time,
+		is_lock,
+		DEDUCT_TYPE,
+		MOBILE_NUM,
+		BANK_CARD_NO,
+		BANK,
+		CUST_NAME
+		) VALUES (
+		#{dataDt},
+		#{updateBy.id},
+		UUID_SHORT(),
+		#{deductAmount},
+		#{contractNo},
+		#{capitalTerraceNo},
+		#{midCapitalTerraceNo},
+		#{createDate},
+		#{isLock},
+		#{deductType},
+		#{mobileNum},
+		#{bankcardNo},
+		#{bank},
+		#{custName}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE acc_deduct_apply SET
+		data_dt = #{dataDt},
+		deduct_cust_id = #{deductCustId},
+		DEDUCT_APPLY_NO = #{streamNo},
+		deduct_amount = #{deductAmount},
+		contract_no = #{contractNo},
+		capital_terrace_no = #{capitalTerraceNo},
+		deduct_time = #{deductTime},
+		is_lock =
+		#{isLock},
+		WHERE contract_no = #{contractNo}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_deduct_apply
+		WHERE contract_no =
+		#{contractNo}
+	</update>
+
+	<insert id="saveDeductApplyToDeductResult">
+		INSERT INTO acc_deduct_apply(
+		data_dt,
+		deduct_cust_id,
+		DEDUCT_APPLY_NO,
+		deduct_amount,
+		contract_no,
+		capital_terrace_no,
+		deduct_time,
+		is_lock,
+		DEDUCT_TYPE,
+		MOBILE_NUM,
+		BANK_CARD_NO,
+		BANK,
+		CUST_NAME
+		) VALUES (
+		#{dataDt},
+		#{deductCustId},
+		<if test="deductApplyNo != null and deductApplyNo != ''">
+			#{deductApplyNo},
+		</if>
+		<if test="deductApplyNo == null or deductApplyNo == ''">
+			uuid_short(),
+		</if>
+		#{deductAmount},
+		#{contractNo},
+		#{capitalTerraceNo},
+		#{deductTime},
+		#{isLock},
+		#{deductType},
+		#{mobileNum},
+		#{bankcardNo},
+		#{bank},
+		#{custName}
+		)
+	</insert>
+	<update id="updateDeductApplyIsLock">
+		update acc_deduct_apply SET is_lock = '1'
+		WHERE DEDUCT_APPLY_NO = #{deductApplyNo}
+	</update>
+	
+	
+	
+	<insert id="saveDCDeductApply">
+		INSERT INTO acc_deduct_apply(
+		DATA_DT,
+		DEDUCT_APPLY_NO,
+		CONTRACT_NO,
+		CAPITAL_TERRACE_NO,
+		DEDUCT_AMOUNT,
+		DEDUCT_TIME,
+		DEDUCT_CUST_ID,
+		DEDUCT_TYPE,
+		STREAM_TYPE,
+		MOBILE_NUM,
+		BANK_CARD_NO,
+		BANK,
+		CUST_NAME,
+		IS_LOCK,
+		FLAG
+		) VALUES (
+		#{dataDt},
+		#{deductApplyNo},
+		#{contractNo},
+		#{capitalTerraceNo},
+		#{deductAmount},
+		#{deductTime},
+		#{deductCustId},
+		#{deductType},
+		#{streamType},
+		#{mobileNum},
+		#{bankcardNo},
+		#{bank},
+		#{custName},
+		#{isLock},
+		#{flag}
+		)
+	</insert>
+
+</mapper>

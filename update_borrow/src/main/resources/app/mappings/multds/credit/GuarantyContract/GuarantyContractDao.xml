@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.credit.GuarantyContract.dao.GuarantyContractDao">
+
+	<sql id="GuarantyContractColumns">
+	    id as "id",
+		product_type as "productType",
+		template_Type as "templateType",
+		template_Name as "templateName",
+		is_upload_file as "isuploadfile",
+		contract_Org_platform as "contractOrgplatform"
+	</sql>
+
+	<select id="findList" resultType="GuarantyContract">
+		SELECT
+		<include refid="GuarantyContractColumns" />
+		FROM CRE_CONTRACT_TEMPLATE a
+		<where>
+			<if test="templateType != null and templateType != ''">
+				AND a.TEMPLATE_TYPE = #{templateType}
+			</if>
+		</where>
+		ORDER BY a.PRODUCT_TYPE DESC
+
+	</select>
+	
+	<select id="get" resultType="GuarantyContract">
+			SELECT 
+				<include refid="GuarantyContractColumns" />
+			FROM CRE_CONTRACT_TEMPLATE a
+			where id = #{id}
+	</select>
+	
+</mapper>

@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.CusDao">
+ <!-- 
+	 * @reqno: H1509110039
+	 * @date-designer:20150918-gengchang
+	 * @db-z : CRE_APPLY_REGISTER : id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20150918-gengchang:CRE_信贷审批_进件管理_客户登记列表_新增
+	 *												查询符合要求的所有数据项
+	 *												支持Oracle和MySQL数据库
+	 -->
+ <!-- 
+	 * @reqno:H1511100047
+	 * @date-designer:20151111-huangxuecheng
+	 * @db-z:CRE_APPLY_REGISTER:id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20151111-huangxuecheng:CRE_信贷审批_进件管理_个人客户登记列表_流程图、流程轨迹,查出proInsId
+	 -->
+	 <!--
+	 * @reqno:H1512210023
+	 * @date-designer:2015年12月30日-songmin
+	 * @date-author:2015年12月30日-songmin:CRE_信贷审批_进件管理_个人客户登记
+	 * @db-z:cre_apply_register:CUST_TYPE
+	 *	查询条件添加客户类型等于个人客户条件
+	 -->
+	<!--
+	 * @reqno:H1601280119
+	 * @date-designer:2016年1月28日-lirongchao
+	 * @db-z:cre_apply_register:id,APPLY_NO,ID_TYPE,ID_NUM,LIST_STATUS,cust_type,mobileNum
+	 * @date-author:2016年1月28日-lirongchao:CRE_信贷审批_进件管理_客户登记列表_个人客户登记_改造
+	 										因新表和旧表差异，所以需要修改表结构
+	-->	 
+<select id="findList" resultType="Customer">
+		SELECT 
+		       c.id,
+		       c.APPLY_NO as applyNo,
+		       c.cust_name as cusName,
+		       (select distinct d.label 
+		             from sys_dict d
+		             where c.id_type=d.value
+		             and  d.type='CUSTOMER_P_ID_TYPE' ) idType,
+		       c.id_num as idNum,
+		       c.id_num as idNumConfirm,
+		       c.MOBILE_NUM as mobileNum,
+		       c.APPLY_AMOUNT as applyAmount,
+		       c.CHANNEL_OTHER_DESC as channelOtherDesc,
+		       (select distinct d.label 
+		                from sys_dict d
+		                where c.channel_source_type=d.value
+		                and  d.type='CHANNEL_SOURCE_TYPE') channelSourceType,
+		       c.REGISTER_DATE as registerDate,
+		       (select distinct d.label 
+				from sys_dict d
+				where c.APPLY_STATUS=d.value
+				and  d.type='APPLY_STATUS') as applyStatus,
+				c.PROC_INS_ID as procInsId
+			    FROM cre_apply_register c
+	 WHERE  c.CUST_TYPE = '1' and CREATE_BY = #{createBy.id}
+	 <if test="cusName != null and cusName != ''">
+			and c.cust_name LIKE <if test="dbName == 'oracle'">'%'||#{cusName}||'%'</if>
+											  <if test="dbName == 'mysql'">concat('%',#{cusName},'%')</if>
+	</if>
+	<if test="idType != null and idType != ''">
+		and c.id_type LIKE <if test="dbName == 'oracle'">'%'||#{idType}||'%'</if>
+									  <if test="dbName == 'mysql'">concat('%',#{idType},'%')</if>
+	</if>
+	<if test="idNum != null and idNum != ''">
+		and c.id_num LIKE <if test="dbName == 'oracle'">'%'||#{idNum}||'%'</if>
+									  <if test="dbName == 'mysql'">concat('%',#{idNum},'%')</if>
+	</if>
+	<if test="applyStatus != null and applyStatus != ''">
+		and c.APPLY_STATUS = #{applyStatus} 
+	</if>
+			order by REGISTER_DATE desc,APPLY_STATUS asc
+	</select>
+	<!-- 
+	 * @reqno: H1509110039
+	 * @date-designer:20150918-gengchang
+	 * @db-z : CRE_APPLY_REGISTER : id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20150918-gengchang:CRE_信贷审批_进件管理_客户登记列表_新增
+	 *												查询符合要求的所有数据项的分页总数
+	 -->
+	<select id="getCount" resultType="long">
+		SELECT count(1) from (
+			SELECT 
+		       c.id,
+		       c.APPLY_NO as applyNo,
+		       c.cust_name as cusName,
+		       (select distinct d.label 
+		             from sys_dict d
+		             where c.id_type=d.value
+		             and  d.type='CUSTOMER_P_ID_TYPE' ) idType,
+		       c.id_num as idNum,
+		       c.id_num as idNumConfirm,
+		       c.MOBILE_NUM as mobileNum,
+		       c.APPLY_AMOUNT as applyAmount,
+		       c.CHANNEL_OTHER_DESC as channelOtherDesc,		       
+		       (select distinct d.label 
+		                from sys_dict d
+		                where c.channel_source_type=d.value
+		                and  d.type='CHANNEL_SOURCE_TYPE') channelSourceType,
+		       c.REGISTER_DATE as "registerDate",
+		      c.APPLY_STATUS as applyStatus
+			    FROM cre_apply_register c
+			 WHERE c.CUST_TYPE = '1' and CREATE_BY = #{createBy.id}
+			  <if test="cusName != null and cusName != ''">
+				and c.cust_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{cusName}||'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{cusName},'%')</if>
+				</if>
+				<if test="idType != null and idType != ''">
+					and c.id_type LIKE 
+						<if test="dbName == 'oracle'">'%'||#{idType}||'%'</if>
+						<if test="dbName == 'mysql'">concat('%',#{idType},'%')</if>
+				</if>
+				<if test="idNum != null and idNum != ''">
+					and c.id_num LIKE 
+						<if test="dbName == 'oracle'">'%'||#{idNum}||'%'</if>
+						<if test="dbName == 'mysql'">concat('%',#{idNum},'%')</if>
+				</if>
+				<if test="applyStatus != null and applyStatus != ''">
+					and c.APPLY_STATUS = #{applyStatus} 
+				</if>
+		) tmp_count
+	</select>
+	<!-- 
+	 * @reqno: H1509110041
+	 * @date-designer:20150918-gengchang
+	 * @db-z : CRE_APPLY_REGISTER : id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20150918-gengchang:CRE_信贷审批_进件管理_客户登记列表_新增
+	 *													获得单条数据
+	 -->
+	 <!-- 
+	 * @reqno:H1511100047
+	 * @date-designer:20151111-huangxuecheng
+	 * @db-z : CRE_APPLY_REGISTER : id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20151111-huangxuecheng:CRE_信贷审批_进件管理_个人客户登记列表_流程图、流程轨迹,查出proInsId
+	 -->
+	 <!-- 
+	 * @reqno:H1512160006
+	 * @date-designer:2015年12月16日-songmin
+	 * @date-author:2015年12月16日-songmin:CRE_信贷审批_进件管理_企业客户登记_新增、修改
+	 *		查询客户登记信息时，增加联系人、联系人身份证号码、联系人手机号字段
+	 * @db-z:CRE_APPLY_REGISTER:CONTACTS_NAME、CONTACTS_CARD_ID_NO、CONTACTS_MOBILE
+	 -->
+	 <!-- 
+	 * @reqno:H1512160007
+	 * @date-designer:2015年12月17日-songmin
+	 * @date-author:2015年12月17日-songmin:关联方式获取登记企业客户信息同步的贷款申请信息数据
+	 * @db-j:CRE_APPLY_INFO:APPLY_PRODUCT_TYPE_CODE、APPLY_PRODUCT_TYPE_NAME、APPLY_PRODUCT_ID、APPLY_PRODUCT_NAME、id
+	 -->
+	<select id="get" resultType="Customer">
+		SELECT 
+		   c.id,
+		   c.APPLY_NO as applyNo,
+		   c.cust_name as "cusName",
+	       c.id_type as "idType",
+	       c.id_num as "idNum",
+	       c.id_num as idNumConfirm,
+	       c.MOBILE_NUM as "mobileNum",
+	       c.APPLY_AMOUNT as applyAmount,
+	       c.CHANNEL_OTHER_DESC as "channelOtherDesc",
+	       c.channel_source_type as "channelSourceType",
+	       c.REGISTER_DATE as "registerDate",
+	       c.APPLY_STATUS as "applyStatus",
+	       c.PROC_INS_ID as procInsId,
+	       c.CONTACTS_NAME as contactsName,
+		   c.CONTACTS_CARD_ID_NO as contactsCardIdNo,
+		   c.CONTACTS_MOBILE as contactsMobile,
+		   b.APPLY_PRODUCT_TYPE_CODE as "applyInfo.applyProductTypeCode",
+		   b.APPLY_PRODUCT_TYPE_NAME as "applyInfo.applyProductTypeName",
+		   b.APPLY_PRODUCT_ID as "applyInfo.applyProductId",
+		   b.APPLY_PRODUCT_NAME as "applyInfo.applyProductName",
+		   b.id as "applyInfo.id"
+		FROM CRE_APPLY_REGISTER c 
+		LEFT JOIN CRE_APPLY_INFO b on c.id = b.APPLY_ID
+		WHERE c.id = #{id}
+	</select>
+	
+	<!-- 
+	 * @reqno: H1509110041
+	 * @date-designer:20150918-gengchang
+	 * @db-z : CRE_APPLY_REGISTER :  id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20150918-gengchang:CRE_信贷审批_进件管理_客户登记列表_新增
+	 *													支持Oracle和MySQL数据库
+	 -->
+	 <!-- 
+	 * @reqno:H1512160006
+	 * @date-designer:2015年12月16日-songmin
+	 * @date-author:2015年12月16日-songmin:CRE_信贷审批_进件管理_企业客户登记_新增、修改
+	 *		存储企业客户登记信息，这里共用以往的个人客户登记信息，新增存储字段联系人、联系人身份证号码、联系人手机号字段的保存、客户类型
+	 * @db-z:CRE_APPLY_REGISTER:CONTACTS_NAME、CONTACTS_CARD_ID_NO、CONTACTS_MOBILE
+	 -->
+	<insert id="insert">
+		INSERT INTO CRE_APPLY_REGISTER(
+			id,
+			APPLY_NO,
+			cust_name,
+			id_type,
+			id_num,
+			MOBILE_NUM,
+			APPLY_AMOUNT,
+			CHANNEL_OTHER_DESC,
+			channel_source_type,
+			REGISTER_DATE,
+			APPLY_STATUS,
+			ORG_ID,
+			CREATE_BY,
+	<!-- 
+		
+		 * @reqno: H1510210068
+		 * @date-designer:20151023-lirongchao
+		 * @db-j : cre_apply_register :SERIAL_NUMBER,
+		 * @date-author:20151023-lirongchao: 需求-1.在客户登记列表的新增或修改页面，
+		 * 										当用户点击“提交”按钮，后台在提交前按规则生成申请编号、并保存；
+												2.生成申请编号的规则：YYYYMMDD+00001+4位随机数；其中“00001”为序号，
+												每个公司每天从00001开始递增
+											当前环节-保存新增的两个字段.
+		 	
+	
+	
+	 --> 			
+			
+			SERIAL_NUMBER,
+			CONTACTS_NAME,
+			CONTACTS_CARD_ID_NO,
+			CONTACTS_MOBILE,
+			CUST_TYPE,
+			CREATE_DATE,
+			UPDATE_DATE,
+			UPDATE_BY
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{cusName},
+			#{idType},
+			#{idNum},
+			#{mobileNum},
+			#{applyAmount},
+			#{channelOtherDesc},
+			#{channelSourceType},
+			#{registerDate},
+			#{applyStatus},
+			#{registerOrgId},
+			#{createBy.id},
+			#{serialNumber},
+			#{contactsName},
+			#{contactsCardIdNo},
+			#{contactsMobile},
+			#{custType},
+			#{createDate},
+			#{updateDate},
+			#{updateBy.id}
+		)
+	</insert>
+	
+	<!-- 
+	 * @reqno: H1509110042
+	 * @date-designer:20150918-gengchang
+	 * @db-z : CRE_APPLY_REGISTER : id,APPLY_NO,cust_name，id_type，id_num，MOBILE_NUM，，，CHANNEL_OTHER_DESC，
+	 *												channel_source_type，REGISTER_DATE，APPLY_STATUS
+	 * @date-author:20150918-gengchang:CRE_信贷审批_进件管理_客户登记列表_修改、删除
+	 *													删除指定id的记录
+	 -->
+	<update id="delete">
+		DELETE from CRE_APPLY_REGISTER 
+			WHERE id = #{id} 
+	</update>
+	
+	
+	<!-- 
+	 * @reqno:H1512160006
+	 * @date-designer:2015年12月17日-songmin
+	 * @date-author:2015年12月17日-songmin:
+	 * 		修改时增加数据修改项LINKMAN_NAME、CONTACTS_CARD_ID_NO、CONTACTS_MOBILE
+	 *		新加的企业客户登记字段相对于个人客户新增了LINKMAN_NAME、CONTACTS_CARD_ID_NO、LINKMAN_MOBILE字段
+	 * @db-z:CRE_APPLY_REGISTER:CONTACTS_NAME、CONTACTS_CARD_ID_NO、CONTACTS_MOBILE
+	 -->
+	<update id="update">
+		update CRE_APPLY_REGISTER 
+		set 
+			cust_name=#{cusName},
+			id_type=#{idType},
+			id_num=#{idNum},
+			MOBILE_NUM=#{mobileNum},
+			APPLY_AMOUNT=#{applyAmount},
+			CHANNEL_OTHER_DESC=#{channelOtherDesc},
+			channel_source_type=#{channelSourceType},
+			APPLY_STATUS=#{applyStatus},
+			CONTACTS_NAME=#{contactsName},
+			CONTACTS_CARD_ID_NO=#{contactsCardIdNo},
+			CONTACTS_MOBILE=#{contactsMobile},
+			UPDATE_DATE=#{updateDate},
+			UPDATE_BY=#{updateBy.id}
+		where id=#{id} 
+	</update>
+	
+	 <!-- 
+	 * @reqno:AH1509140009
+	 * @date-designer:2015年9月28日-songmin
+	 * @date-author:2015年9月28日-songmin:根据证件类型、证件号进行匹配，查看当前申请客户的历史贷款申请记录
+	 * @db-z:CRE_APPLY_REGISTER:APPLY_NO、cust_name、id_type、id_num、REGISTER_DATE、ORG_ID、APPLY_STATUS
+	 * @db-j:CRE_APPLY_INFO:apply_amount 申请额度
+	 * @db-j:sys_office:name 机构名称
+	 * @db-j:SYS_DICT:label 字典Label、type 字典类型、value 字典值
+	 -->
+	 <select id="findApplyHis" resultType="Customer">
+	 <!-- 
+	 		/**
+		 * @reqno: H1511100159
+		 * @date-designer:20151113-lirongchao
+		 * @db-z : cre_apply_register :id
+		 * @db-j : SYS_DICT :value
+		 * @db-j : cre_apply_info :APPLY_NO
+		 * @date-author:20151113-lirongchao:  1.CRE_信贷审批_初审_内匹配信息列表中，在“状态”列后面，添加操作列，内容为“客户详情”链接，点击时，弹出窗口，查看客户贷款申请信息、客户信息；
+2.点击列表操作中的“客户详情”，弹出窗口,窗口名称“客户详情”；
+3.页面布局：以tab页签形式显示，包括：贷款申请信息、客户信息；默认只加载“贷款申请信息”页签，其它页签只有在点击时才做加载；
+两页面显示的元素与信贷审批系统中申请录入保持不变；页面所有的表单均为只读，保存、新增、删除、修改按钮隐藏不显示；
+	 当前环节-查询时获取合同id，以便后继的查看详情功能
+		 */
+	  -->
+	  <!-- 
+		* @reqno:H1511190029
+		* @date-designer:2015年11月06日-songmin
+		* @date-author:2015年11月06日-songmin:关联查询条件放到leftjoin后面，status的字典字段修改为APPLY_STATUS
+	   -->
+	 	select a.id, a.APPLY_NO applyNo,a.cust_name cusName,d1.label idType,a.id_num idNum,a.REGISTER_DATE registerDate,a.ORG_ID registerOrgId,d2.label APPLY_STATUS,b.name orgName,c.apply_amount applyAmount
+		from cre_apply_register a 
+		left join sys_office b on a.ORG_ID=b.id 
+		left join SYS_DICT d1 on a.id_type=d1.value and d1.type='CUSTOMER_P_ID_TYPE' 
+		left join SYS_DICT d2 on a.APPLY_STATUS=d2.value  and d2.type='APPLY_STATUS' 
+		left join cre_apply_info c on a.id=c.apply_id 
+		where a.id_type =#{idType} and a.id_num=#{idNum} 
+		order by a.REGISTER_DATE
+	 </select>
+	 
+	<!-- 
+		
+		 * @reqno: H1510210068
+		 * @date-designer:20151023-lirongchao
+		 * @db-j : cre_apply_register :SERIAL_NUMBER 序号
+		 * @date-author:20151023-lirongchao: 需求:1.在客户登记列表的新增或修改页面，
+		 * 										当用户点击“提交”按钮，后台在提交前按规则生成申请编号、并保存；
+												2.生成申请编号的规则：YYYYMMDD+00001+4位随机数；其中“00001”为序号，
+												每个公司每天从00001开始递增
+												当前环节:查询日期为当天的，自己公司登记的第几个用户.
+		 	
+	
+	
+	 --> 
+	 <select id="findserial" resultType="Customer">
+	 	select a.SERIAL_NUMBER
+		from cre_apply_register a  
+		where  DATE(a.REGISTER_DATE) =DATE(#{registerDate}) 
+		order by a.REGISTER_DATE
+	 </select>	 
+	 
+	
+	<!-- 	 /**
+	 * @reqno: H1510210067
+	 * @date-designer:20151028-gengchang
+	 * @db-z : cre_apply_register :APPLY_STATUS, ID_TYPE, ID_NUM
+	 * @date-author:20151028-gengchang: CRE_信贷审批_进件管理_客户登记列表_新增、修改_提交_做客户唯一性校验
+	 *				statusResult():查询数据库中证件类型和证件号，在客户申请信息表中查询出status
+  */ -->
+	<select id="statusResult" resultType="map">
+		SELECT APPLY_STATUS FROM cre_apply_register
+		WHERE ID_TYPE = #{idType} and ID_NUM = #{idNum}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1512160005
+	 * @date-designer:2015年12月16日-songmin
+	 * @date-author:2015年12月16日-songmin:CRE_信贷审批_进件管理_企业客户登记_查询
+	 *		根据客户名称（模糊）、证件类型、证件号、状态分页查询企业客户列表信息
+	 * @db-z:CRE_APPLY_REGISTER:ID、APPLY_NO、CUST_NAME、ID_TYPE、ID_NUM、MOBILE_NUM、、CHANNEL_SOURCE_TYPE、REGISTER_DATE、APPLY_STATUS、PROC_INS_ID
+	 * @db-j:SYS_DICT:value、LABEL、TYPE
+	 -->
+	<select id="findEnList" resultType="Customer">
+		select 
+			a.ID id,
+			a.APPLY_NO applyNo,
+			a.CUST_NAME cusName,
+			a.ID_TYPE idType,
+			b.LABEL idTypeLabel,
+			a.ID_NUM idNum,
+	        a.APPLY_AMOUNT as applyAmount,
+	        a.CHANNEL_OTHER_DESC as "channelOtherDesc",			
+			a.CHANNEL_SOURCE_TYPE channelSourceType,
+			e.LABEL channelSourceTypeLabel,
+			a.REGISTER_DATE registerDate,
+			a.APPLY_STATUS applyStatus,
+			d.LABEL statusLabel,
+			a.CONTACTS_MOBILE contactsMobile,
+			a.PROC_INS_ID procInsId
+		from 
+			CRE_APPLY_REGISTER a
+			left join SYS_DICT b on a.ID_TYPE = b.value and b.TYPE='CUSTOMER_C_ID_TYPE'
+			left join SYS_DICT d on a.APPLY_STATUS=d.value and d.TYPE='APPLY_STATUS'
+			left join SYS_DICT e on a.CHANNEL_SOURCE_TYPE=e.value and e.TYPE='CHANNEL_SOURCE_TYPE'
+		where a.CUST_TYPE = '2' and a.CREATE_BY = #{createBy.id}
+		  <if test="cusName != null and cusName != ''">
+			and a.CUST_NAME LIKE 
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{cusName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="idType != null and idType != ''">
+				and a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				and a.ID_NUM = #{idNum}
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				and a.APPLY_STATUS = #{applyStatus} 
+			</if>
+		order by a.REGISTER_DATE desc
+	</select>
+	
+	<!-- 
+	 * @reqno:H1512160005
+	 * @date-designer:2015年12月16日-songmin
+	 * @date-author:2015年12月16日-songmin:CRE_信贷审批_进件管理_企业客户登记_查询
+	 *		根据客户名称（模糊）、证件类型、证件号、状态查询企业客户总数
+	 * @db-z:CRE_APPLY_REGISTER:CUST_NAME、ID_TYPE、ID_NUM、APPLY_STATUS
+	 -->
+	<select id="findEnListCount" resultType="java.lang.Long">
+		select 
+			count(*)
+		from 
+			CRE_APPLY_REGISTER a
+		where a.CUST_TYPE = '2' and a.CREATE_BY = #{createBy.id}
+		  <if test="cusName != null and cusName != ''">
+			and a.CUST_NAME LIKE 
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{cusName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="idType != null and idType != ''">
+				and a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				and a.ID_NUM = #{idNum}
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				and a.APPLY_STATUS = #{applyStatus} 
+			</if>
+	</select>
+	 
+</mapper>

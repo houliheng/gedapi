@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.financialStateImport.dao.ThemisReportBodyDao">
+    
+	<sql id="themisReportBodyColumns">
+		a.apply_no AS "applyNo",
+		a.companycode AS "companycode",
+		a.report_year_month AS "reportYearMonth",
+		b.report_order_col AS "themisReportDic.reportOrderCol",
+		b.report_index_code AS "themisReportDic.reportIndexCode",
+		b.report_index_name AS "themisReportDic.reportIndexName",
+		b.report_table AS "themisReportDic.reportTable",
+		a.report_index_value AS "reportIndexValue"
+	</sql>
+		
+	<sql id="themisReportBodyJoins">
+		INNER JOIN ift_themis_report_dic b ON a.report_order_col = b.report_order_col
+		AND a.report_table = b.report_table
+	</sql>
+    
+	<select id="findList" resultType="ThemisReportBody">
+		SELECT 
+			<include refid="themisReportBodyColumns"/>
+		FROM ift_themis_report_body a
+		<include refid="themisReportBodyJoins"/>
+		<where>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+			</if>
+			<if test="themisReportDic != null and themisReportDic.reportOrderCol != null and themisReportDic.reportOrderCol != ''">
+				AND b.report_order_col = #{themisReportDic.reportOrderCol}
+			</if>
+			<if test="themisReportDic != null and themisReportDic.reportTable != null and themisReportDic.reportTable != ''">
+				AND b.report_table = #{themisReportDic.reportTable}
+			</if>
+		</where>
+	</select>
+		
+	<insert id="insert">
+		INSERT INTO ift_themis_report_body(
+			apply_no,
+			companycode,
+			report_year_month,
+			report_order_col,
+			report_index_value,
+			report_table
+		) VALUES (
+			#{applyNo},
+			#{companycode},
+			#{reportYearMonth},
+			#{themisReportDic.reportOrderCol},
+			#{reportIndexValue},
+			#{themisReportDic.reportTable}
+		)
+	</insert>
+	
+	<!-- 批量插入 -->
+	<insert id="banchInsert">
+		INSERT INTO ift_themis_report_body(
+			apply_no,
+			companycode,
+			report_year_month,
+			report_order_col,
+			report_index_value,
+			report_table
+		)
+		<foreach collection="themisReportBodyList" item="themisReportBody" separator=" union all ">
+		SELECT
+			#{themisReportBody.applyNo},
+			#{themisReportBody.companycode},
+			#{themisReportBody.reportYearMonth},
+			#{themisReportBody.themisReportDic.reportOrderCol},
+			#{themisReportBody.reportIndexValue},
+			#{themisReportBody.themisReportDic.reportTable}
+		FROM sys_dual
+		</foreach>
+	</insert>
+	
+	<insert id = "batchInsert" parameterType ="java.util.List">
+		INSERT INTO ift_themis_report_body(
+			apply_no,
+			companycode,
+			report_year_month,
+			report_order_col,
+			report_index_value,
+			report_table
+		)values
+		<foreach item="list" collection="param5" index="index" separator=",">
+		(
+		#{param1},
+		#{param2},
+		#{param3},
+		#{list.reportOrderCol},
+		#{list.reportIndexValue},
+		#{param4}
+		)
+		</foreach>
+	</insert>
+	
+	
+	<delete  id="deleteByApplyNo">
+	DELETE  FROM  ift_themis_report_body
+	WHERE  APPLY_NO = #{param1}
+	AND		report_table =#{param2}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="ThemisReportBody">
+		UPDATE ift_themis_report_body SET 	
+			report_index_value = #{reportIndexValue}
+		WHERE apply_no = #{applyNo} 
+			AND companycode = #{companycode}
+			AND report_year_month = #{reportYearMonth}
+			AND report_order_col = #{themisReportDic.reportOrderCol}
+			AND report_table = #{themisReportDic.reportTable}
+	</update>
+	
+	<!-- 批量删除 -->
+	<update id="banchDelete">
+		DELETE FROM ift_themis_report_body
+		where companycode = #{companycode}
+	</update>
+	
+	<select id= "findThemisReportHead"  resultType="com.resoft.credit.financialStateImport.entity.ThemisReportHead">
+	SELECT 
+			APPYL_NO as "applyNo",
+			DEPCODE  as "depcode",
+			COMPANYCODE  as "companycode",
+			COMPANY_CHN_NAME as "companyChnName",
+			COMPANY_ENG_NAME as "companyEngName",
+			CREATEDATE as "buildDate",
+			COMPANYNATURE as "companynature",
+			MAIN_INDUSTRY_CODE as "mainIndustryCode",
+			GB_INDU1 as "gbIndu1",
+			GB_INDU2 as "gbIndu2",
+			MARKET_CLASS as "marketClass",
+			POSTCODE as  "postcode",
+			IS_MERGER as "isMerger",
+			REPORT_TYPE as "reportType",
+			REPORT_UNIT as "reportUnit"
+	FROM ift_themis_report_head
+	WHERE APPYL_NO=#{applyNo}
+	</select>
+	
+	<select id="findYearMonthByApply" resultType="String">
+	SELECT 
+			distinct report_year_month 
+	FROM 
+			ift_themis_report_body
+	WHERE 
+			apply_no=#{param2}
+	AND
+			report_table=#{param1}
+	</select>
+	
+	<select id ="findFinancialReport" resultType="com.resoft.credit.financialStateImport.entity.ReportInfo4Excel">
+	SELECT 
+		report_index_value	as	"reportIndexValue",
+		report_order_col  		as "reportOrderCol"
+	FROM ift_themis_report_body
+	WHERE apply_no=#{param3} and report_year_month=#{param2} and report_table=#{param1};
+	</select>
+</mapper>

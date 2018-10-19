@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditViewBook.dao.creditAssets.CreditAssetsDao">
+    
+	<sql id="creditAssetsColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.assets_owner_id AS "assetsOwnerId",
+		a.assets_owner_name AS "assetsOwnerName",
+		a.assets_name AS "assetsName",
+		a.market_value AS "marketValue",
+		a.is_mortgage AS "isMortgage",
+		a.is_check AS "isCheck",
+		a.detail_comment AS "detailComment",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditAssetsJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditAssets">
+		SELECT 
+			<include refid="creditAssetsColumns"/>
+		FROM cre_credit_assets a
+		<include refid="creditAssetsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditAssets">
+		SELECT 
+			<include refid="creditAssetsColumns"/>
+		FROM cre_credit_assets a
+		<include refid="creditAssetsJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_assets a
+		<include refid="creditAssetsJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditAssets">
+		SELECT 
+			<include refid="creditAssetsColumns"/>
+		FROM cre_credit_assets a
+		<include refid="creditAssetsJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_assets(
+			id,
+			apply_no,
+			role_type,
+			assets_owner_id,
+			assets_owner_name,
+			assets_name,
+			market_value,
+			is_mortgage,
+			is_check,
+			detail_comment,
+			remarks,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{assetsOwnerId},
+			#{assetsOwnerName},
+			#{assetsName},
+			#{marketValue},
+			#{isMortgage},
+			#{isCheck},
+			#{detailComment},
+			#{remarks},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_assets SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			assets_owner_id = #{assetsOwnerId},
+			assets_owner_name = #{assetsOwnerName},
+			assets_name = #{assetsName},
+			market_value = #{marketValue},
+			is_mortgage = #{isMortgage},
+			is_check = #{isCheck},
+			detail_comment = #{detailComment},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_assets
+		WHERE id = #{id}
+	</update>
+	
+	<update id="batchDelete">
+		update  cre_credit_assets set del_flag = '1'
+		where id in 
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>
+	</update>
+	
+	<select id="getCreditAssetsByApplyNo" resultType="CreditAssets">
+		SELECT 
+			<include refid="creditAssetsColumns"/>
+		FROM cre_credit_assets a where a.del_flag ='0'
+				AND a.apply_no = #{applyNo}
+	</select>
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.debtColletion.dao.AllDebtCollectionDao">
+
+	<sql id="allDebtCollectionColumns">
+		a.id as "id",
+		a.contract_no AS "contractNo",
+		a.data_dt AS
+		"dataDt",
+		a.cust_name AS "custName",
+		a.risk_lelve AS "riskLelve",
+		a.collection_times AS "collectionTimes",
+		a.ta_overdue_times AS
+		"taOverdueTimes",
+		a.contract_amount AS "contractAmount",
+		a.curr_overdue_amount AS "currOverdueAmount",
+		a.operate_org_id AS
+		"operateOrgId",
+		o.name AS
+		"operateOrgName",
+		a.curr_collection_type AS
+		"currCollectionType",
+		a.curr_collection_from
+		AS "currCollectionFrom",
+		a.curr_collection_status AS
+		"currCollectionStatus",
+		a.curr_collector AS
+		"currCollector"
+	</sql>
+
+	<select id="get" resultType="DebtCollection">
+		SELECT
+		<include refid="allDebtCollectionColumns" />
+		FROM pl_debt_collection a
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id
+		=
+		o.id
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+
+	<select id="findList" resultType="DebtCollection">
+		SELECT
+		<include refid="allDebtCollectionColumns" />
+		FROM pl_debt_collection a
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id
+		=
+		o.id
+		<where>
+			and (a.OPERATE_ORG_ID =
+			#{operateOrgId} OR o.parent_ids LIKE
+			concat('%',#{operateOrgId},',%'))
+			<if test="riskLelve != null and riskLelve != ''">
+				and a.RISK_LELVE = #{riskLelve}
+			</if>
+			<if test=" currCollectionType != null and currCollectionType != ''">
+				and a.curr_collection_type = #{currCollectionType}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM pl_debt_collection a
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id
+		=
+		o.id
+		<where>
+			and (a.OPERATE_ORG_ID =
+			#{operateOrgId} OR o.parent_ids LIKE
+			concat('%',#{operateOrgId},',%'))
+			<if test="riskLelve != null and riskLelve != ''">
+				and a.RISK_LELVE = #{riskLelve}
+			</if>
+			<if
+				test=" currCollectionType != null and currCollectionType != '' ">
+				and a.curr_collection_type = #{currCollectionType}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollection">
+		SELECT
+		<include refid="allDebtCollectionColumns" />
+		FROM pl_debt_collection a
+		where a.curr_collection_type =
+		#{currCollectionType}
+	</select>
+
+
+</mapper>

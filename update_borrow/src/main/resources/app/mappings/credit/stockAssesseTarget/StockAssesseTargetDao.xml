@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.stockAssesseTarget.dao.StockAssesseTargetDao">
+    
+	<sql id="stockAssesseTargetColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		date_format(a.assesse_time,'%Y-%m-%d') AS "assesseTime",
+		a.assesse_project AS "assesseProject",
+		a.assesse_content AS "assesseContent",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.grade as "grade"
+	</sql>
+	
+	<sql id="stockAssesseTargetJoins">
+	</sql>
+    
+	<select id="get" resultType="StockAssesseTarget">
+		SELECT 
+			<include refid="stockAssesseTargetColumns"/>
+		FROM cre_stock_assesse_target a
+		<include refid="stockAssesseTargetJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="StockAssesseTarget">
+		SELECT 
+			<include refid="stockAssesseTargetColumns"/>
+		FROM cre_stock_assesse_target a
+		<include refid="stockAssesseTargetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_assesse_target a
+		<include refid="stockAssesseTargetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="StockAssesseTarget">
+		SELECT 
+			<include refid="stockAssesseTargetColumns"/>
+		FROM cre_stock_assesse_target a
+		<include refid="stockAssesseTargetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByApplyNo" resultType="StockAssesseTarget" parameterType="java.util.Map">
+		SELECT 
+			<include refid="stockAssesseTargetColumns"/>
+		FROM cre_stock_assesse_target a where a.apply_no = #{applyNo} and del_flag = '0' and grade in 
+		(${grades})
+		order by a.create_date desc
+	</select>
+	<insert id="insert">
+		INSERT INTO cre_stock_assesse_target(
+			id,
+			apply_no,
+			assesse_time,
+			assesse_project,
+			assesse_content,
+			del_flag,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			grade
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{assesseTime},
+			#{assesseProject},
+			#{assesseContent},
+			#{delFlag},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{grade}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_assesse_target SET 	
+			apply_no = #{applyNo},
+			assesse_time = #{assesseTime},
+			assesse_project = #{assesseProject},
+			assesse_content = #{assesseContent},
+			grade = #{grade},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id} and del_flag = '0'
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_stock_assesse_target SET 
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+	
+	
+	<update id="batchDelete">
+		update  cre_stock_assesse_target set del_flag = '1'
+		where id in 
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>
+	</update>
+	
+	
+	<delete id="deleteStockInfoByApplyGrade">
+		delete  from cre_stock_assesse_target 
+			WHERE apply_no = #{applyNo}
+					and grade=#{grade}
+	</delete>
+
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.blacklist.dao.BlacklistDetailDao">
+	<!-- 
+	 * @reqno: H1512210033
+	 * @date-designer:2015年12月24日-lirongchao
+	 * @date-author:2015年12月24日-lirongchao:1.查询条件-【客户名称（模糊查询）、状态】、【证件类型、证件号码（模糊查询）】、【创建日期（开始结束时间）】；
+											查询表单按钮-查询、重置；
+											2.列表数据项-单选框按钮、客户名称、状态（黑名单、白名单）、证件类型、证件号、创建人、创建日期、操作（详情）
+											3.列表排序-创建日期降序
+											4.表头按钮-加黑、刷白
+											当前环节-黑名单详情xml
+	 -->    
+	<sql id="blacklistDetailColumns">
+		a.id AS "id",
+		a.blacklist_id AS "blacklistId",
+		a.list_status AS "listStatus",
+		a.remarks AS "remarks",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		su.`name` AS "createBy.name"
+	</sql>
+	
+	<sql id="blacklistDetailJoins">
+		LEFT JOIN SYS_USER su ON su.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="BlacklistDetail">
+		SELECT 
+			<include refid="blacklistDetailColumns"/>
+		FROM cre_blacklist_detail a
+		<include refid="blacklistDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="BlacklistDetail">
+		SELECT 
+			<include refid="blacklistDetailColumns"/>
+		FROM cre_blacklist_detail a
+		<include refid="blacklistDetailJoins"/>
+		<where>
+			
+			<if test="blacklistId != null and blacklistId != ''">
+				AND a.blacklist_id = #{blacklistId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="BlacklistDetail">
+		SELECT 
+			<include refid="blacklistDetailColumns"/>
+		FROM cre_blacklist_detail a
+		<include refid="blacklistDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_blacklist_detail(
+			id,
+			blacklist_id,
+			list_status,
+			remarks,
+			create_by,
+			create_date
+		) VALUES (
+			#{id},
+			#{blacklistId},
+			#{listStatus},
+			#{remarks},
+			#{createBy.id},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_blacklist_detail SET 	
+			blacklist_id = #{blacklistId},
+			list_status = #{listStatus},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_blacklist_detail
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

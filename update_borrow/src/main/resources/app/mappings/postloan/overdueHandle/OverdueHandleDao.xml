@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.overdueHandle.dao.OverdueHandleDao">
+    
+	<sql id="overdueHandleColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.handle_status AS "handleStatus",
+		a.proc_ins_id AS "procInsId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="overdueHandleJoins">
+	</sql>
+    
+	<select id="get" resultType="OverdueHandle">
+		SELECT 
+			<include refid="overdueHandleColumns"/>
+		FROM pl_overdue_handle a
+		<include refid="overdueHandleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OverdueHandle">
+		SELECT 
+			<include refid="overdueHandleColumns"/>
+		FROM pl_overdue_handle a
+		<include refid="overdueHandleJoins"/>
+		<where>
+			a.del_flag = '0'
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_overdue_handle a
+		<include refid="overdueHandleJoins"/>
+		<where>
+			a.del_flag = '0'
+			<if test="custName != null and custName != ''">
+				AND a.cust_name = #{custName}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="OverdueHandle">
+		SELECT 
+			<include refid="overdueHandleColumns"/>
+		FROM pl_overdue_handle a
+		<include refid="overdueHandleJoins"/>
+		<where>
+			a.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_overdue_handle(
+			id,
+			contract_no,
+			period_num,
+			handle_status,
+			proc_ins_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{handleStatus},
+			#{procInsId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_overdue_handle SET 	
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			handle_status = #{handleStatus},
+			proc_ins_id = #{procInsId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE pl_overdue_handle SET 
+			del_flag = '0'
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findZBXFList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		<![CDATA[
+			SELECT 	c.CUST_NAME as custName,
+					r.apply_no as applyNo,
+					c.CONTRACT_NO as contractNo,
+					c.CONTRACT_AMOUNT as contractAmount,
+					s.PERIOD_NUM as periodNum,
+					p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+					s.OVERDUE_DAYS as overdueDays,
+					o2.`name` as orgLevel2,
+					o3.`name` as orgLevel3,
+					o4.`name` as orgLevel4,
+					r.REGISTER_NAME as registerName
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+			WHERE s.OVERDUE_DAYS >= 30 
+			AND NOT EXISTS (select 1 from pl_overdue_handle ph where ph.CONTRACT_NO = s.CONTRACT_NO and ph.PERIOD_NUM = s.PERIOD_NUM)
+			AND ps.REPAY_PERIOD_STATUS = '0300'
+		]]>
+		<if test="custName != null and custName != ''">
+			AND c.cust_name like concat('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND c.contract_no like concat('%',#{contractNo},'%')
+		</if>
+	</select>
+	
+	<select id="findZBXFDoneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		<![CDATA[
+			SELECT 	DISTINCT
+					c.CUST_NAME as custName,
+					r.apply_no as applyNo,
+					c.CONTRACT_NO as contractNo,
+					c.CONTRACT_AMOUNT as contractAmount,
+					s.PERIOD_NUM as periodNum,
+					p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+					s.OVERDUE_DAYS as overdueDays,
+					o2.`name` as orgLevel2,
+					o3.`name` as orgLevel3,
+					o4.`name` as orgLevel4,
+					r.REGISTER_NAME as registerName,
+					act.ASSIGNEE_ as assignee
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+			INNER JOIN pl_overdue_handle ph on ph.CONTRACT_NO = s.CONTRACT_NO and ph.PERIOD_NUM = s.PERIOD_NUM
+			INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST act ON act.PROC_INST_ID_ = ph.PROC_INS_ID AND act.TASK_DEF_KEY_='utask_dqxf'
+		]]>
+		where ph.create_by = #{createBy}
+		<if test="custName != null and custName != ''">
+			AND c.cust_name like concat('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND c.contract_no like concat('%',#{contractNo},'%')
+		</if>
+		ORDER BY ph.CREATE_DATE DESC
+	</select>
+	
+	<select id="todoListAdmin" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+			temp.ID_ AS ID,
+			temp.NAME_ AS NAME,
+			temp.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+			temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+			temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+			temp.CREATE_TIME_ AS CREATETIME,
+			temp.ASSIGNEE_ AS ASSIGNEE,
+			CASE WHEN temp.ASSIGNEE_ IS NULL THEN 'todo' ELSE 'claim' END AS STATUS,
+			temp.EXECUTION_ID_ AS EXECUTIONID,
+			c.CUST_NAME as custName,
+			r.apply_no as applyNo,
+			c.CONTRACT_NO as contractNo,
+			c.CONTRACT_AMOUNT as contractAmount,
+			s.PERIOD_NUM as periodNum,
+			p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+			s.OVERDUE_DAYS as overdueDays,
+			o2.`name` as orgLevel2,
+			o3.`name` as orgLevel3,
+			o4.`name` as orgLevel4,
+			r.REGISTER_NAME as registerName
+		FROM
+		(
+			SELECT DISTINCT
+				t.ID_,
+				t.NAME_,
+				t.TASK_DEF_KEY_,
+				t.PROC_INST_ID_,
+				t.PROC_DEF_ID_,
+				t.CREATE_TIME_,
+				t.ASSIGNEE_,
+				t.EXECUTION_ID_
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+			JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON E.PROC_INST_ID_ = T.PROC_INST_ID_
+			LEFT JOIN (
+			SELECT IT.TASK_ID_
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+			inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_user_ally sua on
+			IT.GROUP_ID_ = sua.ALLYID
+			where IT.TYPE_ = 'candidate'
+			) I ON I.TASK_ID_ = T.ID_
+			WHERE T.SUSPENSION_STATE_ = '1' AND E.IS_ACTIVE_ = '1'
+			<if test="taskDefKey!=null and taskDefKey!=''">
+				AND T.TASK_DEF_KEY_=#{taskDefKey}
+			</if>
+		) temp
+		INNER JOIN pl_overdue_handle a ON temp.PROC_INST_ID_ = a.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON a.CONTRACT_NO = c.CONTRACT_NO
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO and a.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE 1 =	1 AND a.HANDLE_STATUS = '1'
+		<if test="custName != null and custName != ''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND a.contract_no LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+	
+	<select id="todoList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL THEN 'todo' ELSE 'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS EXECUTIONID,
+		c.CUST_NAME as custName,
+		r.apply_no as applyNo,
+		c.CONTRACT_NO as contractNo,
+		c.CONTRACT_AMOUNT as contractAmount,
+		s.PERIOD_NUM as periodNum,
+		p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+		s.OVERDUE_DAYS as overdueDays,
+		o2.`name` as orgLevel2,
+		o3.`name` as orgLevel3,
+		o4.`name` as orgLevel4,
+		r.REGISTER_NAME as registerName
+		FROM
+		(
+		SELECT DISTINCT
+			t.ID_,
+			t.NAME_,
+			t.TASK_DEF_KEY_,
+			t.PROC_INST_ID_,
+			t.PROC_DEF_ID_,
+			t.CREATE_TIME_,
+			t.ASSIGNEE_,
+			t.EXECUTION_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+		JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON E.PROC_INST_ID_ = T.PROC_INST_ID_
+		LEFT JOIN (
+			SELECT IT.TASK_ID_,syu.login_name as USER_ID_
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+			inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_user_ally sua on IT.GROUP_ID_ = sua.ALLYID
+			inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_user syu on
+			sua.userid = syu.id
+			WHERE syu.login_name = #{userLoginName} AND IT.TYPE_='candidate'
+		) I ON I.TASK_ID_ = T.ID_
+		WHERE T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		AND (T.ASSIGNEE_ = #{userLoginName} OR (I.USER_ID_ = #{userLoginName} AND T.ASSIGNEE_ IS NULL))
+		<!-- AND (T.ASSIGNEE_ = #{userLoginName} ) -->
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		ORDER BY T.CREATE_TIME_
+		) temp
+		INNER JOIN pl_overdue_handle a ON temp.PROC_INST_ID_ = a.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON a.CONTRACT_NO = c.CONTRACT_NO 
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO and a.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE 1 = 1 AND a.HANDLE_STATUS = '1'	
+		<if test="custName != null and custName != ''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND a.contract_no LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+	
+	<select id="findZBXFAssignList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		select 
+			su.id as userId,
+			su.name as userName,
+			su.login_name as loginName,
+			o.name as companyName
+		from sys_user su
+		inner join sys_user_ally sua on su.id = sua.userid
+		inner join sys_ally sa on sa.id = sua.allyid
+		inner join sys_office o on su.company_id = o.id
+		where su.company_id = #{companyId} 
+		and su.login_flag = '1' and su.del_flag = '0'
+		and sa.id = #{groupId}
+		<if test="loginName != null and loginName != ''">
+			AND su.login_name like concat('%',#{loginName},'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			AND su.name like concat('%',#{userName},'%')
+		</if>
+	</select>
+	
+	<!-- <select id="doneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		#temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		#temp.END_TIME_ AS ENDTIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		temp.EXECUTION_ID_ AS EXECUTIONID,
+		c.CUST_NAME as custName,
+		r.apply_no as applyNo,
+		c.CONTRACT_NO as contractNo,
+		c.CONTRACT_AMOUNT as contractAmount,
+		s.PERIOD_NUM as periodNum,
+		p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+		s.OVERDUE_DAYS as overdueDays,
+		o2.`name` as orgLevel2,
+		o3.`name` as orgLevel3,
+		o4.`name` as orgLevel4,
+		r.REGISTER_NAME as registerName
+		FROM
+		(
+		SELECT
+			*
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST T
+		WHERE 
+		T.DELETE_REASON_ IS NOT NULL
+		AND T.END_TIME_ IS NOT NULL
+		AND (T.DELETE_REASON_ = 'completed' OR T.DELETE_REASON_ = 'jump')
+		AND T.ASSIGNEE_ = #{userLoginName}
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		ORDER BY T.END_TIME_ DESC
+		) temp		
+		INNER JOIN pl_overdue_handle a ON temp.PROC_INST_ID_ = a.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON a.CONTRACT_NO = c.CONTRACT_NO 
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO and a.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE 1 = 1 AND a.HANDLE_STATUS = '1'	
+		<if test="custName != null and custName != ''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND a.contract_no LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		ORDER BY s.OVERDUE_DAYS DESC
+	</select> -->
+	<select id="doneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.END_TIME_ AS ENDTIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		temp.EXECUTION_ID_ AS EXECUTIONID,
+		c.CUST_NAME as custName,
+		r.apply_no as applyNo,
+		c.CONTRACT_NO as contractNo,
+		c.CONTRACT_AMOUNT as contractAmount,
+		s.PERIOD_NUM as periodNum,
+		p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+		s.OVERDUE_DAYS as overdueDays,
+		o2.`name` as orgLevel2,
+		o3.`name` as orgLevel3,
+		o4.`name` as orgLevel4,
+		r.REGISTER_NAME as registerName
+		FROM
+		(
+		select * from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST T 
+		where not exists (
+				select 1 from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST aht 
+				where aht.PROC_INST_ID_ = T.PROC_INST_ID_ 
+				and aht.TASK_DEF_KEY_ = T.TASK_DEF_KEY_
+				and aht.ASSIGNEE_ = T.ASSIGNEE_
+				and aht.END_TIME_ > T.END_TIME_
+		) 
+		AND T.DELETE_REASON_ IS NOT NULL
+		AND T.END_TIME_ IS NOT NULL
+		AND (T.DELETE_REASON_ = 'completed' OR T.DELETE_REASON_ = 'jump')
+		AND T.ASSIGNEE_ = #{userLoginName}
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		ORDER BY T.END_TIME_ DESC
+		) temp		
+		INNER JOIN pl_overdue_handle a ON temp.PROC_INST_ID_ = a.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON a.CONTRACT_NO = c.CONTRACT_NO 
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO and a.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE 1 = 1 AND a.HANDLE_STATUS = '1'	
+		<if test="custName != null and custName != ''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND a.contract_no LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		ORDER BY ENDTIME DESC
+	</select>
+	<select id="findListByOverdueDays" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+			temp.ID_ AS ID,
+			temp.NAME_ AS NAME,
+			temp.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+			temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+			temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+			temp.CREATE_TIME_ AS CREATETIME,
+			temp.ASSIGNEE_ AS ASSIGNEE,
+			CASE WHEN temp.ASSIGNEE_ IS NULL THEN 'todo' ELSE 'claim' END AS STATUS,
+			temp.EXECUTION_ID_ AS EXECUTIONID,
+			c.CUST_NAME as custName,
+			r.apply_no as applyNo,
+			c.CONTRACT_NO as contractNo,
+			c.CONTRACT_AMOUNT as contractAmount,
+			s.PERIOD_NUM as periodNum,
+			p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+			s.OVERDUE_DAYS as overdueDays,
+			o2.`name` as orgLevel2,
+			o3.`name` as orgLevel3,
+			o4.`name` as orgLevel4,
+			r.REGISTER_NAME as registerName
+		FROM
+		(
+			SELECT DISTINCT
+				t.ID_,
+				t.NAME_,
+				t.TASK_DEF_KEY_,
+				t.PROC_INST_ID_,
+				t.PROC_DEF_ID_,
+				t.CREATE_TIME_,
+				t.ASSIGNEE_,
+				t.EXECUTION_ID_
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+			JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON E.PROC_INST_ID_ = T.PROC_INST_ID_
+			LEFT JOIN (
+			SELECT IT.TASK_ID_
+			FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+			inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_user_ally sua on
+			IT.GROUP_ID_ = sua.ALLYID
+			where IT.TYPE_ = 'candidate'
+			) I ON I.TASK_ID_ = T.ID_
+			WHERE T.SUSPENSION_STATE_ = '1' AND E.IS_ACTIVE_ = '1'
+			<if test="taskDefKey!=null and taskDefKey!=''">
+				AND T.TASK_DEF_KEY_=#{taskDefKey}
+			</if>
+		) temp
+		INNER JOIN pl_overdue_handle a ON temp.PROC_INST_ID_ = a.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON a.CONTRACT_NO = c.CONTRACT_NO
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO and a.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE a.HANDLE_STATUS = '1'
+		and <![CDATA[ s.OVERDUE_DAYS >= #{lowerLimitDays}]]>
+		<if test="upperLimitDays!=null and upperLimitDays!=''">
+			and  <![CDATA[ s.OVERDUE_DAYS < #{upperLimitDays} ]]>
+		</if>
+		
+		ORDER BY CREATETIME DESC
+	</select>
+	
+	<select id="findListUnstarted" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT 	c.CUST_NAME as custName,
+				r.apply_no as applyNo,
+				c.CONTRACT_NO as contractNo,
+				c.CONTRACT_AMOUNT as contractAmount,
+				s.PERIOD_NUM as periodNum,
+				p.REPAY_AMOUNT-ps.FACT_REPAY_AMOUNT as overdueAmount,
+				s.OVERDUE_DAYS as overdueDays,
+				o2.`name` as orgLevel2,
+				o3.`name` as orgLevel3,
+				o4.`name` as orgLevel4,
+				r.REGISTER_NAME as registerName
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s on c.CONTRACT_NO = s.CONTRACT_NO
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p on p.CONTRACT_NO = c.CONTRACT_NO and p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps on ps.CONTRACT_NO = p.CONTRACT_NO and ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 on o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 on o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 on o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r on r.APPLY_NO = c.APPLY_NO
+		WHERE <![CDATA[ s.OVERDUE_DAYS >= #{lowerLimitDays}]]>
+		<if test="upperLimitDays!=null and upperLimitDays!=''">
+			and  <![CDATA[ s.OVERDUE_DAYS < #{upperLimitDays} ]]>
+		</if>
+		AND NOT EXISTS (select 1 from pl_overdue_handle ph where ph.CONTRACT_NO = s.CONTRACT_NO and ph.PERIOD_NUM = s.PERIOD_NUM)
+		AND ps.REPAY_PERIOD_STATUS = '0300'
+	</select>
+</mapper>

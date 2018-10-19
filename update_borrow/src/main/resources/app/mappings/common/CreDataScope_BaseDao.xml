@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="creDataScope_base">
+	<!-- /**
+	 * @reqno:H1507220018
+	 * @date-designer:20150727-chenshaojia
+	 * @date-author:20150727-chenshaojia:优化用户管理的数据权限的实现，基本数据范围的条件sql实现
+	 */ -->
+	<!-- 公司以及公司下属的所有机构 -->
+    <sql id="companyAndChild">
+    	AND EXISTS (SELECT 1 FROM sys_office WHERE ((id = #{sqlMap.ResoftFramework_user.company.id} OR parent_ids LIKE CONCAT(#{sqlMap.ResoftFramework_companyParentIds},',%'))AND id = ${sqlMap.ResoftFramework_companyColumnName}))
+    </sql>
+    <!-- 本公司，并且包括本公司下的部门 -->
+    <sql id="company">
+    	AND EXISTS (SELECT 1 FROM sys_office WHERE (id = #{sqlMap.ResoftFramework_user.company.id} OR (parent_id = #{sqlMap.ResoftFramework_user.company.id} AND type = '2')) AND id = ${sqlMap.ResoftFramework_companyColumnName})
+    </sql>
+    <!-- 部门以及下属所有机构 -->
+    <sql id="officeAndChild">
+    	AND EXISTS (SELECT 1 FROM sys_office WHERE  type = '2' AND (id = #{sqlMap.ResoftFramework_user.office.id} OR parent_ids LIKE CONCAT(#{sqlMap.ResoftFramework_officeParentIds}||',%') AND id = ${sqlMap.ResoftFramework_officeColumnName}))
+    </sql>
+    <!-- 本部门 -->
+    <sql id="office">
+    	AND ${sqlMap.ResoftFramework_officeColumnName} = #{sqlMap.ResoftFramework_user.office.id}
+    </sql>
+    <!-- 明细 -->
+    <sql id="custom">
+    	OR EXISTS (SELECT 1 FROM sys_role_office ro123456, sys_office o123456 WHERE ro123456.office_id = o123456.id AND ro123456.role_id in 
+    	<foreach item="roleId" collection="sqlMap.ResoftFramework_roleIdList" open="(" separator="," close=")">
+	    	#{roleId}
+    	</foreach>
+    	AND (${sqlMap.ResoftFramework_companyColumnName} = ro123456.office_id OR ${sqlMap.ResoftFramework_officeColumnName} = ro123456.office_id)
+    	)
+    </sql>
+</mapper>

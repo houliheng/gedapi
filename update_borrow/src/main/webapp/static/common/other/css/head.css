@@ -1,0 +1,144 @@
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+
+#north{background:url(../images/bg_north.gif) repeat-y right 0 ;
+	background-color:#2295cb;
+}
+.head_bg {
+	background-image: url(../images/head_center2.gif);
+	background-repeat: repeat-x;
+
+}
+.head_left {
+	background-image: url(../images/head_left2.jpg);
+	background-repeat: no-repeat;
+	height: 82px;
+}
+.logo{
+  width:153px;
+  float:left;
+  margin-top:10px;
+  margin-left:10px;
+}
+
+.logo_txt{
+  float:left;
+  margin-top:15px;
+  margin-left:30px;
+  font:bold 30px/45px 黑体;
+  font-style:italic;
+  color:#0348a3;
+}
+
+.head_right {
+	background-image: url(../images/head_right2.jpg);
+	background-position:right top;
+	background-repeat: no-repeat;
+	
+	
+}
+.buttom_bg {
+	background-image: url(../images/button_bg.jpg);
+	background-repeat: no-repeat;
+	background-position: right;
+	height: 36px;
+}
+.buttom_bg td {
+	font-size: 12px;
+	color: #deedfe;
+	text-align: center;
+}
+.buttom_bg td a {
+	color: #DEEDFE;
+	text-decoration: none;
+}
+.buttom_bg td a:hover {
+	color: #DEEDFE;
+	text-decoration: underline;
+}
+.buttom_bg2 {
+	background-image: url(../images/button_bg2.jpg);
+	background-repeat: no-repeat;
+	background-position: right;
+	height: 36px;
+}
+.buttom_bg2 td {
+	font-size: 12px;
+	color: #deedfe;
+	text-align: center;
+}
+.buttom_bg2 td a {
+	color: #DEEDFE;
+	text-decoration: none;
+}
+.buttom_bg2 td a:hover {
+	color: #DEEDFE;
+	text-decoration: underline;
+}
+.welcome {
+	clear:both;
+	border-top:0px solid #005b13;
+	border-bottom:0px solid #3f8a05;
+	text-align: right;
+	line-height:23px;
+	padding-right: 10px;
+	font-size: 12px;
+	color: #000;
+	float:right;
+	width:700px; 
+}
+
+#user_option_navigator{float:right;padding-top:16px;}
+#user_option_navigator li{float:left;margin-right:10px;text-align:center;}
+#user_option_navigator img{display:block;margin:0 auto;}
+#user_option_navigator a{vertical-align:bottom;font-size:12px;color:#fff;text-decoration:none;display:block;text-align:center;}
+#user_option_navigator a:hover{color:#00547b}
+
+/******************************日程提醒CSS**************************************/
+#idScroller {
+	margin-top: 0px;
+	line-height:20px;
+	width:360px; 
+	height:20px; 
+	float:left;
+	overflow:hidden; 
+	display:none;
+}
+#idScroller ul{
+	width:100%;
+}
+#idScroller li{
+	width:100%;  
+	float:left; 
+	overflow:hidden; 
+	list-style:none;
+	text-align:left;
+	font-size: 12px;
+	color: #FFFFFF;
+}
+#cal {
+	margin-top: 0px;
+	line-height:20px;
+	width:60px; 
+	height:20px; 
+	overflow:hidden; 
+	float:left;
+	display:none;
+}
+#cal ul{
+	width:100%;
+}
+#cal li{
+	width:100%;  
+	float:left; 
+	overflow:hidden; 
+	list-style:none;
+	text-align:right;
+	font-size:12px;
+	font-weight: bold;
+	color: #FFFFFF;
+}

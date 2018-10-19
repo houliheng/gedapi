@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyChangeBankcard.dao.AccVideoPathDao">
+	<select id="findAccVideoPathQueryList" resultType="AccVideoPath">
+		SELECT
+		REGISTER_DATE AS "registerDate",
+		APPLY_NO AS "applyNo",
+		FILE_DIR AS
+		"fileDir",
+		FILE_NAME AS "fileName",
+		FILE_STORAGE_PATH AS
+		"fileStoragePath",
+		THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+		CREATE_BY AS "createBy1",
+		CREATE_DATE AS "createDate1"
+		FROM
+		ACC_VIDEO_PATH
+		WHERE APPLY_NO = #{applyNo}
+	</select>
+
+	<select id="findPictureAddressQueryList" resultType="java.lang.String">
+		SELECT
+		a.FILE_STORAGE_PATH AS "fileStoragePath"
+		from ACC_VIDEO_PATH a
+		WHERE
+		a.APPLY_NO = #{applyNo} and del_flag = '0'
+	</select>
+	<insert id="saveAccVideoPath">
+		INSERT INTO ACC_VIDEO_PATH(
+		REGISTER_DATE ,
+		APPLY_NO ,
+		FILE_DIR ,
+		FILE_NAME ,
+		FILE_STORAGE_PATH ,
+		THUMBNAIL_STORAGE_PATH,
+		CREATE_BY ,
+		DEL_FLAG,
+		CREATE_DATE
+		) VALUES (
+		cast(
+		#{registerDate} AS
+		DATE),
+		#{applyNo},
+		#{fileDir},
+		#{fileName},
+		#{fileStoragePath},
+		#{thumbnailStoragePath},
+		#{createBy1},
+		#{delFlag},
+		cast(#{createDate1} AS
+		DATETIME)
+		)
+	</insert>
+	<update id="deleteAccVideoPath">
+		UPDATE ACC_VIDEO_PATH SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE APPLY_NO = #{applyNo}
+	</update>
+</mapper>

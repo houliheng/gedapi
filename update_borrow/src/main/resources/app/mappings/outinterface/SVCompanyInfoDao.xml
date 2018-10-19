@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVCompanyInfoDao">
+
+	<sql id="sVCompanyInfoColumns">
+		a.id AS "id",
+		a.busi_reg_name AS "busiRegName",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.register_code AS
+		"registerCode",
+		a.organization_no AS "organizationNo",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.register_national_tax_no AS
+		"registerNationalTaxNo",
+		a.register_land_tax_no AS "registerLandTaxNo",
+		a.company_land_use AS "companyLandUse",
+		a.company_type AS
+		"companyType",
+		a.company_property AS "companyProperty",
+		a.company_status AS "companyStatus",
+		a.company_site AS "companySite",
+		a.corporation_name AS "corporationName",
+		a.corporation_card_id_no AS
+		"corporationCardIdNo",
+		a.corporation_mobile AS "corporationMobile",
+		a.register_capital AS "registerCapital",
+		a.found_date AS "foundDate",
+		a.reg_province AS "regProvince",
+		a.reg_city AS "regCity",
+		a.reg_distinct AS "regDistinct",
+		a.reg_details AS "regDetails",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS
+		"operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.is_addr_resi AS "isAddrResi",
+		a.core_business AS "coreBusiness",
+		a.curr_staff_num AS "currStaffNum",
+		a.operate_areas AS "operateAreas",
+		a.main_business AS "mainBusiness",
+		a.annual_turnover AS "annualTurnover",
+		a.special_operate_permit AS
+		"specialOperatePermit",
+		a.special_operate_start_date AS
+		"specialOperateStartDate",
+		a.special_operate_end_date AS
+		"specialOperateEndDate",
+		a.is_have_houses AS "isHaveHouses",
+		a.state_of_taxation AS "stateOfTaxation",
+		a.capital_structure_com AS
+		"capitalStructureCom",
+		a.create_date AS "createDate"
+	</sql>
+
+	<sql id="sVCompanyInfoJoins">
+	</sql>
+
+	<select id="get"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyInfo">
+		SELECT
+		<include refid="sVCompanyInfoColumns" />
+		FROM ift_sv_company_info a
+		<include refid="sVCompanyInfoJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyInfo">
+		SELECT
+		<include refid="sVCompanyInfoColumns" />
+		FROM ift_sv_company_info a
+		<include refid="sVCompanyInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM ift_sv_company_info a
+		<include refid="sVCompanyInfoJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyInfo">
+		SELECT
+		<include refid="sVCompanyInfoColumns" />
+		FROM ift_sv_company_info a
+		<include refid="sVCompanyInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_company_info(
+		id,
+		busi_reg_name,
+		un_soc_credit_no,
+		register_code,
+		organization_no,
+		busi_lic_reg_no,
+		register_national_tax_no,
+		register_land_tax_no,
+		company_land_use,
+		company_type,
+		company_property,
+		company_status,
+		company_site,
+		corporation_name,
+		corporation_card_id_no,
+		corporation_mobile,
+		register_capital,
+		found_date,
+		reg_province,
+		reg_city,
+		reg_distinct,
+		reg_details,
+		operate_province,
+		operate_city,
+		operate_distinct,
+		operate_details,
+		is_addr_resi,
+		core_business,
+		curr_staff_num,
+		operate_areas,
+		main_business,
+		annual_turnover,
+		special_operate_permit,
+		special_operate_start_date,
+		special_operate_end_date,
+		is_have_houses,
+		state_of_taxation,
+		capital_structure_com,
+		create_date
+		) VALUES
+		<foreach item="company" collection="list" index="index"
+			separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{company.busiRegName},
+			#{company.unSocCreditNo},
+			#{company.registerCode},
+			#{company.organizationNo},
+			#{company.busiLicRegNo},
+			#{company.registerNationalTaxNo},
+			#{company.registerLandTaxNo},
+			#{company.companyLandUse},
+			#{company.companyType},
+			#{company.companyProperty},
+			#{company.companyStatus},
+			#{company.companySite},
+			#{company.corporationName},
+			#{company.corporationCardIdNo},
+			#{company.corporationMobile},
+			#{company.registerCapital},
+			#{company.foundDate},
+			#{company.regProvince},
+			#{company.regCity},
+			#{company.regDistinct},
+			#{company.regDetails},
+			#{company.operateProvince},
+			#{company.operateCity},
+			#{company.operateDistinct},
+			#{company.operateDetails},
+			#{company.isAddrResi},
+			#{company.coreBusiness},
+			#{company.currStaffNum},
+			#{company.operateAreas},
+			#{company.mainBusiness},
+			#{company.annualTurnover},
+			#{company.specialOperatePermit},
+			#{company.specialOperateStartDate},
+			#{company.specialOperateEndDate},
+			#{company.isHaveHouses},
+			#{company.stateOfTaxation},
+			#{company.capitalStructureCom},
+			CURRENT_TIMESTAMP
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE ift_sv_company_info SET
+		busi_reg_name = #{busiRegName},
+		un_soc_credit_no = #{unSocCreditNo},
+		register_code = #{registerCode},
+		organization_no = #{organizationNo},
+		busi_lic_reg_no = #{busiLicRegNo},
+		register_national_tax_no = #{registerNationalTaxNo},
+		register_land_tax_no = #{registerLandTaxNo},
+		company_land_use = #{companyLandUse},
+		company_type = #{companyType},
+		company_property = #{companyProperty},
+		company_status = #{companyStatus},
+		company_site = #{companySite},
+		corporation_name = #{corporationName},
+		corporation_card_id_no = #{corporationCardIdNo},
+		corporation_mobile = #{corporationMobile},
+		register_capital = #{registerCapital},
+		found_date = #{foundDate},
+		reg_province = #{regProvince},
+		reg_city = #{regCity},
+		reg_distinct = #{regDistinct},
+		reg_details = #{regDetails},
+		operate_province = #{operateProvince},
+		operate_city = #{operateCity},
+		operate_distinct = #{operateDistinct},
+		operate_details = #{operateDetails},
+		is_addr_resi = #{isAddrResi},
+		core_business = #{coreBusiness},
+		curr_staff_num = #{currStaffNum},
+		operate_areas = #{operateAreas},
+		main_business = #{mainBusiness},
+		annual_turnover = #{annualTurnover},
+		special_operate_permit = #{specialOperatePermit},
+		special_operate_start_date = #{specialOperateStartDate},
+		special_operate_end_date = #{specialOperateEndDate},
+		is_have_houses = #{isHaveHouses},
+		state_of_taxation = #{stateOfTaxation},
+		capital_structure_com = #{capitalStructureCom},
+		create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM ift_sv_company_info
+		WHERE id = #{id}
+	</update>
+
+</mapper>

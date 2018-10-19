@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.accountingStream.dao.AccountingStreamDao">
+
+	<sql id="accountingStreamColumns">
+		a.data_dt AS "dataDt",
+		a.stream_no AS "streamNo",
+		a.capital_terrace_no AS "capitalTerraceNo",
+		a.contract_no AS "contractNo",
+		a.deduct_amount AS "deductAmount",
+		a.is_lock AS "isLock",
+		a.stream_time AS
+		"streamTime",
+		a.deduct_result AS "deductResult",
+		a.deduct_user_id AS
+		"deductUserId",
+		a.description AS "description"
+	</sql>
+
+	<sql id="accountingStreamJoins">
+	</sql>
+
+	<select id="get" resultType="AccountingStream">
+		SELECT
+		<include refid="accountingStreamColumns" />
+		FROM acc_deduct_result a
+		<include refid="accountingStreamJoins" />
+		WHERE a.contract_no = #{id}
+	</select>
+
+	<select id="findList" resultType="AccountingStream">
+		SELECT
+		cc.cust_name AS "custName",
+		b.contract_no AS "contractNo",
+		b.stream_No AS "streamNo",
+		a.DEDUCT_AMOUNT
+		AS "applyDeductAmount",
+		b.DEDUCT_AMOUNT AS "DeductAmountResult",
+		cc.ORG_LEVEL4 AS
+		"orgLevel4.id",
+		x. NAME AS "orgLevel4.name",
+		<!-- cc.ORG_LEVEL3 --> 
+		y.id AS
+		"orgLevel3.id",
+		y. NAME AS
+		"orgLevel3.name",
+		<!-- cc.ORG_LEVEL2 -->
+		z.id AS
+		"orgLevel2.id",
+		z. NAME AS "orgLevel2.name",
+		b.DEDUCT_RESULT AS
+		"deductResult",
+		b.STREAM_TIME AS
+		"streamTime",
+		a.stream_type as "streamType",
+		a.deduct_type as "deductType",
+		a.DEDUCT_CUST_ID as "deductCustId",
+		su.name as "deductCustName"
+		FROM acc_deduct_result b
+		inner JOIN acc_deduct_apply
+		a
+		ON
+		a.DEDUCT_APPLY_NO =
+		b.DEDUCT_APPLY_NO
+		inner JOIN acc_contract cc ON
+		b.contract_no
+		= cc.contract_no
+		left join
+		sys_office x on cc.ORG_LEVEL4 =
+		x.id
+		left join sys_office y on
+		<!-- cc.ORG_LEVEL3 = y.id -->
+		x.parent_id = Y.id  
+		left join sys_office
+		z on <!-- cc.ORG_LEVEL2 = z.id -->
+		y.parent_id=z.id
+		inner
+		JOIN sys_user su on su.id =
+		a.DEDUCT_CUST_ID
+		inner join
+		sys_office o on
+		cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.DEDUCT_RESULT in ('1','2')
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="streamType != null and streamType != ''">
+				and a.stream_type = #{streamType}
+			</if>
+			<if test="streamNo != null and streamNo != ''">
+				and b.stream_no like CONCAT('%',#{streamNo},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+				and cc.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+			<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+				and y.id = #{orgLevel3.id}<!-- cc.ORG_LEVEL3 = #{orgLevel3.id} -->
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+				and z.id = #{orgLevel2.id}<!-- cc.ORG_LEVEL2 = #{orgLevel2.id} -->
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' and streamEndTime !=null and streamEndTime != '' ">
+				and b.STREAM_TIME between #{streamStartTime} and
+				#{streamEndTime}
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' ">
+				and  <![CDATA[b.STREAM_TIME >= #{streamStartTime}]]> 
+			</if>
+			<if test="streamEndTime !=null and streamEndTime != '' ">
+				and  <![CDATA[b.STREAM_TIME <= #{streamEndTime}]]> 
+			</if>
+		</where>
+		order by b.STREAM_TIME desc ,b.stream_No desc
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_deduct_result b
+		inner JOIN acc_deduct_apply a
+		ON
+		a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		inner JOIN acc_contract cc ON
+		b.contract_no = cc.contract_no
+		left join
+		sys_office x on cc.ORG_LEVEL4 =
+		x.id
+		left join sys_office y on
+		x.parent_id = Y.id 
+		<!-- cc.ORG_LEVEL3 = y.id -->
+		left join
+		sys_office
+		z on <!-- cc.ORG_LEVEL2 = z.id -->
+		y.parent_id=z.id
+		inner
+		JOIN sys_user su on su.id =
+		a.DEDUCT_CUST_ID
+		inner join sys_office o on
+		cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.DEDUCT_RESULT in ('1','2')
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="streamType != null and streamType != ''">
+				and a.stream_type = #{streamType}
+			</if>
+			<if test="streamNo != null and streamNo != ''">
+				and b.stream_no like CONCAT('%',#{streamNo},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+				and cc.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+			 <if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+				and y.id= #{orgLevel3.id}<!-- cc.ORG_LEVEL3 = #{orgLevel3.id} -->
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+				and z.id= #{orgLevel2.id}<!-- cc.ORG_LEVEL2 = #{orgLevel2.id} -->
+			</if> 
+			<if test="streamStartTime !=null and streamStartTime != '' and streamEndTime !=null and streamEndTime != '' ">
+				and b.STREAM_TIME between #{streamStartTime} and
+				#{streamEndTime}
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' ">
+				and  <![CDATA[b.STREAM_TIME >= #{streamStartTime}]]> 
+			</if>
+			<if test="streamEndTime !=null and streamEndTime != '' ">
+				and  <![CDATA[b.STREAM_TIME <= #{streamEndTime}]]> 
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="AccountingStream">
+		SELECT
+		<include refid="accountingStreamColumns" />
+		FROM acc_deduct_result a
+		<include refid="accountingStreamJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_deduct_result(
+		data_dt,
+		stream_no,
+		capital_terrace_no,
+		contract_no,
+		deduct_amount,
+		period_num,
+		is_lock,
+		entry_time,
+		stream_time,
+		deduct_result,
+		deduct_user_id,
+		description
+		) VALUES (
+		#{dataDt},
+		#{streamNo},
+		#{capitalTerraceNo},
+		#{contractNo},
+		#{deductAmount},
+		#{periodNum},
+		#{isLock},
+		#{entryTime},
+		#{streamTime},
+		#{accountingStream},
+		#{deductUserId},
+		#{description}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE acc_deduct_result SET
+		data_dt = #{dataDt},
+		stream_no = #{streamNo},
+		capital_terrace_no = #{capitalTerraceNo},
+		contract_no = #{contractNo},
+		deduct_amount = #{deductAmount},
+		period_num = #{periodNum},
+		is_lock = #{isLock},
+		entry_time = #{entryTime},
+		stream_time = #{streamTime},
+		deduct_result = #{deductResult},
+		deduct_user_id = #{deductUserId},
+		description = #{description}
+		WHERE contract_no = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_deduct_result
+		WHERE contract_no = #{id}
+	</update>
+
+</mapper>

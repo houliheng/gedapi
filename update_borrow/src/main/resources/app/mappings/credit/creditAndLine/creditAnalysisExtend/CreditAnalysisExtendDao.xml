@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditAnalysisExtend.CreditAnalysisExtendDao">
+    
+	<sql id="creditAnalysisColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		
+		a.TURNOVER_PROFIT AS "turnoverProfit",
+		a.TF_BASIS AS "tfBasis",
+		a.STAFF_NUMBER_DESC AS "staffNumberDesc",
+		a.SND_BASIS AS "sndBasis",
+		a.SALE_PROFIT_DESC AS "saleProfitDesc",
+		a.SPD_BASIS AS "spdBasis",
+		a.COMPANY_DEBT AS "companyDebt",
+		a.CD_BASIS AS "cdBasis",
+		
+		
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditAnalysisJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditAnalysisExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_extend a
+		<include refid="creditAnalysisJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditAnalysisExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_extend a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_analysis_extend a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_analysis_extend(
+			id,
+			apply_no,
+			
+			TURNOVER_PROFIT,
+			TF_BASIS,
+			STAFF_NUMBER_DESC,
+			SND_BASIS,
+			SALE_PROFIT_DESC,
+			SPD_BASIS,
+			COMPANY_DEBT,
+			CD_BASIS,
+			
+			
+			CREATE_BY,
+			CREATE_DATE,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			
+			#{turnoverProfit},
+			#{tfBasis},
+			#{staffNumberDesc},
+			#{sndBasis},
+			#{saleProfitDesc},
+			#{spdBasis},
+			#{companyDebt},
+			#{cdBasis},
+			
+			
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_analysis_extend SET 	
+			apply_no = #{applyNo},
+			
+			TURNOVER_PROFIT = #{turnoverProfit},
+			TF_BASIS = #{tfBasis},
+			STAFF_NUMBER_DESC = #{staffNumberDesc},
+			SND_BASIS = #{sndBasis},
+			SALE_PROFIT_DESC = #{saleProfitDesc},
+			SPD_BASIS = #{spdBasis},
+			COMPANY_DEBT = #{companyDebt},
+			CD_BASIS = #{cdBasis},
+			
+			
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_analysis_extend
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCreditAnalysisExtendByApplyNo" resultType="CreditAnalysisExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_extend a
+		<where>
+				AND a.apply_no = #{applyNo}
+		</where>		
+	</select>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_credit_analysis_extend SET 	
+		<if test="turnoverProfit != null and turnoverProfit != ''">
+			TURNOVER_PROFIT = #{turnoverProfit},
+		</if>
+		<if test="tfBasis != null and tfBasis != ''">
+			TF_BASIS = #{tfBasis},
+		</if>
+		<if test="staffNumberDesc != null and staffNumberDesc != ''">
+			STAFF_NUMBER_DESC = #{staffNumberDesc},
+		</if>
+		<if test="sndBasis != null and sndBasis != ''">
+			SND_BASIS = #{sndBasis},
+		</if>
+		<if test="saleProfitDesc != null and saleProfitDesc != ''">
+			SALE_PROFIT_DESC = #{saleProfitDesc},
+		</if>
+		<if test="spdBasis != null and spdBasis != ''">
+			SPD_BASIS = #{spdBasis},
+		</if>
+		<if test="companyDebt != null and companyDebt != ''">
+			COMPANY_DEBT = #{companyDebt},
+		</if>
+		<if test="cdBasis != null and cdBasis != ''">
+			CD_BASIS = #{cdBasis},
+		</if>
+		
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+</mapper>

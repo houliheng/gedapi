@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.pricedRisk.dao.PricedRiskDao">
+
+	<!-- 获取用款企业成立年限 -->
+	<select id="getCompanyCreatePeriod" resultType="java.util.Map">
+		SELECT
+		a.APPLY_NO,
+		a.REGISTER_DATE as "registerDate",
+		b.FOUND_DATE as "foundDate"
+		FROM cre_apply_register a
+		LEFT JOIN cre_apply_relation c ON a.APPLY_NO = c.APPLY_NO
+		AND c.ROLE_TYPE = '5'
+		LEFT JOIN cre_company_info b ON c.CUST_ID = b.ID
+		where a.APPLY_NO = #{applyNo}
+	</select>
+	<!-- 获取信用卡额度使用占比 -->
+	<select id="getCreditCardUsageAccounting" resultType="java.util.Map">
+		SELECT
+		a.apply_no as "applyNo",
+		case when ALL_CREDIT_AMOUNT = 0 then 1 else (ifnull(a.ALL_USED_AMOUNT,0)/a.ALL_CREDIT_AMOUNT) end as "ratio"
+		FROM cre_credit_cust a
+		WHERE
+		a.del_flag = '0' AND a.apply_no = #{applyNo} and a.ROLE_TYPE = '1'
+		order by a.update_date desc limit 1
+	</select>
+	<!-- 获取有效流水总额 -->
+	<select id="getEffectiveFlowSum" resultType="java.util.Map">
+		select a.APPLY_NO as "applyNo",
+		ifnull(SUM(a.AVG_CURRE_VALID_LINE_AMOUNT),0) as "effectiveFlowSum"
+		from cre_credit_line_bank a
+		where a.del_flag = '0' and a.APPLY_NO = #{applyNo} and a.ROLE_TYPE in (1,4,5)
+	</select>
+	<!-- 获取批复合同金额 -->
+	<select id="getContractAccountInCheckApprove" resultType="java.util.Map">
+		SELECT
+		IFNULL(a.CONTRACT_AMOUNT,0) as "contractAccount"
+		FROM cre_check_approve a
+		WHERE a.apply_no = #{applyNo}
+		ORDER BY a.PROCESS_SEQUENCE DESC limit 1
+	</select>
+	<!-- 获取一年内本人查询次数 -->
+	<select id="getOwnQueryTimesInOneYear" resultType="java.util.Map">
+		SELECT ifnull(SUM(a.QUERY_NUM_YEAR),0) as "ownQueryTimesInOneYear"
+		FROM cre_credit_cust a where a.APPLY_NO = #{applyNo} and a.del_flag = '0' and a.ROLE_TYPE = '1'
+	</select>
+
+	<!-- 获取担保人资产覆盖率 -->
+	<select id="getGuaranteedAssetCoverage" resultType="java.util.Map">
+		select ifnull(a.GUARANTEE_ASSETS_OF_LOAN,0) as "guaranteedAssetCoverage"
+		from cre_credit_other_info a where a.APPLY_NO = #{applyNo}
+	</select>
+
+
+</mapper>

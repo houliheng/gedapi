@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+客户房产信息表    SQLMapper  CRE_CUST_HOUSING_INFO
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreCustHousingInfoDao">
+	<!-- 
+	 * @reqno:H1510080098
+	 * @date-designer:2015年10月21日-songmin
+	 * @date-author:2015年10月21日-songmin:CRE_信贷审批_申请录入_客户信息_基本信息【默认数据项】展现
+	 * @db-z:CRE_CUST_HOUSING_INFO:ID（id）、APPLY_ID（申请id）、HOUSE_TYPE（住房类型，字典类型：house_type）、HOUSE_AMOUNT（房贷金额/租金）、
+	 *				 HOUSE_PUR_TIME（购房时间）、HOUSE_PRICE（购房价格）、HOUSE_AREA（住房面积）、PRO_PERCENT（产权占比）、
+	 *				 LIVE_BEGIN_DATE（居住起始日期）、LOAD_PERIOD（贷款期限，购房的贷款期限）、MONTH_PRICE（月供）、BALANCE（贷款余额）、
+	 *				 ADDR_SYNC（房屋地址与现居地址是否一致）、HS_PROVINCE（地址省）、HS_CITY（地址市）、HS_DISTINCT（地址区）、HS_DETAILS（地址-详细）
+	 * @db-j:sys_dict:value、label
+	 -->
+	<select id="get" resultType="CreCustHousingInfo">
+		select 
+			a.ID id,
+			a.APPLY_ID applyId,
+			a.HOUSE_TYPE houseType,
+			b.LABEL houseTypeLabel,
+			a.HOUSE_AMOUNT houseAmount,
+			a.HOUSE_PUR_TIME housePurTime,
+			a.HOUSE_PRICE housePrice,
+			a.HOUSE_AREA houseArea,
+			a.PRO_PERCENT proPercent,
+			a.LIVE_BEGIN_DATE liveBeginDate,
+			a.LOAD_PERIOD loadPeriod,
+			a.MONTH_PRICE monthPrice,
+			a.BALANCE balance,
+			a.ADDR_SYNC addrSync,
+			c.LABEL addrSyncLabel,
+			a.HS_PROVINCE hsProvince,
+			a.HS_CITY hsCity,
+			a.HS_DISTINCT hsDistinct,
+			a.HS_DETAILS hsDetails
+		from CRE_CUST_HOUSING_INFO a 
+		left join sys_dict b on a.HOUSE_TYPE = b.VALUE and b.TYPE='HOUSE_TYPE'
+		left join sys_dict c on a.ADDR_SYNC = c.VALUE and c.TYPE='yes_no'
+		where APPLY_ID=#{applyId}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		新增房产信息
+	 *		新增数据项：ID、申请ID、住房类型、房贷金额/租金、购房时间、购房价格、住房面积、产权占比、居住起始日期、贷款期限，购房的贷款期限、月供、贷款余额、房屋地址与现居地址是否一致、地址省、地址市、地址区、地址-详细
+	 *
+	 * @db-z:CRE_CUST_HOUSING_INFO:ID（id）、APPLY_ID（申请id）、HOUSE_TYPE（住房类型，字典类型：house_type）、HOUSE_AMOUNT（房贷金额/租金）、
+	 *				 HOUSE_PUR_TIME（购房时间）、HOUSE_PRICE（购房价格）、HOUSE_AREA（住房面积）、PRO_PERCENT（产权占比）、
+	 *				 LIVE_BEGIN_DATE（居住起始日期）、LOAD_PERIOD（贷款期限，购房的贷款期限）、MONTH_PRICE（月供）、BALANCE（贷款余额）、
+	 *				 ADDR_SYNC（房屋地址与现居地址是否一致）、HS_PROVINCE（地址省）、HS_CITY（地址市）、HS_DISTINCT（地址区）、HS_DETAILS（地址-详细）
+	 -->
+	<insert id="insert">
+		insert into CRE_CUST_HOUSING_INFO(
+			ID,
+			APPLY_ID,
+			HOUSE_TYPE,
+			HOUSE_AMOUNT,
+			HOUSE_PUR_TIME,
+			HOUSE_PRICE,
+			HOUSE_AREA,
+			PRO_PERCENT,
+			LIVE_BEGIN_DATE,
+			LOAD_PERIOD,
+			MONTH_PRICE,
+			BALANCE,
+			ADDR_SYNC,
+			HS_PROVINCE,
+			HS_CITY,
+			HS_DISTINCT,
+			HS_DETAILS)
+		values(
+			#{id},
+			#{applyId},
+			#{houseType},
+			#{houseAmount},
+			#{housePurTime},
+			#{housePrice},
+			#{houseArea},
+			#{proPercent},
+			#{liveBeginDate},
+			#{loadPeriod},
+			#{monthPrice},
+			#{balance},
+			#{addrSync},
+			#{hsProvince},
+			#{hsCity},
+			#{hsDistinct},
+			#{hsDetails})
+	</insert>
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		根据ID修改房产信息
+	 *		修改数据项：住房类型、房贷金额/租金、购房时间、购房价格、住房面积、产权占比、居住起始日期、贷款期限，购房的贷款期限、月供、贷款余额、房屋地址与现居地址是否一致、地址省、地址市、地址区、地址-详细
+	 *
+	 * @db-z:CRE_CUST_HOUSING_INFO:HOUSE_TYPE（住房类型，字典类型：house_type）、HOUSE_AMOUNT（房贷金额/租金）、
+	 *				 HOUSE_PUR_TIME（购房时间）、HOUSE_PRICE（购房价格）、HOUSE_AREA（住房面积）、PRO_PERCENT（产权占比）、
+	 *				 LIVE_BEGIN_DATE（居住起始日期）、LOAD_PERIOD（贷款期限，购房的贷款期限）、MONTH_PRICE（月供）、BALANCE（贷款余额）、
+	 *				 ADDR_SYNC（房屋地址与现居地址是否一致）、HS_PROVINCE（地址省）、HS_CITY（地址市）、HS_DISTINCT（地址区）、HS_DETAILS（地址-详细）、ID
+	 -->
+	<update id="update">
+		update CRE_CUST_HOUSING_INFO 
+		set 
+			HOUSE_TYPE=#{houseType},
+			HOUSE_AMOUNT=#{houseAmount},
+			HOUSE_PUR_TIME=#{housePurTime},
+			HOUSE_PRICE=#{housePrice},
+			HOUSE_AREA=#{houseArea},
+			PRO_PERCENT=#{proPercent},
+			LIVE_BEGIN_DATE=#{liveBeginDate},
+			LOAD_PERIOD=#{loadPeriod},
+			MONTH_PRICE=#{monthPrice},
+			BALANCE=#{balance},
+			ADDR_SYNC=#{addrSync},
+			HS_PROVINCE=#{hsProvince},
+			HS_CITY=#{hsCity},
+			HS_DISTINCT=#{hsDistinct},
+			HS_DETAILS=#{hsDetails}
+		where ID=#{id}
+	</update>
+</mapper>

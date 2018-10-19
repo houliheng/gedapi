@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.bankAccountStatement.dao.MyDictDao">
+	<select id="findDictByLabel" parameterType="string" resultType="com.thinkgem.jeesite.modules.sys.entity.Dict">
+	  	SELECT id as id,
+		value  as value,
+		label as label,
+		type as type,
+		description as description,
+		sort as sort,
+		create_by as createBy,
+		create_date as createDate,
+		update_by as updateBy,
+		update_date as updateDate,
+		remarks as remarks,
+		sys_no as sysNo,
+		del_flag as delFlag
+		FROM sys_dict
+		WHERE label=#{label}
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_dict(
+		id,
+		value,
+		label,
+		type,
+		description,
+		sort,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		remarks,
+		<!--
+            /**
+             * @reqno:H1512180091
+             * @date-designer:20151223-sunna
+             * @date-author:20151223-sunna:字典管理增加所属系统。增加sys_no字段
+             */
+        -->
+		sys_no,
+		del_flag
+		) VALUES (
+		#{id},
+		#{value},
+		#{label},
+		#{type},
+		#{description},
+		#{sort},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{remarks},
+		<!--
+            /**
+             * @reqno:H1512180091
+             * @date-designer:20151223-sunna
+             * @date-author:20151223-sunna:字典管理增加所属系统。增加sys_no字段
+             */
+        -->
+		#{sysNo},
+		#{delFlag}
+		)
+	</insert>
+</mapper>

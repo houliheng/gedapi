@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gedApiUser.dao.CreGedapiUserDao">
+    
+	<sql id="creGedapiUserColumns">
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.role_type AS "roleType",
+		a.del_flag AS "delFlag",
+		a.cust_name AS "custName",
+		a.phone AS "phone",
+		a.id_num AS "idNum",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.ged_number AS "gedNumber"
+	</sql>
+	
+	<sql id="creGedapiUserJoins">
+	</sql>
+    <!--根据custName 查询冠易贷证号信息   -->
+
+	<select id="queryGedApiUserByCustName" resultType="CreGedapiUser">
+		SELECT
+		<include refid="creGedapiUserColumns"/>
+		FROM cre_gedapi_user a
+		<include refid="creGedapiUserJoins"/>
+		WHERE a.cust_id = #{custId}
+	</select>
+
+	<!--根据冠易贷账号删除信息-->
+	<delete id="deleteGedapiUserByGedNumber" >
+		 delete from cre_gedapi_user where ged_number =  #{gedNumber}
+
+	</delete>
+
+	<select id="get" resultType="CreGedapiUser">
+		SELECT 
+			<include refid="creGedapiUserColumns"/>
+		FROM cre_gedapi_user a
+		<include refid="creGedapiUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreGedapiUser">
+		SELECT 
+			<include refid="creGedapiUserColumns"/>
+		FROM cre_gedapi_user a
+		<include refid="creGedapiUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_gedapi_user a
+		<include refid="creGedapiUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreGedapiUser">
+		SELECT 
+			<include refid="creGedapiUserColumns"/>
+		FROM cre_gedapi_user a
+		<include refid="creGedapiUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_gedapi_user(
+			id,
+			cust_id,
+			role_type,
+			del_flag,
+			cust_name,
+			phone,
+			id_num,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			ged_number
+		) VALUES (
+			#{id},
+			#{custId},
+			#{roleType},
+			#{delFlag},
+			#{custName},
+			#{phone},
+			#{idNum},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{gedNumber}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_gedapi_user SET 	
+			cust_id = #{custId},
+			role_type = #{roleType},
+			cust_name = #{custName},
+			phone = #{phone},
+			id_num = #{idNum},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			ged_number = #{gedNumber}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_gedapi_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+
+
+</mapper>

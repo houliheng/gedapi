@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.videoDir.dao.VideoDirDao">
+    
+	<sql id="videoDirColumns">
+		a.id AS "id",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.file_dir AS "fileDir",
+		a.type AS "type",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="videoDirJoins">
+	</sql>
+    
+	<select id="get" resultType="VideoDir">
+		SELECT 
+			<include refid="videoDirColumns"/>
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="VideoDir">
+		SELECT 
+			<include refid="videoDirColumns"/>
+			,case when par.PARENT_ID is null then 'false' else 'true' end as haveChildNode
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+			left join (select PARENT_ID, count(PARENT_ID) as num
+			  from cre_video_dir 
+			  where del_flag = #{DEL_FLAG_NORMAL} 
+			 group by PARENT_ID) par
+			on par.PARENT_ID = a.id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+			<if test="id != null and id != ''">
+				AND (a.parent_Id = #{id}
+				OR a.id = #{id})
+			</if>
+		</where>
+		ORDER BY a.sort
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{name}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="VideoDir">
+		SELECT 
+			<include refid="videoDirColumns"/>
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+			<if test="id != null and id != ''">
+				AND (a.parent_Id = #{id}
+				OR a.id = #{id})
+			</if>
+		</where>		
+		ORDER BY a.sort
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_video_dir(
+			id,
+			parent_id,
+			parent_ids,
+			name,
+			sort,
+			file_dir,
+			type,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{parent.id},
+			#{parentIds},
+			#{name},
+			#{sort},
+			#{fileDir},
+			#{type},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_video_dir SET 	
+			parent_id = #{parent.id},
+			name = #{name},
+			sort = #{sort},
+			file_dir = #{fileDir},
+			type = #{type}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_video_dir SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findVideoByParentIdsLike" resultType="VideoDir">
+		SELECT
+			<include refid="videoDirColumns"/>
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.parent_ids LIKE #{parentIds} AND a.type = #{type}
+		ORDER BY a.sort
+	</select>
+	<select id="findByParentIdsLike" resultType="VideoDir">
+		SELECT
+			<include refid="videoDirColumns"/>
+			,case when par.PARENT_ID is null then 'false' else 'true' end as haveChildNode
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		left join (select PARENT_ID, count(PARENT_ID) as num
+					  from cre_video_dir 
+					  where del_flag = #{DEL_FLAG_NORMAL} 
+					 group by PARENT_ID) par
+			on par.PARENT_ID = a.id
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.type = #{type}
+		ORDER BY a.sort
+	</select>
+</mapper>

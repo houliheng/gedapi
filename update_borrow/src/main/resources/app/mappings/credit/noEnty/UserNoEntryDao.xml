@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.noEntry.dao.UserNoEntryDao">
+    
+	<sql id="userNoEntryColumns">
+		a.id AS "id",
+		a.user_id AS "user.id",
+		a.user_id AS "userId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		su.name AS "user.name",
+		su.login_name AS "user.loginName",
+		so.name AS "user.office.name"
+	</sql>
+	
+	<sql id="userNoEntryJoins">
+		LEFT JOIN sys_user su ON su.id = a.user_id
+		LEFT JOIN sys_office so ON so.id = su.office_id
+	</sql>
+    
+	<select id="get" resultType="UserNoEntry">
+		SELECT 
+			<include refid="userNoEntryColumns"/>
+		FROM cre_user_no_entry a
+		<include refid="userNoEntryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="UserNoEntry">
+		SELECT 
+			<include refid="userNoEntryColumns"/>
+		FROM cre_user_no_entry a
+		<include refid="userNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+			<if test="user != null and user.loginName != null and user.loginName != ''">
+				AND su.login_name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{user.loginName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>			
+			<if test="user != null and user.name != null and user.name != ''">
+				AND su.name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{user.name}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="user != null and user.office != null and user.office.id != null and user.office.id != ''">
+				AND (
+					so.id = #{user.office.id}
+					OR so.parent_ids LIKE CONCAT('%', #{user.office.id}, ',%')
+				)
+			</if>			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="UserNoEntry">
+		SELECT 
+			<include refid="userNoEntryColumns"/>
+		FROM cre_user_no_entry a
+		<include refid="userNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_user_no_entry(
+			id,
+			user_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{userId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_user_no_entry SET 	
+			user_id = #{user.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_user_no_entry SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 
+	 * @reqno: H1512260024
+	 * @date-designer:2016年01月13日-lirongchao
+	 * @db-z : cre_user_no_entry : id
+	 * @date-author:2016年01月13日-lirongchao:根据id批量删除人员禁件列表	
+	 -->
+	<update id="batchDelete">
+		DELETE FROM  cre_user_no_entry 
+		WHERE id in
+		<foreach item="idList" collection="list" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>	
+	</update>
+	
+	<select id="findListByUserId" resultType="UserNoEntry">
+		SELECT 
+			<include refid="userNoEntryColumns"/>
+		FROM cre_user_no_entry a
+		<include refid="userNoEntryJoins"/>
+		<where>
+			a.del_flag = '0'
+			AND a.USER_ID = #{userId}		
+		</where>
+	</select>
+	
+</mapper>

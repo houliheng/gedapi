@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditViewBook.dao.creditOtherInfo.CreditOtherInfoDao">
+    
+	<sql id="creditOtherInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.couple_assets_of_loan AS "coupleAssetsOfLoan",
+		a.guarantee_assets_of_loan AS "guaranteeAssetsOfLoan",
+		a.last_year_stock_change AS "lastYearStockChange",
+		a.pay_tax_status AS "payTaxStatus",
+		a.management_fee_status AS "managementFeeStatus",
+		a.power_fee_status AS "powerFeeStatus",
+		a.main_man_of_stock AS "mainManOfStock",
+		a.capital_contribution_period AS "capitalContributionPeriod",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.land_end_date AS "landEndDate"
+	</sql>
+	
+	<sql id="creditOtherInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditOtherInfo">
+		SELECT 
+			<include refid="creditOtherInfoColumns"/>
+		FROM cre_credit_other_info a
+		<include refid="creditOtherInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditOtherInfo">
+		SELECT 
+			<include refid="creditOtherInfoColumns"/>
+		FROM cre_credit_other_info a
+		<include refid="creditOtherInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_other_info a
+		<include refid="creditOtherInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditOtherInfo">
+		SELECT 
+			<include refid="creditOtherInfoColumns"/>
+		FROM cre_credit_other_info a
+		<include refid="creditOtherInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_other_info(
+			id,
+			apply_no,
+			couple_assets_of_loan,
+			guarantee_assets_of_loan,
+			last_year_stock_change,
+			pay_tax_status,
+			management_fee_status,
+			power_fee_status,
+			main_man_of_stock,
+			capital_contribution_period, 
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			land_end_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{coupleAssetsOfLoan},
+			#{guaranteeAssetsOfLoan},
+			#{lastYearStockChange},
+			#{payTaxStatus},
+			#{managementFeeStatus},
+			#{powerFeeStatus},
+			#{mainManOfStock},
+			#{capitalContributionPeriod},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{landEndDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_other_info SET 	
+			apply_no = #{applyNo},
+			couple_assets_of_loan = #{coupleAssetsOfLoan},
+			guarantee_assets_of_loan = #{guaranteeAssetsOfLoan},
+			last_year_stock_change = #{lastYearStockChange},
+			pay_tax_status = #{payTaxStatus},
+			management_fee_status = #{managementFeeStatus},
+			power_fee_status = #{powerFeeStatus},
+			main_man_of_stock = #{mainManOfStock},
+			land_end_date = #{landEndDate},
+			capital_contribution_period = #{capitalContributionPeriod},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_other_info
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCreditOtherInfoByApplyNo" resultType="CreditOtherInfo">
+		SELECT 
+			<include refid="creditOtherInfoColumns"/>
+		FROM cre_credit_other_info a
+		<where>
+				AND a.apply_no = #{applyNo}
+		</where>		
+	</select>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_credit_other_info SET 	
+			apply_no = #{applyNo},
+			couple_assets_of_loan = #{coupleAssetsOfLoan},
+			guarantee_assets_of_loan = #{guaranteeAssetsOfLoan},
+			last_year_stock_change = #{lastYearStockChange},
+			pay_tax_status = #{payTaxStatus},
+			management_fee_status = #{managementFeeStatus},
+			power_fee_status = #{powerFeeStatus},
+			main_man_of_stock = #{mainManOfStock},
+			capital_contribution_period = #{capitalContributionPeriod},
+			land_end_date = #{landEndDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+</mapper>

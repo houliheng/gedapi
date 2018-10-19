@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.applyExtend.dao.ApplyExtendDao">
+
+	<sql id="applyExtendColumns">
+		a.id as "id",
+		a.contract_no AS "contractNo",
+		a.extend_amount
+		AS "extendAmount",
+		a.extend_fee_rate1 AS "extendFeeRate1",
+		a.extend_fee_rate2 AS "extendFeeRate2",
+		a.extend_margin AS
+		"extendMargin",
+		a.extend_start_date AS "extendStartDate",
+		a.extend_end_date AS "extendEndDate",
+		a.extend_service_fee AS
+		"extendServiceFee",
+		ifnull(a.extend_period,'0') as "extendPeriod",
+		a.extend_interest AS "extendInterest",
+		a.extend_fee_percent AS
+		"extendFeePercent",
+		a.extend_fee AS "extendFee",
+		a.extend_all_amount AS
+		"extendAllAmount",
+		a.extend_rerson AS "extendRerson",
+		a.apply_speciall
+		AS "applySpeciall",
+		a.extend_apply_status AS "extendApplyStatus"
+	</sql>
+
+	<sql id="applyExtendJoins">
+	</sql>
+
+	<select id="get" resultType="ApplyExtend">
+		SELECT
+		<include refid="applyExtendColumns" />
+		FROM pl_apply_extend a
+		<include refid="applyExtendJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findApplyExtendByContractNo" resultType="ApplyExtend">
+		SELECT
+		a.id as "id",
+		a.contract_no AS "contractNo",
+		a.extend_amount
+		AS
+		"extendAmount",
+		a.extend_fee_rate1 AS "extendFeeRate1",
+		a.extend_fee_rate2 AS "extendFeeRate2",
+		a.extend_margin AS
+		"extendMargin",
+		a.extend_start_date AS "extendStartDate",
+		a.extend_end_date AS "extendEndDate",
+		a.extend_service_fee AS
+		"extendServiceFee",
+		a.extend_period as "extendPeriod",
+		a.extend_interest AS "extendInterest",
+		a.extend_fee_percent AS
+		"extendFeePercent",
+		a.extend_fee AS "extendFee",
+		a.extend_all_amount AS
+		"extendAllAmount",
+		a.extend_rerson AS "extendRerson",
+		a.apply_speciall
+		AS "applySpeciall",
+		a.extend_apply_status AS "extendApplyStatus"
+		FROM
+		pl_apply_extend a
+		<include refid="applyExtendJoins" />
+		WHERE a.contract_no = #{contractNo} and a.extend_apply_status in
+		('1','2')
+	</select>
+
+	<select id="findList" resultType="ApplyExtend">
+		SELECT
+		c.operate_org_name AS "operateOrgName",
+		c.cust_name AS
+		"custName",
+		c.contract_no AS "contractNo",
+		c.contract_amount AS
+		"contractAmount",
+		c.con_start_date AS "conStartDate",
+		c.con_end_date AS
+		"conEndDate",
+		c.appro_period_value AS "approPeriodValue",
+		ifnull(a.extend_period,'0') as "extendPeriod",
+		a.id as "id",
+		a.extend_apply_status AS
+		"extendApplyStatus"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract
+		c
+		INNER
+		JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status
+		s on c.CONTRACT_NO = s.CONTRACT_NO
+		left
+		JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on c.OPERATE_ORG_ID = o.id
+		<if test="flag == 1">
+			inner join pl_apply_extend a on c.contract_no =
+			a.contract_no
+		</if>
+		<if test="flag == 0">
+			left join pl_apply_extend a on c.contract_no =
+			a.contract_no
+		</if>
+		<where>
+			and s.REPAY_CONTRACT_STATUS in('0600','0800') and
+			(c.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="flag == 0">
+				AND ( NOT EXISTS (
+				SELECT
+				b.CONTRACT_NO
+				FROM
+				pl_apply_extend
+				b
+				WHERE
+				c.contract_no = b.contract_no
+				) or a.EXTEND_APPLY_STATUS = '1')
+			</if>
+			<if test="flag == 1">
+				and a.EXTEND_APPLY_STATUS != '1'
+			</if>
+			<if
+				test="company != null and company != '' and company.id != null and company.id != ''">
+				AND c.OPERATE_ORG_ID = #{company.id}
+				<!-- like -->
+				<!-- concat('%',#{operateOrgName},'%') -->
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND c.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="extendApplyStatus != null and extendApplyStatus != ''">
+				AND a.extend_apply_status = #{extendApplyStatus}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract
+		c INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status
+		s on c.CONTRACT_NO = s.CONTRACT_NO
+		left join pl_apply_extend a
+		on
+		c.contract_no = a.contract_no
+		<where>
+			<if test="flag == 0">
+				and NOT EXISTS (select b.CONTRACT_NO from pl_apply_extend
+				b WHERE
+				c.contract_no = b.contract_no )
+			</if>
+			<if test="operateOrgName != null and operateOrgName != ''">
+				AND c.operate_org_name like
+				concat('%',#{operateOrgName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND c.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="extendApplyStatus != null and extendApplyStatus != ''">
+				AND a.extend_apply_status = #{extendApplyStatus}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyExtend">
+		SELECT
+		<include refid="applyExtendColumns" />
+		FROM pl_apply_extend a
+		<include refid="applyExtendJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_apply_extend(
+		id,
+		contract_no,
+		extend_amount,
+		extend_fee_rate1,
+		extend_fee_rate2,
+		extend_margin,
+		extend_start_date,
+		extend_end_date,
+		extend_service_fee,
+		extend_period,
+		extend_interest,
+		extend_fee_percent,
+		extend_fee,
+		extend_all_amount,
+		extend_rerson,
+		apply_speciall,
+		extend_apply_status
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{extendAmount},
+		#{extendFeeRate1},
+		#{extendFeeRate2},
+		#{extendMargin},
+		#{extendStartDate},
+		#{extendEndDate},
+		#{extendServiceFee},
+		#{extendPeriod},
+		#{extendInterest},
+		#{extendFeePercent},
+		#{extendFee},
+		#{extendAllAmount},
+		#{extendRerson},
+		#{applySpeciall},
+		#{extendApplyStatus}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_apply_extend SET
+		contract_no =
+		#{contractNo},
+		extend_amount = #{extendAmount},
+		extend_fee_rate1 =
+		#{extendFeeRate1},
+		extend_fee_rate2 = #{extendFeeRate2},
+		extend_margin =
+		#{extendMargin},
+		extend_start_date = #{extendStartDate},
+		extend_end_date = #{extendEndDate},
+		extend_service_fee =
+		#{extendServiceFee},
+		extend_period = #{extendPeriod},
+		extend_interest =
+		#{extendInterest},
+		extend_fee_percent = #{extendFeePercent},
+		extend_fee
+		= #{extendFee},
+		extend_all_amount = #{extendAllAmount},
+		extend_rerson =
+		#{extendRerson},
+		apply_speciall = #{applySpeciall},
+		extend_apply_status
+		= #{extendApplyStatus}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_apply_extend
+		WHERE id = #{id}
+	</update>
+
+	<select id="validateApplyExtend" resultType="ApplyExtend">
+		select
+		<include refid="applyExtendColumns" />
+		from pl_apply_extend a WHERE a.contract_no =
+		#{contractNo} and
+		a.EXTEND_APPLY_STATUS in ('2','3')
+	</select>
+
+	<update id="updateApplyStatus">
+		update pl_apply_extend set
+		EXTEND_APPLY_STATUS =
+		#{extendApplyStatus}
+		<if test="extendPeriod != null and extendPeriod != ''">
+			,extend_period = #{extendPeriod}
+		</if>
+		where id = #{id}
+	</update>
+
+	<update id="updateProcInsIdByBusinessId">
+		UPDATE pl_apply_extend
+		SET proc_ins_id = #{procInsId}
+		WHERE
+		id = #{id}
+	</update>
+
+</mapper>

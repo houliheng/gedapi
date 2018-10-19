@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRelation.dao.ApplyRelationDao">
+
+	<sql id="applyRelationColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS
+		"roleType",
+		a.relation_for_apply AS "relationForApply",
+		a.cust_id AS
+		"custId",
+		a.create_by AS "createBy.id",
+		a.cust_name AS "custName",
+		a.description AS "description",
+		a.del_flag as "delFlag",
+		a.create_date AS "createDate",
+		a.mate_to_guarantor as "mateToGuarantor",
+		a.SV_FLAG AS svFlag,
+		a.IS_CONFIRM AS "isConfirm"
+	</sql>
+
+	<sql id="applyRelationJoins">
+	</sql>
+
+	<select id="get" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<select id="getByApplyNoAndRoleType" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		WHERE a.APPLY_NO = #{applyNo}
+			and a.ROLE_TYPE = #{roleType}
+	</select>
+
+
+	<select id="getListByApplyNo" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		WHERE a.APPLY_NO = #{applyNo}
+		and a.ROLE_TYPE = #{roleType}
+	</select>
+
+	
+	<select id="getMainAndGuarantor" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		WHERE a.APPLY_NO = #{applyNo}
+			and a.ROLE_TYPE in (#{roleType1},#{roleType2})
+	</select>
+	
+	<!-- 根据客户ID查询关系表信息 -->
+	<select id="getRelationByParams" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.CUST_ID = #{custId}
+	</select>
+
+	<!-- 根据申请编号和客户ID查询关系表信息 -->
+	<select id="findApplyRelationByApplyNo" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.apply_no = #{applyNo}
+		<if test="custId != null and custId != '' ">
+		 AND a.CUST_ID = #{custId} 
+		</if>
+		<if test="roleType != null and roleType != '' ">
+		 and a.role_type = #{roleType} 
+		</if>
+		 and a.del_flag = '0'
+	</select>
+
+	<select id="findList" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			<if test="custId != null and custId != ''">
+				AND a.cust_id = #{custId}
+			</if>
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+			<if test="relationForApply != null and relationForApply != ''">
+			AND a.relation_for_apply = #{relationForApply}
+		    </if>
+		</where>
+	</select>
+	
+
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+			<if test="relationForApply != null and relationForApply != ''">
+				AND a.relation_for_apply = #{relationForApply}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_apply_relation(
+		id,
+		apply_no,
+		role_type,
+		relation_for_apply,
+		mate_to_guarantor,
+		cust_id,
+		create_by,
+		cust_name,
+		description,
+		create_date,
+		del_flag,
+		sv_flag
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{roleType},
+		#{relationForApply},
+		#{mateToGuarantor},
+		#{custId},
+		#{createBy.id},
+		#{custName},
+		#{description},
+		#{createDate},
+		#{delFlag},
+		#{svFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_apply_relation SET
+		apply_no = #{applyNo},
+		role_type = #{roleType},
+		mate_to_guarantor = #{mateToGuarantor},
+		relation_for_apply = #{relationForApply},
+		cust_id = #{custId},
+		cust_name = #{custName},
+		<if test="delFlag != null and delFlag != ''">
+			del_flag = #{delFlag},
+		</if>
+		<if test="svFlag != null and svFlag != ''">
+			sv_flag = #{svFlag},
+		</if>
+		description = #{description}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateByRegisterAndCust">
+		UPDATE cre_apply_relation SET
+		apply_no = #{applyNo},
+		role_type = #{roleType},
+		cust_id = #{custId},
+		cust_name = #{custName},
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_apply_relation
+		WHERE id = #{id}
+	</update>
+
+	<select id="getCheckCoupleDoubtfulByApplyNo" resultType="ApplyRelation">
+		select id,apply_no,cust_name,role_type,cust_id from cre_apply_relation where
+		apply_no = #{applyNo} AND del_flag = '0' and role_type in ('1','3')
+		order by role_type,CREATE_DATE
+	</select>
+
+	<select id="getCompanyListByApplyNo" resultType="ApplyRelation">
+		select id,apply_no,cust_name,role_type,cust_id from cre_apply_relation where
+		apply_no = #{applyNo} AND del_flag = '0' and role_type in ('5','9')
+		order by role_type,CREATE_DATE
+	</select>
+
+	<select id="getCheckWebByApplyNo" resultType="ApplyRelation">
+		select id,apply_no,cust_name,role_type,cust_id from cre_apply_relation where
+		apply_no = #{applyNo} AND del_flag = '0' and ROLE_TYPE not in ('4','8')
+	</select>
+
+	<select id="findByApplyNoAndRoleTypeList" resultType="ApplyRelation">
+		select id,apply_no,cust_name,role_type,cust_id from cre_apply_relation
+		<where>
+			del_flag = '0'
+				AND apply_no = #{applyNo}
+			<if test="roleTypeList != null and roleTypeList != ''">
+				AND role_type in
+				<foreach item="roleTypeList" collection="roleTypeList" open="(" close=")" separator=",">
+					#{roleTypeList}
+				</foreach>
+			</if>
+		</where>
+
+	</select>
+
+	<select id="getRelationCount" resultType="long">
+		SELECT count(*)
+		FROM
+		(SELECT a.id
+		FROM
+		cre_apply_relation a
+		INNER JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		WHERE a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		AND b.DEL_FLAG = '0'
+		limit 1
+		) tmp
+	</select>
+
+	<select id="getCompanyRelationCount" resultType="long">
+		SELECT count(1)
+		FROM
+		cre_apply_relation a
+		INNER JOIN cre_company_info b ON a.CUST_ID = b.ID
+		WHERE a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		AND b.DEL_FLAG = '0'
+	</select>
+
+	<select id="findCustNameByRoleType" resultType="java.util.HashMap">
+		SELECT a.cust_id as custId, a.cust_name as custName
+		FROM
+		cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+		</where>
+	</select>
+
+	<select id="findCustNameByRoleTypeOnCreditCompany" resultType="CreditCompany">
+		SELECT a.cust_id as companyId, a.cust_name as companyName
+		FROM
+		cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+		</where>
+	</select>
+
+	<select id="findCustNameByRoleTypeOnCreditAssets" resultType="CreditAssets">
+		SELECT a.cust_id as "assetsOwnerId", a.cust_name as "assetsOwnerName"
+		FROM
+		cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		<where>
+			a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+		</where>
+	</select>
+
+	<select id="getRelationMatchByApplyNo" resultType="ApplyRelation">
+		select a.APPLY_NO,
+		c.CONTRACT_NO as "applyLoanStatus.contractNo",
+		a.ROLE_TYPE,
+		a.CUST_NAME,
+		b.APPLY_NO as "matchApplyNo",
+		b.ROLE_TYPE as "matchRoleType",
+		b.CUST_NAME as "matchCustName"
+		from cre_apply_relation a
+		INNER join
+		cre_apply_relation b on a.CUST_ID = b.CUST_ID and a.APPLY_NO != b.APPLY_NO
+		<!-- INNER JOIN cre_contract t ON t.APPLY_NO = b.APPLY_NO AND t.CUST_ID=b.CUST_ID
+		INNER join cre_apply_loan_status c on c.CONTRACT_NO=t.CONTRACT_NO -->
+		INNER join cre_apply_loan_status c on b.APPLY_NO = c.APPLY_NO 
+		where a.apply_no = #{applyNo} and c.LOAN_STATUS='22'
+	</select>
+
+<!-- 	<select id="findByApplyNoAndRoleTypeListAll" resultType="ApplyRelation"> -->
+<!-- 		select id,apply_no,cust_name,role_type,cust_id from cre_apply_relation -->
+<!-- 		<where> -->
+<!-- 			AND apply_no = #{applyNo} -->
+<!-- 			<if test="roleTypeList != null and roleTypeList != ''"> -->
+<!-- 				AND role_type in -->
+<!-- 				<foreach item="roleTypeList" collection="roleTypeList" open="(" close=")" separator=","> -->
+<!-- 					#{roleTypeList} -->
+<!-- 				</foreach> -->
+<!-- 			</if> -->
+<!-- 		</where> -->
+
+<!-- 	</select> -->
+	
+	<update id="updateApplyRelationByApplyNoAndCustId">
+		UPDATE cre_apply_relation SET
+		DEL_FLAG = #{delFlag}
+		<if test="mateToGuarantor != null and mateToGuarantor != '' ">
+		,mate_to_guarantor = #{mateToGuarantor}
+		</if>
+		WHERE apply_no = #{applyNo}
+		<if test="custId != null and custId != '' ">
+			and CUST_ID = #{custId}
+		</if>
+		<if test="roleType != null and roleType != '' ">
+			and ROLE_TYPE = #{roleType}
+		</if>
+	</update>
+	
+	<update id="updateIsPush">
+		UPDATE cre_apply_relation SET
+			IS_PUSH = '0'
+		WHERE APPLY_NO = #{applyNo} AND ROLE_TYPE = '3' AND RELATION_FOR_APPLY = '1'
+	</update>
+
+	<select id="findUnionList" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.apply_no = #{applyNo} and a.cust_id != #{custId} and a.role_type in ('1','3') and a.del_flag='0'
+	</select>
+	
+	
+	<select id="getApplyRelation" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.apply_no = #{applyNo} and a.cust_id  = #{custId} and a.role_type in ('3','6')  and a.del_flag='0'
+	</select>
+	
+	<select id="getRoleType" resultType="String">
+		SELECT
+		a.role_type
+		FROM cre_apply_relation a
+			left join cre_cust_info b on a.cust_id = b.id
+		WHERE a.apply_no = #{applyNo}  and b.ID_NUM=#{unSocCreditNo}
+		  and a.del_flag='0'
+		  and a.role_type !='4' and a.role_type !='7'
+	</select>
+	
+	
+	<select id="guaranteeOpen" resultType="String">
+		SELECT
+			c.id
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c ON b.UN_SOC_CREDIT_NO = c.social_credit_code
+		WHERE
+			a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = '8'
+		and c.status='7'
+	</select>
+	
+	<select id="companyOpens" resultType="String">
+		SELECT
+			c.id
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c ON b.UN_SOC_CREDIT_NO = c.social_credit_code
+		WHERE
+			a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		and c.status='7'
+	</select>
+	
+	<select id="peopleOpen" resultType="String">
+		SELECT
+			c.id
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c ON b.MOBILE_NUM = c.LEGAL_PER_PHONE
+		WHERE
+			a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		c.status='4'
+	</select>
+	
+	<select id="getCodeByApply" resultType="String">
+		SELECT
+		a.UN_SOC_CREDIT_NO
+		FROM cre_apply_relation a
+			left join cre_company_info b on a.cust_id = b.id
+		WHERE a.apply_no = #{applyNo}  
+		  and a.del_flag='0'
+		  and a.role_type ='5' 
+	</select>
+	
+	
+	
+	<select id="getCompanyRoleType" resultType="String">
+		SELECT
+		a.role_type
+		FROM cre_apply_relation a
+			left join cre_company_info b on a.cust_id = b.id
+		WHERE a.apply_no = #{applyNo}  and b.UN_SOC_CREDIT_NO=#{unSocCreditNo}
+		  and a.del_flag='0'
+	</select>
+	
+	<select id="getDanBaoCompanyRoleType" resultType="String">
+		SELECT
+		a.role_type
+		FROM cre_apply_relation a
+			left join cre_company_info b on a.cust_id = b.id
+		WHERE a.apply_no = #{applyNo}  and b.UN_SOC_CREDIT_NO=#{unSocCreditNo}
+		  and a.del_flag='0'
+	</select>
+	
+	<select id="getRoleByPhone" resultType="String">
+		SELECT
+		a.role_type
+		FROM cre_apply_relation a
+			left join cre_cust_info b on a.cust_id = b.id
+		WHERE a.apply_no = #{applyNo}  and b.MOBILE_NUM=#{registerPhone}
+		  and a.del_flag='0'  and a.role_type=#{roleType}
+	</select>
+	
+	<select id="getBatchRelationByCustId" resultType="ApplyRelation">
+		SELECT
+			<include refid="applyRelationColumns" />
+		FROM
+			cre_apply_relation a
+		WHERE
+			a.CUST_ID =   #{companyId} 
+		AND a.ROLE_TYPE = '9'
+		AND a.DEL_FLAG = '0'
+		AND a.APPLY_NO = #{applyNo}
+	</select>
+	
+	
+	<select id="getBatchRelationByCustIdAndRoleType" resultType="ApplyRelation">
+		SELECT
+			<include refid="applyRelationColumns" />
+		FROM
+			cre_apply_relation a
+		WHERE
+			a.CUST_ID = #{custId}
+			<if test="roleType != null and roleType != ''">
+			AND a.ROLE_TYPE = #{roleType}
+			</if>
+		AND a.DEL_FLAG = '0'
+		AND a.APPLY_NO = #{applyNo}
+	</select>
+	
+	
+	<select id="getGEDguarantorInfo" resultType="com.resoft.outinterface.rest.newged.entity.GedPushGuaranteeRequest">
+		SELECT
+			"1" AS "guarantorType",
+			b.MOBILE_NUM AS "guarantMobile",
+			a.cust_id AS "borrowGuarantorId"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		where a.ROLE_TYPE='3'
+		and a.APPLY_NO=#{applyNo}
+	</select>
+	
+	
+	
+	<select id="getGEDguarantorCom" resultType="com.resoft.outinterface.rest.newged.entity.GedPushGuaranteeRequest">
+		SELECT
+			"2" AS "guarantorType",
+			b.CORPORATION_MOBILE AS "guarantMobile",
+			"1" AS "type",
+			b.UN_SOC_CREDIT_NO AS "code",
+			a.cust_id AS "borrowGuarantorId"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		where a.ROLE_TYPE='6'
+		and a.APPLY_NO=#{applyNo}
+	</select>
+	
+	
+	<select id="getGEDguarantorGS" resultType="com.resoft.outinterface.rest.newged.entity.GedPushGuaranteeRequest">
+		SELECT
+			"3" AS "guarantorType",
+			b.LINK_MOBILE AS "guarantMobile",
+			"1" AS "type",
+			b.UN_SOC_CREDIT_NO AS "code",
+			b.GUARANTEE_lIMIT AS "guaranteeAmount",
+			a.cust_id AS "borrowGuarantorId"
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		where a.ROLE_TYPE='8'
+		and a.APPLY_NO=#{applyNo}
+	</select>
+	<select id="queryMainApplyrelation" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		WHERE a.apply_no = #{applyNo} and a.cust_id  = #{custId} and a.del_flag='0' and a.ROLE_TYPE = #{roleType}
+	</select>
+	
+	<select id="getMainAll" resultType="com.resoft.credit.guaranteeRelation.entity.GuaranteeRelation">
+		SELECT
+			a.APPLY_NO AS "applyNo",
+			a.ROLE_TYPE AS "roleType",
+			<!-- "1" AS "companyId", -->
+			a.CUST_ID AS "custId"
+		FROM
+			cre_apply_relation a
+		where a.ROLE_TYPE in ('3','6')
+			and a.APPLY_NO=#{applyNo}
+		and a.del_flag='0'
+	</select>
+	<select id="findAllGuranteeRelation" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		where a.del_flag='0' and a.ROLE_TYPE = '8'  and a.cust_id = #{custId}
+	</select>
+	
+	<select id="findMianApplyRelation" resultType="ApplyRelation">
+		SELECT
+		<include refid="applyRelationColumns" />
+		FROM cre_apply_relation a
+		<include refid="applyRelationJoins" />
+		where a.del_flag='0' and a.ROLE_TYPE = '5' and a.APPLY_NO=#{applyNo}
+	</select>
+	
+	<update id="updateApplyConfirm">
+		update cre_apply_relation set IS_CONFIRM = '2' where apply_no = #{applyNo} and role_type = '8' and del_flag='0'
+	</update>
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.postloan.pushdatatopl.dao.PlMortgageCarInfoDao">
+				
+	<insert id="insertCarDataToPl">
+		INSERT INTO pl_mortgage_car_info(
+			property_right,
+			property_name,
+			apply_no,
+			busi_lic_reg_no,
+			mortgage_type, 
+			vehicle_brand,
+			buy_date,
+			id, 
+			vehicle_type,
+			vehicle_series,
+			property_of_com_owners,
+			other_information,
+			busi_reg_name,
+			operate_province,
+			operate_city,
+			operate_distinct,
+			operate_details,
+			corporation_name,
+			corporation_card_id_no,
+			client_name,
+			client_id_no,
+			client_phone,
+			client_company_relation,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			is_push_data
+		) VALUES 
+		<foreach item="mortgageCarInfoList" collection="mortgageCarInfoList" index="index" separator=",">
+		(
+			#{mortgageCarInfoList.propertyRight},
+			#{mortgageCarInfoList.propertyName},
+			#{mortgageCarInfoList.applyNo},
+			#{mortgageCarInfoList.busiLicRegNo},
+		    #{mortgageCarInfoList.mortgageType},
+			#{mortgageCarInfoList.vehicleBrand},
+			#{mortgageCarInfoList.buyDate},
+		    #{mortgageCarInfoList.id}, 
+			#{mortgageCarInfoList.vehicleType},
+			#{mortgageCarInfoList.vehicleSeries},
+			#{mortgageCarInfoList.propertyOfComOwners},
+			#{mortgageCarInfoList.otherInformation},
+			#{mortgageCarInfoList.busiRegName},
+			#{mortgageCarInfoList.operateProvince},
+			#{mortgageCarInfoList.operateCity},
+			#{mortgageCarInfoList.operateDistinct},
+			#{mortgageCarInfoList.operateDetails},
+			#{mortgageCarInfoList.corporationName},
+			#{mortgageCarInfoList.corporationCardIdNo},
+			#{mortgageCarInfoList.clientName},
+			#{mortgageCarInfoList.clientIdNo},
+			#{mortgageCarInfoList.clientPhone},
+			#{mortgageCarInfoList.clientCompanyRelation},
+			'0',
+		    #{mortgageCarInfoList.createBy.id},
+			#{mortgageCarInfoList.createDate},
+			#{mortgageCarInfoList.updateBy.id},
+			#{mortgageCarInfoList.updateDate},
+			'0'
+		)
+		</foreach>
+	</insert>
+</mapper>

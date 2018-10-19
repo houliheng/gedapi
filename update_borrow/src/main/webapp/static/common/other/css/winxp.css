@@ -1,0 +1,114 @@
+/* menu body */
+
+.menu-body {
+	/*background-color:	Menu;	/*ThreeDFace;*/ */
+	background-color:#fff;FILTER: progid:DXImageTransform.Microsoft.gradient(startColorStr:#73ccf1,EndColorStr :#4089b4,GradientType:0);
+	color:				#FFFFFF;
+	margin:				0;
+	padding:			0;
+	overflow:			hidden;
+	border:				1px solid #3bc9eb;
+	cursor:				hand;
+}
+
+.menu-body .outer-border {
+	border:			0;
+}
+
+.menu-body .inner-border {
+	width:		100%;
+	height:		100%;
+	border:		0px solid ThreeDShadow;
+	padding:	2px;
+}
+
+/* end menu body */
+
+/*****************************************************************************/
+
+/* menu items */
+
+.menu-body #scroll-up-item td,
+.menu-body #scroll-down-item td {
+	font-family:	Webdings !important;
+	text-align:		center;
+	padding:		10px;
+}
+
+.menu-body td {
+	font:			menu;
+}
+
+.menu-body .hover td {
+	background-image: url(../images/xiala_over.gif);
+	background-repeat: repeat-x;
+	height: 21px;
+	color:	#FFFFFF;
+}
+
+.menu-body td.empty-icon-cell {
+	padding:4px;
+	border:		0;
+}
+
+.menu-body td.empty-icon-cell span {
+	width:	16px;
+}
+
+.menu-body td.icon-cell {
+	width:		16px;
+	padding:	0px 2px 1px 2px;
+	border:		0;
+
+}
+
+.menu-body td.icon-cell img {
+	width:	16px;
+	height:	16px;
+	margin:	0;
+}
+
+.menu-body td.label-cell {
+	width:		100%;
+	padding:	0px 5px 1px -15px;
+}
+
+.menu-body td.shortcut-cell {
+	padding:	0px 5px 1px 5px;
+}
+
+.menu-body td.arrow-cell {
+	width:			20px;
+	padding:		0px 2px 1px 0px;
+	font-family:	Webdings;
+}
+
+/* end menu items */
+
+/*****************************************************************************/
+
+/* Menu Bar */
+
+.menu-bar {
+	border:			0;
+	cursor:			hand;
+	padding:		1px;
+}
+
+.menu-bar .menu-button {
+	color:		#FFFFFF;
+	font:		Menu;
+	padding:	3px 7px 3px 7px;
+	border:		0;
+	margin:		0;
+	display:	inline-block;
+	white-space:	nowrap;
+	cursor:			hand;
+}
+
+.menu-bar .menu-button.active,
+.menu-bar .menu-button.hover {
+	color:				#00547b;
+}
+
+/* End Menu Bar */

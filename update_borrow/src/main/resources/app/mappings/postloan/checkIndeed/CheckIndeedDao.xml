@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkIndeed.dao.CheckIndeedDao">
+    
+	<sql id="checkIndeedColumns">
+		a.id AS "id",
+		a.ALLOCATE_ID as "allocateId",
+		a.CONTRACT_NO AS "contractNo",
+		a.check_date AS "checkDate",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.risk_point AS "riskPoint",
+		a.check_address AS "checkAddress",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkIndeedJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckIndeed">
+		SELECT 
+			<include refid="checkIndeedColumns"/>
+		FROM pl_check_indeed a
+		<include refid="checkIndeedJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckIndeed">
+		SELECT 
+			<include refid="checkIndeedColumns"/>
+		FROM pl_check_indeed a
+		<include refid="checkIndeedJoins"/>
+		<where>
+			and a.allocate_id = #{allocateId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_check_indeed a
+		<include refid="checkIndeedJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckIndeed">
+		SELECT 
+			<include refid="checkIndeedColumns"/>
+		FROM pl_check_indeed a
+		<include refid="checkIndeedJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_check_indeed(
+			id,
+			allocate_id,
+			CONTRACT_NO,
+			check_date,
+			check_user_id,
+			check_user_name,
+			risk_point,
+			check_address,
+			description,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{allocateId},
+			#{contractNo},
+			#{checkDate},
+			#{checkUserId},
+			#{checkUserName},
+			#{riskPoint},
+			#{checkAddress},
+			#{description},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_check_indeed SET 	
+			CONTRACT_NO = #{contractNo},
+			check_date = #{checkDate},
+			check_user_id = #{checkUserId},
+			check_user_name = #{checkUserName},
+			risk_point = #{riskPoint},
+			check_address = #{checkAddress},
+			description = #{description},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_check_indeed
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCheckIndeedByAllocateId" resultType="CheckIndeed">
+		select * from pl_check_indeed a where a.allocate_id = #{allocateId} 
+	</select>
+	
+</mapper>

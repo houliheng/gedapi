@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkApproveUnion.dao.CompanyCustInfoRelatedDao">
+
+	<sql id="companyCustInfoRelatedColumns">
+		a.ID as "id",
+		a.APPLY_NO as "applyNo",
+		a.CUST_ID as "custId",
+		a.CUST_NAME as "custName",
+		a.APPRO_ID as "approId",
+		a.COMPANY_ID as "companyId"
+	</sql>
+
+	<sql id="companyCustInfoRelatedJoins">
+
+	</sql>
+
+	<select id="get" resultType="CompanyCustInfoRelated">
+		SELECT
+		<include refid="companyCustInfoRelatedColumns" />
+		FROM cre_company_cust_related a
+		<include refid="companyCustInfoRelatedJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getCompanyCustInfoRelatedByApproId" resultType="CompanyCustInfoRelated">
+		SELECT
+		<include refid="companyCustInfoRelatedColumns" />
+		FROM cre_company_cust_related a
+		<include refid="companyCustInfoRelatedJoins" />
+		WHERE a.APPRO_ID = #{approId}
+	</select>
+
+	<select id="findList" resultType="CompanyCustInfoRelated">
+		SELECT
+		<include refid="companyCustInfoRelatedColumns" />
+		FROM cre_company_cust_related a
+		<where>
+			<if test="applyNo != null and applyNo != '' ">
+				 and a.apply_no = #{applyNo}
+			</if>
+			<if test="custId != null and custId != '' ">
+				 and a.CUST_ID = #{custId}
+			</if>
+			<if test="approId != null and approId != '' ">
+				and a.APPRO_ID = #{approId}
+			</if>
+			<if test="companyId != null and companyId != '' ">
+				and a.COMPANY_ID = #{companyId}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_company_cust_related(
+		ID,
+		APPLY_NO,
+		CUST_ID,
+		CUST_NAME,
+		APPRO_ID,
+		COMPANY_ID
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custId},
+		#{custName},
+		#{approId},
+		#{companyId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_company_cust_related SET
+		APPLY_NO = #{applyNo},
+		CUST_ID = #{custId},
+		CUST_NAME = #{custName},
+		APPRO_ID = #{approId},
+		COMPANY_ID = #{companyId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_company_cust_related
+		WHERE id = #{id}
+	</update>
+
+	<update id="deleteCompanyCustInfoRelatedByApplyNo">
+		DELETE FROM cre_company_cust_related
+		WHERE apply_no = #{applyNo}
+	</update>
+
+</mapper>

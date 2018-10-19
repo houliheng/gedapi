@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.fhRiskControl.dao.FhRiskControlDao">
+
+	<sql id="fhRiskControlColumns">
+		a.id AS "id",
+		a.apply_no as "applyNo",
+		a.FILE_PATH AS "filePath",
+		a.REAL_FILE_PATH AS "realFilePath",
+		a.CUST_ID AS "custId",
+		a.FILE_NAME AS "fileName",
+		a.check_num AS "checkNum",
+		a.KTGG_COUNT AS "ktggCount",
+		a.AJLC_COUNT AS "ajlcCount",
+		a.NEWS_COUNT AS "newsCount",
+		a.CPWS_COUNT AS "cpwsCount",
+		a.ZXGG_COUNT AS "zxggCount",
+		a.SXGG_COUNT AS "sxggCount",
+		a.FYGG_COUNT AS "fyggCount",
+		a.BGT_COUNT AS "bgtCount",
+		a.TOTAL_COUNT AS "totalCount",
+		a.REPORT_STATUS AS "reportStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="fhRiskControlJoins">
+	</sql>
+
+	<select id="get" resultType="FhRiskControl">
+		SELECT
+		<include refid="fhRiskControlColumns" />
+		FROM cre_fh_risk_control a
+		<include refid="fhRiskControlJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findFhRiskControlReportByApplyNoAndCustId" resultType="FhRiskControl">
+		SELECT
+		a.id AS "id",
+		a.apply_no as "applyNo",
+		a.FILE_PATH AS "filePath",
+		a.REAL_FILE_PATH AS "realFilePath",
+		a.CUST_ID AS "custId",
+		a.FILE_NAME AS "fileName",
+		a.REPORT_STATUS AS "reportStatus",
+		a.create_by
+		AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+		FROM cre_fh_risk_control_bg a
+		WHERE a.apply_no = #{applyNo} and a.cust_id = #{custId}
+	</select>
+
+	<select id="findRiskControlYcByApplyNo" resultType="FhRiskControl">
+		SELECT
+		b.check_num AS "checkNum" 
+		FROM cre_apply_relation a
+		LEFT JOIN cre_fh_risk_control_yc b ON a.APPLY_NO = b.APPLY_NO 
+		AND a.CUST_ID = b.CUST_ID
+		where a.apply_no = #{applyNo} and a.ROLE_TYPE != "8"
+	</select>
+
+	<select id="findList" resultType="FhRiskControl">
+		SELECT
+		max(c.CREATE_DATE),
+		c.*
+		FROM
+		(
+		SELECT
+		b.CREATE_DATE,
+		a.CUST_ID AS "custId",
+		a.CUST_NAME AS "custName",
+		a.APPLY_NO AS "applyNo",
+		a.ROLE_TYPE AS "roleType",
+		d.ID_NUM AS "idNum",
+		b.check_num AS "checkNum",
+		e.FILE_PATH AS "filePath",
+		e.REAL_FILE_PATH AS "realFilePath",
+		b.KTGG_COUNT AS "ktggCount",
+		b.AJLC_COUNT AS "ajlcCount",
+		e.FILE_NAME AS "fileName",
+		b.NEWS_COUNT AS "newsCount",
+		b.CPWS_COUNT AS "cpwsCount",
+		b.ZXGG_COUNT AS "zxggCount",
+		b.SXGG_COUNT AS "sxggCount",
+		b.FYGG_COUNT AS "fyggCount",
+		b.BGT_COUNT
+
+		AS "bgtCount",
+		b.TOTAL_COUNT AS "totalCount",
+		e.report_status AS "reportStatus"
+		FROM
+		cre_apply_relation a
+		LEFT JOIN cre_fh_risk_control_yc b ON a.APPLY_NO = b.APPLY_NO AND a.CUST_ID = b.CUST_ID
+		LEFT JOIN cre_fh_risk_control_bg e ON a.APPLY_NO = e.APPLY_NO AND a.CUST_ID =
+		e.CUST_ID
+		LEFT JOIN cre_cust_info d ON a.CUST_ID = d.ID
+		WHERE a.APPLY_NO = #{applyNo} and a.ROLE_TYPE != "8" ORDER BY b.CREATE_DATE DESC )
+		c GROUP BY c.custId
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_fh_risk_control a
+		<include refid="fhRiskControlJoins" />
+	</select>
+
+	<select id="getCountByApplyNoAndCustId" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_fh_risk_control_yc a
+		where a.apply_no = #{applyNo} and cust_id = #{custId}
+	</select>
+
+	<select id="findAllList" resultType="FhRiskControl">
+		SELECT
+		<include refid="fhRiskControlColumns" />
+		FROM cre_fh_risk_control a
+		<include refid="fhRiskControlJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_fh_risk_control_yc(
+		ID,
+		APPLY_NO,
+		CUST_ID,
+		CHECK_NUM,
+		KTGG_COUNT,
+		AJLC_COUNT,
+		NEWS_COUNT,
+		CPWS_COUNT,
+		ZXGG_COUNT,
+		SXGG_COUNT,
+		FYGG_COUNT,
+		BGT_COUNT,
+		TOTAL_COUNT,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custId},
+		#{checkNum},
+		#{ktggCount},
+		#{ajlcCount},
+		#{newsCount},
+		#{cpwsCount},
+		#{zxggCount},
+		#{sxggCount},
+		#{fyggCount},
+		#{bgtCount},
+		#{totalCount},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<insert id="savefhRiskControlReport">
+		INSERT INTO cre_fh_risk_control_bg(
+		ID,
+		APPLY_NO,
+		CUST_ID,
+		FILE_PATH,
+		REAL_FILE_PATH,
+		REPORT_STATUS,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custId},
+		#{filePath},
+		#{realFilePath},
+		#{reportStatus},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_fh_risk_control_yc SET
+		apply_no = #{applyNo},
+		CUST_ID = #{custId},
+		check_num = #{checkNum},
+		KTGG_COUNT = #{ktggCount},
+		AJLC_COUNT = #{ajlcCount},
+		NEWS_COUNT = #{newsCount},
+		CPWS_COUNT = #{cpwsCount},
+		ZXGG_COUNT = #{zxggCount},
+		SXGG_COUNT =
+		#{sxggCount},
+		FYGG_COUNT = #{fyggCount},
+		BGT_COUNT = #{bgtCount},
+		TOTAL_COUNT = #{totalCount},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_fh_risk_control
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateReportStatusAndFilePathById">
+		UPDATE cre_fh_risk_control_bg SET
+
+		UPDATE_DATE = #{updateDate}
+		<if test="filePath != null and filePath != ''">
+			,FILE_PATH = #{filePath}
+		</if>
+		<if test="fileName != null and fileName != ''">
+			,FILE_NAME = #{fileName}
+		</if>
+		<if test="reportStatus != null and reportStatus != ''">
+			,REPORT_STATUS = #{reportStatus}
+		</if>
+		<if test="realFilePath != null and realFilePath != ''">
+			,REAL_FILE_PATH = #{realFilePath}
+		</if>
+		WHERE apply_no = #{applyNo} and cust_id = #{custId}
+	</update>
+
+	<update id="updateRealFilePathById">
+		UPDATE cre_fh_risk_control SET
+		REAL_FILE_PATH = #{realFilePath} WHERE id= #{id}
+	</update>
+
+</mapper>

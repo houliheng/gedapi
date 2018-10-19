@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.resoft.credit.creOrgMapping.dao.CreOrgMappingDao">
+	
+	<!-- 新增 -->
+	<insert id="insert">
+		INSERT INTO cre_org_mapping(
+			id,
+			name,
+			org_value
+		) VALUES (
+			#{id},
+			#{name},
+			#{orgValue}
+		)
+	</insert>
+	<!-- 查询最大码值 -->
+	<select id="findMaxOrgValue" resultType="Integer">
+		select max(CAST(org_value AS SIGNED))  from cre_org_mapping 
+	</select>
+	
+	<!--根据id查看是否有对应记录  -->
+	<select id="get" resultType="CreOrgMapping">
+		select id,name,org_value as orgValue from cre_org_mapping where id=#{id}
+	</select>
+	
+	
+	<select id="findList" resultType="CreOrgMapping">
+		SELECT id,name,org_value as orgValue from cre_org_mapping a
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name like concat('%',#{name},'%')
+			</if>
+			<if test="id != null and id != ''">
+				AND a.id like concat('%',#{id},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				order by cast(org_value as SIGNED INTEGER) desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<update id="update">
+		update cre_org_mapping set name = #{name},id=#{id} where org_value = #{orgValue}
+	</update>
+	
+	<select id="findCreOrgMappingByCode" resultType="CreOrgMapping">
+		select id,name,org_value as orgValue from cre_org_mapping where id = #{code}
+	</select>
+</mapper>

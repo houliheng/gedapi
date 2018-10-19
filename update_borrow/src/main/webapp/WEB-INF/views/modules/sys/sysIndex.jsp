@@ -1,0 +1,560 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>${fns:getConfig('copyright.productName')}</title>
+		<meta name="decorator" content="blank"/>
+		<meta name="description" content="overview &amp; stats" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!--basic styles-->
+	<%-- 	<link href="${themeStatic}/ace_admin/css/bootstrap-responsive.min.css" rel="stylesheet" /> --%>
+		<link rel="stylesheet" href="${themeStatic}/ace_admin/css/font-awesome.min.css" />
+
+		<!--ace styles-->
+		<link rel="stylesheet" href="${themeStatic}/ace_admin/css/ace.min.css" />
+<%-- 		<link rel="stylesheet" href="${themeStatic}/ace_admin/css/ace-responsive.min.css" />
+		<link rel="stylesheet" href="${themeStatic}/ace_admin/css/ace-skins.min.css" /> --%>
+		
+		<!--ace scripts-->
+		<script src="${themeStatic}/ace_admin/js/ace-elements.min.js"></script>
+		<script src="${themeStatic}/ace_admin/js/ace.min.js"></script>
+		
+		<!--easyui scripts 用窗口功能-->
+		<link rel="stylesheet" type="text/css" href="${ctxStatic}/jquery-easyui-1.4.2/themes/bootstrap/window.css">
+		<link rel="stylesheet" type="text/css" href="${ctxStatic}/jquery-easyui-1.4.2/themes/bootstrap/panel.css">
+		<link rel="stylesheet" type="text/css" href="${ctxStatic}/jquery-easyui-1.4.2/themes/icon.css">
+		<script type="text/javascript" src="${ctxStatic}/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="${ctxStatic}/jquery-easyui-1.4.2/locale/easyui-lang-zh_CN.js"></script>
+		
+		<!--拖拽功能-->
+		<script src="${themeStatic}/ace_admin/js/jquery.dragsort-0.5.1.js"></script>
+		<link rel="stylesheet" href="${themeStatic}/ace_admin/css/dragsort.css" />
+		<link rel="Stylesheet" href="${ctxStatic}/jerichotab/css/jquery.jerichotab.css" />
+    <script type="text/javascript" src="${ctxStatic}/jerichotab/js/jquery.jerichotab.js"/>
+    
+    
+		<script type="text/javascript">
+			var documentHeight = 0;
+			var topPadding = 15;
+			$(function(){
+				if(window.navigator.userAgent.toUpperCase().indexOf("MSIE")>0){//验证是否符合该主题的浏览器版本
+					var bowerType = window.navigator.userAgent.toUpperCase().match(/msie [\d.]+;/gi);
+					if(parseInt(bowerType.toString().substring(5)) < 8 ){
+						alert("您当前的浏览器版本不支持此主题，点击确定后将切换到默认主题！");
+						window.location.href = "${pageContext.request.contextPath}/changetheme/default?url=${pageContext.request.contextPath}";
+					}
+				}
+			});
+		</script>
+
+		<!--inline styles related to this page-->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>
+
+	<body>
+		<div id="main">
+		<div id="header" class="navbar navbar-fixed-top">
+			<div  class="navbar-inner">
+					
+				<div style="margin-top: -24px; height: 45px;" class="brand" ><span id="productName"><img src="${ctxStatic}/images/xexdlogo.png"/></span></div>
+					<ul class="nav ace-nav pull-right">
+						<li class="light-blue">
+							<a data-toggle="dropdown" href="#" class="dropdown-toggle"> 
+								<img class="nav-user-photo" src="${fns:getUser().photo}" alt="${fns:getUser().name} Photo" /> 
+								<span class="user-info"> 
+									<small>您好,</small>
+									${fns:getUser().name}
+								</span> 
+								<i class="icon-caret-down"></i>
+							</a>
+							<ul class="user-menu pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-closer">
+								<li><a href="${ctx}/sys/user/info" target="mainFrame"><i class="icon-user"></i>&nbsp; 个人信息</a></li>
+								<li><a href="${ctx}/sys/user/modifyPwd" target="mainFrame"><i class="icon-lock"></i>&nbsp;  修改密码</a></li>
+								<li class="divider"></li>
+								<li><a href="${ctx}/logout" title="退出登录"><i class="icon-off"></i>&nbsp; 退出 </a></li>
+							</ul>
+						</li>
+					</ul><!--/.ace-nav-->
+				</div><!--/.container-fluid-->
+			</div><!--/.navbar-inner-->
+		</div>
+		<div   class="main-container container-fluid">
+			<a class="menu-toggler" id="menu-toggler" href="#">
+				<span class="menu-text"></span>
+			</a>
+			
+			<div id="textDiv"></div>
+			<div class="sidebar" id="sidebar" style="overflow:scroll">
+				<!--菜单导航-->
+				<ul class="nav nav-list" id="menuList" >
+				</ul>
+				<!--/.nav-list-->
+
+			 	<div class="sidebar-collapse" id="sidebar-collapse">
+					<i class="icon-double-angle-left"></i>
+				</div>
+			</div>
+			
+
+			<div class="main-content">
+				
+				<!--
+				 * @reqno: H1507020024
+				 * @date-designer:20150707-zhunan
+				 * @e-out-other : UserModule - 列表 : 展示自定义首页内容列表
+				 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+				 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+				 * @date-author:20150707-zhunan: 用此列表对其动态添加，添加不同的插件，展示自定义首页内容
+				-->
+				<!--自定义首页-->
+				<div>
+					<ul id="UserModule" class="list listUl">
+					</ul>
+				</div>
+				
+				
+				<!-- save sort order here which can be retrieved on server on postback -->
+				<div>
+				<input name="list1SortOrder" type="hidden" />
+				</div>
+			</div><!--/.main-content-->
+		</div><!--/.main-container-->
+
+	<div style="color:#333"> 
+	<div id="openClose" class="close">&nbsp;</div>
+		<div id="right" class="rightclose" style="background:url(${ctxStatic}/images/backgruoud.jpg);background-size:100% auto;">
+		</div>
+ 	</div>
+
+		<!--inline scripts related to this page-->
+		
+		<script type="text/javascript">
+			document.cokkie="tabmode=1";
+			var Module = null;
+			var userModule = null;//存储用户主题插件内容
+			var commonModule = null;//存储公共主题插件内容
+			var isEdit = false;//编辑模式开关，默认是关闭状态
+			$(document).ready(function() {
+				
+			});
+			
+			//判断是否是编辑模式，如果保存编辑结果，则关闭编辑模式
+			function editTheme(){
+				if(isEdit==false){//开启编辑模式
+					top.$.jBox.tip('开启编辑模式！');
+					$('#editMTheme').text('保存并关闭编辑模式');
+					isEdit = true;
+					$("figcaption").removeClass("titleCss");
+// 					Module.startDrag();
+				}else{
+					
+					/**
+					 * @reqno: H1507020033
+					 * @date-designer:20150707-zhunan
+					 * @e-out-other : UserModule - 列表 : 展示自定义首页内容列表
+					 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+					 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+					 * @db-j : sys_config : USER_ID,CONFIG_ID,CONFIG_TYPE，CONFIG_VALUE，CONFIG_NAME，REMARKS
+					 * @date-author:20150707-zhunan: 把用户配置好的页面参数保存到sys_config表中，每个用户对应一条config_type='CommonModule'的数据，此数据存的值为公共插件的ID
+					 */    
+					
+					{//保存用户的偏好
+						var list = $('[id=UserModule]').find('li');
+					
+						if(list==null || list.length == 0){
+							alert("您必须选择一个组建才能保存！");
+							return;
+						}
+					
+						loading('正在保存，请稍等...');
+					
+						var ids = "";
+						for(var i=0;i<list.length;i++){
+							if(i!=0){
+								ids += ",";
+							}
+							ids += list[i].id;
+						}
+		 				$.ajax({
+		 					type: "POST",
+		 					   url: "${ctx}/theme/theme/saveModel",
+		 					   data:{ids: ids},
+		 					   datatype: 'json',
+		 					   success: function(result){
+		 						  	$.jBox.tip('保存成功！', 'success');
+
+									$('#editMTheme').text('开启编辑模式');
+									isEdit = false;
+									$("figcaption").addClass("titleCss");
+		 					   }	
+		 				});
+					}
+				}
+				
+			}
+			
+			/**
+			 * @reqno: H1507020035
+			 * @date-designer:20150707-zhunan
+			 * @e-out-other : commonWindo - 窗口 : 打开的公共组建窗口
+			 * @e-out-other : FreeCommonModule - 列表 : 存储公共组建的ul
+			 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+			 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+			 * @date-author:20150707-zhunan: 打开公用组建的窗口调用函数
+			 */
+			function openWindow(){//打开公共组建窗口
+				if(isEdit==true){
+					$('#commonWin').window('open');
+				}else{
+					alert('请先开启编辑模式！');
+				}
+			}
+
+			$("ul:first").dragsort();
+			
+			/**
+			 * @reqno: H1507020024
+			 * @date-designer:20150707-zhunan
+			 * @e-out-other : UserModule - 列表 : 展示自定义首页内容列表
+			 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+			 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+			 * @date-author:20150707-zhunan: 用此列表对其动态添加，添加不同的插件，展示自定义首页内容
+			 */
+			/**
+			 * 初始化主题
+			 */
+			function innerTheme() {
+			
+			//window.location.href="${ctx}/credit/appoint/tasktodo";
+			/* 	loading('正在初始化布局页面，请稍等...'); */
+				$.ajax({
+					type: "POST",
+					url: "${ctx}/theme/theme/getModel",
+					datatype: 'json',
+					success: function(result){
+						
+						if(result==null || result.userModule == null || result.commonModule == null){
+							top.$.jBox.messager('初始化失败！请联系管理员','失败！');
+							return;
+						}
+						
+						userModule = result.userModule;//用户所选的插件
+						commonModule = result.commonModule;//其余公共插件
+						
+						/**
+						 * @reqno: H1507020035
+						 * @date-designer:20150707-zhunan
+						 * @e-out-other : commonWindo - 窗口 : 打开的公共组建窗口
+						 * @e-out-other : FreeCommonModule - 列表 : 存储公共组建的ul
+						 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+						 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+						 * @db-j : sys_config : USER_ID,CONFIG_ID,CONFIG_TYPE，CONFIG_VALUE，CONFIG_NAME，REMARKS 取config_type='CommonModule'对应客户的数据
+						 * @db-j : sys_common_module : MODULE_ID，MODULE_NAME，MODULE_SYSTEM....公共组建存储表
+						 * @date-author:20150707-zhunan: 根据sys_config表config_type='CommonModule',user_id=当前用户和sys_common_module表的组建信息生成客户上次保存过的首页页面插件信息，渲染到首页中
+						 */
+						//初始化用户主题插件
+						var UserModuleHtml = '';
+						for(var key in userModule){
+							UserModuleHtml += createNode(userModule[key],"iframe");
+						}
+						$('#UserModule').append(UserModuleHtml);
+		
+						/**
+						 * @reqno: H1507020035
+						 * @date-designer:20150707-zhunan
+						 * @e-out-other : commonWindo - 窗口 : 打开的公共组建窗口
+						 * @e-out-other : FreeCommonModule - 列表 : 存储公共组建的ul
+						 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+						 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+						 * @db-j : sys_common_module : MODULE_ID，MODULE_NAME，MODULE_SYSTEM....公共组建存储表
+						 * @date-author:20150707-zhunan: 渲染客户没有选取的公共插件内容通过
+						 */
+						//初始化公共插件
+						var FreeCommonModuleHtml = '';
+						for (var key in commonModule) {
+							FreeCommonModuleHtml += createNode(commonModule[key],"img");
+						}
+						$('#FreeCommonModule').append(FreeCommonModuleHtml);
+						$("figcaption").addClass("titleCss");//去掉标题
+		
+						//初始化拖拽模块
+						Module = $("#UserModule, #FreeCommonModule").dragsort({
+							dragSelector : "figcaption",
+							dragBetween : true,
+							firstDragBetween : true,
+							dragEnd : moveModuleNode,
+							dragStart: dragStart,
+							placeHolderTemplate : "<li class='placeHolder'><div class=\"Listdiv\"></div></li>",
+							scrollSpeed: 0
+						});
+						
+						top.$.jBox.tip('初始化成功！', 'success');
+					}	
+ 				}); 
+			}
+			
+			
+			/**
+			 * @reqno: H1507020024
+			 * @date-designer:20150707-zhunan
+			 * @e-out-other : commonWindo - 窗口 : 打开的公共组建窗口
+			 * @e-out-other : FreeCommonModule - 列表 : 存储公共组建的ul
+			 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+			 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+			 * @date-author:20150707-zhunan: 生成节点
+				@param module 节点数据
+				@param type 插入个性化类型
+			 */
+			function createNode(module,type){
+				if(module==null){
+					return "";
+				}
+				var html = "<li id=\"" + module.MODULE_ID + "\" data-colspan=\"" + module.MODULE_WIDTH + "\" >" /*data-rowspan=\"" + module.MODULE_HEIGHT + "\"*/
+					 	 + "<div class=\"grid\"><div class=\"effect-zoe\"><div class=\"Listdiv\" ><figcaption>" /*data-rowspan=\"" + module.MODULE_HEIGHT + "\"*/
+					 	 + module.MODULE_NAME;
+				if(type!=null && type == "iframe"){
+					html += "<a href=\"javascript:removeUserModuleNode('"+ module.MODULE_ID + "')\"></a>" 
+						 + "</figcaption>" 
+						 + createIframe(module);
+				}else if(type!=null && type == "img"){
+					html += "</figcaption><img src=\"${themeStatic}/" + module.MODULE_IMG + "\" />";
+				}else{
+					html += "</figcaption>";
+				}
+				html += "</div></div></li>";
+				return html;
+			}
+			/**
+			 * @reqno: H1507020024
+			 * @date-designer:20150707-zhunan
+			 * @e-out-other : commonWindo - 窗口 : 打开的公共组建窗口
+			 * @e-out-other : FreeCommonModule - 列表 : 存储公共组建的ul
+			 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+			 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+			 * @date-author:20150707-zhunan: 生成iframe
+				@param module 节点数据
+			 */
+			function createIframe(module){
+				return 	"<iframe id=\"iframe_" + module.MODULE_ID + "\" src=\"${ctx}/" + module.MODULE_HREF 
+						+ "\" frameborder=\"0\" scrolling=\"auto\" width=\"100%\" height=\"100%\"/>";
+			}
+			
+			/**
+			移动点击移动时候执行的函数，返回true为继续执行移动
+			*/
+			function dragStart(data,thisData){
+				if(isEdit==false){//如果不是编辑模式，不能进行移动
+					return false;
+				}
+				
+				//移动节点时候删除iframe，否则会很慢
+				var iframe = thisData.draggedItem.find('iframe');
+				if(iframe.length > 0){
+					iframe.remove();
+				}
+				return true;
+			}
+
+			/**
+			 * 移动节点
+			 */
+			function moveModuleNode(data, thisData) {
+				var from = $(data).index(thisData);
+				var to = thisData.getItems().index(thisData.draggedItem);
+				var thisNode = thisData.draggedItem;
+
+				var id = thisNode.attr('id');
+				if (from == '1' && to == '-1') {
+					thisNode.find('img').remove();//删除对应的图片
+					//添加关闭标签
+					thisNode.find('figcaption').append(
+							"<a href=\"javascript:removeUserModuleNode('" + id + "')\"></a>");
+					//添加iframe
+					thisNode.find('.Listdiv').append(createIframe(commonModule[id]));
+					userModule[id] = commonModule[id];//公共主题插件转到用户主题下
+					delete commonModule[id];//从公用主题中删除用户拖拽走的插件
+				}else if(from == '0' && to == '-1'){
+					thisNode.find('iframe').remove();//删除对应的iframe
+					thisNode.find('a').remove();//删除对应的a标签
+					thisNode.find('.Listdiv').append("<img src=\"${themeStatic}/" + userModule[id].MODULE_IMG + "\" />");//添加缩略图
+					commonModule[id] = userModule[id];//用户主题插件转到公共主题下
+					delete userModule[id];//从公共主题中删除公共拖拽走的插件
+				}else if(from == '0'){
+					thisNode.find('.Listdiv').append(createIframe(userModule[id]));
+				}
+			};
+
+			/**
+			 * 删除用户节点
+			 * @param id 要被删除的节点ID
+			 */
+			function removeUserModuleNode(id) {
+				if(isEdit==false){
+					alert('请先开启编辑模式！');
+					return;
+				}
+				var text = $('#' + id).text();
+				$('#' + id).remove();
+				$('#FreeCommonModule').append(createNode(userModule[id],"img"));
+				commonModule[id] = userModule[id];//用户主题插件转到公共主题下
+				delete userModule[id];//删除用户主题对应的ID
+			}
+ 
+			$(function() {
+				/**
+				 * @reqno: H1507020024
+				 * @date-designer:20150707-zhunan
+				 * @date-author:20150707-zhunan: 初始化主题调用sql
+				 */
+				innerTheme();//初始化主题控件
+				
+				initMenu();//初始化菜单
+
+			});
+			
+			/**
+			 * 初始化菜单
+			*/
+			function initMenu(){
+				$.ajax({
+					type: "GET",
+					url: "${ctx}/theme/theme/treeData?nodeId=1",
+					cache:false,
+					dataType: 'json',
+					success: function(data){
+						var menus = data;
+						$('#menuList').append(creatMenu(menus,0));
+						/* $('#menuList').load(); */
+						$("#sidebar-collapse").click();//默认菜单是收缩状态
+					}	
+				});
+				/* $.getJSON("${ctx}/theme/theme/treeData?nodeId=1",function(data) {
+					var menus = data;
+					$('#menuList').append(creatMenu(menus,0));
+					$("#sidebar-collapse").click();//默认菜单是收缩状态
+				}); */
+			}
+			/**
+			 * 创建菜单
+			 * @param menus 菜单内容
+			 * @param down 深度
+			 */
+			function creatMenu(menus,down){
+				var html = "";
+				if(down!=0){ html += "<ul style=\"overflow: auto\" id=\"submenu\" class=\"submenu\">"; }//只有子菜单才有此节点，子菜单深度大于等于1
+				for (var i = 0; i < menus.length; i++) {
+					
+					if (menus[i].show) {
+						var isChild = "";
+						if (menus[i].children != null
+								&& menus[i].children.length != 0) {
+							isChild = " class=\"dropdown-toggle\" ";
+						}
+						html += "<li>";
+						if (menus[i].attributes.menu.href == null
+								|| menus[i].attributes.menu.href.length == 0) {
+							html += "<a href=\"#\" data-id=\""+ menus[i].id + "\" " + isChild +"  >";
+						} else {
+							html += "<a href=\"${ctx}" + menus[i].attributes.menu.href + "\" data-id=\""+ menus[i].id + "\" target=\"mainFrame\"" + isChild + "  >";
+						}
+						/* html += "<i class=\"icon-" + menus[i].iconCls + "\"></i>"; */
+									if (menus[i].text=="信贷审批"){
+										html += "<i class=\"icon-xdsp\"></i>";
+									}
+									if (menus[i].text=="催收管理"){
+									html += "<i class=\"icon-" + "csgl" + "\"></i>";
+									}
+								 	if (menus[i].text=="影像管理"){
+									html += "<i class=\"icon-" + "yxgl" + "\"></i>";
+									} 
+									if (menus[i].text=="账务管理"){
+									html += "<i class=\"icon-" + "cwgl" + "\"></i>";
+									} 
+									if (menus[i].text=="合同管理"){
+									html += "<i class=\"icon-" + "htgl" + "\"></i>";
+									} 
+									if (menus[i].text=="报表管理"){
+									html += "<i class=\"icon-" + "bbgl" + "\"></i>";
+									}
+									if (menus[i].text=="借后管理"){
+									html += "<i class=\"icon-" + "bbgl" + "\"></i>";
+									}
+									if (menus[i].text=="系统设置"){
+									html += "<i class=\"icon-" + "xtsz" + "\"></i>";
+									}
+						html += "<span class=\"menu-text\">"
+								+ menus[i].text + "</span>";
+	
+						if (isChild.length != 0) {
+							html += "<b class=\"arrow icon-angle-down\"></b>";
+						}
+	
+						html += "</a>";
+						if (isChild.length != 0) {
+							html += creatMenu(menus[i].children,(down+1));
+						} else {
+							isChild = "";
+						}
+						html += "</li>";
+					}
+				}
+				if(down!=0){ html += "</ul>";}//只有子菜单才有此节点，子菜单深度大于等于1
+				return html;
+			}
+		var tabTitleHeight = 33; // 页签的高度
+		$(function(){
+		resizeRight(false);
+			$.fn.initJerichoTab({
+                renderTo: '#right', uniqueId: 'jerichotab',
+                contentCss: { 'height': $('#right').height() - tabTitleHeight },
+                tabs: [], loadOnce: true, tabWidth: 110, titleHeight: tabTitleHeight
+            });
+            $("[target='mainFrame']").live("click",function(e){
+           		e.preventDefault();
+            	addTab($(this),true);
+            	return true;
+            });
+          	
+		});
+		
+		function resizeRight(){
+			 var w=$(window).width();
+            var sw =0;
+            var h=$(window).height();
+            var sh=60;
+            var bopen =$("#right").hasClass("rightopen");
+            if(bopen){
+            	sw =219;
+            	$("#sidebar").attr("style","overflow: auto");
+            }else{
+            	sw =60;
+            	$("#sidebar").attr("style","");
+            }
+          	$("#right").width(w-sw);
+          	$("#right").height(h-sh);
+          	$(".tabs").width($("#right").width());
+		}
+		function addTab($this, refresh){
+			$.fn.jerichoTab.addTab({
+                tabFirer: $this,
+                title: $this.text(),
+                closeable: true,
+                data: {
+                    dataType: 'iframe',
+                    dataLink: $this.attr('href')
+                }
+            }).loadData(refresh);
+            $(".tabs").width($("#right").width());
+			return false;
+		}
+		</script>
+		<style>
+    	.rightclose{
+    		padding-left:48px;padding-top:50px;
+    	}
+    	.rightopen{
+    		padding-left:190px;padding-top:50px;
+    	}
+    </style>
+	</body>
+</html>

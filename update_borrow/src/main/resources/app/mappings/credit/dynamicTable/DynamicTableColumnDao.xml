@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.dynamicTable.dao.DynamicTableColumnDao">
+    <!--  
+	@reqno:H1510170009
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_查询,查询出所有list数据的方法
+	@db-z:sys_dict:value,label,type
+	@db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP,SHOW_POSITION,COMPANY_ID
+	@db-j:cre_pro_from_column:DATA_GROUP_ID
+    -->  
+<select id="findList" resultType="DynamicTableColumnVo">
+	select 
+		x.value as productType,
+  		x.label as productTypeValue, 
+		a.DATA_GROUP as dataGroup, 
+		y.label as dataGroupValue,
+		a.SHOW_POSITION as showPosition,
+		z.label as showPositionValue,
+  		t.count as columnCount,
+  		a.ID as creDataGroupTableId,
+  		a.COMPANY_ID as companyId
+	from sys_dict x
+		inner join cre_data_group_table a  on 1=1
+		left join sys_dict y on y.value = a.DATA_GROUP and y.type = 'DATA_GROUP'
+		left join sys_dict z on z.value = a.SHOW_POSITION and z.type = 'SHOW_POSITION'
+		left JOIN (select count(1) as count,DATA_GROUP_ID,PRODUCT_TYPE from cre_pro_from_column b group by b.PRODUCT_TYPE,b.DATA_GROUP_ID) t ON t.DATA_GROUP_ID = a.ID and t.PRODUCT_TYPE=x.value
+	WHERE
+    	x.type = 'product_type'
+		AND a.COMPANY_ID = #{companyId }
+	    <if test="productType != null and productType != ''" >
+			AND x.value = #{productType } 
+		</if>
+		<if test="dataGroup != null and dataGroup != '' ">   
+			AND a.DATA_GROUP = #{dataGroup} 
+		</if>
+		<if test="showPosition != null and showPosition != '' ">   
+			AND a.SHOW_POSITION = #{showPosition} 
+		</if>
+		order by x.value,a.SHOW_POSITION,a.DATA_GROUP
+	</select>
+    <!--  
+	@reqno:H1510170009
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_查询,查询出所有list数据count的方法
+	@db-z:sys_dict:value,label,type
+	@db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP,SHOW_POSITION,COMPANY_ID
+	@db-j:cre_pro_from_column:DATA_GROUP_ID
+    -->  	
+	<!-- 获得分页总数 -->
+	<select id="getCount" resultType="long">
+		select 
+			x.value as productType,
+	  		x.label as productTypeValue, 
+			a.DATA_GROUP as dataGroup, 
+			y.label as dataGroupValue,
+			a.SHOW_POSITION as showPosition,
+			z.label as showPositionValue,
+	  		t.count as columnCount,
+	  		a.ID as creDataGroupTableId,
+	  		a.COMPANY_ID as companyId
+		from sys_dict x
+			inner join cre_data_group_table a  on 1=1
+			left join sys_dict y on y.value = a.DATA_GROUP and y.type = 'DATA_GROUP'
+			left join sys_dict z on z.value = a.SHOW_POSITION and z.type = 'SHOW_POSITION'
+			left JOIN (select count(1) as count,DATA_GROUP_ID,PRODUCT_TYPE from cre_pro_from_column b group by b.PRODUCT_TYPE,b.DATA_GROUP_ID) t ON t.DATA_GROUP_ID = a.ID and t.PRODUCT_TYPE=x.value
+		WHERE
+	    	x.type = 'product_type'
+			AND a.COMPANY_ID = #{companyId }
+			    <if test="productType != null and productType != ''" >
+					AND x.value = #{productType } 
+				</if>
+				<if test="dataGroup != null and dataGroup != '' ">   
+					AND a.DATA_GROUP = #{dataGroup} 
+				</if>
+				<if test="showPosition != null and showPosition != '' ">   
+					AND a.SHOW_POSITION = #{showPosition} 
+				</if>
+				order by x.value,a.SHOW_POSITION,a.DATA_GROUP
+				) tmp_count
+	</select>
+    <!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_查询,查询出单个pojo方法
+	@db-z:sys_dict:value,label,type
+	@db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP,SHOW_POSITION,COMPANY_ID
+	@db-j:cre_pro_from_column:DATA_GROUP_ID
+    --> 	
+	<select id="get" resultType="DynamicTableColumnVo">
+		select 
+			x.value as productType,
+	  		x.label as productTypeValue, 
+			a.DATA_GROUP as dataGroup, 
+			y.label as dataGroupValue,
+			a.SHOW_POSITION as showPosition,
+			z.label as showPositionValue,
+	  		t.count as columnCount,
+	  		a.ID as creDataGroupTableId,
+	  		a.COMPANY_ID as companyId
+		from sys_dict x
+			inner join cre_data_group_table a  on 1=1
+			left join sys_dict y on y.value = a.DATA_GROUP and y.type = 'DATA_GROUP'
+			left join sys_dict z on z.value = a.SHOW_POSITION and z.type = 'SHOW_POSITION'
+			left JOIN (select count(1) as count,DATA_GROUP_ID from cre_pro_from_column b group by b.PRODUCT_TYPE,b.DATA_GROUP_ID) t ON t.DATA_GROUP_ID = a.ID
+		WHERE
+	    	x.type = 'product_type'
+			AND a.COMPANY_ID = #{companyId }
+	</select>
+	
+	<delete id="delete">
+		DELETE FROM cre_pro_from_column 
+		WHERE id = #{id } 
+	</delete>
+	<!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_删除
+	@db-z:cre_pro_from_column:id
+    -->
+	<delete id="deleteMulti">
+		DELETE FROM cre_pro_from_column 
+		WHERE id in 
+		<foreach item="idsList" collection="list" open="(" close=")" separator=",">
+		 #{idsList} 
+		</foreach>
+	</delete>
+	<!--  
+	@reqno:H1510170011
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_新增
+	@db-z:cre_pro_from_column:id,PRODUCT_TYPE,DATA_GROUP_ID,COLUMN_CODE,COLUMN_NAME,IS_REQUIRED,COLUMN_LENGTH,SORT
+    -->	
+	<insert id="insert">
+		INSERT INTO cre_pro_from_column(
+			ID,
+			PRODUCT_TYPE,
+			DATA_GROUP_ID,
+			COLUMN_CODE,
+			COLUMN_NAME,
+			IS_REQUIRED,
+			COLUMN_LENGTH,
+			SORT
+		) VALUES (
+			#{id },
+			#{productType },
+			#{dataGroupId },
+			#{columnCode },
+			#{columnName },
+			#{isRequired }
+			#{columnLength }
+			#{sort }
+		)
+	</insert>
+	<!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_修改
+	@db-z:cre_pro_from_column:id,PRODUCT_TYPE,DATA_GROUP_ID,COLUMN_CODE,COLUMN_NAME,IS_REQUIRED,COLUMN_LENGTH,SORT
+    -->	
+	<update id="update">
+		UPDATE cre_pro_from_column 
+		set 
+		ID=#{id },
+		PRODUCT_TYPE=#{productType },
+		DATA_GROUP_ID=#{dataGroupId },
+		COLUMN_CODE=#{columnCode },
+		COLUMN_NAME=#{columnName },
+		IS_REQUIRED=#{isRequired },
+		COLUMN_LENGTH=#{columnLength },
+		SORT=#{sort }
+		WHERE id = #{id } 
+	</update>
+	<!--  
+	@reqno:H1510170011
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_新增时获取说有的column
+    -->	
+    <!--  
+	@reqno:H1511300032
+	@date-designer:20151202-huangxuecheng
+	@date-author:20151202-huangxuecheng:开发原因：CRE_信贷审批_系统管理_表单栏目配置_修改功能，当后台数据库名不是“mcp”时，"物理表名"对应的下拉列表框无法把数据库中的表名加载出来
+    -->
+	<!-- 获取指定数据库下的所有table -->
+	<select id="selectAllTableName" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			TABLE_NAME,
+			TABLE_COMMENT 
+	    FROM 
+	        information_schema.TABLES 
+	    WHERE 
+	    	TABLE_SCHEMA = #{schemaName }
+	</select>
+	<!--  
+	@reqno:H1510170010
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_查询时查出顶级父机构传入查询条件
+	@db-z:sys_office:parent_ids
+    -->	
+	<!-- 获取指定公司id下的顶级父机构 -->
+	<select id="selectParentIdsByCompanyid" parameterType="string" resultType="string">
+		SELECT
+			parent_ids
+		FROM
+			sys_office
+		where id=#{id }
+	</select>
+	<!--  
+	@reqno:H1510170012
+	@date-designer:20151022-huangxuecheng
+	@date-author:20151022-huangxuecheng:CRE_信贷审批_系统管理_表单数据项配置_修改封装pojo
+    -->
+	<select id="selectInforByIdAndProductType" parameterType="java.util.Map" resultType="DynamicTableColumnVo">
+	select 
+		x.value as productType,
+  		x.label as productTypeValue, 
+		a.DATA_GROUP as dataGroup, 
+		y.label as dataGroupValue,
+		a.SHOW_POSITION as showPosition,
+		z.label as showPositionValue,
+  		0 as columnCount,
+  		a.ID as creDataGroupTableId,
+  		a.COMPANY_ID as companyId
+	from sys_dict x
+		inner join cre_data_group_table a  on 1=1
+		left join sys_dict y on y.value = a.DATA_GROUP and y.type = 'DATA_GROUP'
+		left join sys_dict z on z.value = a.SHOW_POSITION and z.type = 'SHOW_POSITION'
+	WHERE
+    	x.type = 'product_type'
+		AND a.COMPANY_ID = {companyId }
+	and a.ID= #{creDataGroupTableId }
+	and x.value= #{productType }
+	</select>
+	
+</mapper>

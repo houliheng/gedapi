@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.accounting.PLContract.dao.PLContractDao">
+
+	<sql id="plContractColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.ORG_LEVEL4 as
+		"orgLevel4.id",
+		a.ORG_LEVEL3 as
+		"orgLevel3.id",
+		a.ORG_LEVEL2 as
+		"orgLevel2.id",
+		a.apply_no AS "applyNo",
+		a.contract_amount AS
+		"contractAmount",
+		a.id_type AS "idType",
+		a.loan_amount AS "loanAmount",
+		a.id_num AS
+		"idNum",
+		a.appro_product_type_id AS "approProductTypeId",
+		a.appro_product_type_name AS "approProductTypeName",
+		a.appro_product_id
+		AS "approProductId",
+		a.appro_product_name AS
+		"approProductName",
+		a.appro_period_id AS "approPeriodId",
+		a.appro_period_value AS
+		"approPeriodValue",
+		a.appro_year_rate AS
+		"approYearRate",
+		a.loan_model AS
+		"loanModel",
+		a.service_fee_type AS
+		"serviceFeeType",
+		a.occur_date AS
+		"occurDate",
+		a.service_fee AS
+		"serviceFee",
+		a.special_service_fee AS
+		"specialServiceFee",
+		a.margin_amount AS "marginAmount",
+		a.appro_loan_repay_type AS
+		"approLoanRepayType",
+		a.rep_bankcard_no AS
+		"repBankcardNo",
+		a.cust_id AS
+		"custId",
+		a.rep_bankcard_name AS
+		"repBankcardName",
+		a.cust_name AS
+		"custName",
+		a.rep_bank_name AS
+		"repBankName",
+		a.rep_bank_mobile AS
+		"repBankMobile",
+		a.rep_bank_id_num AS
+		"repBankIdNum",
+		a.operate_org_id
+		AS
+		"operateOrgId",
+		a.rep_bank_detail AS
+		"repBankDetail",
+		a.operate_name
+		AS
+		"operateName",
+		a.operate_org_name AS
+		"operateOrgName",
+		a.operate_id
+		AS
+		"operateId",
+		a.con_start_date AS
+		"conStartDate",
+		a.con_end_date AS
+		"conEndDate",
+		a.rep_bank AS "repBank",
+		a.rep_bank_province AS
+		"repBankProvince",
+		a.rep_bank_city AS "repBankCity",
+		a.rep_bank_distinct AS "repBankDistinct",
+		a.service_fee_rate AS
+		"serviceFeeRate",
+		a.margin_rate AS "marginRate",
+		a.CAPITAL_TERRACE_NO as
+		"capitalTerraceNo"
+	</sql>
+
+
+	<select id="get" resultType="com.resoft.multds.accounting.PLContract.entity.PLContract">
+		SELECT
+		<include refid="plContractColumns" />
+		FROM acc_contract a
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+	<select id="findList" resultType="com.resoft.multds.accounting.PLContract.entity.PLContract">
+		SELECT
+		<include refid="plContractColumns" />
+		FROM acc_contract a
+		<where>
+			<if test="operateOrgName != null and operateOrgName != ''">
+				AND a.operate_org_name like
+				concat('%',#{operateOrgName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like concat('%',#{custName},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findListByContractNo" resultType="com.resoft.multds.accounting.PLContract.entity.PLContract">
+		SELECT
+		<include refid="plContractColumns" />
+		FROM acc_contract a
+		<where>
+			a.contract_no = #{contractNo}
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		select
+		count(a.id)
+		from acc_contract a
+		<where>
+			<if test="operateOrgName != null and operateOrgName != ''">
+				AND a.operate_org_name like
+				concat('%',#{operateOrgName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like concat('%',#{custName},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="com.resoft.multds.accounting.PLContract.entity.PLContract">
+		SELECT
+		<include refid="plContractColumns" />
+		FROM acc_contract a
+		<where>
+
+		</where>
+	</select>
+
+
+
+	<!-- 根据合同编号查询合同基本信息 -->
+	<select id="findCheckDailyContractBaseInfo" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		CONTRACT_NO AS "contractNo",
+		CUST_NAME AS "custName",
+		LOAN_DATE AS "loanDate",
+		CON_END_DATE AS "conEndDate",
+		LOAN_AMOUNT AS "loanAmount",
+		DAY (
+		DATE_SUB(LOAN_DATE, INTERVAL 1 DAY)
+		) AS "repayDate",
+		APPRO_PERIOD_VALUE AS "approPeriodValue",
+		APPRO_PRODUCT_TYPE_NAME AS
+		"approProductTypeName"
+		FROM
+		ACC_CONTRACT C
+		WHERE
+		C.CONTRACT_NO =
+		#{contractNo};
+	</select>
+
+	<select id="getToCheck25PLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.APPLY_NO AS "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY (DATE_SUB(a. LOAN_DATE, INTERVAL 1 DAY)) AS
+		"monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM
+		ACC_CONTRACT a
+		INNER JOIN sys_office o ON a.OPERATE_ORG_ID = o.id
+		<where>
+			(a.OPERATE_ORG_ID = #{currUserCompanyId}
+			OR o.parent_ids LIKE CONCAT(#{currUserCompanyParentsIds},#{currUserCompanyId},',%') )
+			<if test="contractNoList != null and contractNoList.size() > 0 ">
+				and contract_no in
+				<foreach item="hasAllocatedcontractNo" collection="contractNoList" open="(" close=")" separator=",">
+					#{hasAllocatedcontractNo}
+				</foreach>
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and CONTRACT_NO = #{contractNo}
+			</if>
+			<if test="custName != null and custName != ''">
+				and CUST_NAME = #{custName}
+			</if>
+			<if test="approProductTypeId != null and approProductTypeId != ''">
+				and APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+			</if>
+		</where>
+		order by contract_no
+	</select>
+
+
+	<!-- 抵（质）押物管理 合同信息 -->
+	<select id="findAssetContractList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		apply_no AS "applyNo",
+		CONTRACT_NO AS "contractNo",
+		LOAN_DATE AS
+		"loanDate",
+		CUST_NAME AS "custName",
+		LOAN_AMOUNT AS "loanAmount",
+		CON_END_DATE AS "conEndDate",
+		DAY (
+		DATE_SUB(LOAN_DATE, INTERVAL 1 DAY)
+		) AS "repayDate",
+		APPRO_PRODUCT_TYPE_NAME AS "approProductTypeName",
+		APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM
+		ACC_CONTRACT C
+		WHERE 1=1
+		<if test="contractNo != null and contractNo != ''">
+			AND C.contract_no like concat('%',#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND C.cust_name like concat('%',#{custName},'%')
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			and APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+	</select>
+	<select id="getOutStandingCapitalAmount" resultType="java.math.BigDecimal">
+		SELECT
+		IFNULL(SUM(
+		(a.CAPITAL_AMOUNT + IFNULL(a.INTEREST_AMOUNT,0)) -
+		(IFNULL(b.FACT_CAPITAL_AMOUNT, 0)+IFNULL(b.FACT_INTEREST_AMOUNT,0))
+		),0)
+		FROM
+		acc_repay_plan a
+		LEFT JOIN acc_sta_repay_plan_status b ON
+		a.CONTRACT_NO
+		= b.CONTRACT_NO
+		AND a.PERIOD_NUM = b.PERIOD_NUM
+		WHERE
+		a.CONTRACT_NO = #{contractNo}
+	</select>
+
+	<update id="updateContractStatusByContractNo">
+		update acc_sta_contract_status set
+		REPAY_CONTRACT_STATUS =
+		#{repayContractStatus} where contract_no =
+		#{contractNo}
+	</update>
+
+	<update id="updateAccStaRepayPlanStatus">
+		update acc_sta_repay_plan_status set
+		FACT_CAPITAL_AMOUNT =
+		FACT_CAPITAL_AMOUNT + #{factCapitalAmount} where
+		contract_no =
+		#{contractNo} and
+		PERIOD_NUM = #{periodNum}
+	</update>
+
+	<insert id="insertAccDeductApply">
+		insert into acc_deduct_apply(
+		DATA_DT,
+		DEDUCT_APPLY_NO
+		,
+		CONTRACT_NO ,
+		CAPITAL_TERRACE_NO ,
+		DEDUCT_AMOUNT ,
+		DEDUCT_TIME ,
+		DEDUCT_CUST_ID ,
+		IS_LOCK)
+		VALUE(
+		#{dataDt},
+		#{deductApplyNo},
+		#{contractNo},
+		null,
+		#{deductAmount},
+		#{deductTime},
+		#{deductCustId},
+		#{isLock});
+	</insert>
+
+	<insert id="insertAccDeductResult">
+		INSERT INTO ACC_DEDUCT_RESULT
+		(
+		DATA_DT,
+		CAPITAL_TERRACE_NO,
+		CONTRACT_NO,
+		SYS_SEQ_NO,
+		DEDUCT_APPLY_NO,
+		STREAM_NO,
+		STREAM_TIME,
+		DEDUCT_AMOUNT,
+		DEDUCT_RESULT,
+		DEDUCT_USER_ID,
+		IS_LOCK,
+		DESCRIPTION
+		)value(
+		#{dataDt},
+		null,
+		#{contractNo},
+		null,
+		#{deductApplyNo},
+		#{streamNo},
+		#{streamTime},
+		#{deductAmount},
+		#{deductResult},
+		#{deductUserId},
+		#{isLock},
+		#{description}
+		);
+
+	</insert>
+
+	<select id="getPeriodNumByContractNo" resultType="java.lang.String">
+		select
+		max(PERIOD_NUM) from acc_sta_repay_plan_status where contract_no =
+		#{contractNo}
+	</select>
+
+	<select id="findIdNumByContractNo" resultType="String">
+		SELECT
+		ID_NUM
+		FROM
+		acc_contract
+		WHERE
+		CONTRACT_NO = #{contractNo};
+	</select>
+
+	<select id="getAccStaContractStatusByContractNo" resultType="java.util.Map">
+		SELECT
+		c.OPERATE_ORG_ID AS "operateOrgId",
+		s.TA_TIMES AS "taTimes",
+		s.CURR_OVERDUE_AMOUNT AS "currOverdueAmount"
+		FROM
+		acc_contract c
+		INNER JOIN acc_sta_contract_status s ON c.CONTRACT_NO = s.CONTRACT_NO
+		WHERE
+		c.contract_no = #{contractNo}
+	</select>
+</mapper>

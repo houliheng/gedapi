@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.checkAccount.dao.CheckAccountDao">
+
+    <sql id="checkAccountColumns">
+        c.contract_no as "contractNo",
+        c.cust_name as "borrowName",
+        ar.cust_type as "loanType",
+        c.contract_amount as "contractAmount",
+        c.appro_product_type_name as "productName",
+        c.loan_company_name as "customName",
+        cs.repay_contract_status as "repayStatus",
+        f.name as "region",
+        e.name as "area",
+        d.name as "branchOffice",
+        ar.mobile_num as "borrowMobile"
+    </sql>
+
+    <sql id="checkAccountJoins">
+        inner join acc_sta_contract_status cs on cs.CONTRACT_NO = c.CONTRACT_NO
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register ar on ar.apply_no = c.apply_no
+        left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office d on c.org_level4 = d.id
+        left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office e on d.parent_id = e.id
+        left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office f on e.parent_id = f.id
+    </sql>
+
+    <select id="get" resultType="CheckAccount">
+        select
+          <include refid="checkAccountColumns"/>
+        from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract c
+          <include refid="checkAccountJoins"/>
+        <where>
+            <choose>
+                <when test="contractNo != null and contractNo != ''">
+                    c.contract_no = #{contractNo}
+                </when>
+                <otherwise>
+                    0 = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="list" resultType="CheckAccount">
+        select
+        <include refid="checkAccountColumns"/>
+        from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract c
+        <include refid="checkAccountJoins"/>
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o on c.operate_org_id = o.id
+        <where>
+            and (c.OPERATE_ORG_ID = #{currentUser.company.id}
+            or o.parent_ids like concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+            and (cs.repay_contract_status = '0600'
+            or cs.repay_contract_status = '0800')
+            <if test="contractNo != null and contractNo != ''">
+                and c.contract_no like CONCAT(#{contractNo},'%')
+            </if>
+            <if test="borrowName != null and borrowName != ''">
+                and c.cust_name like CONCAT('%',#{borrowName},'%')
+            </if>
+            <if test="loanType != null and loanType != ''">
+                and c.cust_type = #{loanType}
+            </if>
+            <if test="customName != null and customName != ''">
+                and c.loan_company_name like CONCAT('%',#{customName},'%')
+            </if>
+            <if test="repayStatus != null and repayStatus != ''">
+                and cs.repay_contract_status = #{repayStatus}
+            </if>
+        </where>
+    </select>
+
+    <select id="listDone"  resultType="CheckAccount">
+        select
+        <include refid="checkAccountColumns"/>,
+        caa.check_amount as "checkAmount",
+        caa.status as "applyStatus",
+        caa.id as "applyId"
+        from acc_check_account_apply caa
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract c on c.contract_no = caa.contract_no
+        <include refid="checkAccountJoins"/>
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o on c.operate_org_id = o.id
+        <where>
+            and (c.OPERATE_ORG_ID = #{currentUser.company.id}
+            or o.parent_ids like concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+            and (cs.repay_contract_status = '0600'
+            or cs.repay_contract_status = '0800')
+            <if test="contractNo != null and contractNo != ''">
+                and c.contract_no like CONCAT(#{contractNo},'%')
+            </if>
+            <if test="borrowName != null and borrowName != ''">
+                and c.cust_name like CONCAT('%',#{borrowName},'%')
+            </if>
+            <if test="loanType != null and loanType != ''">
+                and c.cust_type = #{loanType}
+            </if>
+            <if test="customName != null and customName != ''">
+                and c.loan_company_name like CONCAT('%',#{customName},'%')
+            </if>
+            <if test="repayStatus != null and repayStatus != ''">
+                and cs.repay_contract_status = #{repayStatus}
+            </if>
+        </where>
+    </select>
+</mapper>

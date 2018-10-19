@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyMarginRepay.dao.ApplyMarginRepayDao">
+
+	<sql id="applyMarginRepayColumns">
+		a.id AS "id",
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		d.name as "orgLevel4.name",
+		e.id as "orgLevel3.id",
+		e.name as "orgLevel3.name",
+		f.id as "orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.operate_id AS "operateId",
+		a.operate_org_id AS "operateOrgId",
+		a.contract_no AS "contractNo",
+		a.apply_time AS "applyTime",
+		a.margin_amount AS "marginAmount",
+		a.apply_margin_amount AS "applyMarginAmount",
+		a.appro_margin_amount AS
+		"approMarginAmount",
+		a.margin_amount_status AS "marginAmountStatus",
+		a.margin_apply_desc AS "marginApplyDesc",
+		a.margin_appro_desc AS
+		"marginApproDesc",
+		a.margin_received_mode AS "marginReceivedMode",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.margin_amount_time as "marginAmountTime"
+	</sql>
+
+	<sql id="applyMarginRepayJoins">
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join sys_office e on
+		a.ORG_LEVEL3 = e.id
+		left join sys_office f on a.ORG_LEVEL2 = f.id
+	</sql>
+
+	<select id="get" resultType="ApplyMarginRepay">
+		SELECT
+		<include refid="applyMarginRepayColumns" />
+		FROM acc_apply_margin_repay a
+		<include refid="applyMarginRepayJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findApplyMarginRepayByContractNo" resultType="ApplyMarginRepay">
+		SELECT
+		<include refid="applyMarginRepayColumns" />
+		FROM acc_apply_margin_repay a
+		<include refid="applyMarginRepayJoins" />
+		WHERE 
+		<if test = "doneOrDoFlag == null" >
+		a.contract_no = #{contractNo}
+		<if test = "marginAmountStatus != null and marginAmountStatus != ''">
+		 and a.margin_amount_status = #{marginAmountStatus}
+		</if>
+		</if>
+		<if test = "doneOrDoFlag != null " >
+		a.PROC_INS_ID = #{procInsId}
+		</if>
+	</select>
+
+	<select id="findList" resultType="ApplyMarginRepayVO">
+		select b.CUST_NAME as custName
+		,a.CONTRACT_NO as contractNo
+		,b.CONTRACT_AMOUNT as contractAmount
+		,b.SETTLE_DATE as settleDate
+		,b.ORG_LEVEL4 as "orgLevel4.id"
+		,d.name as "orgLevel4.name"
+		,e.id as "orgLevel3.id"
+		,e.name as "orgLevel3.name"
+		,f.id as "orgLevel2.id"
+		,f.name as "orgLevel2.name"
+		,a.MARGIN_AMOUNT as marginAmount
+		,a.APPRO_MARGIN_AMOUNT as
+		approMarginAmount
+		,ifnull(a.MARGIN_AMOUNT_STATUS,'1') as
+		marginAmountStatus
+		from acc_sta_contract_status b
+		left join sys_office d on b.ORG_LEVEL4 = d.id
+		left join sys_office e on b.ORG_LEVEL3 = e.id
+		left join sys_office f on b.ORG_LEVEL2 = f.id
+		left join
+		acc_apply_margin_repay a
+		on a.CONTRACT_NO = b.CONTRACT_NO
+		where
+		b.SETTLE_DATE is not null
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM acc_apply_margin_repay a
+		<include refid="applyMarginRepayJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyMarginRepayVO">
+		select b.CUST_NAME as custName
+		,a.CONTRACT_NO as contractNo
+		,b.CONTRACT_AMOUNT as contractAmount
+		,b.SETTLE_DATE as settleDate
+		,b.ORG_LEVEL4 as "orgLevel4.id"
+		,d.name as "orgLevel4.name"
+		,e.id as "orgLevel3.id"
+		,e.name as "orgLevel3.name"
+		,f.id as "orgLevel2.id"
+		,f.name as "orgLevel2.name"
+		,a.MARGIN_AMOUNT as marginAmount
+		,a.APPRO_MARGIN_AMOUNT as
+		approMarginAmount
+		,ifnull(a.MARGIN_AMOUNT_STATUS,'1') as
+		marginAmountStatus
+		from acc_sta_contract_status b
+		left join sys_office d on b.ORG_LEVEL4 = d.id
+		left join sys_office e on b.ORG_LEVEL3 = e.id
+		left join sys_office f on b.ORG_LEVEL2 = f.id
+		left join
+		acc_apply_margin_repay a
+		on a.CONTRACT_NO = b.CONTRACT_NO
+		where
+		b.SETTLE_DATE is not null
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_apply_margin_repay(
+		id,
+		org_level2,
+		org_level3,
+		org_level4,
+		operate_id,
+		operate_org_id,
+		contract_no,
+		apply_time,
+		margin_amount,
+		apply_margin_amount,
+		appro_margin_amount,
+		margin_amount_status,
+		margin_apply_desc,
+		margin_appro_desc,
+		margin_received_mode,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		)
+		VALUES (
+		#{id},
+		#{orgLevel2.id},
+		#{orgLevel3.id},
+		#{orgLevel4.id},
+		#{operateId},
+		#{operateOrgId},
+		#{contractNo},
+		#{createDate},
+		#{marginAmount},
+		#{applyMarginAmount},
+		#{approMarginAmount},
+		#{marginAmountStatus},
+		#{marginApplyDesc},
+		#{marginApproDesc},
+		#{marginReceivedMode},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE acc_apply_margin_repay SET
+		<if test="orgLevel2 != null and orgLevel2 !=''">
+			org_level2 =#{orgLevel2.id},
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 !=''">
+			org_level3 = #{orgLevel3.id},
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 !=''">
+			org_level4 = #{orgLevel4.id},
+		</if>
+		<if test="operateId != null and operateId !=''">
+			operate_id = #{operateId},
+		</if>
+		<if test="operateOrgId != null and operateOrgId !=''">
+			operate_org_id = #{operateOrgId},
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			contract_no = #{contractNo},
+		</if>
+		<if test="marginAmount != null and marginAmount !=''">
+			margin_amount =#{marginAmount},
+		</if>
+		<if test="applyMarginAmount != null and applyMarginAmount !=''">
+			apply_margin_amount = #{applyMarginAmount},
+		</if>
+		<if test="approMarginAmount != null and approMarginAmount !=''">
+			appro_margin_amount = #{approMarginAmount},
+		</if>
+		<if test="marginAmountStatus != null and marginAmountStatus !=''">
+			margin_amount_status =#{marginAmountStatus},
+		</if>
+		<if test="marginAmountTime != null and marginAmountTime !=''">
+			margin_amount_time =#{marginAmountTime},
+		</if>
+		<if test="marginApplyDesc != null and marginApplyDesc !=''">
+			margin_apply_desc = #{marginApplyDesc},
+		</if>
+		<if test="marginApproDesc != null and marginApproDesc !=''">
+			margin_appro_desc = #{marginApproDesc},
+		</if>
+		<if test="marginReceivedMode != null and marginReceivedMode !=''">
+			margin_received_mode =#{marginReceivedMode},
+		</if>
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+
+	<update id="updateApplyMarginRepay">
+		UPDATE acc_apply_margin_repay SET
+		<if test="orgLevel2 != null and orgLevel2 !=''">
+			org_level2 =#{orgLevel2.id},
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 !=''">
+			org_level3 = #{orgLevel3.id},
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 !=''">
+			org_level4 = #{orgLevel4.id},
+		</if>
+		<if test="operateId != null and operateId !=''">
+			operate_id = #{operateId},
+		</if>
+		<if test="operateOrgId != null and operateOrgId !=''">
+			operate_org_id = #{operateOrgId},
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			contract_no = #{contractNo},
+		</if>
+		<if test="marginAmount != null and marginAmount !=''">
+			margin_amount =#{marginAmount},
+		</if>
+		<if test="applyMarginAmount != null and applyMarginAmount !=''">
+			apply_margin_amount = #{applyMarginAmount},
+		</if>
+		<if test="approMarginAmount != null and approMarginAmount !=''">
+			appro_margin_amount = #{approMarginAmount},
+		</if>
+		<if test="marginAmountStatus != null and marginAmountStatus !=''">
+			margin_amount_status =#{marginAmountStatus},
+		</if>
+		<if test="marginAmountTime != null and marginAmountTime !=''">
+			margin_amount_time =#{marginAmountTime},
+		</if>
+		<if test="marginApplyDesc != null and marginApplyDesc !=''">
+			margin_apply_desc = #{marginApplyDesc},
+		</if>
+		<if test="marginApproDesc != null and marginApproDesc !=''">
+			margin_appro_desc = #{marginApproDesc},
+		</if>
+		<if test="marginReceivedMode != null and marginReceivedMode !=''">
+			margin_received_mode =#{marginReceivedMode},
+		</if>
+		update_by = #{updateBy.id},
+		update_date =#{updateDate}
+		WHERE contract_no
+		= #{contractNo}
+	</update>
+	
+	<update id="updateProcInsIdById">
+		UPDATE acc_apply_margin_repay SET PROC_INS_ID = #{procInsId} WHERE ID = #{id}
+	</update>
+
+</mapper>

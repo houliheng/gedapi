@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.mortgageHouseInfo.dao.MortgageHouseInfoDao">
+
+	<sql id="mortgageHouseInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.property_right AS
+		"propertyRight",
+		a.property_name AS "propertyName",
+		a.current_use_status AS "currentUseStatus",
+		a.house_use_property AS
+		"houseUseProperty",
+		a.land_use_property AS "landUseProperty",
+		a.house_type AS "houseType",
+		a.cont_province AS "contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS "contDistinct",
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.using_area AS "usingArea",
+		a.floor_num AS "floorNum",
+		a.house_years AS
+		"houseYears",
+		a.service_life AS "serviceLife",
+		a.house_purchase_price AS
+		"housePurchasePrice",
+		a.is_keep_papers AS "isKeepPapers",
+		a.is_property_line AS "isPropertyLine",
+		a.is_shift_record AS
+		"isShiftRecord",
+		a.property_status AS "propertyStatus",
+		a.is_unique_house AS "isUniqueHouse",
+		a.evaluate_way AS "evaluateWay",
+		a.market_price AS "marketPrice",
+		a.evaluate_price AS "evaluatePrice",
+		a.mortgagee_id AS "mortgageeId",
+		a.mortgagee_name AS "mortgageeName",
+		a.mortgagee_id_num AS "mortgageeIdNum",
+		a.del_flag AS "delFlag",
+		a.house_card_number AS "houseCardNumber",
+		a.land_card_number AS
+		"landCardNumber",
+		a.land_property AS "landProperty",
+		a.mortgage_rate AS
+		"mortgageRate",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		a.mortgage_note AS "mortgageNote",
+		a.SV_FLAG AS svFlag
+	</sql>
+
+	<sql id="mortgageHouseInfoJoins">
+	</sql>
+
+	<select id="get" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+		<include refid="mortgageHouseInfoJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+		<include refid="mortgageHouseInfoJoins" />
+		<where>
+			a.del_flag = '0'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_mortgage_house_info a
+		<include refid="mortgageHouseInfoJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+		<include refid="mortgageHouseInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_mortgage_house_info(
+		id,
+		apply_no,
+		property_right,
+		property_name,
+		current_use_status,
+		house_use_property,
+		land_use_property,
+		house_type,
+		cont_province,
+		cont_city,
+		cont_distinct,
+		cont_details,
+		building_area,
+		using_area,
+		floor_num,
+		house_years,
+		service_life,
+		house_purchase_price,
+		is_keep_papers,
+		is_property_line,
+		is_shift_record,
+		property_status,
+		is_unique_house,
+		evaluate_way,
+		market_price,
+		evaluate_price,
+		mortgagee_id,
+		mortgagee_name,
+		mortgagee_id_num,
+		del_flag,
+		mortgage_rate,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		house_card_number,
+		land_card_number,
+		land_property,
+		mortgage_note,
+		sv_flag
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{propertyRight},
+		#{propertyName},
+		#{currentUseStatus},
+		#{houseUseProperty},
+		#{landUseProperty},
+		#{houseType},
+		#{contProvince},
+		#{contCity},
+		#{contDistinct},
+		#{contDetails},
+		#{buildingArea},
+		#{usingArea},
+		#{floorNum},
+		#{houseYears},
+		#{serviceLife},
+		#{housePurchasePrice},
+		#{isKeepPapers},
+		#{isPropertyLine},
+		#{isShiftRecord},
+		#{propertyStatus},
+		#{isUniqueHouse},
+		#{evaluateWay},
+		#{marketPrice},
+		#{evaluatePrice},
+		#{mortgageeId},
+		#{mortgageeName},
+		#{mortgageeIdNum},
+		'0',
+		#{mortgageRate},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{houseCardNumber},
+		#{landCardNumber},
+		#{landProperty},
+		#{mortgageNote},
+		#{svFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_mortgage_house_info SET
+		apply_no = #{applyNo},
+		property_right = #{propertyRight},
+		property_name = #{propertyName},
+		current_use_status = #{currentUseStatus},
+		house_use_property = #{houseUseProperty},
+		land_use_property = #{landUseProperty},
+		house_type = #{houseType},
+		house_card_number = #{houseCardNumber},
+		land_card_number = #{landCardNumber},
+		land_property = #{landProperty},
+		cont_province = #{contProvince},
+		cont_city = #{contCity},
+		cont_distinct = #{contDistinct},
+		cont_details = #{contDetails},
+		building_area = #{buildingArea},
+		using_area = #{usingArea},
+		floor_num = #{floorNum},
+		house_years = #{houseYears},
+		service_life = #{serviceLife},
+		house_purchase_price = #{housePurchasePrice},
+		is_keep_papers = #{isKeepPapers},
+		is_property_line = #{isPropertyLine},
+		is_shift_record = #{isShiftRecord},
+		property_status = #{propertyStatus},
+		is_unique_house = #{isUniqueHouse},
+		evaluate_way = #{evaluateWay},
+		market_price = #{marketPrice},
+		evaluate_price = #{evaluatePrice},
+		mortgagee_id = #{mortgageeId},
+		mortgagee_name = #{mortgageeName},
+		mortgagee_id_num = #{mortgageeIdNum},
+		mortgage_rate = #{mortgageRate},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		mortgage_note = #{mortgageNote},
+		sv_flag = #{svFlag}
+		WHERE id = #{id}
+	</update>
+
+	<update id="batchDelete">
+		update cre_mortgage_house_info set del_flag = '1', is_push = '0'
+		WHERE id in
+		<foreach item="idList" collection="idList" open="(" close=")"
+			separator=",">
+			#{idList}
+		</foreach>
+	</update>
+
+	<select id="getHoseCount" resultType="long">
+		select count(1)
+		from
+		cre_mortgage_house_info c
+		where c.APPLY_NO = #{applyNo}
+		and c.DEL_FLAG =
+		'0'
+	</select>
+
+	<select id="getPageByApplyNo" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+		<where>
+			and a.apply_no = #{applyNo} and a.DEL_FLAG = '0'
+		</where>
+	</select>
+
+	<select id="getByapplyNo" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+		<where>
+			and a.apply_no = #{applyNo} and a.DEL_FLAG = '0'
+		</where>
+	</select>
+
+<select id="getHouseData" resultType="MortgageHouseInfo">
+		SELECT
+		<include refid="mortgageHouseInfoColumns" />
+		FROM cre_mortgage_house_info a
+			where a.del_flag = '0' and a.apply_no = #{applyNo}
+	</select>
+</mapper>

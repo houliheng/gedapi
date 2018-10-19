@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.repayPlan.dao.AccRepayPlanDao">
+
+	<sql id="repayPlanColumns">
+		a.id AS "id",
+		a.period_num AS
+		"periodNum",
+		a.ORG_LEVEL4
+		as
+		"orgLevel4.id",
+		d.name as "orgLevel4.name",
+		a.ORG_LEVEL3 as
+		"orgLevel3.id",
+		e.name as "orgLevel3.name",
+		a.ORG_LEVEL2 as
+		"orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.deduct_date AS
+		"deductDate",
+		a.cust_name AS
+		"custName",
+		a.repay_amount
+		AS "repayAmount",
+		a.contract_no AS "contractNo",
+		a.period_value AS
+		"periodValue",
+		a.interest_amount AS "interestAmount",
+		a.service_fee AS
+		"serviceFee",
+		a.management_fee AS "mangementFee",
+		a.capital_amount AS
+		"capitalAmount",
+		a.create_time AS "createTime",
+		a.OVERDUE_PENALTY as
+		"penaltyAmount"
+	</sql>
+
+	<sql id="repayPlanJoins">
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join
+		sys_office e on
+		d.parent_id = e.id 
+		<!-- a.ORG_LEVEL3 = e.id -->
+		left join sys_office f on
+		e.parent_id = f.id
+		<!-- a.ORG_LEVEL2 = f.id -->
+	</sql>
+
+	<select id="get" resultType="AccRepayPlan">
+		SELECT
+		<include refid="repayPlanColumns" />
+		FROM acc_repay_plan a
+		<include refid="repayPlanJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="findRepayPlanByContractNo" resultType="AccRepayPlan">
+		SELECT
+		<include refid="repayPlanColumns" />
+		FROM acc_repay_plan a
+		<include refid="repayPlanJoins" />
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+
+	<select id="getCurrentRepayPlan" resultType="AccRepayPlan">
+		SELECT
+		<include refid="repayPlanColumns" />
+		FROM acc_repay_plan a
+		<include refid="repayPlanJoins" />
+		WHERE a.contract_no = #{contractNo}
+			and  <![CDATA[a.DEDUCT_DATE >= #{deductDdate}]]>
+		order by a.DEDUCT_DATE asc  limit 1
+	</select>
+
+	
+	
+
+	<select id="getDataInQueryRepayPlan" resultType="AccRepayPlan">
+		SELECT
+		a.id AS "id"
+		FROM acc_repay_plan a
+		WHERE a.contract_no = #{contractNo} and a.period_num = #{periodNum}
+	</select>
+
+	<select id="findRepayPlanToStaRepayPlanStatusByContractNo" resultType="java.util.Map">
+		SELECT
+		a.CONTRACT_NO as "contractNo",
+		a.period_num AS
+		"periodNum",
+		a.deduct_date AS "dataDt",
+		b.FINE_AMOUNT as "fineAmount"
+		FROM acc_repay_plan a 
+		left join acc_sta_overdue_status_tmp b
+		on a.CONTRACT_NO = b.CONTRACT_NO and a.PERIOD_NUM = b.PERIOD_NUM
+		WHERE
+		a.contract_no = #{contractNo} order by a.period_num
+	</select>
+
+	<!--查询应还本息金额 还有应还账户管理费金额-->
+	<select id="selectAccRepayPlanByXinxi" resultType="AccRepayPlan">
+		SELECT
+		a.CUST_NAME AS "custName",
+		a.contract_no AS "contractNo",
+		d. NAME AS "orgLevel4.name",
+		e. NAME AS "orgLevel3.name",
+		f. NAME AS "orgLevel2.name",
+		cc.CONTRACT_AMOUNT as "contractAmount",
+		a.PERIOD_VALUE AS "periodValue",
+		a.PERIOD_NUM AS "periodNum",
+		a.DEDUCT_DATE AS "deductDate",
+		ifnull(a.CAPITAL_AMOUNT,0) - ifnull(b.FACT_CAPITAL_AMOUNT, 0) AS "capitalAmount",
+		ifnull(a.INTEREST_AMOUNT,0) - ifnull(b.FACT_INTEREST_AMOUNT, 0) AS "interestAmount",
+		ifnull(a.MANAGEMENT_FEE,0) - ifnull(b.FACT_MANAGEMENT_FEE, 0) AS "mangementFee",
+		ifnull(a.SERVICE_FEE,0) - ifnull(b.FACT_SERVICE_FEE, 0) AS "serviceFee",
+		ifnull(a.REPAY_AMOUNT,0) - ifnull(b.FACT_REPAY_AMOUNT, 0) AS "repayAmount",
+		SUM(ifnull(a.CAPITAL_AMOUNT,0) - ifnull(b.FACT_CAPITAL_AMOUNT, 0)  + ifnull(a.INTEREST_AMOUNT,0) - ifnull(b.FACT_INTEREST_AMOUNT, 0) ) as "couponAmount",
+		SUM(ifnull(a.MANAGEMENT_FEE,0) - ifnull(b.FACT_MANAGEMENT_FEE, 0))as "mangementFeeAmount"
+		FROM
+		acc_repay_plan a
+		LEFT JOIN acc_sta_repay_plan_status b ON a.contract_no = b.contract_no
+		AND a.period_num = b.period_num
+		LEFT JOIN acc_sta_contract_status c ON a.contract_no = c.contract_no
+		INNER JOIN acc_contract cc ON c.contract_no = cc.contract_no
+		INNER JOIN sys_office o ON
+		cc.OPERATE_ORG_ID = o.id
+		<include refid="repayPlanJoins" />
+		where
+		c.REPAY_CONTRACT_STATUS IN ('0600', '0800')
+		AND (b.REPAY_PERIOD_STATUS IN ('0200', '0300') or b.REPAY_PERIOD_STATUS is null)
+		and (cc.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE
+		concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and a.ORG_LEVEL4 = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and  orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id= #{orgLevel3.id}<!-- a.ORG_LEVEL3 = #{orgLevel3.id} -->
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and  orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id= #{orgLevel2.id}<!-- a.ORG_LEVEL2 = #{orgLevel2.id} -->
+		</if>
+		<if test="repayPeriodStatus !=null and repayPeriodStatus != '' and repayPeriodStatus != '0200' ">
+			and b.REPAY_PERIOD_STATUS = #{repayPeriodStatus}
+		</if>
+		<if test="repayPeriodStatus == '0200' ">
+			and b.CONTRACT_NO is NULL
+		</if>
+		<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+			and a.DEDUCT_DATE between #{startTime} and #{endTime}
+		</if>
+		<if test="startTime !=null and startTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE >= #{startTime}]]>
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE <= #{endTime}]]>
+		</if>
+		ORDER BY a.contract_no,a.PERIOD_NUM
+	</select>
+
+
+
+
+
+
+
+	<select id="findList" resultType="AccRepayPlan">
+		SELECT
+		a.CUST_NAME AS "custName",
+		a.contract_no AS "contractNo",
+		d. NAME AS "orgLevel4.name",
+		e. NAME AS "orgLevel3.name",
+		f. NAME AS "orgLevel2.name",
+		cc.CONTRACT_AMOUNT as "contractAmount",
+		a.PERIOD_VALUE AS "periodValue",
+		a.PERIOD_NUM AS "periodNum",
+		a.DEDUCT_DATE AS "deductDate",
+		ifnull(a.CAPITAL_AMOUNT,0) - ifnull(b.FACT_CAPITAL_AMOUNT, 0) AS "capitalAmount",
+		ifnull(a.INTEREST_AMOUNT,0) - ifnull(b.FACT_INTEREST_AMOUNT, 0) AS "interestAmount",
+		ifnull(a.MANAGEMENT_FEE,0) - ifnull(b.FACT_MANAGEMENT_FEE, 0) AS "mangementFee",
+		ifnull(a.SERVICE_FEE,0) - ifnull(b.FACT_SERVICE_FEE, 0) AS "serviceFee",
+		ifnull(a.REPAY_AMOUNT,0) - ifnull(b.FACT_REPAY_AMOUNT, 0) AS "repayAmount"
+		FROM
+		acc_repay_plan a
+		LEFT JOIN acc_sta_repay_plan_status b ON a.contract_no = b.contract_no
+		AND a.period_num = b.period_num
+		LEFT JOIN acc_sta_contract_status c ON a.contract_no = c.contract_no
+		INNER JOIN acc_contract cc ON c.contract_no = cc.contract_no
+		INNER JOIN sys_office o ON
+		cc.OPERATE_ORG_ID = o.id
+		<include refid="repayPlanJoins" />
+		where
+		c.REPAY_CONTRACT_STATUS IN ('0600', '0800')
+		AND (b.REPAY_PERIOD_STATUS IN ('0200', '0300') or b.REPAY_PERIOD_STATUS is null)
+		and (cc.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE
+		concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and a.ORG_LEVEL4 = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and  orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id= #{orgLevel3.id}<!-- a.ORG_LEVEL3 = #{orgLevel3.id} -->
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and  orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id= #{orgLevel2.id}<!-- a.ORG_LEVEL2 = #{orgLevel2.id} -->
+		</if>
+		<if test="repayPeriodStatus !=null and repayPeriodStatus != '' and repayPeriodStatus != '0200' ">
+			and b.REPAY_PERIOD_STATUS = #{repayPeriodStatus}
+		</if>
+		<if test="repayPeriodStatus == '0200' ">
+			and b.CONTRACT_NO is NULL
+		</if>
+		<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+			and a.DEDUCT_DATE between #{startTime} and #{endTime}
+		</if>
+		<if test="startTime !=null and startTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE >= #{startTime}]]>
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE <= #{endTime}]]>
+		</if>
+		ORDER BY a.contract_no,a.PERIOD_NUM
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT count(*) FROM acc_repay_plan a
+		LEFT JOIN acc_sta_repay_plan_status b ON a.contract_no = b.contract_no
+		AND a.period_num = b.period_num
+		LEFT JOIN acc_sta_contract_status c ON a.contract_no = c.contract_no
+		INNER JOIN acc_contract cc ON c.contract_no = cc.contract_no
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		<include refid="repayPlanJoins" />
+		where
+		c.REPAY_CONTRACT_STATUS IN ('0600', '0800')
+		AND (b.REPAY_PERIOD_STATUS IN ('0200', '0300') or b.REPAY_PERIOD_STATUS is null)
+		and (cc.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE
+		concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and a.ORG_LEVEL4 = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and  orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id= #{orgLevel3.id}<!-- a.ORG_LEVEL3 = #{orgLevel3.id} -->
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and  orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id= #{orgLevel2.id}<!-- a.ORG_LEVEL2 = #{orgLevel2.id} -->
+		</if>
+		<if test="repayPeriodStatus !=null and repayPeriodStatus != '' and repayPeriodStatus != '0200' ">
+			and b.REPAY_PERIOD_STATUS = ${repayPeriodStatus}
+		</if>
+		<if test="repayPeriodStatus == '0200' ">
+			and b.CONTRACT_NO is NULL
+		</if>
+		<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+			and a.DEDUCT_DATE between #{startTime} and #{endTime}
+		</if>
+		<if test="startTime !=null and startTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE >= #{startTime}]]>
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			and  <![CDATA[a.DEDUCT_DATE <= #{endTime}]]>
+		</if>
+		ORDER BY a.contract_no,a.PERIOD_NUM
+	</select>
+
+	<select id="findAllList" resultType="AccRepayPlan">
+		SELECT
+		<include refid="repayPlanColumns" />
+		FROM acc_repay_plan a
+		<include refid="repayPlanJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_repay_plan(
+		id,
+		<!-- org_level2, -->
+		period_num,
+		<!-- org_level3, -->
+		deduct_date,
+		org_level4,
+		cust_name,
+		repay_amount,
+		contract_no,
+		period_value,
+		interest_amount,
+		service_fee,
+		management_fee,
+		capital_amount,
+		create_time,
+		OVERDUE_PENALTY
+		) VALUES (
+		#{id},
+		<!-- #{orgLevel2.id}, -->
+		#{periodNum},
+		<!-- #{orgLevel3.id}, -->
+		#{deductDate},
+		#{orgLevel4.id},
+		#{custName},
+		#{repayAmount},
+		#{contractNo},
+		#{periodValue},
+		#{interestAmount},
+		#{serviceFee},
+		#{mangementFee},
+		#{capitalAmount},
+		#{createTime},
+		#{penaltyAmount}
+		)
+	</insert>
+
+	<insert id="importRepayPlan">
+		INSERT INTO acc_repay_plan(
+		id,
+		<!-- <if test="orgLevel2 != null and orgLevel2 != ''">
+		org_level2,
+		</if> -->
+		<if test="periodNum != null and periodNum != ''">
+		period_num,
+		</if>
+		<!-- <if test="orgLevel3 != null and orgLevel3 != ''">
+		org_level3,
+		</if> -->
+		<if test="deductDate != null and deductDate != ''">
+		deduct_date,
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != ''">
+		org_level4,
+		</if>
+		<if test="custName != null and custName != ''">
+		cust_name,
+		</if>
+		<if test="repayAmount != null and repayAmount != ''">
+		repay_amount,
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+		period_value,
+		</if>
+		<if test="interestAmount != null and interestAmount != ''">
+		interest_amount,
+		</if>
+		<if test="serviceFee != null and serviceFee != ''">
+		service_fee,
+		</if>
+		<if test="mangementFee != null and mangementFee != ''">
+		management_fee,
+		</if>
+		<if test="capitalAmount != null and capitalAmount != ''">
+		capital_amount,
+		</if>
+		<if test="createTime != null and createTime != ''">
+		create_time,
+		</if>
+		<if test="penaltyAmount != null and penaltyAmount != ''">
+		OVERDUE_PENALTY,
+		</if>
+		<if test="capitalTerraceNo != null and capitalTerraceNo != ''">
+		CAPITAL_TERRACE_NO,
+		</if>
+		contract_no
+		) VALUES (
+		REPLACE(UUID(),'-',''),
+		<!-- <if test="orgLevel2 != null and orgLevel2 != ''">
+		#{orgLevel2},
+		</if> -->
+		<if test="periodNum != null and periodNum != ''">
+		#{periodNum},
+		</if>
+		<!-- <if test="orgLevel3 != null and orgLevel3 != ''">
+		#{orgLevel3},
+		</if> -->
+		<if test="deductDate != null and deductDate != ''">
+		#{deductDate},
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != ''">
+		#{orgLevel4},
+		</if> 
+		<if test="custName != null and custName != ''">
+		#{custName},
+		</if>
+		<if test="repayAmount != null and repayAmount != ''">
+		#{repayAmount},
+		</if>
+		<if test="periodValue != null and periodValue != ''">
+		#{periodValue},
+		</if>
+		<if test="interestAmount != null and interestAmount != ''">
+		#{interestAmount},
+		</if>
+		<if test="serviceFee != null and serviceFee != ''">
+		#{serviceFee},
+		</if>
+		<if test="mangementFee != null and mangementFee != ''">
+		#{mangementFee},
+		</if>
+		<if test="capitalAmount != null and capitalAmount != ''">
+		#{capitalAmount},
+		</if>
+		<if test="createTime != null and createTime != ''">
+		#{createTime},
+		</if>
+		<if test="penaltyAmount != null and penaltyAmount != ''">
+		#{penaltyAmount},
+		</if>
+		<if test="capitalTerraceNo != null and capitalTerraceNo != ''">
+		#{capitalTerraceNo},
+		</if>
+		#{contractNo}
+		)
+	</insert>
+	
+	<update id="updateimportedRepayPlan">
+		UPDATE acc_repay_plan SET
+		deduct_date = #{deductDate},
+		org_level4 = #{orgLevel4},
+		cust_name = #{custName},
+		repay_amount = #{repayAmount},
+		period_value = #{periodValue},
+		interest_amount = #{interestAmount},
+		service_fee = #{serviceFee},
+		management_fee = #{mangementFee},
+		capital_amount = #{capitalAmount},
+		create_time = #{createTime},
+		CAPITAL_TERRACE_NO = #{capitalTerraceNo},
+		OVERDUE_PENALTY = #{penaltyAmount}
+		WHERE contract_no = #{contractNo} and period_num = #{periodNum}
+	</update>
+
+	<update id="update">
+		UPDATE acc_repay_plan SET
+		<!-- org_level2 =
+		#{orgLevel2.id}, -->
+		period_num = #{periodNum},
+		<!-- org_level3 =
+		#{orgLevel3.id}, -->
+		deduct_date = #{deductDate},
+		org_level4 =
+		#{orgLevel4.id},
+		cust_name = #{custName},
+		repay_amount = #{repayAmount},
+		contract_no = #{contractNo},
+		period_value = #{periodValue},
+		interest_amount = #{interestAmount},
+		service_fee = #{serviceFee},
+		management_fee = #{mangementFee},
+		capital_amount = #{capitalAmount},
+		create_time = #{createTime},
+		OVERDUE_PENALTY = #{penaltyAmount}
+		WHERE id
+		= #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_repay_plan
+		WHERE id = #{id}
+	</update>
+
+	<select id="getRepayPlanByContractNo" resultType="AccRepayPlan">
+		SELECT
+		RP.CONTRACT_NO AS "contractNo"
+		,RP.PERIOD_NUM AS "periodNum"
+		,IFNULL(A.REPAY_PERIOD_STATUS,'0200') AS
+		"staRepayPlanStatus.repayPeriodStatus"
+		,RP.DEDUCT_DATE AS "deductDate"
+		,RP.REPAY_AMOUNT AS "repayAmount"
+		,A.FACT_SERVICE_FEE AS
+		"staRepayPlanStatus.factServiceFee"
+		,A.FACT_MANAGEMENT_FEE AS
+		"staRepayPlanStatus.factManagementFee"
+		,A.FACT_INTEREST_AMOUNT AS
+		"staRepayPlanStatus.factIntersetAmount"
+		,A.FACT_CAPITAL_AMOUNT AS
+		"staRepayPlanStatus.factCapitalAmount"
+		,A.FACT_PENALTY_AMOUNT AS
+		"staRepayPlanStatus.factPenaltyAmount"
+		,A.FACT_FINE_AMOUNT AS
+		"staRepayPlanStatus.factFineAmount"
+		,B.OVERDUE_DAYS AS
+		"staOverdueStatus.overdueDays"
+		FROM acc_repay_plan RP
+		LEFT JOIN
+		acc_sta_repay_plan_status A
+		ON RP.CONTRACT_NO = A.CONTRACT_NO
+		AND
+		RP.PERIOD_NUM = A.PERIOD_NUM
+		LEFT JOIN acc_sta_overdue_status B
+		ON
+		RP.CONTRACT_NO = B.CONTRACT_NO
+		AND RP.PERIOD_NUM = B.PERIOD_NUM
+		WHERE
+		RP.CONTRACT_NO = #{contractNo}
+	</select>
+	
+	<select id="getDataInQueryRepayPlanByContractAndPeriod" resultType="AccRepayPlan">
+		select period_num as from acc_sta_repay_plan_status where contract_no = #{contractNo} and period_num >= #{periodNum} and repay_period_status = '0400'
+	</select>
+	<!-- <select id="getDataInQueryRepayPlanByContractAndPeriod" resultType="AccRepayPlan">
+		SELECT
+		IFNULL(a.CAPITAL_AMOUNT,0.00)+IFNULL(a.INTEREST_AMOUNT,0.00)+IFNULL(a.MANAGEMENT_FEE,0.00) - IFNULL(b.FACT_INTEREST_AMOUNT,0.00) - IFNULL(b.FACT_CAPITAL_AMOUNT,0.00) -IFNULL(b.FACT_MANAGEMENT_FEE,0.00) as repayAmount,
+		a.PERIOD_NUM as periodNum
+		FROM acc_repay_plan a left join acc_sta_repay_plan_status b on a.CONTRACT_NO = b.CONTRACT_NO and a.PERIOD_NUM = b.PERIOD_NUM
+		WHERE a.contract_no = #{contractNo}  and a.PERIOD_NUM >= #{periodNum}  ORDER BY a.PERIOD_NUM
+	</select> -->
+	
+	
+	<select id="findAccRepayByConAndNumber" resultType="AccRepayPlan">
+		SELECT
+		SUM(
+		IFNULL(a.OVERDUE_PENALTY, 0) + IFNULL(b.FINE_AMOUNT, 0)
+		) as repayAmount,a.PERIOD_NUM as periodNum,a.CONTRACT_NO as contractNo
+		FROM
+		acc_repay_plan a
+		INNER JOIN acc_sta_overdue_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		AND a.PERIOD_NUM = b.PERIOD_NUM
+		WHERE
+		a.CONTRACT_NO = #{contractNo}
+		AND a.PERIOD_NUM = #{periodNum}
+	</select>
+
+
+	<!--根据合同编号查询实还服务费 -->
+	<select id="queryFactServiceFee" resultType="java.math.BigDecimal" >
+		select IFNULL(SUM(FACT_SERVICE_FEE),'0.00') as "FactServiceFee"
+		from acc_sta_repay_plan_status
+		where  CONTRACT_NO = #{contractNo}
+	</select>
+	
+	<select id="getAdvanceRepayPlan" resultType="AccRepayPlan">
+		SELECT
+		a.DEDUCT_DATE as deductDate,a.PERIOD_NUM as periodNum,a.CONTRACT_NO as contractNo,b.REPAY_PERIOD_STATUS as repayPeriodStatus,a.CAPITAL_AMOUNT as capitalAmount
+		FROM
+		acc_repay_plan a
+		LEFT JOIN
+		acc_sta_repay_plan_status b
+		ON a.CONTRACT_NO = b.CONTRACT_NO
+		AND
+		a.PERIOD_NUM = b.PERIOD_NUM
+		WHERE
+		a.CONTRACT_NO = #{contractNo}
+		AND a.PERIOD_NUM >= #{periodNum} and <![CDATA[a.DEDUCT_DATE > #{date}]]> ORDER BY  a.PERIOD_NUM
+	</select>
+	
+	<select id="queryStayMoney" resultType="com.resoft.accounting.advanceRepayGET.entity.AdvanceRepayGet">
+		SELECT SUM(IFNULL(a.CAPITAL_AMOUNT,0)) as remainCapitalAmount,IFNULL((SELECT
+	IFNULL(a.MANAGEMENT_FEE,0)+IFNULL(a.INTEREST_AMOUNT,0)
+FROM
+	acc_repay_plan a
+LEFT JOIN acc_advance_ged c ON a.CONTRACT_NO = c.CONTRACT_NO
+AND a.PERIOD_NUM = c.PERIOD_NUM
+WHERE
+	a.CONTRACT_NO = #{contractNo}
+AND c.ADVANCE_FLAG ='0'),0.00) AS remainAllInterest FROM acc_repay_plan a LEFT JOIN acc_sta_repay_plan_status b on a.CONTRACT_NO = b.CONTRACT_NO AND a.PERIOD_NUM = b.PERIOD_NUM
+		LEFT JOIN acc_advance_ged c on a.CONTRACT_NO = c.CONTRACT_NO AND a.PERIOD_NUM = c.PERIOD_NUM
+		where a.CONTRACT_NO = #{contractNo} and c.ADVANCE_FLAG in ('1','0')
+	</select>
+	
+	
+	<select id="queryAccRepayPlan" resultType="AccRepayPlan">
+		SELECT
+		a.id AS "id",
+		a.period_num AS
+		"periodNum",
+		a.deduct_date AS
+		"deductDate",
+		a.cust_name AS
+		"custName",
+		a.contract_no AS "contractNo",
+		a.period_value AS
+		"periodValue",
+		ifnull(a.interest_amount,0) AS "interestAmount",
+		ifnull(a.service_fee,0) AS
+		"serviceFee",
+		a.management_fee AS "mangementFee",
+		a.capital_amount AS
+		"capitalAmount",
+		(case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0.00 END) as
+		"penaltyAmount",
+		ifnull(a.SERVICE_FEE,0)+ifnull(a.MANAGEMENT_FEE,0)+ifnull(a.CAPITAL_AMOUNT,0)+ifnull(a.INTEREST_AMOUNT,0)+(case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0 END)+IFNULL(c.FINE_AMOUNT,0)-ifnull(d.DISCOUNT_FEE,0)-ifnull(q.PENALTY_EXEMPT_AMOUNT,0)-ifnull(q.FINE_EXEMPT_AMOUNT,0) as repayAmount,
+		ifnull(c.FINE_AMOUNT,0) as fineAmount
+		FROM acc_repay_plan a
+		LEFT JOIN acc_sta_overdue_status c ON a.CONTRACT_NO = c.CONTRACT_NO
+		AND a.period_num = c.PERIOD_NUM
+		LEFT JOIN acc_sta_repay_plan_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		AND a.PERIOD_NUM = b.PERIOD_NUM
+		LEFT JOIN acc_discount d ON a.CONTRACT_NO = d.CONTRACT_NO
+		AND a.PERIOD_NUM = d.PERIOD_NUM
+		LEFT JOIN acc_discount_stream f ON a.CONTRACT_NO = f.CONTRACT_NO
+		AND a.PERIOD_NUM = f.PERIOD_NUM
+		LEFT JOIN acc_sta_penalty_fine_exempt q ON a.CONTRACT_NO = q.CONTRACT_NO
+		AND a.PERIOD_NUM = q.PERIOD_NUM
+		WHERE a.contract_no = #{contractNo} and a.PERIOD_NUM >= #{periodNum} ORDER BY  a.PERIOD_NUM
+	</select>
+
+</mapper>

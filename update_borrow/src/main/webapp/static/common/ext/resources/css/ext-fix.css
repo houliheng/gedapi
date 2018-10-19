@@ -1,0 +1,11 @@
+@charset "utf-8";
+/* CSS Document */
+	/**
+	 *@reqno:H1504230091
+	 *@date-designer:20150424-jiaoyang
+	 *@date-author:20150424-jiaoyang:新增样式控制combobox不显示下拉样式时的文本框不会消失。
+	 */
+
+.ext-ie .x-form-text{position:static !important;margin:0;}
+.ext-ie td .x-form-text{top:0;}
+.x-btn-text-icon .x-btn-center .x-btn-text{padding-top:2px;}

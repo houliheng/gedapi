@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.contract.dao.ContractProjectListDao">
+
+
+    <!--查询冠易贷账号管理  -->
+    <select id="findList" resultType="ContractProjectList">
+
+        select
+         a.CONTRACT_NO as "contractNo" ,
+         b.REC_BANKCARD_NO as "recBankcareNo",
+         b.APPRO_PRODUCT_NAME as "approProductName",
+         a.REPAY_CONTRACT_STATUS as "repayContractStatus" ,
+         b.GEDAPI_SAVE as "gedApiSave",
+         b.APPLY_NO as "applyNo",
+         c.CUST_TYPE as "isFlag",
+         case when c.CUST_TYPE = '1' THEN k.ID  else IFNULL(d.ID,f.ID) end  as "custId",
+         case when c.CUST_TYPE = '1' THEN ""  else IFNULL(d.BUSI_REG_NAME,f.BUSI_REG_NAME) end as "borrowName",
+         case when c.CUST_TYPE = '1' THEN ""  else IFNULL(g.ROLE_TYPE,'5') end as "borrowType",
+         case when c.CUST_TYPE = '1' THEN ""  else IFNULL(d.UN_SOC_CREDIT_NO,f.UN_SOC_CREDIT_NO) end  as "unSocCreditNo" ,
+         case when c.CUST_TYPE = '1' THEN k.CUST_NAME  else r.CUST_NAME  end as "custName" ,
+         case when c.CUST_TYPE = '1' THEN k.MOBILE_NUM  else r.MOBILE_NUM  end  as "mobileNum" ,
+         case when c.CUST_TYPE = '1' THEN ''  else IFNULL(d.CORPORATION_NAME,f.CORPORATION_NAME) end as "corporaTionName",
+         case when c.CUST_TYPE = '1' THEN ''  else IFNULL(d.CORPORATION_MOBILE,f.CORPORATION_MOBILE) end as "corporaTionMobile"
+         from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status  a
+         INNER JOIN cre_contract b on a.CONTRACT_NO = b.CONTRACT_NO
+         join cre_apply_register c on c.APPLY_NO = b.APPLY_NO
+         left   join cre_company_info d on b.CUST_ID = d.ID
+         INNER join cre_apply_relation e on b.APPLY_NO = e.APPLY_NO and e.ROLE_TYPE = '5'
+             left  join cre_company_info f on e.CUST_ID = f.ID
+         left join cre_apply_relation g on g.CUST_ID = d.ID and b.APPLY_NO = g.APPLY_NO
+         left join cre_apply_relation h on b.APPLY_NO = h.APPLY_NO and h.ROLE_TYPE = '1' and h.DEL_FLAG = '0'
+         left join cre_cust_info r on r.ID = h.CUST_ID
+         left join cre_cust_info k on k.ID = b.CUST_ID
+         where a.REPAY_CONTRACT_STATUS   in  ("0600","0800") and c.SEND_GED != 1
+        <if test="contractNo != null and contractNo != ''">
+            AND b.CONTRACT_NO like CONCAT(#{contractNo},'%')
+        </if>
+        <if test="repayContractStatus != null and repayContractStatus != ''">
+            AND a.REPAY_CONTRACT_STATUS  = #{repayContractStatus}
+        </if>
+
+        <if test="approProductName != null and approProductName != ''">
+            AND  b.APPRO_PRODUCT_NAME  = #{approProductName}
+        </if>
+
+        <if test="borrowName != null and borrowName != ''">
+            AND  d.BUSI_REG_NAME  like CONCAT(#{borrowName},'%')
+
+        </if>
+        order by b.CREATE_DATE DESC
+
+    </select>
+
+    <!-- 获得分页总数 -->
+    <select id="getCount" resultType="long">
+        select
+        count(a.CONTRACT_NO)
+        from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status  a
+        INNER JOIN cre_contract b on a.CONTRACT_NO = b.CONTRACT_NO
+        join cre_apply_register c on c.APPLY_NO = b.APPLY_NO
+        left   join cre_company_info d on b.CUST_ID = d.ID
+        INNER join cre_apply_relation e on b.APPLY_NO = e.APPLY_NO and e.ROLE_TYPE = '5'
+        left  join cre_company_info f on e.CUST_ID = f.ID
+        left join cre_apply_relation g on g.CUST_ID = d.ID and b.APPLY_NO = g.APPLY_NO
+        left join cre_apply_relation h on b.APPLY_NO = h.APPLY_NO and h.ROLE_TYPE = '1' and h.DEL_FLAG = '0'
+        left join cre_cust_info r on r.ID = h.CUST_ID
+        left join cre_cust_info k on k.ID = b.CUST_ID
+        where a.REPAY_CONTRACT_STATUS   in  ("0600","0800")  and c.SEND_GED  != 1
+        <if test="contractNo != null and contractNo != ''">
+            AND b.CONTRACT_NO like CONCAT(#{contractNo},'%')
+        </if>
+        <if test="repayContractStatus != null and repayContractStatus != ''">
+            AND a.REPAY_CONTRACT_STATUS  = #{repayContractStatus}
+        </if>
+
+        <if test="approProductName != null and approProductName != ''">
+            AND  b.APPRO_PRODUCT_NAME  = #{approProductName}
+        </if>
+
+        <if test="borrowName != null and borrowName != ''">
+            AND  c.BUSI_REG_NAME  = #{borrowName}
+        </if>
+        order by b.CREATE_DATE DESC
+    </select>
+
+
+</mapper>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyMarginRepay.dao.ApplyMarginRepayVODao">
+	<sql id="applyMarginRepayColumns">
+		A.CUST_NAME as "custName"
+		,A.CONTRACT_NO as "contractNo"
+		,A.CONTRACT_AMOUNT as
+		"contractAmount"
+		,A.SETTLE_DATE as "settleDate"
+		,A.ORG_LEVEL4 as "orgLevel4.id"
+		,d.name as "orgLevel4.name"
+		,e.id as "orgLevel3.id"
+		,e.name as "orgLevel3.name"
+		,f.id as
+		"orgLevel2.id"
+		,f.name as "orgLevel2.name"
+		,cc.MARGIN_AMOUNT as "marginAmount"
+		,ifnull(B.APPRO_MARGIN_AMOUNT,'0')
+		as "approMarginAmount"
+		,IFNULL(b.MARGIN_AMOUNT_STATUS,'1') as
+		"marginAmountStatus",
+		b.margin_amount_time as "marginAmountTime"
+	</sql>
+	<sql id="applyMarginRepayJoins">
+		inner join
+		acc_contract cc
+		on A.CONTRACT_NO =
+		cc.CONTRACT_NO
+		LEFT JOIN
+		acc_apply_margin_repay B
+		ON A.CONTRACT_NO =
+		B.CONTRACT_NO
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join sys_office e on d.parent_id = e.id
+		left join sys_office f on e.parent_id = f.id
+	</sql>
+	<select id="get" resultType="ApplyMarginRepayVO">
+		SELECT
+		<include refid="applyMarginRepayColumns" />
+		FROM
+		acc_sta_contract_status A
+		<include refid="applyMarginRepayJoins" />
+		where
+		(A.REPAY_CONTRACT_STATUS = '0700'
+		OR
+		A.REPAY_CONTRACT_STATUS =
+		'0900'
+		OR
+		A.REPAY_CONTRACT_STATUS = '1000'
+		OR
+		A.REPAY_CONTRACT_STATUS =
+		'1100')
+		AND
+		a.CONTRACT_NO = #{id}
+	</select>
+
+	<select id="findList" resultType="ApplyMarginRepayVO">
+		SELECT
+		<include refid="applyMarginRepayColumns" />
+		FROM
+		acc_sta_contract_status A
+		<include refid="applyMarginRepayJoins" />
+		inner join
+		sys_office o on cc.OPERATE_ORG_ID = o.id
+		where
+		(A.REPAY_CONTRACT_STATUS = '0700'
+		OR
+		A.REPAY_CONTRACT_STATUS =
+		'0900'
+		OR
+		A.REPAY_CONTRACT_STATUS = '1000')
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and d.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id = #{orgLevel2.id}
+		</if>
+		<if test="marginAmountStatus != null and marginAmountStatus != '' and marginAmountStatus !=1 ">
+			and b.MARGIN_AMOUNT_STATUS = #{marginAmountStatus}
+		</if>
+		<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+			and b.margin_amount_time between #{startTime} and #{endTime}
+		</if>
+		<if test="startTime !=null and startTime != '' ">
+			and  <![CDATA[b.margin_amount_time >= #{startTime}]]>
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			and  <![CDATA[b.margin_amount_time <= #{endTime}]]>
+		</if>
+		<if test="marginAmountStatus == 1 ">
+			and B.CONTRACT_NO is null
+		</if>
+		and (cc.OPERATE_ORG_ID = #{currentUser.company.id} OR o.parent_ids LIKE
+		concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT count(*)
+		FROM
+		acc_sta_contract_status A
+		<include refid="applyMarginRepayJoins" />
+		where
+		(A.REPAY_CONTRACT_STATUS = '0700'
+		OR
+		A.REPAY_CONTRACT_STATUS =
+		'0900'
+		OR
+		A.REPAY_CONTRACT_STATUS = '1000')
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and d.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and e.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and f.id = #{orgLevel2.id}
+		</if>
+		<if test="marginAmountStatus != null and marginAmountStatus != '' and marginAmountStatus !=1 ">
+			and b.MARGIN_AMOUNT_STATUS = #{marginAmountStatus}
+		</if>
+		<if test="marginAmountStatus == 1 ">
+			and B.CONTRACT_NO is null
+		</if>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ApplyMarginRepayVO">
+		SELECT
+		<include refid="applyMarginRepayColumns" />
+		FROM
+		acc_sta_contract_status A
+		<include refid="applyMarginRepayJoins" />
+		where
+		(A.REPAY_CONTRACT_STATUS = '0700'
+		OR
+		A.REPAY_CONTRACT_STATUS =
+		'0900'
+		OR
+		A.REPAY_CONTRACT_STATUS = '1000')
+
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<!-- <otherwise> ORDER BY a.update_date DESC </otherwise> -->
+		</choose>
+	</select>
+</mapper>

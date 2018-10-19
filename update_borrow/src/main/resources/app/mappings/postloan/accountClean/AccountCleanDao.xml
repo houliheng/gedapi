@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.accountClean.dao.AccountCleanDao">
+    
+	<sql id="accountCleanColumns">
+	    a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.clean_by_id AS "cleanById",
+		a.clean_by AS "cleanBy",
+		a.clean_amount AS "cleanAmount",
+		a.clean_apply_status AS "cleanApplyStatus",
+		a.clean_return_amount AS "cleanReturnAmount"
+	</sql>
+	<sql id="accountCleanAllocateColumns">
+	    ,b.ALLOCATE_TYPE AS "allocateType"
+	</sql>
+	
+	<sql id="accountCleanJoins">
+	</sql>
+	
+	<sql id="accountCleanAllocateJoins"> 
+	left join pl_account_clean_allocate b on a.contract_no = b.contract_no
+	</sql>
+    
+	<select id="get" resultType="AccountClean">
+		SELECT 
+			<include refid="accountCleanColumns"/>
+		FROM pl_account_clean a
+		<include refid="accountCleanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AccountClean">
+		SELECT 
+			<include refid="accountCleanColumns"/>
+		FROM pl_account_clean a
+		<where>
+		<if test ="cleanBy != null and cleanBy != ''">
+			a.clean_by = #{cleanBy}
+		</if>
+		<if test ="contractNo != null and contractNo != ''">
+			a.contract_No = #{contractNo}
+		</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(*)
+		FROM pl_account_clean a
+		<include refid="accountCleanJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccountClean">
+		SELECT 
+			<include refid="accountCleanColumns"/>
+		FROM pl_account_clean a
+		<include refid="accountCleanJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_account_clean(
+		    id,
+			contract_no,
+			clean_by_id,
+			clean_by,
+			clean_amount,
+			clean_apply_status,
+			clean_return_amount
+		) VALUES (
+		    #{id},
+			#{contractNo},
+			#{cleanById},
+			#{cleanBy},
+			#{cleanAmount},
+			#{cleanApplyStatus},
+			#{cleanReturnAmount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_account_clean SET 	
+			contract_no = #{contractNo},
+			clean_by_id = #{cleanById},
+			clean_by = #{cleanBy},
+			clean_amount = #{cleanAmount},
+			clean_apply_status = #{cleanApplyStatus},
+			clean_return_amount = #{cleanReturnAmount}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_account_clean
+		WHERE id = #{id}
+	</update>
+	<select id="getAccountCleanInfo" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+	SELECT
+	U.id AS "liquidateId",
+	U.LOGIN_NAME AS "loginName",
+	U.NAME AS
+	"liquidateName",
+	o1.NAME AS "operatorOffice",
+	O.NAME AS
+	"orgName"
+	FROM
+	SYS_USER U
+	LEFT JOIN SYS_OFFICE O ON U.COMPANY_ID =
+	O.ID
+	LEFT JOIN SYS_OFFICE O1 ON U.office_id = O1.ID
+	WHERE U.office_id =
+	#{officeId}
+	<if test="liquidateName != null and liquidateName != ''">
+		AND U.NAME like CONCAT('%',#{liquidateName},'%')
+	</if>
+	</select>
+</mapper>

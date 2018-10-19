@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.credit.plCustRemoveBind.dao.PLCustRemoveBindDao">
+
+	<sql id="plCustRemoveBindColumns">
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.cust_name AS
+		"custName",
+		a.MOBILE_NUM as "mobileNum",
+		a.id_type AS "idType",
+		a.id_num
+		AS "idNum",
+		a.user_id AS "user.id",
+		a.org_id AS "company.id",
+		a.is_bind
+		AS "isBind",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		u6.name AS "user.name",
+		company.name AS "company.name"
+	</sql>
+
+	<sql id="plCustRemoveBindJoins">
+		LEFT JOIN sys_user u6 ON u6.id = a.user_id
+		LEFT JOIN
+		sys_office company on a.org_id = company.id
+	</sql>
+
+	<select id="get" resultType="com.resoft.multds.credit.plCustRemoveBind.entity.PLCustRemoveBind" parameterType="String">
+		SELECT
+		<include refid="plCustRemoveBindColumns" />
+		FROM cre_cust_remove_bind a
+		<include refid="plCustRemoveBindJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="getByIdCard" resultType="com.resoft.multds.credit.plCustRemoveBind.entity.PLCustRemoveBind" parameterType="com.resoft.multds.credit.plCustRemoveBind.entity.PLCustRemoveBind">
+		SELECT
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.MOBILE_NUM
+		as "mobileNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.user_id AS
+		"user.id",
+		a.org_id AS "company.id",
+		a.is_bind AS "isBind",
+		a.create_by
+		AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS
+		"updateBy.id",
+		a.update_date AS "updateDate"
+		FROM cre_cust_remove_bind a
+		WHERE a.ID_NUM = #{idNum}
+	</select>
+
+	<!-- 绑定或者解绑定客户经理信息 -->
+	<update id="bind">
+		UPDATE cre_cust_remove_bind SET
+		user_id = #{user.id},
+		is_bind =
+		#{isBind},
+		<if test="user != null and user.id != null and user.id != ''">
+			org_id = (select company_id from sys_user where id =
+			#{user.id}),
+		</if>
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id in
+		<foreach item="id" collection="ids" open="(" close=")"
+			separator=",">
+			#{id}
+		</foreach>
+	</update>
+
+	<!-- 新增 -->
+	<insert id="insert">
+		INSERT INTO cre_cust_remove_bind(
+		ID,
+		CUST_ID,
+		CUST_NAME,
+		ID_TYPE,
+		ID_NUM,
+		MOBILE_NUM,
+		USER_ID,
+		ORG_ID,
+		IS_BIND,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{custId},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{user.id},
+		#{company.id},
+		#{isBind},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+</mapper>

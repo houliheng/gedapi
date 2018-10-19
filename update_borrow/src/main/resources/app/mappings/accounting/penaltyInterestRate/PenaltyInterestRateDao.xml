@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.penaltyInterestRate.dao.PenaltyInterestRateDao">
+    
+	<sql id="penaltyInterestRateColumns">
+		a.id AS "id",
+		a.param_name AS "paramName",
+		a.param_value AS "paramValue",
+		a.description AS "description",
+		a.start_date AS "startDate",
+		a.end_date AS "endDate",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="penaltyInterestRateJoins">
+	</sql>
+    
+	<select id="get" resultType="PenaltyInterestRate">
+		SELECT 
+			<include refid="penaltyInterestRateColumns"/>
+		FROM acc_param a
+		<include refid="penaltyInterestRateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PenaltyInterestRate">
+		SELECT 
+			<include refid="penaltyInterestRateColumns"/>
+		FROM acc_param a
+		<include refid="penaltyInterestRateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="startDate != null and startDate != ''">
+				AND a.start_date &gt;= #{startDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND a.end_date &lt;= #{endDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_param a
+		<include refid="penaltyInterestRateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="startDate != null and startDate != ''">
+				AND a.start_date &gt;= #{startDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND a.end_date &lt;= #{endDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="PenaltyInterestRate">
+		SELECT 
+			<include refid="penaltyInterestRateColumns"/>
+		FROM acc_param a
+		<include refid="penaltyInterestRateJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_param(
+			id,
+			param_name,
+			param_value,
+			description,
+			start_date,
+			end_date,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			del_flag
+		) VALUES (
+			#{id},
+			#{paramName},
+			#{paramValue},
+			#{description},
+			#{startDate},
+			#{endDate},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_param SET 	
+			param_name = #{paramName},
+			param_value = #{paramValue},
+			description = #{description},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE acc_param SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

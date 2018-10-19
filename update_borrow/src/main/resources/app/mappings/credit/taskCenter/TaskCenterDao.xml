@@ -1,0 +1,1406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.taskCenter.dao.TaskCenterDao">
+	<!--待办任务 -->
+	<select id="findToDoListByPage" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		a.APPLY_NO,
+		a.ID_TYPE,
+		a.ID_NUM,
+		a.CUST_NAME,
+		a.PROC_INS_ID,
+		t2.APPLY_AMOUNT,
+		t2.CONTRACT_AMOUNT,
+		t3.`name` AS ORG_ID
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT  IT.TASK_ID_,syu.login_name as
+		USER_ID_
+		FROM ACT_RU_IDENTITYLINK IT
+		inner join sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		inner join sys_user syu on
+		sua.userid =
+		syu.id
+		WHERE syu.login_name = #{userId} AND IT.TYPE_='candidate'
+		) I ON
+		I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		AND (T.ASSIGNEE_ = #{userId} OR (I.USER_ID_ = #{userId} AND
+		T.ASSIGNEE_
+		IS NULL))
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		ORDER BY T.CREATE_TIME_
+		LIMITSQL
+		) temp
+		INNER JOIN CRE_APPLY_REGISTER a
+		ON temp.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO t2 ON
+		a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3 ON a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		WHERE 1 =
+		1 AND a.APPLY_STATUS = 2
+		<include refid="creDataScope_user.dataScopeFilter" />
+		<!-- AND (t3.id = #{currentOrg} OR -->
+		<!-- t3.parent_ids -->
+		<!-- LIKE CONCAT(#{currentOrgParentIds},'%')) -->
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		<if test="applyProductTypeCode != null and applyProductTypeCode != ''">
+			AND a.APPLY_PRODUCT_TYPE_CODE = #{applyProductTypeCode}
+		</if>
+		<if
+			test="officeId != null and officeId != '' and parentAndSelf != null and parentAndSelf != ''">
+			AND (t3.id= #{officeId} OR t3.parent_ids LIKE
+			CONCAT(#{parentAndSelf},'%'))
+		</if>
+		<if test="parentOfficeId != null and parentOfficeId != ''">
+			AND EXISTS (SELECT 1 FROM cre_office_apply_relation oa
+			WHERE oa.apply_no = a.apply_no and oa.office_id = #{parentOfficeId})
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+	<!--已分配任务 -->
+	<select id="findDoneClaimlist" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		t.id AS 'id',
+		t.APPLY_NO AS 'applyNo',
+		t.PROCESS_NAME AS
+		'processName',
+		t4.name AS 'allocator',
+		t.CREATE_BY AS 'createby',
+		t.CREATE_DATE AS
+		'CREATETIME',
+		t.TASK_DEF_KEY as 'taskDefKey',
+		t.EXECUTION_ID as
+		'execId',
+		t.PROC_DEF_ID as 'procDefId',
+		a.ID_TYPE,
+		a.ID_NUM,
+		a.CUST_NAME,
+		a.PROC_INS_ID ,
+		t3.`name` AS ORG_ID
+		FROM
+		cre_task_allocate
+		t
+		INNER JOIN
+		CRE_APPLY_REGISTER
+		a ON t.APPLY_NO =
+		a.APPLY_NO
+		LEFT JOIN
+		sys_user t4 ON
+		t.ALLOCATE_TARGET = t4.id
+		LEFT JOIN
+		sys_office t3 ON
+		a.ORG_ID = t3.id
+		AND
+		t3.type = 1
+		WHERE
+		1 = 1
+		AND
+		t.CREATE_BY = #{userID}
+		<!-- AND -->
+		<!-- (t3.id = -->
+		<!-- #{currentOrg} OR t3.parent_ids -->
+		<!-- LIKE -->
+		<!-- CONCAT(#{currentOrgParentIds},'%')) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		<if test="applyProductTypeCode != null and applyProductTypeCode != ''">
+			AND a.APPLY_PRODUCT_TYPE_CODE = #{applyProductTypeCode}
+		</if>
+		<if test="parentOfficeId != null and parentOfficeId != ''">
+			AND EXISTS (SELECT 1 FROM cre_office_apply_relation oa
+			WHERE oa.apply_no = a.apply_no and oa.office_id = #{parentOfficeId})
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+	<!--已办任务 -->
+	<select id="findDoneTaskList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		T2.APPLY_AMOUNT AS
+		APPLY_AMOUNT,
+		T2.CONTRACT_AMOUNT AS CONTRACT_AMOUNT,
+		a.ID_TYPE AS
+		ID_TYPE,
+		a.CUST_TYPE AS CUST_TYPE,
+		a.ID_NUM AS ID_NUM,
+		a.APPLY_NO AS
+		APPLY_NO,
+		T3.NAME AS ORG_ID,
+		a.PROC_INS_ID AS PROC_INS_ID,
+		a.REGISTER_DATE AS
+		REGISTER_DATE,
+		T.NAME_ AS
+		NAME,
+		T.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		T.PROC_INST_ID_ AS
+		PROCESSINSTANCEID,
+		T.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		T.END_TIME_  AS ENDTIME,
+		T.ASSIGNEE_ AS ASSIGNEE,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'finish' AS STATUS,
+		T.START_TIME_  AS STARTTIME
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT NULL
+		AND END_TIME_ IS NOT
+		NULL
+		AND (DELETE_REASON_ = 'completed' OR DELETE_REASON_ = 'jump')
+		<if test="cwfkFlag !='cwfk'">
+			AND ASSIGNEE_ = #{userId}
+		</if>
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[END_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[END_TIME_ <= #{cdateEnd}]]>
+		</if>
+		ORDER BY END_TIME_ DESC
+		LIMITSQL
+		) T
+		INNER JOIN CRE_APPLY_REGISTER a ON
+		T.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO T2 ON
+		a.APPLY_NO = T2.APPLY_NO
+		LEFT JOIN SYS_OFFICE T3 ON a.ORG_ID = T3.ID
+		AND T3.TYPE = 1
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		WHERE 1=1
+		<!-- (t3.id = #{currentOrg} OR t3.parent_ids LIKE -->
+		<!-- CONCAT(#{currentOrgParentIds},'%')) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		<if
+			test="selectOrgId != null and selectOrgId != '' and selectOrgParentIds != null and selectOrgParentIds != ''">
+			AND (t3.id = #{selectOrgId} OR t3.parent_ids LIKE
+			CONCAT(#{selectOrgParentIds},'%'))
+		</if>
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		ORDER BY T.END_TIME_ DESC
+	</select>
+
+	<insert id="insertOfficeApplyRelation">
+		INSERT INTO cre_office_apply_relation(
+		apply_no,
+		office_id
+		) VALUES (
+		#{applyNo},
+		#{officeId}
+		)
+	</insert>
+
+	<insert id="updateOfficeApplyRelationByApplyNo">
+		update cre_office_apply_relation set office_id =
+		#{officeId} where apply_no = #{applyNo}
+	</insert>
+
+	<!-- @reqno:H1511100047 @date-designer:20151111-huangxuecheng @date-author:20151111-huangxuecheng:CRE_信贷审批_进件管理_个人客户登记列表_流程图、流程轨迹。描述：根据传入的procInstId查询ActRuTask实体类，封装了参数execId和proDefId提供流程图、流程轨迹使用 
+		@db-z:act_ru_task:PROC_DEF_ID_,EXECUTION_ID_ -->
+	<select id="selectSingleRunTask" parameterType="string"
+		resultType="ActRuTask">
+		SELECT
+		t.PROC_DEF_ID_ as procDefId,
+		t.EXECUTION_ID_ as
+		executionId
+		FROM
+		act_ru_task t
+		WHERE
+		t.PROC_INST_ID_ = #{procInstId}
+	</select>
+	<!-- @reqno:H1511100047 @date-designer:20151111-huangxuecheng @date-author:20151111-huangxuecheng:CRE_信贷审批_进件管理_个人客户登记列表_流程图、流程轨迹.描述：根据传入的procInstId查询ActHiTaskInst实体类，封装了参数execId和proDefId 
+		提供流程图、流程轨迹使用 @db-z:act_hi_taskinst:PROC_DEF_ID_,EXECUTION_ID_ -->
+	<select id="selectHisTask" parameterType="string" resultType="ActHiTaskInst">
+		SELECT
+		t.PROC_DEF_ID_ as procDefId,
+		t.EXECUTION_ID_ as executionId
+		FROM
+		act_hi_taskinst t
+		WHERE
+		t.PROC_INST_ID_ = #{procInstId}
+	</select>
+	<!-- @reqno:H1510280020 @date-designer:20151117-huangxuecheng @date-author:20151117-huangxuecheng:CRE_信贷审批_任务中心_在办流程监控.开发说明：实现在办流程监控的查询列表以及分页功能，查询出list在service中封装在page中 
+		@db-z:act_hi_procinst:START_TIME_,START_USER_ID_ @db-j:CRE_APPLY_REGISTER:ID,CUST_NAME,ID_NUM,APPLY_NO,PROC_INS_ID,REGISTER_DATE 
+		@db-j:CRE_APPLY_INFO:APPLY_AMOUNT @db-j:sys_office:NAME @db-j:sys_dict:LABEL -->
+	<!-- * @reqno:H1512160006 * @date-designer:2016年1月5日-songmin * @date-author:2016年1月5日-songmin:系统添加对公客户信贷功能，证件类型改为获取通过字典工具类获取，不再通过left 
+		join方式取得，同时，查询结果中增加客户类型的查询 * @db-z:CRE_APPLY_REGISTER:ID_TYPE、CUST_TYPE * 
+		前台页面通过${fns:getDictLabel(process.ID_TYPE, '...', '')}获取证件类型 -->
+	<select id="selectToDoProcess" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		SELECT
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS
+		CUST_NAME,
+		t2.APPLY_AMOUNT AS APPLY_AMOUNT,
+		a.ID_TYPE AS ID_TYPE,
+		a.CUST_TYPE as CUST_TYPE,
+		a.ID_NUM AS ID_NUM,
+		a.APPLY_NO AS
+		APPLY_NO,
+		t3.NAME AS ORG_ID,
+		a.PROC_INS_ID AS PROC_INS_ID,
+		a.REGISTER_DATE AS
+		REGISTER_DATE
+		FROM
+		CRE_APPLY_REGISTER a
+		LEFT JOIN CRE_APPLY_INFO t2 ON
+		a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3 ON a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN sys_dict t4 ON a.ID_TYPE =
+		t4.VALUE
+		AND
+		t4.type
+		=
+		'CUSTOMER_P_ID_TYPE'
+		WHERE
+		1 = 1
+		<if test="custName!=null and custName!=''">
+			AND a.CUST_NAME LIKE '%${custName}%'
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND a.APPLY_NO = #{applyNo}
+		</if>
+		<if test="idNum!=null and idNum!=''">
+			AND a.ID_NUM LIKE '%${idNum}%'
+		</if>
+		<!-- AND ( -->
+		<!-- t3.id = #{selfId} -->
+		<!-- OR t3.parent_ids LIKE '${parentIds}%' -->
+		<!-- ) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		) b ON
+		t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is NULL
+		order by
+		t.START_TIME_ desc
+	</select>
+	<!-- @reqno:H1510280020 @date-designer:20151117-huangxuecheng @date-author:20151117-huangxuecheng:CRE_信贷审批_任务中心_在办流程监控.开发说明：实现在办流程监控的查询列表以及分页功能，查询出count在service中封装在page中 
+		@db-z:act_hi_procinst:START_TIME_,START_USER_ID_ @db-j:CRE_APPLY_REGISTER:ID,CUST_NAME,ID_NUM,APPLY_NO,PROC_INS_ID,REGISTER_DATE 
+		@db-j:CRE_APPLY_INFO:APPLY_AMOUNT @db-j:sys_office:NAME @db-j:sys_dict:LABEL -->
+	<select id="selectToDoProcessCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(1) FROM
+		(
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		SELECT
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		t2.APPLY_AMOUNT AS
+		APPLY_AMOUNT,
+		t4.LABEL AS ID_TYPE,
+		a.ID_NUM AS ID_NUM,
+		a.APPLY_NO AS
+		APPLY_NO,
+		t3. NAME
+		AS
+		ORG_ID,
+		a.PROC_INS_ID AS PROC_INS_ID,
+		a.REGISTER_DATE AS REGISTER_DATE
+		FROM
+		CRE_APPLY_REGISTER a
+		LEFT JOIN
+		CRE_APPLY_INFO t2 ON a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3
+		ON a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN sys_dict t4 ON a.ID_TYPE
+		=
+		t4.VALUE
+		AND t4.type =
+		'CUSTOMER_P_ID_TYPE'
+		WHERE
+		1 = 1
+		<if test="custName!=null and custName!=''">
+			AND a.CUST_NAME LIKE '%${custName}%'
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND a.APPLY_NO = #{applyNo}
+		</if>
+		<if test="idNum!=null and idNum!=''">
+			AND a.ID_NUM LIKE '%${idNum}%'
+		</if>
+		<!-- AND ( -->
+		<!-- t3.id = #{selfId} -->
+		<!-- OR t3.parent_ids LIKE '${parentIds}%' -->
+		<!-- ) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		) b ON
+		t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is NULL
+		order by
+		t.START_TIME_ desc
+		) TA
+	</select>
+	<!-- @reqno:H1510280021 @date-designer:20151117-huangxuecheng @date-author:20151117-huangxuecheng:CRE_信贷审批_任务中心_办结流程监控.开发说明：实现办结流程监控的查询列表以及分页功能，查询出list在service中封装在page中 
+		@db-z:act_hi_procinst:START_TIME_,START_USER_ID_,t.END_TIME_ @db-j:CRE_APPLY_REGISTER:ID,CUST_NAME,ID_NUM,APPLY_NO,PROC_INS_ID,REGISTER_DATE 
+		@db-j:CRE_APPLY_INFO:APPLY_AMOUNT @db-j:sys_office:NAME @db-j:sys_dict:LABEL -->
+	<!-- * @reqno:H1512160006 * @date-designer:2016年1月5日-songmin * @date-author:2016年1月5日-songmin:系统添加对公客户信贷功能，证件类型改为获取通过字典工具类获取，不再通过left 
+		join方式取得，同时，查询结果中增加客户类型的查询 * @db-z:CRE_APPLY_REGISTER:ID_TYPE、CUST_TYPE * 
+		前台页面通过${fns:getDictLabel(process.ID_TYPE, '...', '')}获取证件类型 -->
+	<select id="selectDoneProcess" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.END_TIME_ as END_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		SELECT
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		t2.APPLY_AMOUNT AS
+		APPLY_AMOUNT,
+		a.ID_TYPE AS ID_TYPE,
+		a.CUST_TYPE as CUST_TYPE,
+		a.ID_NUM AS
+		ID_NUM,
+		a.APPLY_NO AS APPLY_NO,
+		t3. NAME AS ORG_ID,
+		a.PROC_INS_ID AS
+		PROC_INS_ID,
+		a.REGISTER_DATE AS REGISTER_DATE
+		FROM
+		CRE_APPLY_REGISTER a
+		LEFT JOIN CRE_APPLY_INFO t2 ON a.APPLY_NO =
+		t2.APPLY_NO
+		LEFT JOIN
+		sys_office t3 ON a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN sys_dict
+		t4
+		ON
+		a.ID_TYPE = t4.VALUE
+		AND t4.type =
+		'CUSTOMER_P_ID_TYPE'
+		WHERE
+		1 = 1
+		<if test="custName!=null and custName!=''">
+			AND a.CUST_NAME LIKE '%${custName}%'
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND a.APPLY_NO = #{applyNo}
+		</if>
+		<if test="idNum!=null and idNum!=''">
+			AND a.ID_NUM LIKE '%${idNum}%'
+		</if>
+		<!-- AND ( -->
+		<!-- t3.id = #{selfId} -->
+		<!-- OR t3.parent_ids LIKE '${parentIds}%' -->
+		<!-- ) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		) b ON
+		t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is not NULL
+		order by
+		t.START_TIME_ desc
+	</select>
+	<!-- @reqno:H1510280021 @date-designer:20151117-huangxuecheng @date-author:20151117-huangxuecheng:CRE_信贷审批_任务中心_办结流程监控.开发说明：实现办结流程监控的查询列表以及分页功能，查询出count在service中封装在page中 
+		@db-z:act_hi_procinst:START_TIME_,START_USER_ID_,t.END_TIME_ @db-j:CRE_APPLY_REGISTER:ID,CUST_NAME,ID_NUM,APPLY_NO,PROC_INS_ID,REGISTER_DATE 
+		@db-j:CRE_APPLY_INFO:APPLY_AMOUNT @db-j:sys_office:NAME @db-j:sys_dict:LABEL -->
+	<select id="selectDoneProcessCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(1) FROM
+		(
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.END_TIME_ as
+		END_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		SELECT
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		t2.APPLY_AMOUNT
+		AS APPLY_AMOUNT,
+		t4.LABEL AS ID_TYPE,
+		a.ID_NUM AS
+		ID_NUM,
+		a.APPLY_NO
+		AS
+		APPLY_NO,
+		t3. NAME AS ORG_ID,
+		a.PROC_INS_ID AS
+		PROC_INS_ID,
+		a.REGISTER_DATE AS REGISTER_DATE
+		FROM
+		CRE_APPLY_REGISTER a
+		LEFT JOIN
+		CRE_APPLY_INFO t2 ON a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN
+		sys_office t3 ON
+		a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN sys_dict t4
+		ON
+		a.ID_TYPE =
+		t4.VALUE
+		AND t4.type = 'CUSTOMER_P_ID_TYPE'
+		WHERE
+		1 = 1
+		<if test="custName!=null and custName!=''">
+			AND a.CUST_NAME LIKE '%${custName}%'
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND a.APPLY_NO = #{applyNo}
+		</if>
+		<if test="idNum!=null and idNum!=''">
+			AND a.ID_NUM LIKE '%${idNum}%'
+		</if>
+		<!-- AND ( -->
+		<!-- t3.id = #{selfId} -->
+		<!-- OR t3.parent_ids LIKE '${parentIds}%' -->
+		<!-- ) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		) b ON
+		t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is not NULL
+		order by
+		t.START_TIME_ desc
+		) TA
+	</select>
+
+	<insert id="saveTaskAllocate">
+		insert into cre_task_allocate(
+		ID,
+		APPLY_NO,
+		PROCESS_NAME,
+		ALLOCATE_TARGET,
+		CREATE_BY,
+		CREATE_DATE,
+		TASK_DEF_KEY,
+		EXECUTION_ID,
+		PROC_DEF_ID
+		)
+		values(
+		#{id},
+		#{applyNo},
+		#{processName},
+		#{allocator},
+		#{createId},
+		#{createDate},
+		#{taskDefKey},
+		#{execId},
+		#{procDefId}
+		)
+	</insert>
+
+	<!--系统管理员待办任务 -->
+	<select id="findAllToDoListByPage" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		a.APPLY_NO,
+		a.ID_TYPE,
+		a.ID_NUM,
+		a.CUST_NAME,
+		a.PROC_INS_ID,
+		t2.APPLY_AMOUNT,
+		t2.CONTRACT_AMOUNT,
+		t3.`name` AS ORG_ID
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT DISTINCT IT.TASK_ID_
+		FROM ACT_RU_IDENTITYLINK
+		IT
+		inner join sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		where
+		IT.TYPE_ = 'candidate'
+		) I ON
+		I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		) temp
+		INNER JOIN CRE_APPLY_REGISTER a ON temp.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO t2 ON a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3 ON a.ORG_ID = t3.id AND t3.type = 1
+		LEFT JOIN
+		cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		WHERE 1 =
+		1 AND
+		a.APPLY_STATUS = 2
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		<if test="applyProductTypeCode != null and applyProductTypeCode != ''">
+			AND a.APPLY_PRODUCT_TYPE_CODE = #{applyProductTypeCode}
+		</if>
+		<!-- <if test="parentOfficeId != null and parentOfficeId != ''"> AND EXISTS 
+			(SELECT 1 FROM cre_office_apply_relation oa WHERE oa.apply_no = a.apply_no 
+			and oa.office_id = #{parentOfficeId}) </if> -->
+		ORDER BY CREATETIME DESC
+	</select>
+
+	<update id="refuseToSignTask">
+		update act_ru_task set ASSIGNEE_ = null where ID_ =
+		#{taskId}
+	</update>
+
+	<select id="allFindDoneOrFinishList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DLT.* FROM (
+		SELECT
+		<if test="tableSql!=null and tableSql!=''">
+			B.*,
+		</if>
+		T.ID_ AS TASKID,
+		T.NAME_ AS NAME,
+		T.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		T.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		T.PROC_DEF_ID_ AS
+		PROCESSDEFINITIONID,
+		T.END_TIME_ AS ENDTIME,
+		T.ASSIGNEE_ AS ASSIGNEE,
+		PD.NAME_ AS PROCESSNAME,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'finish' AS
+		STATUS,
+		T.START_TIME_ AS STARTTIME
+		FROM (
+		SELECT AHT.*
+		FROM
+		ACT_HI_TASKINST AHT,
+		(SELECT HT.PROC_INST_ID_ AS
+		PROCINSID,MAX(HT.END_TIME_) AS MAXENDTIME
+		FROM ACT_HI_TASKINST HT WHERE
+		HT.END_TIME_ IS NOT NULL
+		AND (HT.DELETE_REASON_ = 'completed' OR
+		HT.DELETE_REASON_ = 'jump')
+		GROUP BY
+		HT.PROC_INST_ID_) AHHT
+		WHERE
+		AHT.END_TIME_ = AHHT.MAXENDTIME
+		AND AHT.PROC_INST_ID_ = AHHT.PROCINSID
+		ORDER BY AHT.END_TIME_ DESC
+		) T
+		JOIN ACT_HI_PROCINST E ON
+		T.PROC_INST_ID_=E.ID_
+		<if test="tableSql!=null and tableSql!=''">
+			JOIN (${tableSql}) B ON T.PROC_INST_ID_ = B.PROC_INS_ID
+		</if>
+		LEFT JOIN ACT_RE_PROCDEF PD ON PD.ID_=T.PROC_DEF_ID_
+		WHERE
+		T.DELETE_REASON_ IS NOT NULL AND E.END_TIME_ IS NOT NULL
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_ like #{proDefKey}
+		</if>
+		<if test="edateStart!=null and edateStart!=''">
+			AND T.END_TIME_>=#{edateStart}
+		</if>
+		<if test="edateEnd!=null and edateEnd!=''">
+			AND <![CDATA[T.END_TIME_<=#{edateEnd}]]>
+		</if>
+		) DLT
+		<if test="page !=null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY DLT.${page.orderBy}
+		</if>
+	</select>
+
+	<!--系统管理员合同审核、财务放款待办任务 -->
+	<select id="findAllToDoListByPageTwo" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		a.APPLY_NO,
+		a.ID_TYPE,
+		a.ID_NUM,
+		a.CUST_NAME,
+		a.PROC_INS_ID,
+		t2.APPLY_AMOUNT,
+		t2.CONTRACT_AMOUNT,
+		t3.`name` AS ORG_ID,
+		a.APPLY_PRODUCT_TYPE_CODE,
+		cc.LOAN_MODEL,
+		s2.name as ORG_LEVEL2,
+		s3.name
+		as ORG_LEVEL3,
+		s4.name as ORG_LEVEL4
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON
+		E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT DISTINCT IT.TASK_ID_
+		FROM
+		ACT_RU_IDENTITYLINK IT
+		inner join sys_user_ally sua on
+		IT.GROUP_ID_ =
+		sua.ALLYID
+		where IT.TYPE_ = 'candidate'
+		) I ON
+		I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		) temp
+		INNER JOIN CRE_APPLY_REGISTER a ON temp.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO t2 ON a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3 ON a.ORG_ID = t3.id AND t3.type = 1
+		LEFT JOIN
+		cre_apply_loan_status ls ON ls.APPLY_NO = a.APPLY_NO
+		LEFT JOIN
+		cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		LEFT JOIN sys_office s2 ON
+		s2.id = cc.ORG_LEVEL2
+		LEFT JOIN sys_office s3 ON s3.id = cc.ORG_LEVEL3
+		LEFT JOIN sys_office s4 ON s4.id = cc.ORG_LEVEL4
+		WHERE 1 = 1 AND
+		a.APPLY_STATUS = 2
+		<if
+			test="selectOrgId != null and selectOrgId != '' and selectOrgParentIds != null and selectOrgParentIds != ''">
+			AND (t3.id = #{selectOrgId} OR t3.parent_ids LIKE
+			CONCAT(#{selectOrgParentIds},'%'))
+		</if>
+		<if test="loanModel != null and loanModel != ''">
+			AND cc.LOAN_MODEL LIKE CONCAT('%',#{loanModel},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		<if test="applyProductTypeCode != null and applyProductTypeCode != ''">
+			AND a.APPLY_PRODUCT_TYPE_CODE = #{applyProductTypeCode}
+		</if>
+		<!-- <if test="parentOfficeId != null and parentOfficeId != ''"> AND EXISTS 
+			(SELECT 1 FROM cre_office_apply_relation oa WHERE oa.apply_no = a.apply_no 
+			and oa.office_id = #{parentOfficeId}) </if> -->
+		ORDER BY CREATETIME DESC
+	</select>
+
+	<select id="findToDoListByPageTwo" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		a.APPLY_NO,
+		a.ID_TYPE,
+		a.ID_NUM,
+		a.CUST_NAME,
+		a.PROC_INS_ID,
+		t2.APPLY_AMOUNT,
+		t2.CONTRACT_AMOUNT,
+		t3.`name` AS ORG_ID,
+		a.APPLY_PRODUCT_TYPE_CODE,
+		cc.LOAN_MODEL,
+		s2.name as ORG_LEVEL2,
+		s3.name
+		as ORG_LEVEL3,
+		s4.name as ORG_LEVEL4
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON
+		E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT
+		IT.TASK_ID_,syu.login_name as
+		USER_ID_
+		FROM ACT_RU_IDENTITYLINK IT
+		inner
+		join sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		inner join sys_user
+		syu on
+		sua.userid =
+		syu.id
+		WHERE syu.login_name = #{userId} AND
+		IT.TYPE_='candidate'
+		) I ON
+		I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ =
+		'1'
+		AND E.IS_ACTIVE_ = '1'
+		AND (T.ASSIGNEE_ = #{userId} OR (I.USER_ID_ =
+		#{userId} AND
+		T.ASSIGNEE_
+		IS NULL))
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		ORDER BY CREATE_TIME_ DESC
+		LIMITSQL
+		) temp
+		INNER JOIN CRE_APPLY_REGISTER
+		a ON temp.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO t2 ON
+		a.APPLY_NO = t2.APPLY_NO
+		LEFT JOIN sys_office t3 ON a.ORG_ID = t3.id
+		AND t3.type = 1
+		LEFT JOIN cre_apply_loan_status ls ON ls.APPLY_NO =
+		a.APPLY_NO
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		LEFT
+		JOIN sys_office s2 ON s2.id = cc.ORG_LEVEL2
+		LEFT JOIN sys_office s3 ON
+		s3.id = cc.ORG_LEVEL3
+		LEFT JOIN sys_office s4 ON s4.id = cc.ORG_LEVEL4
+		WHERE 1 = 1 AND a.APPLY_STATUS = 2
+		<include refid="creDataScope_user.dataScopeFilter" />
+		<!-- AND (t3.id = #{currentOrg} OR -->
+		<!-- t3.parent_ids -->
+		<!-- LIKE CONCAT(#{currentOrgParentIds},'%')) -->
+		<if
+			test="selectOrgId != null and selectOrgId != '' and selectOrgParentIds != null and selectOrgParentIds != ''">
+			AND (t3.id = #{selectOrgId} OR t3.parent_ids LIKE
+			CONCAT(#{selectOrgParentIds},'%'))
+		</if>
+		<if test="loanModel != null and loanModel != ''">
+			AND cc.LOAN_MODEL LIKE CONCAT('%',#{loanModel},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		<if test="applyProductTypeCode != null and applyProductTypeCode != ''">
+			AND a.APPLY_PRODUCT_TYPE_CODE = #{applyProductTypeCode}
+		</if>
+		<if
+			test="officeId != null and officeId != '' and parentAndSelf != null and parentAndSelf != ''">
+			AND (t3.id= #{officeId} OR t3.parent_ids LIKE
+			CONCAT(#{parentAndSelf},'%'))
+		</if>
+		<if test="parentOfficeId != null and parentOfficeId != ''">
+			AND EXISTS (SELECT 1 FROM cre_office_apply_relation oa
+			WHERE oa.apply_no = a.apply_no and oa.office_id = #{parentOfficeId})
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+
+	<select id="findDoneTaskListHtsh" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT distinct
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		T2.APPLY_AMOUNT AS APPLY_AMOUNT,
+		T2.CONTRACT_AMOUNT AS CONTRACT_AMOUNT,
+		a.ID_TYPE AS ID_TYPE,
+		a.CUST_TYPE AS CUST_TYPE,
+		a.ID_NUM AS ID_NUM,
+		a.APPLY_NO AS APPLY_NO,
+		T3.NAME AS ORG_ID,
+		a.PROC_INS_ID AS PROC_INS_ID,
+		a.REGISTER_DATE AS REGISTER_DATE,
+		T.ID_ AS ID,
+		T.NAME_ AS NAME,
+		T.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		T.PROC_INST_ID_ AS
+		PROCESSINSTANCEID,
+		T.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		T.END_TIME_ AS
+		ENDTIME,
+		T.ASSIGNEE_ AS ASSIGNEE,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'finish' AS STATUS,
+		T.START_TIME_ AS STARTTIME,
+		a.APPLY_PRODUCT_TYPE_CODE,
+		cc.LOAN_MODEL,
+		s2.name as ORG_LEVEL2,
+		s3.name
+		as ORG_LEVEL3,
+		s4.name as ORG_LEVEL4,
+		ls.LOAN_STATUS
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT NULL
+		AND END_TIME_ IS NOT
+		NULL
+		AND (DELETE_REASON_ = 'completed' OR DELETE_REASON_ = 'jump')
+		<if test="cwfkFlag !='cwfk'">
+			AND ASSIGNEE_ = #{userId}
+		</if>
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[END_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[END_TIME_ <= #{cdateEnd}]]>
+		</if>
+		LIMITSQL
+		) T
+		INNER JOIN CRE_APPLY_REGISTER a ON T.PROC_INST_ID_ =
+		a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO T2 ON a.APPLY_NO = T2.APPLY_NO
+		LEFT JOIN SYS_OFFICE T3 ON a.ORG_ID = T3.ID AND T3.TYPE = 1
+		LEFT JOIN
+		cre_apply_loan_status ls ON ls.APPLY_NO = a.APPLY_NO
+		LEFT JOIN
+		cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		LEFT JOIN sys_office s2 ON
+		s2.id = cc.ORG_LEVEL2
+		LEFT JOIN sys_office s3 ON s3.id = cc.ORG_LEVEL3
+		LEFT JOIN sys_office s4 ON s4.id = cc.ORG_LEVEL4
+		WHERE 1=1
+		<!-- (t3.id = #{currentOrg} OR t3.parent_ids LIKE -->
+		<!-- CONCAT(#{currentOrgParentIds},'%')) -->
+		<include refid="creDataScope_user.dataScopeFilter" />
+		<if
+			test="selectOrgId != null and selectOrgId != '' and selectOrgParentIds != null and selectOrgParentIds != ''">
+			AND (t3.id = #{selectOrgId} OR t3.parent_ids LIKE
+			CONCAT(#{selectOrgParentIds},'%'))
+		</if>
+		<if test="loanModel != null and loanModel != ''">
+			AND cc.LOAN_MODEL LIKE CONCAT('%',#{loanModel},'%')
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo != null and applyNo != ''">
+			AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+		</if>
+		<if test="idNum != null and idNum != ''">
+			AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+		</if>
+		ORDER BY T.END_TIME_ DESC
+	</select>
+
+	<select id="findAllDoneTaskList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT DISTINCT
+		a.APPLY_NO,
+		a.ID AS APPLY_ID,
+		a.CUST_NAME AS CUST_NAME,
+		a.ID_TYPE AS ID_TYPE,
+		a.CUST_TYPE AS CUST_TYPE,
+		a.ID_NUM AS ID_NUM,
+		a.PROC_INS_ID AS PROC_INS_ID,
+		a.REGISTER_DATE AS REGISTER_DATE,
+		T2.APPLY_AMOUNT AS
+		APPLY_AMOUNT,
+		T2.CONTRACT_AMOUNT AS CONTRACT_AMOUNT,
+		T3.NAME AS ORG_ID,
+		TEMP.*
+		FROM ((SELECT DISTINCT
+		NAME_ AS
+		NAME,
+		TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		PROC_INST_ID_ AS
+		PROCESSINSTANCEID,
+		PROC_DEF_ID_ AS
+		PROCESSDEFINITIONID,
+		END_TIME_   AS ENDTIME,
+		ASSIGNEE_ AS
+		ASSIGNEE,
+		EXECUTION_ID_ AS EXECUTIONID 
+		FROM
+		ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT NULL
+		AND END_TIME_
+		IS NOT NULL
+		AND (
+		DELETE_REASON_ = 'completed'
+		OR DELETE_REASON_ = 'jump'
+		)
+		AND
+		TASK_DEF_KEY_ = 'utask_cwfk')
+		UNION
+		(SELECT DISTINCT
+		t.NAME_
+		AS NAME,
+		t.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		t.PROC_INST_ID_ AS
+		PROCESSINSTANCEID,
+		t.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		t.CREATE_TIME_  AS ENDTIME,
+		t.ASSIGNEE_ AS ASSIGNEE,
+		t.EXECUTION_ID_ AS
+		EXECUTIONID 
+		FROM
+		ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT
+		DISTINCT IT.TASK_ID_
+		FROM
+		ACT_RU_IDENTITYLINK IT
+		INNER JOIN sys_user_ally sua ON IT.GROUP_ID_ = sua.ALLYID
+		WHERE
+		IT.TYPE_ = 'candidate'
+		) I ON I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		AND T.TASK_DEF_KEY_ =
+		'utask_cwfk'))TEMP
+		INNER JOIN CRE_APPLY_REGISTER a ON
+		TEMP.PROCESSINSTANCEID = a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO T2 ON
+		a.APPLY_NO = T2.APPLY_NO
+		INNER JOIN SYS_OFFICE T3 ON a.ORG_ID = T3.ID
+		AND T3.TYPE = 1
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		<where>
+			<if test="custName != null and custName != ''">
+				AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.APPLY_NO LIKE CONCAT(#{applyNo},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE CONCAT(#{idNum},'%')
+			</if>
+		</where>
+	</select>
+
+
+	<select id="findUnderLoanFirstDate" resultType="java.util.HashMap">
+		SELECT DISTINCT
+		   t.ID_ as "ID",
+		   t.NAME_ as "NAME",
+		   t.TASK_DEF_KEY_ as "TASKDEFINITIONKEY",
+		   t.PROC_INST_ID_ as "PROCESSINSTANCEID",
+		   t.PROC_DEF_ID_ as "PROCESSDEFINITIONID",
+		   t.CREATE_TIME_ as "CREATETIME",
+		   t.EXECUTION_ID_ as "EXECUTIONID",
+			 t.ASSIGNEE_ AS "ASSIGNEE",
+				CASE
+				WHEN t.ASSIGNEE_ IS NULL THEN
+				 'todo'
+				ELSE
+				 'claim'
+				END AS "STATUS",
+				cuc.APPLY_NO as "applyNo",
+				cuc.BUSI_REG_NAME as "busiRegName",
+				cca.APPRO_PRODUCT_NAME as "approProductName",
+				cca.CONTRACT_AMOUNT as "contractAmount",
+				cca.APPRO_LOAN_REPAY_TYPE as "approLoanRepayType",
+				cca.APPRO_PERIOD_VALUE as "approPeriodValue",
+				cgu.ged_number as "gedNumber"
+		  FROM
+		   ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON E.PROC_INST_ID_ = T.PROC_INST_ID_
+		/*--  LEFT JOIN ( SELECT DISTINCT IT.TASK_ID_  FROM ACT_RU_IDENTITYLINK IT INNER JOIN sys_user_ally sua ON IT.GROUP_ID_ = sua.ALLYID WHERE IT.TYPE_ = 'candidate' ) I ON I.TASK_ID_ = T.ID_
+		*/
+		LEFT JOIN cre_under_company_info cuc on cuc.PROC_INST_ID=t.PROC_INST_ID_
+		left JOIN cre_check_approve cca on cca.APPly_no = cuc.apply_no
+		LEFT JOIN cre_gedapi_user cgu on cgu.CUST_ID=cuc.ID
+		  WHERE
+		   T.SUSPENSION_STATE_ = '1'
+		  AND E.IS_ACTIVE_ = '1'
+		  AND T.PROC_INST_ID_ =#{procInstId}
+
+	</select>
+
+	<select id="findUnderAllToDoListByPage" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		/*-- 管理员*/
+		SELECT DISTINCT
+		   t.ID_ as "ID",
+		   t.NAME_ as "NAME",
+		   t.TASK_DEF_KEY_ as "TASKDEFINITIONKEY",
+		   t.PROC_INST_ID_ as "PROCESSINSTANCEID",
+		   t.PROC_DEF_ID_ as "PROCESSDEFINITIONID",
+		   t.CREATE_TIME_ as "CREATETIME",
+		   t.EXECUTION_ID_ as "EXECUTIONID",
+			 t.ASSIGNEE_ AS "ASSIGNEE",
+				CASE
+				WHEN t.ASSIGNEE_ IS NULL THEN
+				 'todo'
+				ELSE
+				 'claim'
+				END AS "STATUS",
+				cuc.APPLY_NO as "applyNo",
+				cuc.BUSI_REG_NAME as "busiRegName",
+				cuc.UN_SOC_CREDIT_NO as "unSocCreditNo",
+				cuci.MOBILE_NUM as "corporationMobile",
+				cuci.id	as "custId",
+				cuc.id as "comId",
+				cuc.LOAN_STATUS as "loanStatus",
+				cca.APPRO_PRODUCT_TYPE_NAME as "approProductTypeName",
+				cca.CONTRACT_AMOUNT as "contractAmount",
+				cca.APPRO_LOAN_REPAY_TYPE as "approLoanRepayType",
+				cca.APPRO_PERIOD_VALUE as "approPeriodValue",
+                cca.under_contract_no  as "contractNo",
+				ac.FACT_GUARANTEE_FEE as "factGuaranteeFee",
+				cuc.ged_number as "gedNumber"
+
+		  FROM
+		   ACT_RU_TASK T
+		JOIN ACT_RU_EXECUTION E ON E.PROC_INST_ID_ = T.PROC_INST_ID_
+		/*--  LEFT JOIN ( SELECT DISTINCT IT.TASK_ID_  FROM ACT_RU_IDENTITYLINK IT INNER JOIN sys_user_ally sua ON IT.GROUP_ID_ = sua.ALLYID WHERE IT.TYPE_ = 'candidate' ) I ON I.TASK_ID_ = T.ID_
+		*/
+		LEFT JOIN cre_under_company_info cuc on cuc.PROC_INST_ID=t.PROC_INST_ID_
+		left JOIN cre_check_approve cca on cca.APPly_no = cuc.apply_no
+		left join cre_under_cust_info cuci on  cuci.apply_no=cuc.apply_no
+		left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract ac on ac.apply_no = cuc.apply_no
+		  WHERE
+		   T.SUSPENSION_STATE_ = '1'
+		  AND E.IS_ACTIVE_ = '1'
+		  AND T.TASK_DEF_KEY_ =#{taskDefKey}
+		<if test="applyProductTypeCode!=null and applyProductTypeCode!=''">
+			AND cca.APPRO_PRODUCT_TYPE_CODE=#{applyProductTypeCode}
+		</if>
+		<if test="custName!=null and custName!=''">
+			AND cuc.BUSI_REG_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND cuc.APPLY_NO=#{applyNo}
+		</if>
+		  order by t.CREATE_TIME_ desc
+	</select>
+
+	<select id="findUnderAllDoneListByPage"  resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+			DISTINCT
+			T.NAME_ AS NAME,
+			T.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+			T.PROC_INST_ID_ AS PROCESSINSTANCEID,
+			T.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+			T.END_TIME_ AS ENDTIME,
+			T.ASSIGNEE_ AS ASSIGNEE,
+			T.EXECUTION_ID_ AS EXECUTIONID,
+			'finish' AS STATUS,
+			T.START_TIME_ AS STARTTIME,
+			cuc.APPLY_NO AS "applyNo",
+			cuc.BUSI_REG_NAME AS "busiRegName",
+			cuc.LOAN_STATUS as "loanStatus",
+			cca.APPRO_PRODUCT_NAME AS "approProductName",
+			cca.CONTRACT_AMOUNT AS "contractAmount",
+			cca.APPRO_LOAN_REPAY_TYPE AS "approLoanRepayType",
+			cca.APPRO_PERIOD_VALUE AS "approPeriodValue",
+			cgu.ged_number AS "gedNumber"
+		FROM
+			ACT_HI_TASKINST T
+		LEFT JOIN cre_under_company_info cuc ON cuc.PROC_INST_ID = t.PROC_INST_ID_
+		LEFT JOIN cre_check_approve cca ON cca.APPly_no = cuc.apply_no
+		LEFT JOIN cre_gedapi_user cgu ON cgu.CUST_ID = cuc.ID
+		WHERE
+			DELETE_REASON_ IS NOT NULL
+		AND END_TIME_ IS NOT NULL
+		AND (
+			DELETE_REASON_ = 'completed'
+			OR DELETE_REASON_ = 'jump'
+		)
+		AND TASK_DEF_KEY_ = #{taskDefKey}
+		<if test="applyProductTypeCode!=null and applyProductTypeCode!=''">
+			AND cca.APPRO_PRODUCT_TYPE_CODE=#{applyProductTypeCode}
+		</if>
+		<if test="custName!=null and custName!=''">
+			AND cuc.BUSI_REG_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND cuc.APPLY_NO=#{applyNo}
+		</if>
+		GROUP BY cuc.APPLY_NO
+		ORDER BY
+			END_TIME_ DESC
+	</select>
+
+
+
+	<select id="findUnderEndProcess"  resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		cuc.PROC_INST_ID AS PROCESSINSTANCEID,
+		cuc.APPLY_NO AS "applyNo",
+		cuc.BUSI_REG_NAME AS "busiRegName",
+		cca.APPRO_PRODUCT_NAME AS "approProductName",
+		cca.CONTRACT_AMOUNT AS "contractAmount",
+		cca.APPRO_LOAN_REPAY_TYPE AS "approLoanRepayType",
+		cca.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		cgu.ged_number AS "gedNumber"
+		FROM
+		 cre_under_company_info cuc
+		LEFT JOIN cre_check_approve cca ON cca.APPly_no = cuc.apply_no
+		LEFT JOIN cre_gedapi_user cgu ON cgu.CUST_ID = cuc.ID
+		WHERE
+			cuc.LOAN_STATUS>='1'
+		<if test="applyProductTypeCode!=null and applyProductTypeCode!=''">
+			AND cca.APPRO_PRODUCT_TYPE_CODE=#{applyProductTypeCode}
+		</if>
+		<if test="custName!=null and custName!=''">
+			AND cuc.BUSI_REG_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="applyNo!=null and applyNo!=''">
+			AND cuc.APPLY_NO=#{applyNo}
+		</if>
+		ORDER BY
+		cuc.UPDATE_DATE DESC
+	</select>
+
+
+</mapper>

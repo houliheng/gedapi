@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.GedImportGedOrder.dao.CreGedImportGetOrderDao">
+    
+	<sql id="creGedImportGetOrderColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.order_code AS "orderCode",
+		a.company_name AS "companyName",
+		a.company_card_no AS "companyCardNo",
+		a.id_number AS "idNumber",
+		a.loan_purpose AS "loanPurpose",
+		a.loan_type AS "loanType",
+		a.loan_amount AS "loanAmount",
+		a.credit_amount AS "creditAmount",
+		a.loan_term AS "loanTerm",
+		a.appro_term AS "approTerm",
+		a.loan_date AS "loanDate",
+		a.month_rate AS "monthRate",
+		a.address AS "address",
+		a.contract_phone AS "contractPhone",
+		a.cash_deposit AS "cashDeposit",
+		a.service_fee AS "serviceFee",
+		a.service_fee_way AS "serviceFeeWay",
+		a.manage_fee AS "manageFee",
+		a.repayment_type AS "repaymentType",
+		a.status AS "status",
+		a.account_code AS "accountCode",
+		a.user_name AS "userName",
+		a.user_type AS "userType",
+		a.cust_id AS "custId",
+		a.city_code AS "cityCode",
+		a.bank_branch_name AS "bankBranchName",
+		a.handle_status AS "handleStatus",
+		a.bank_code as "bankCode",
+		a.batch_date as "batchDate"
+	</sql>
+	
+	<sql id="creGedImportGetOrderJoins">
+	</sql>
+    
+	<select id="get" resultType="CreGedImportGetOrder">
+		SELECT 
+			<include refid="creGedImportGetOrderColumns"/>
+		FROM cre_ged_import_get_order a
+		<include refid="creGedImportGetOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<!--根据合同号查询数据-->
+
+	<select id="findCreGedImportByContractNo" resultType="CreGedImportGetOrder">
+		SELECT
+		<include refid="creGedImportGetOrderColumns"/>
+		FROM cre_ged_import_get_order a
+		<include refid="creGedImportGetOrderJoins"/>
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+	<!--导入数据-->
+	<insert id="importContract" >
+     INSERT INTO cre_ged_import_get_order(
+		<if test="id != null and id != ''">
+			id,
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			contract_no,
+		</if>
+		<if test="orderCode != null and orderCode   != ''   ">
+			order_code,
+		</if>
+		<if test=" companyName != null and  companyName  != ''   ">
+			company_name,
+		</if>
+		<if test=" companyCardNo != null and  companyCardNo  != ''   ">
+			company_card_no,
+		</if>
+		<if test="idNumber != null and  idNumber  != ''   ">
+			id_number,
+		</if>
+		<if test=" loanPurpose != null and loanPurpose   != ''   ">
+			loan_purpose,
+		</if>
+		<if test=" loanType != null and   loanType  != ''   ">
+			loan_type,
+		</if>
+		<if test=" loanAmount != null and  loanAmount  != ''   ">
+			loan_amount,
+		</if>
+		<if test=" creditAmount != null and  creditAmount  != ''   ">
+			credit_amount,
+		</if>
+		<if test=" loanTerm != null and  loanTerm  != ''   ">
+			loan_term,
+		</if>
+		<if test=" approTerm != null and  approTerm  != ''   ">
+			appro_term,
+		</if>
+		<if test="loanDate != null and  loanDate  != ''   ">
+			loan_date,
+		</if>
+		<if test=" monthRate != null and  monthRate  != ''   ">
+			month_rate,
+		</if>
+
+		<if test="address  != null and  address  != ''   ">
+			address,
+		</if>
+		<if test="  contractPhone != null and  contractPhone  != ''   ">
+			contract_phone,
+		</if>
+		<if test="  cashDeposit != null and cashDeposit   != ''   ">
+			cash_deposit,
+		</if>
+		<if test="  serviceFee != null and serviceFee   != ''   ">
+			service_fee,
+		</if>
+		<if test=" serviceFeeWay != null and  serviceFeeWay   != ''   ">
+			service_fee_way,
+		</if>
+		<if test=" manageFee != null and   manageFee  != ''   ">
+			manage_fee,
+		</if>
+		<if test=" repaymentType != null and   repaymentType != ''   ">
+			repayment_type,
+		</if>
+			<if test=" status != null and   status != ''   ">
+				status,
+		</if>
+		<if test=" accountCode != null and  accountCode  != ''   ">
+			account_code,
+		</if>
+		<if test="  userName != null and   userName != ''   ">
+			user_name,
+		</if>
+		<if test=" userType != null and  userType  != ''   ">
+			user_type,
+		</if>
+		<if test=" custId != null and   custId != ''   ">
+			cust_id,
+		</if>
+		<if test=" cityCode != null and  cityCode  != ''   ">
+			city_code,
+		</if>
+		<if test="  bankBranchName != null and bankBranchName   != ''   ">
+			bank_branch_name
+		</if>
+		<if test="bankCode != null and bankCode   != ''   ">
+			bank_code
+		</if>
+		<if test="batchDate != null and batchDate   != ''   ">
+			batch_date
+		</if>
+		) VALUES (
+
+		<if test="id != null and id != ''">
+			#{id},
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			#{contractNo},
+		</if>
+		<if test="orderCode != null and orderCode   != ''   ">
+			#{orderCode},
+		</if>
+		<if test=" companyName != null and  companyName  != ''   ">
+			#{companyName},
+		</if>
+		<if test=" companyCardNo != null and  companyCardNo  != ''   ">
+			#{companyCardNo},
+		</if>
+		<if test="idNumber != null and  idNumber  != ''   ">
+			#{idNumber},
+		</if>
+		<if test=" loanPurpose != null and loanPurpose   != ''   ">
+			#{loanPurpose},
+		</if>
+		<if test=" loanType != null and   loanType  != ''   ">
+			#{loanType},
+		</if>
+		<if test=" loanAmount != null and  loanAmount  != ''   ">
+			#{loanAmount},
+		</if>
+		<if test=" creditAmount != null and  creditAmount  != ''   ">
+			#{creditAmount},
+		</if>
+		<if test=" loanTerm != null and  loanTerm  != ''   ">
+			#{loanTerm},
+		</if>
+		<if test=" approTerm != null and  approTerm  != ''   ">
+			#{approTerm},
+		</if>
+		<if test="loanDate != null and  loanDate  != ''   ">
+			#{loanDate},
+		</if>
+		<if test=" monthRate != null and  monthRate  != ''   ">
+			#{monthRate},
+		</if>
+		<if test="address  != null and  address  != ''   ">
+			#{address},
+		</if>
+		<if test="  contractPhone != null and  contractPhone  != ''   ">
+			#{contractPhone},
+		</if>
+		<if test="  cashDeposit != null and cashDeposit   != ''   ">
+			#{cashDeposit},
+		</if>
+		<if test="  serviceFee != null and serviceFee   != ''   ">
+			#{serviceFee},
+		</if>
+		<if test=" serviceFeeWay != null and  serviceFeeWay   != ''   ">
+			#{serviceFeeWay},
+		</if>
+		<if test=" manageFee != null and   manageFee  != ''   ">
+			#{manageFee},
+		</if>
+		<if test=" repaymentType != null and   repaymentType != ''   ">
+			#{repaymentType},
+		</if>
+		<if test=" status != null and   status != ''   ">
+			#{status},
+		</if>
+		<if test=" accountCode != null and  accountCode  != ''   ">
+			#{accountCode},
+		</if>
+		<if test="  userName != null and   userName != ''   ">
+			#{userName},
+		</if>
+		<if test=" userType != null and  userType  != ''   ">
+			#{userType},
+		</if>
+		<if test=" custId != null and   custId != ''   ">
+			#{custId},
+		</if>
+		<if test=" cityCode != null and  cityCode  != ''   ">
+			#{cityCode},
+		</if>
+		<if test="  bankBranchName != null and bankBranchName   != ''   ">
+			#{bankBranchName},
+		</if>
+		<if test="bankCode != null and bankCode   != ''   ">
+			#{bankCode},
+		</if>
+		<if test="batchDate != null and batchDate   != ''   ">
+			#{batchDate},
+		</if>
+		
+		)
+	</insert>
+
+	<!--根据合同号来修改数据-->
+	<update id="updateImportedContract" >
+      UPDATE cre_ged_import_get_order SET
+
+			order_code = #{orderCode},
+			company_name = #{companyName},
+			company_card_no = #{companyCardNo},
+			id_number = #{idNumber},
+			loan_purpose = #{loanPurpose},
+			loan_type = #{loanType},
+			loan_amount = #{loanAmount},
+			credit_amount = #{creditAmount},
+			loan_term = #{loanTerm},
+			appro_term = #{approTerm},
+			loan_date = #{loanDate},
+			month_rate = #{monthRate},
+			address = #{address},
+			contract_phone = #{contractPhone},
+			cash_deposit = #{cashDeposit},
+			service_fee = #{serviceFee},
+			service_fee_way = #{serviceFeeWay},
+			manage_fee = #{manageFee},
+			repayment_type = #{repaymentType},
+			status = #{status},
+			account_code = #{accountCode},
+			user_name = #{userName},
+			user_type = #{userType},
+			cust_id = #{custId},
+			city_code = #{cityCode},
+			bank_branch_name = #{bankBranchName},
+			bank_code = #{bankCode},
+			batch_date = #{batchDate}
+		WHERE  contract_no = #{contractNo}
+
+
+
+	</update>
+
+
+
+
+
+	<select id="findList" resultType="CreGedImportGetOrder">
+		SELECT 
+			<include refid="creGedImportGetOrderColumns"/>
+		FROM cre_ged_import_get_order a
+		<include refid="creGedImportGetOrderJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_ged_import_get_order a
+		<include refid="creGedImportGetOrderJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreGedImportGetOrder">
+		SELECT 
+			<include refid="creGedImportGetOrderColumns"/>
+		FROM cre_ged_import_get_order a
+		<include refid="creGedImportGetOrderJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_ged_import_get_order(
+			id,
+			contract_no,
+			order_code,
+			company_name,
+			company_card_no,
+			id_number,
+			loan_purpose,
+			loan_type,
+			loan_amount,
+			credit_amount,
+			loan_term,
+			appro_term,
+			loan_date,
+			month_rate,
+			address,
+			contract_phone,
+			cash_deposit,
+			service_fee,
+			service_fee_way,
+			manage_fee,
+			repayment_type,
+			status,
+			account_code,
+			user_name,
+			user_type,
+			cust_id,
+			city_code,
+			bank_branch_name,
+			handle_status,
+			bank_code,
+			batch_date
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{orderCode},
+			#{companyName},
+			#{companyCardNo},
+			#{idNumber},
+			#{loanPurpose},
+			#{loanType},
+			#{loanAmount},
+			#{creditAmount},
+			#{loanTerm},
+			#{approTerm},
+			#{loanDate},
+			#{monthRate},
+			#{address},
+			#{contractPhone},
+			#{cashDeposit},
+			#{serviceFee},
+			#{serviceFeeWay},
+			#{manageFee},
+			#{repaymentType},
+			#{status},
+			#{accountCode},
+			#{userName},
+			#{userType},
+			#{custId},
+			#{cityCode},
+			#{bankBranchName},
+			#{handleStatus},
+			#{bankCode},
+			#{batchDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_ged_import_get_order SET 	
+			contract_no = #{contractNo},
+			order_code = #{orderCode},
+			company_name = #{companyName},
+			company_card_no = #{companyCardNo},
+			id_number = #{idNumber},
+			loan_purpose = #{loanPurpose},
+			loan_type = #{loanType},
+			loan_amount = #{loanAmount},
+			credit_amount = #{creditAmount},
+			loan_term = #{loanTerm},
+			appro_term = #{approTerm},
+			loan_date = #{loanDate},
+			month_rate = #{monthRate},
+			address = #{address},
+			contract_phone = #{contractPhone},
+			cash_deposit = #{cashDeposit},
+			service_fee = #{serviceFee},
+			service_fee_way = #{serviceFeeWay},
+			manage_fee = #{manageFee},
+			repayment_type = #{repaymentType},
+			status = #{status},
+			account_code = #{accountCode},
+			user_name = #{userName},
+			user_type = #{userType},
+			cust_id = #{custId},
+			city_code = #{cityCode},
+			bank_branch_name = #{bankBranchName},
+			handle_status = #{handleStatus},
+			bank_code =#{bankCode},
+			batch_date = #{batchDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_ged_import_get_order
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

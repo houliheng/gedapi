@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVMortgageHouseDao">
+
+	<sql id="sVMortgageHouseColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.property_right AS
+		"propertyRight",
+		a.property_name AS "propertyName",
+		a.current_use_status AS "currentUseStatus",
+		a.house_use_property AS
+		"houseUseProperty",
+		a.land_use_property AS "landUseProperty",
+		a.house_type AS "houseType",
+		a.cont_province AS "contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS "contDistinct",
+		a.cont_details AS "contDetails",
+		a.building_area AS "buildingArea",
+		a.using_area AS "usingArea",
+		a.floor_num AS "floorNum",
+		a.house_years AS
+		"houseYears",
+		a.service_life AS "serviceLife",
+		a.house_purchase_price AS
+		"housePurchasePrice",
+		a.is_keep_papers AS "isKeepPapers",
+		a.is_property_line AS "isPropertyLine",
+		a.is_shift_record AS
+		"isShiftRecord",
+		a.property_status AS "propertyStatus",
+		a.is_unique_house AS "isUniqueHouse",
+		a.evaluate_way AS "evaluateWay",
+		a.market_price AS "marketPrice",
+		a.evaluate_price AS "evaluatePrice",
+		a.create_date AS "createDate"
+	</sql>
+
+	<sql id="sVMortgageHouseJoins">
+	</sql>
+
+	<select id="get"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageHouse">
+		SELECT
+		<include refid="sVMortgageHouseColumns" />
+		FROM ift_sv_mortgage_house a
+		<include refid="sVMortgageHouseJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageHouse">
+		SELECT
+		<include refid="sVMortgageHouseColumns" />
+		FROM ift_sv_mortgage_house a
+		<include refid="sVMortgageHouseJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM ift_sv_mortgage_house a
+		<include refid="sVMortgageHouseJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageHouse">
+		SELECT
+		<include refid="sVMortgageHouseColumns" />
+		FROM ift_sv_mortgage_house a
+		<include refid="sVMortgageHouseJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_mortgage_house(
+			id,
+			apply_no,
+			property_right,
+			property_name,
+			current_use_status,
+			house_use_property,
+			land_use_property,
+			house_type,
+			cont_province,
+			cont_city,
+			cont_distinct,
+			cont_details,
+			building_area,
+			using_area,
+			floor_num,
+			house_years,
+			service_life,
+			house_purchase_price,
+			is_keep_papers,
+			is_property_line,
+			is_shift_record,
+			property_status,
+			is_unique_house,
+			evaluate_way,
+			market_price,
+			evaluate_price,
+			create_date
+		) VALUES
+		<foreach item="house" collection="list" index="index" separator=",">
+			(
+				REPLACE(UUID(),'-',''),
+				#{applyNo},
+				#{house.propertyRight},
+				#{house.propertyName},
+				#{house.currentUseStatus},
+				#{house.houseUseProperty},
+				#{house.landUseProperty},
+				#{house.houseType},
+				#{house.contProvince},
+				#{house.contCity},
+				#{house.contDistinct},
+				#{house.contDetails},
+				#{house.buildingArea},
+				#{house.usingArea},
+				#{house.floorNum},
+				#{house.houseYears},
+				#{house.serviceLife},
+				#{house.housePurchasePrice},
+				#{house.isKeepPapers},
+				#{house.isPropertyLine},
+				#{house.isShiftRecord},
+				#{house.propertyStatus},
+				#{house.isUniqueHouse},
+				#{house.evaluateWay},
+				#{house.marketPrice},
+				#{house.evaluatePrice},
+				CURRENT_TIMESTAMP
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE ift_sv_mortgage_house SET
+		apply_no = #{applyNo},
+		property_right = #{propertyRight},
+		property_name = #{propertyName},
+		current_use_status = #{currentUseStatus},
+		house_use_property = #{houseUseProperty},
+		land_use_property = #{landUseProperty},
+		house_type = #{houseType},
+		cont_province = #{contProvince},
+		cont_city = #{contCity},
+		cont_distinct = #{contDistinct},
+		cont_details = #{contDetails},
+		building_area = #{buildingArea},
+		using_area = #{usingArea},
+		floor_num = #{floorNum},
+		house_years = #{houseYears},
+		service_life = #{serviceLife},
+		house_purchase_price = #{housePurchasePrice},
+		is_keep_papers = #{isKeepPapers},
+		is_property_line = #{isPropertyLine},
+		is_shift_record = #{isShiftRecord},
+		property_status = #{propertyStatus},
+		is_unique_house = #{isUniqueHouse},
+		evaluate_way = #{evaluateWay},
+		market_price = #{marketPrice},
+		evaluate_price = #{evaluatePrice}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM ift_sv_mortgage_house
+		WHERE id = #{id}
+	</update>
+
+</mapper>

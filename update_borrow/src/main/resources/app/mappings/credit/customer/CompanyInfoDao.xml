@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.resoft.credit.applyRegister.dao.CompanyInfoDao">
+	<!-- 查询数据项 -->
+	<sql id="companyInfoColumns">
+		a.id AS "id",
+		a.apply_id AS "applyId",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.linkman_name AS "linkmanName",
+		a.linkman_id_no AS "linkmanIdNo",
+		a.linkman_phone AS "linkmanPhone",
+		a.corporation_name AS "corporationName",
+		a.corporation_id_no AS "corporationIdNo",
+		a.corporation_phone AS "corporationPhone",
+		a.company_status AS "companyStatus",
+		a.land_use AS "landUse",
+		a.main_category AS "mainCategory",
+		a.large_category AS "largeCategory",
+		a.medium_category AS "mediumCategory",
+		a.small_category AS "smallCategory",
+		a.found_date AS "foundDate",
+		a.curr_staff_num AS "currStaffNum",
+		a.last_staff_num AS "lastStaffNum",
+		a.core_business AS "coreBusiness",
+		a.operate_type AS "operateType",
+		a.register_capital AS "registerCapital",
+		a.PAID_CAPITAL AS "paidCapital",
+		a.register_code AS "registerCode",
+		a.register_date AS "registerDate",
+		a.reg_province AS "regProvince",
+		a.reg_city AS "regCity",
+		a.reg_distinct AS "regDistinct",
+		a.reg_details AS "regDetails",
+		a.addr_resi AS "addrResi",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.remark AS "remark",
+		a.annual_earn AS "annualEarn",
+		a.company_site AS "companySite",
+		a.del_flag AS "delFlag"
+	</sql>
+	<sql id="companyInfoJoins">
+	</sql>
+	
+	<!-- 新增 -->
+	<insert id="insert">
+		INSERT INTO cre_company_info(
+			id,
+			apply_id,
+			cust_name,
+			id_type,
+			id_num,
+			linkman_name,
+			linkman_id_no,
+			linkman_phone,
+			del_flag
+		) VALUES (
+			#{id},
+			#{applyId},
+			#{custName},
+			#{idType},
+			#{idNum},
+			#{linkmanName},
+			#{linkmanIdNo},
+			#{linkmanPhone},
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 根据申请编号查询 -->
+	<select id="getByApplyId" resultType="CompanyInfo">
+		SELECT 
+			<include refid="companyInfoColumns"/>
+		FROM cre_company_info a
+		<include refid="companyInfoJoins"/>
+		WHERE a.APPLY_NO = #{applyNo}
+		and a.del_flag = '0'
+	</select>
+	
+	<!-- 修改 -->
+	<update id="update">
+		UPDATE cre_company_info SET 	
+			linkman_name = #{linkmanName},
+			linkman_id_no = #{linkmanIdNo},
+			linkman_phone = #{linkmanPhone},
+			corporation_name = #{corporationName},
+			corporation_id_no = #{corporationIdNo},
+			corporation_phone = #{corporationPhone},
+			annual_earn = #{annualEarn},
+			company_status = #{companyStatus},
+			land_use = #{landUse},
+			main_category = #{mainCategory},
+			found_date = #{foundDate},
+			large_category = #{largeCategory},
+			curr_staff_num = #{currStaffNum},
+			last_staff_num = #{lastStaffNum},
+			medium_category = #{mediumCategory},
+			core_business = #{coreBusiness},
+			small_category = #{smallCategory},
+			operate_type = #{operateType},
+			register_capital = #{registerCapital},
+			PAID_CAPITAL = #{paidCapital},
+			register_code = #{registerCode},
+			register_date = #{registerDate},
+			reg_province = #{regProvince},
+			reg_city = #{regCity},
+			reg_distinct = #{regDistinct},
+			reg_details = #{regDetails},
+			company_site = #{companySite},
+			addr_resi = #{addrResi},
+			operate_province = #{operateProvince},
+			operate_city = #{operateCity},
+			operate_distinct = #{operateDistinct},
+			operate_details = #{operateDetails},
+			remark = #{remark}
+		WHERE id = #{id}
+		and del_flag = '0'
+	</update>
+	
+	<!-- 批量删除 -->
+	<update id="banchDelete">
+		update  cre_company_info set del_flag = '1'
+		where id in 
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		 #{idList} 
+		</foreach>
+	</update>
+</mapper>

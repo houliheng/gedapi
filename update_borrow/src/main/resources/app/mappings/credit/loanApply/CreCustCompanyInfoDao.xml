@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+客户单位信息表  SQLMapper  CRE_CUST_COMPANY_INFO
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreCustCompanyInfoDao">
+	
+	<!-- 
+	 * @reqno:H1510080102
+	 * @date-designer:2015年10月23日-songmin
+	 * @date-author:2015年10月23日-songmin:CRE_信贷审批_申请录入_客户信息_工作信息【默认数据项】展现
+	 * @db-z:CRE_CUST_COMPANY_INFO:ID、APPLY_ID、COMPANY_NAME（单位名称）、COM_NATURE（单位性质）、
+	 * 		COM_INDUSTRY（所属行业）、POST_TYPE（职位类别）、POST_LEVEL（职位级别）、POST_NAME（职位名称）、
+	 * 		DEPARTMENT（部门名称）、COM_PHONE_AR（单位电话（区号））、COM_PHONE_SB（单位电话总机）、
+	 * 		COM_PHONE_EX（单位电话分机）、WORK_IN_DATE（本单位入职日期）、SALARY_MODE（工资发放方式）、
+	 * 		MONTH_INCOME（每月基本薪金）、OTHER_MONTH_INCOME（其他月收入）、SALART_DAY（工资发放日期）、
+	 * 		COM_PROVINCE（单位地址省）、COM_CITY（地址市）、COM_DISTINCT（单位地址区）、
+	 * 		COM_DETAILS（地址-详细）
+	 -->
+	<select id="get" resultType="CreCustCompanyInfo">
+		SELECT
+			a.ID id,
+			a.APPLY_ID applyId,
+			a.COMPANY_NAME companyName,
+			a.COM_NATURE comNature,
+			a.COM_INDUSTRY comIndustry,
+			a.POST_TYPE postType,
+			a.POST_LEVEL postLevel,
+			a.POST_NAME postName,
+			a.DEPARTMENT department,
+			a.COM_PHONE_AR comPhoneAr,
+			a.COM_PHONE_SB comPhoneSb,
+			a.COM_PHONE_EX comPhoneEx,
+			a.WORK_IN_DATE workInDate,
+			a.SALARY_MODE salaryMode,
+			a.MONTH_INCOME monthIncome,
+			a.OTHER_MONTH_INCOME otherMonthIncome,
+			a.SALART_DAY salartDay,
+			a.COM_PROVINCE comProvince,
+			a.COM_CITY comCity,
+			a.COM_DISTINCT comDistinct,
+			a.COM_DETAILS comDetails
+		FROM CRE_CUST_COMPANY_INFO a
+		WHERE a.APPLY_ID=#{applyId}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		新增工作信息
+	 *		新增数据项：ID、申请ID、单位名称、单位性质、所属行业、职位类别、职位级别、职位名称、部门名称、单位电话（区号）、单位电话总机、单位电话分机、本单位入职日期、工资发放方式、
+	 * 				每月基本薪金、其他月收入、工资发放日期、单位地址省、地址市、单位地址区、地址-详细
+	 *
+	 * @db-z:CRE_CUST_COMPANY_INFO:ID、APPLY_ID、COMPANY_NAME（单位名称）、COM_NATURE（单位性质）、
+	 * 		COM_INDUSTRY（所属行业）、POST_TYPE（职位类别）、POST_LEVEL（职位级别）、POST_NAME（职位名称）、
+	 * 		DEPARTMENT（部门名称）、COM_PHONE_AR（单位电话（区号））、COM_PHONE_SB（单位电话总机）、
+	 * 		COM_PHONE_EX（单位电话分机）、WORK_IN_DATE（本单位入职日期）、SALARY_MODE（工资发放方式）、
+	 * 		MONTH_INCOME（每月基本薪金）、OTHER_MONTH_INCOME（其他月收入）、SALART_DAY（工资发放日期）、
+	 * 		COM_PROVINCE（单位地址省）、COM_CITY（地址市）、COM_DISTINCT（单位地址区）、
+	 * 		COM_DETAILS（地址-详细）
+	 -->
+	<insert id="insert">
+		insert into CRE_CUST_COMPANY_INFO(ID,
+			APPLY_ID,
+			COMPANY_NAME,
+			COM_NATURE,
+			COM_INDUSTRY,
+			POST_TYPE,
+			POST_LEVEL,
+			POST_NAME,
+			DEPARTMENT,
+			COM_PHONE_AR,
+			COM_PHONE_SB,
+			COM_PHONE_EX,
+			WORK_IN_DATE,
+			SALARY_MODE,
+			MONTH_INCOME,
+			OTHER_MONTH_INCOME,
+			SALART_DAY,
+			COM_PROVINCE,
+			COM_CITY,
+			COM_DISTINCT,
+			COM_DETAILS)
+		values(
+			#{id},
+			#{applyId},
+			#{companyName},
+			#{comNature},
+			#{comIndustry},
+			#{postType},
+			#{postLevel},
+			#{postName},
+			#{department},
+			#{comPhoneAr},
+			#{comPhoneSb},
+			#{comPhoneEx},
+			#{workInDate},
+			#{salaryMode},
+			#{monthIncome},
+			#{otherMonthIncome},
+			#{salartDay},
+			#{comProvince},
+			#{comCity},
+			#{comDistinct},
+			#{comDetails}
+		)
+	</insert>
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		根据ID修改工作信息
+	 *		修改数据项：单位名称、单位性质、所属行业、职位类别、职位级别、职位名称、部门名称、单位电话（区号）、单位电话总机、单位电话分机、本单位入职日期、工资发放方式、
+	 * 				每月基本薪金、其他月收入、工资发放日期、单位地址省、地址市、单位地址区、地址-详细
+	 *
+	 * @db-z:CRE_CUST_COMPANY_INFO:ID、APPLY_ID、COMPANY_NAME（单位名称）、COM_NATURE（单位性质）、
+	 * 		COM_INDUSTRY（所属行业）、POST_TYPE（职位类别）、POST_LEVEL（职位级别）、POST_NAME（职位名称）、
+	 * 		DEPARTMENT（部门名称）、COM_PHONE_AR（单位电话（区号））、COM_PHONE_SB（单位电话总机）、
+	 * 		COM_PHONE_EX（单位电话分机）、WORK_IN_DATE（本单位入职日期）、SALARY_MODE（工资发放方式）、
+	 * 		MONTH_INCOME（每月基本薪金）、OTHER_MONTH_INCOME（其他月收入）、SALART_DAY（工资发放日期）、
+	 * 		COM_PROVINCE（单位地址省）、COM_CITY（地址市）、COM_DISTINCT（单位地址区）、
+	 * 		COM_DETAILS（地址-详细）
+	 -->
+	<update id="update">
+		update CRE_CUST_COMPANY_INFO 
+		set 
+			COMPANY_NAME=#{companyName},
+			COM_NATURE=#{comNature},
+			COM_INDUSTRY=#{comIndustry},
+			POST_TYPE=#{postType},
+			POST_LEVEL=#{postLevel},
+			POST_NAME=#{postName},
+			DEPARTMENT=#{department},
+			COM_PHONE_AR=#{comPhoneAr},
+			COM_PHONE_SB=#{comPhoneSb},
+			COM_PHONE_EX=#{comPhoneEx},
+			WORK_IN_DATE=#{workInDate},
+			SALARY_MODE=#{salaryMode},
+			MONTH_INCOME=#{monthIncome},
+			OTHER_MONTH_INCOME=#{otherMonthIncome},
+			SALART_DAY=#{salartDay},
+			COM_PROVINCE=#{comProvince},
+			COM_CITY=#{comCity},
+			COM_DISTINCT=#{comDistinct},
+			COM_DETAILS=#{comDetails}
+		where ID=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.advanceRepayGET.dao.AdvanceRepayGetDao">
+
+	<sql id="advanceRepayGetColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.remain_capital_amount AS "remainCapitalAmount",
+		a.remain_interest_amount AS "remainInterestAmount",
+		a.remain_service_fee AS "remainServiceFee",
+		a.remain_management_fee AS "remainManagementFee",
+		a.all_advance_repay AS "allAdvanceRepay",
+		a.repay_date AS "repayDate",
+		a.ADVANCE_STATUS AS "advanceStatus",
+		a.create_by AS "createBy.id",
+		a.REMAIN_ALL_INTEREST AS "remainAllInterest",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="advanceRepayGetJoins">
+	</sql>
+	
+    <select id="remainRepayPlan" resultType="java.lang.String">
+		SELECT SUM(s.SUM_)
+		FROM
+		(SELECT SUM(a.MANAGEMENT_FEE) + SUM(a.CAPITAL_AMOUNT)-SUM(IFNULL(b.FACT_MANAGEMENT_FEE ,0))-SUM(IFNULL(FACT_CAPITAL_AMOUNT ,0)) AS SUM_
+		FROM ACC_REPAY_PLAN a
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS b ON
+		A.CONTRACT_NO=B.CONTRACT_NO AND A.PERIOD_NUM=B.PERIOD_NUM
+		WHERE a.CONTRACT_NO =#{contractNo} AND a.PERIOD_NUM >= #{periodNum}
+		UNION ALL
+		SELECT INTEREST_AMOUNT - IFNULL(b.FACT_INTEREST_AMOUNT ,0)AS SUM_
+		FROM ACC_REPAY_PLAN a
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS b ON
+		a.CONTRACT_NO=b.CONTRACT_NO AND a.PERIOD_NUM=b.PERIOD_NUM
+		WHERE a.CONTRACT_NO =#{contractNo} AND a.PERIOD_NUM = #{periodNum} )s
+	</select>
+	
+	<select id="getByContractNo" resultType="advanceRepayGet">
+		SELECT 
+			<include refid="advanceRepayGetColumns"/>
+		FROM acc_advance_repay_get a
+		WHERE a.contract_no = #{contractNo}
+		and a.del_flag='0'
+		order by a.create_date desc
+	</select>
+	
+	
+	<select id="get" resultType="AdvanceRepayGet">
+		SELECT 
+			<include refid="advanceRepayGetColumns"/>
+		FROM acc_advance_repay_get a
+		<include refid="advanceRepayGetJoins"/>
+		WHERE a.id = #{id} and a.del_flag='0'
+	</select>
+	
+	<select id="findList" resultType="AdvanceRepayGet">
+		SELECT 
+			<include refid="advanceRepayGetColumns"/>
+		FROM acc_advance_repay_get a
+		<include refid="advanceRepayGetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_advance_repay_get a
+		<include refid="advanceRepayGetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AdvanceRepayGet">
+		SELECT 
+			<include refid="advanceRepayGetColumns"/>
+		FROM acc_advance_repay_get a
+		<include refid="advanceRepayGetJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_advance_repay_get(
+			id,
+			contract_no,
+			period_num,
+			remain_capital_amount,
+			remain_interest_amount,
+			remain_service_fee,
+			remain_management_fee,
+			all_advance_repay,
+			REMAIN_ALL_INTEREST,
+			repay_date,
+			ADVANCE_STATUS,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{remainCapitalAmount},
+			#{remainInterestAmount},
+			#{remainServiceFee},
+			#{remainManagementFee},
+			#{allAdvanceRepay},
+			#{remainAllInterest},
+			#{repayDate},
+			#{advanceStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_advance_repay_get SET 	
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			remain_capital_amount = #{remainCapitalAmount},
+			remain_interest_amount = #{remainInterestAmount},
+			remain_service_fee = #{remainServiceFee},
+			remain_management_fee = #{remainManagementFee},
+			all_advance_repay = #{allAdvanceRepay},
+			REMAIN_ALL_INTEREST = #{remainAllInterest},
+			repay_date = #{repayDate},
+			ADVANCE_STATUS = #{advanceStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE acc_advance_repay_get SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

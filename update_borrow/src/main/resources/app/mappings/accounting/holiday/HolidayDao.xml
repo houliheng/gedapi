@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.holiday.dao.HolidayDao">
+<select id="findList" resultType="Holiday">
+		select 
+			   a.id,
+			   a.holiday_date as hldDate,
+		       a.holiday_name as hldName
+		       from acc_sys_holiday a
+		       where 1=1
+	    <if test="hldName != null and hldName != ''" >
+			AND a.holiday_name LIKE 
+				<if test="dbName == 'oracle'">'%'||#{hldName}||'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{hldName},'%')</if>
+		</if>
+		 <if test="hldStartDate != null and hldStartDate != '' ">   
+			AND a.holiday_date &gt;= #{hldStartDate} 
+		</if>
+		<if test="hldEndDate != null and hldEndDate != '' ">
+			AND a.holiday_date &lt;= #{hldEndDate} 
+		</if>
+		order by holiday_date desc
+	</select>
+	
+	<!-- 获得分页总数 -->
+	<select id="getCount" resultType="long">
+		SELECT count(1) from (
+			SELECT a.holiday_date as hldDate,
+		        		a.holiday_name as hldName
+		       FROM acc_sys_holiday a
+		 WHERE 1=1
+	    <if test="hldName != null and hldName != ''" >
+			AND a.holiday_name LIKE 
+				<if test="dbName == 'oracle'">'%'||#{hldName}||'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{hldName},'%')</if>
+		</if>
+		 <if test="hldStartDate != null and hldStartDate != '' and hldEndDate != null and hldEndDate != ''" >
+			AND a.holiday_date between #{hldStartDate} and #{hldEndDate}
+		</if>
+		) tmp_count
+	</select>
+	<insert id="insert">
+		INSERT INTO acc_sys_holiday(
+			id,
+			holiday_date,
+			holiday_name
+		) VALUES (
+			#{id},
+			#{hldDate},
+			#{hldName}
+		)
+	</insert>
+	
+	<select id="get" resultType="Holiday">
+		SELECT 
+		   id,
+	       holiday_date as "hldDate",
+	       holiday_name as "hldName"
+		FROM acc_sys_holiday a
+		WHERE a.id = #{id}
+	</select>
+
+	<update id="delete">
+		DELETE FROM ACC_SYS_HOLIDAY 
+		WHERE id = #{id} 
+	</update>
+	
+	<update id="update">
+		UPDATE ACC_SYS_HOLIDAY set holiday_name=#{hldName}
+		WHERE id = #{id} 
+	</update>
+	
+	<select id = "findDateCount" resultType="int">
+		SELECT 
+			  count(1)
+		FROM ACC_SYS_HOLIDAY a where holiday_date=#{hldDate}
+	</select>
+	
+</mapper>

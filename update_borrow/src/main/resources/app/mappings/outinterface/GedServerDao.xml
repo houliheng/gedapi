@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.rest.ged.dao.GedServerDao">
+
+<insert id="insert">
+	INSERT INTO cre_ged_apply_register(
+		ID,
+		CUST_NAME,
+		PRODUCT_TYPE,
+		PRODUCT_NAME,
+		COMPANY_NAME,
+		COMPANY_CARD_TYPE,
+		COMPANY_CARD_NUM,
+		BUSINESS_LICENCE,
+		ORGANIZATION_CODE,
+		TAX_CODE,
+		LOAN_PURPOST,
+		PROVINCE,
+		CITY,
+		DISTRICT,
+		APPLY_PERIOD,
+		APPLY_ID,
+		MOBILE_NUM,
+		APPLY_AMOUNT,
+		ID_NUM,
+		REGISTER_DATE,
+		LOCATION_CITY,
+		CREATE_DATE,
+		CREATE_BY
+	)
+	VALUES(
+		REPLACE(UUID(),'-',''),
+		#{custName},
+		#{productType},
+		#{productName},
+		#{companyName},
+		#{companyCardType},
+		#{companyCardNum},
+		#{businessLicence},
+		#{organizationCode},
+		#{taxCode},
+		#{loanPurpost},
+		#{province},
+		#{city},
+		#{district},
+		#{applyPeriod},
+		#{applyId},
+		#{phoneNo},
+		#{applyAmount},
+		#{idNum},
+		#{applyDate},
+		#{contCity},
+		CURRENT_TIMESTAMP,
+		'1'
+	)
+
+</insert>
+	
+	<update id="updateConfirmGuranteRelationByApply">
+		update cre_apply_relation set IS_CONFIRM = #{flag} where  CUST_ID=#{custId} and APPLY_NO =#{applyNo}
+	</update>
+	<update id="updateAppltReltation">
+		update cre_apply_relation set IS_CONFIRM = #{flag} where CUST_ID=#{custId} and APPLY_NO =#{applyNo}
+	</update>
+	<update id="updateConfirmGuranteRelationByGurantee">
+		update cre_apply_company_relation set IS_CONFIRM = #{flag} where CUST_ID=#{custId} and APPLY_NO =#{applyNo} and COMPANY_ID = #{companyId}
+	</update>
+	
+	<update id="updateConfirmRelation">
+		update cre_guarantee_relation set IS_CONFIRM = #{flag} where ROLE_TYPE = #{roleType} and CUST_ID=#{custId} and APPLY_NO =#{applyNo} and COMPANY_ID = #{companyId}
+	</update>
+	
+	<select id="findApplyRelationByApplyNo" resultType="com.resoft.credit.applyRelation.entity.ApplyRelation">
+		select 
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS
+		"roleType",
+		a.relation_for_apply AS "relationForApply",
+		a.cust_id AS
+		"custId",
+		a.cust_name AS "custName",
+		a.description AS "description",
+		a.del_flag as "delFlag",
+		a.create_date AS "createDate",
+		a.mate_to_guarantor as "mateToGuarantor",
+		a.SV_FLAG AS svFlag,
+		a.IS_CONFIRM as isConfirm
+		from cre_apply_relation a where a.APPLY_NO = #{applyNo}
+	</select>
+	
+	
+	<select  id="getIdByApplyNoAndCompanyId" resultType="com.resoft.credit.guaranteeRelation.entity.GuaranteeRelation">
+		select 
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.COMPANY_ID AS "companyId",
+		a.IS_CONFIRM as isConfirm
+		from 
+			cre_guarantee_relation a 
+		where a.apply_no=#{applyNo}
+			and a.COMPANY_ID = #{companyId} and DEL_FLAG = '0'
+	</select>
+	<select id="getGuranteeCompanyId" resultType="com.resoft.credit.guranteeCompanyRelation.entity.CreApplyCompanyRelation">
+		select 
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.company_id AS "companyId",
+		a.cust_id AS "custId",
+		a.role_type AS "roleType",
+		a.notarize_flag AS "notarizeFlag",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.IS_CONFIRM as isConfirm
+		from cre_apply_company_relation a where a.APPLY_NO = #{applyNo} and a.COMPANY_ID = #{companyId} and a.DEL_FLAG = '0' and a.CUST_ID = #{custId}
+	</select>
+	
+	
+	<select id="findApplyCompanyRelationByApplyNo" resultType="com.resoft.credit.guranteeCompanyRelation.entity.CreApplyCompanyRelation">
+		select 
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.company_id AS "companyId",
+		a.cust_id AS "custId",
+		a.role_type AS "roleType",
+		a.notarize_flag AS "notarizeFlag",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.IS_CONFIRM as isConfirm
+		from cre_apply_company_relation a where a.APPLY_NO = #{applyNo} and a.role_type = '3'  and a.DEL_FLAG = '0' and a.IS_CONFIRM = '1'
+	</select>
+	
+	<update id="updateContractNoByApplyNo">
+		update cre_contract set GURANTEE_RELATION = '0' where apply_no = #{applyNo}
+		<if test="custId != null and custId != ''">
+		and APPRO_ID = #{custId}
+		</if>
+	</update>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.RelatedPieceDao">
+
+	<sql id="relatedPieceColumns">
+		a.ROLE_TYPE as "roleType"
+		,c.CUST_NAME as "custName"
+		,c.ID_TYPE as "idType"
+		,c.ID_NUM as "idNum"
+		,d.CONTRACT_AMOUNT as "contractAmount"
+		,c.REGISTER_DATE as "registerDate"
+		,c.ORG_ID as "orgId"
+		,c.APPLY_STATUS as "applyStatus"
+	</sql>
+
+	<sql id="relatedPieceJoins">
+		inner join cre_cust_info b
+		on a.CUST_ID = b.ID
+		inner join cre_apply_register c
+		on a.APPLY_NO = c.APPLY_NO
+		left join cre_contract d
+		on a.APPLY_NO = d.APPLY_NO
+	</sql>
+
+	<select id="get" resultType="RelatedPiece">
+		SELECT
+		<include refid="relatedPieceColumns" />
+		from cre_apply_relation a
+		<include refid="relatedPieceJoins" />
+		WHERE a.CUST_ID =#{custId}
+		AND b.DEL_FLAG = '0'
+	</select>
+
+	<select id="findList" resultType="RelatedPiece">
+		SELECT
+		<include refid="relatedPieceColumns" />
+		from cre_apply_relation a
+		<include refid="relatedPieceJoins" />
+		where a.CUST_ID =#{custId}	
+		AND b.DEL_FLAG = '0'	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		from cre_apply_relation a
+		<include refid="relatedPieceJoins" />
+		where a.CUST_ID =#{custId}	
+		AND b.DEL_FLAG = '0'
+	</select>
+
+	<select id="findAllList" resultType="RelatedPiece">
+		SELECT
+		<include refid="relatedPieceColumns" />
+		FROM cre_apply_register a
+		<include refid="relatedPieceJoins" />
+		WHERE where a.CUST_ID =#{custId}
+		AND b.DEL_FLAG = '0'
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

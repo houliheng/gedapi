@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVCompanyRelatedDao">
+    
+	<sql id="sVCompanyRelatedColumns">
+		a.id AS "id",
+		a.organization_no AS "organizationNo",
+		a.related_company_name AS "relatedCompanyName",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.related_company_org AS "relatedCompanyOrg",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.related_company_type AS "relatedCompanyType",
+		a.register_code AS "registerCode",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="sVCompanyRelatedJoins">
+	</sql>
+    
+	<select id="get" resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyRelated">
+		SELECT 
+			<include refid="sVCompanyRelatedColumns"/>
+		FROM ift_sv_company_related a
+		<include refid="sVCompanyRelatedJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyRelated">
+		SELECT 
+			<include refid="sVCompanyRelatedColumns"/>
+		FROM ift_sv_company_related a
+		<include refid="sVCompanyRelatedJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_sv_company_related a
+		<include refid="sVCompanyRelatedJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCompanyRelated">
+		SELECT 
+			<include refid="sVCompanyRelatedColumns"/>
+		FROM ift_sv_company_related a
+		<include refid="sVCompanyRelatedJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_company_related(
+			id, 
+			organization_no,
+			related_company_name,
+			un_soc_credit_no,
+			related_company_org,
+			busi_lic_reg_no,
+			related_company_type,
+			register_code,
+			create_date
+		) VALUES 
+		<foreach item="companyRelated" collection="list" index="index" separator=",">
+		(
+			REPLACE(UUID(),'-',''),
+			#{companyRelated.organizationNo},
+			#{companyRelated.relatedCompanyName},
+			#{companyRelated.unSocCreditNo},
+			#{companyRelated.relatedCompanyOrg},
+			#{companyRelated.busiLicRegNo},
+			#{companyRelated.relatedCompanyType},
+			#{companyRelated.registerCode},
+			CURRENT_TIMESTAMP
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_sv_company_related SET 	
+			organization_no = #{organizationNo},
+			related_company_name = #{relatedCompanyName},
+			un_soc_credit_no = #{unSocCreditNo},
+			related_company_org = #{relatedCompanyOrg},
+			busi_lic_reg_no = #{busiLicRegNo},
+			related_company_type = #{relatedCompanyType},
+			register_code = #{registerCode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_sv_company_related
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkFace.dao.CheckFaceDao">
+    
+	<sql id="checkFaceColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.check_user_id1 AS "checkUserId1",
+		a.check_user_id2 AS "checkUserId2",
+		a.check_user_id3 AS "checkUserId3",
+		a.per_loan_date AS "perLoanDate",
+		a.funding_gap AS "fundingGap",
+		a.company_desc AS "companyDesc",
+		a.loan_purpose_desc AS "loanPurposeDesc",
+		a.loan_repay_desc AS "loanRepayDesc",
+		a.funding_desc AS "fundingDesc",
+		a.family_desc AS "familyDesc",
+		a.guarantee_measure_desc AS "guaranteeMeasureDesc",
+		a.guarantee_person_desc AS "guaranteePersonDesc",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkFaceJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckFace">
+		SELECT 
+			<include refid="checkFaceColumns"/>
+		FROM cre_check_face a
+		<include refid="checkFaceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckFace">
+		SELECT 
+			<include refid="checkFaceColumns"/>
+		FROM cre_check_face a
+		<include refid="checkFaceJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_check_face a
+		<include refid="checkFaceJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckFace">
+		SELECT 
+			<include refid="checkFaceColumns"/>
+		FROM cre_check_face a
+		<include refid="checkFaceJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_check_face(
+			id,
+			apply_no,
+			check_user_id1,
+			check_user_id2,
+			check_user_id3,
+			per_loan_date,
+			funding_gap,
+			company_desc,
+			loan_purpose_desc,
+			loan_repay_desc,
+			funding_desc,
+			family_desc,
+			guarantee_measure_desc,
+			guarantee_person_desc,
+			description,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{checkUserId1},
+			#{checkUserId2},
+			#{checkUserId3},
+			#{perLoanDate},
+			#{fundingGap},
+			#{companyDesc},
+			#{loanPurposeDesc},
+			#{loanRepayDesc},
+			#{fundingDesc},
+			#{familyDesc},
+			#{guaranteeMeasureDesc},
+			#{guaranteePersonDesc},
+			#{description},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_check_face SET 	
+			apply_no = #{applyNo},
+			check_user_id1 = #{checkUserId1},
+			check_user_id2 = #{checkUserId2},
+			check_user_id3 = #{checkUserId3},
+			per_loan_date = #{perLoanDate},
+			funding_gap = #{fundingGap},
+			company_desc = #{companyDesc},
+			loan_purpose_desc = #{loanPurposeDesc},
+			loan_repay_desc = #{loanRepayDesc},
+			funding_desc = #{fundingDesc},
+			family_desc = #{familyDesc},
+			guarantee_measure_desc = #{guaranteeMeasureDesc},
+			guarantee_person_desc = #{guaranteePersonDesc},
+			description = #{description},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_check_face
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCheckFaceByApplyNo" resultType="CheckFace">
+		SELECT 
+			<include refid="checkFaceColumns"/>
+		FROM cre_check_face a where  a.apply_no = #{applyNo}
+	</select>
+</mapper>

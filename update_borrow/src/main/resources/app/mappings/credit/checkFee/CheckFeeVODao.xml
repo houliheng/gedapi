@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkFee.dao.CheckFeeVODao">
+
+	<select id="findList" resultType="CheckFeeVO">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.is_collect AS
+		"isCollect",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS
+		"checkUserName",
+		a.check_date AS "checkDate",
+		a.check_fee AS "checkFee",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.return_check_fee AS "returnCheckFee",
+		a.update_by AS "updateBy.id",
+		a.return_time AS "returnTime",
+		a.update_date AS "updateDate",
+		a.return_user_id AS "returnUserId",
+		a.return_user_name AS "returnUserName",
+		a.description_return AS
+		"descriptionReturn",
+		b.CUST_NAME AS "custName",
+		d.CONTRACT_NO AS
+		"contractNo",
+		d.CONTRACT_AMOUNT AS "contractAmount"
+		FROM
+		cre_check_fee a
+		INNER JOIN cre_apply_register b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN
+		cre_contract d ON b.APPLY_NO = d.APPLY_NO
+		LEFT JOIN sys_user e ON
+		a.update_by = e.id
+		<where>
+			b.APPLY_STATUS = #{applyStatus}
+			<if test="custName != null and custName != ''">
+				AND b.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND d.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="loginId != null and loginId != ''">
+				AND e.id = #{loginId}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.*)
+		FROM
+		cre_check_fee a
+		INNER JOIN cre_apply_register b ON
+		a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN
+		cre_contract d ON b.APPLY_NO =
+		d.APPLY_NO
+		LEFT JOIN sys_user e ON
+		a.update_by = e.id
+		<where>
+			b.APPLY_STATUS = #{applyStatus}
+			<if test="custName != null and custName != ''">
+				AND b.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND d.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="loginId != null and loginId != ''">
+				AND e.id = #{loginId}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<select id="findAllList" resultType="CheckFeeVO">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.is_collect AS
+		"isCollect",
+		a.check_user_id AS
+		"checkUserId",
+		a.check_user_name AS
+		"checkUserName",
+		a.check_date AS
+		"checkDate",
+		a.check_fee AS "checkFee",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.return_check_fee AS "returnCheckFee",
+		a.update_by AS "updateBy.id",
+		a.return_time AS "returnTime",
+		a.update_date AS "updateDate",
+		a.return_user_id AS "returnUserId",
+		a.return_user_name AS
+		"returnUserName",
+		a.description_return AS
+		"descriptionReturn",
+		b.CUST_NAME AS "custName",
+		d.CONTRACT_NO AS
+		"contractNo",
+		d.CONTRACT_AMOUNT AS "contractAmount"
+		FROM
+		cre_check_fee a
+		INNER JOIN
+		cre_apply_register b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN
+		cre_contract d
+		ON b.APPLY_NO = d.APPLY_NO
+		LEFT JOIN sys_user e ON
+		a.update_by = e.id
+		ORDER BY a.update_date DESC
+	</select>
+
+	<!-- <select id="findCheckFeeVOList" resultType="CheckFeeVO">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.is_collect AS
+		"isCollect",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS
+		"checkUserName",
+		a.check_date AS "checkDate",
+		a.check_fee AS "checkFee",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.return_check_fee AS "returnCheckFee",
+		a.update_by AS "updateBy.id",
+		a.return_time AS "returnTime",
+		a.update_date AS "updateDate",
+		a.return_user_id AS "returnUserId",
+		a.return_user_name AS "returnUserName",
+		a.description_return AS
+		"descriptionReturn",
+		b.CUST_NAME AS "custName",
+		d.CONTRACT_NO AS
+		"contractNo",
+		d.CONTRACT_AMOUNT AS "contractAmount"
+		FROM
+		cre_check_fee a
+		INNER JOIN cre_apply_register b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN
+		cre_contract d ON b.APPLY_NO = d.APPLY_NO
+		LEFT JOIN sys_user e ON
+		a.update_by = e.id
+		<where>
+			b.APPLY_STATUS = #{applyStatus}
+			<if test="custName != null and custName != ''">
+				AND b.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND d.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="loginId != null and loginId != ''">
+				AND e.id = #{loginId}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select> -->
+
+	<select id="findAllUserList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.is_collect AS
+		"isCollect",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS
+		"checkUserName",
+		a.check_date AS "checkDate",
+		a.check_fee AS "checkFee",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.return_check_fee AS "returnCheckFee",
+		a.update_by AS "updateBy.id",
+		a.return_time AS "returnTime",
+		a.update_date AS "updateDate",
+		a.return_user_id AS "returnUserId",
+		a.return_user_name AS "returnUserName",
+		a.description_return AS
+		"descriptionReturn",
+		b.CUST_NAME AS "custName",
+		d.CONTRACT_NO AS
+		"contractNo",
+		d.CONTRACT_AMOUNT AS "contractAmount"
+		FROM
+		cre_check_fee a
+		INNER JOIN cre_apply_register b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN
+		cre_contract d ON b.APPLY_NO = d.APPLY_NO
+		<where>
+			b.APPLY_STATUS = #{applyStatus}
+			<if test="custName != null and custName != ''">
+				AND b.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND d.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+</mapper>

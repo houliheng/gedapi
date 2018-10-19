@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.product.dao.ProductFeeDao">
+	<!-- 
+	 * @reqno:H1511130067
+	 * @date-designer:20151116-chenshaojia
+	 * @date-author:20151116-chenshaojia:CRE_系统管理_产品管理_从业务使用方便考虑，需把【产品管理】功能，从账务系统移动到信贷审批系统，需求不做变动
+	 * 从jee_acc合并代码至jee_cre START 将表名 由ACC_PRODUCT_FEE 改为 CRE_PRODUCT_FEE
+	 -->
+	<sql id="columns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.fee_name AS "feeName",
+		a.fee_rate AS "feeRate",
+		a.fee_tag AS "feeTag",
+		a.del_flag AS "delFlag"
+	</sql>
+	<sql id="jointables">
+	</sql>
+	<select id="get" resultType="ProductFee">
+		SELECT 
+			<include refid="columns"/>
+		FROM CRE_PRODUCT_FEE a
+		<include refid="jointables"/>
+		WHERE a.id = #{id}
+	</select>
+	<!--
+	 @reqno:H1509130046
+	 @date-designer:20150921-songmin
+	 @date-author:20150921-songmin:ACC_系统设置_系统设置_产品管理_产品费用列表查询  分页查询产品费用列表数据 
+	 @db-z:CRE_PRODUCT_FEE:id、product_id、fee_name、fee_rate、fee_tag、del_flag
+	 @db-j:SYS_DICT:label 字典Label、type 字典类型、value 字典值
+	-->
+	<select id="findList" resultType="ProductFee">
+		SELECT 
+			<include refid="columns"/>
+		FROM CRE_PRODUCT_FEE a
+		LEFT JOIN SYS_DICT b on a.fee_tag = b.value 
+		<where>
+			a.product_id=#{productId} and b.type='FEE_TAG'
+		</where>
+		ORDER BY a.fee_tag,a.fee_name
+	</select>
+	<!--
+	 @reqno:H1509130047
+	 @date-designer:20150921-songmin
+	 @date-author:20150921-songmin:ACC_系统设置_系统设置_产品管理_产品费用_新增、修改 新增产品费用记录
+	 @db-z:CRE_PRODUCT_FEE:id、product_id、fee_name、fee_rate、fee_tag、del_flag
+	-->
+	<insert id="insert">
+		INSERT INTO CRE_PRODUCT_FEE(id,product_id,fee_name,fee_rate,fee_tag,del_flag) 
+		VALUES (#{id},#{productId},#{feeName},#{feeRate},#{feeTag},#{delFlag})
+	</insert>
+	<!--
+	 @reqno:H1509130047
+	 @date-designer:20150921-songmin
+	 @date-author:20150921-songmin:ACC_系统设置_系统设置_产品管理_产品费用_新增、修改    修改产品费用记录
+	 								修改时，关联的产品ID不做修改
+	 @db-z:CRE_PRODUCT_FEE:fee_name、fee_rate、fee_tag、del_flag、id
+	-->
+	<update id="update">
+		UPDATE CRE_PRODUCT_FEE SET 	
+			fee_name = #{feeName},
+			fee_rate = #{feeRate},
+			fee_tag = #{feeTag},
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	<!-- 
+	 * @reqno:H1511130067
+	 * @date-designer:20151116-chenshaojia
+	 * @date-author:20151116-chenshaojia:CRE_系统管理_产品管理_从业务使用方便考虑，需把【产品管理】功能，从账务系统移动到信贷审批系统，需求不做变动
+	 * 从jee_acc合并代码至jee_cre END 将表名 由ACC_PRODUCT_FEE 改为 CRE_PRODUCT_FEE
+	 -->
+</mapper>

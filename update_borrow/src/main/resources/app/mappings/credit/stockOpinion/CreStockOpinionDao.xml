@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.stockOpinion.dao.CreStockOpinionDao">
+    
+	<sql id="creStockOpinionColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.office_opinion AS "officeOpinion",
+		a.employee_name AS "employeeName",
+		a.employee_no AS "employeeNo",
+		a.office_flag AS "officeFlag",
+		a.submit_status AS "submitStatus",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id"
+	</sql>
+	
+	<sql id="creStockOpinionJoins">
+	</sql>
+    
+    <select id="getStockInfoByApplyGrade" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a
+		<include refid="creStockOpinionJoins"/>
+		WHERE a.del_flag = '0'
+			and a.APPLY_NO=#{applyNo}
+			and a.office_flag=#{officeFlag}
+	</select>
+    
+	<select id="get" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a
+		<include refid="creStockOpinionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getByApplyNo" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a	
+		WHERE a.apply_No = #{applyNo}
+		and del_flag='0'
+		order by office_flag desc
+	</select>
+	
+	<select id="getByOfficeGrade" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a	
+		WHERE a.apply_No = #{applyNo}
+			and a.office_flag=#{grade}
+		order by office_flag desc
+	</select>
+	
+	
+	
+	<select id="findList" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a
+		<include refid="creStockOpinionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_opinion a
+		<include refid="creStockOpinionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreStockOpinion">
+		SELECT 
+			<include refid="creStockOpinionColumns"/>
+		FROM cre_stock_opinion a
+		<include refid="creStockOpinionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_opinion(
+			id,
+			apply_no,
+			office_opinion,
+			employee_name,
+			employee_no,
+			office_flag,
+			submit_status,
+			del_flag,
+			create_date,
+			create_by,
+			update_date,
+			update_by
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{officeOpinion},
+			#{employeeName},
+			#{employeeNo},
+			#{officeFlag},
+			#{submitStatus},
+			#{delFlag},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_opinion SET 	
+			apply_no = #{applyNo},
+			office_opinion = #{officeOpinion},
+			employee_name = #{employeeName},
+			employee_no = #{employeeNo},
+			office_flag = #{officeFlag},
+			submit_status=#{submitStatus},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_stock_opinion SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="deleteStockInfoByApplyGrade">
+		delete  from cre_stock_opinion 
+		WHERE apply_no = #{applyNo}
+				and office_flag=#{officeFlag}
+	</delete>
+	
+	<update id="updateCreStockOpionState">
+		UPDATE cre_stock_opinion SET 
+			SUBMIT_STATUS = '1'
+		WHERE apply_no = #{applyNo} and OFFICE_FLAG = #{grade} and DEL_FLAG = '0'
+	</update>
+</mapper>

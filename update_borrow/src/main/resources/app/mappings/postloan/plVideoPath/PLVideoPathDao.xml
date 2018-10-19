@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.PLVideoPath.dao.PLVideoPathDao">
+	<select id="findCreVideoPathQueryList" resultType="PLVideoPath">
+	SELECT
+	REGISTER_DATE AS "registerDate",
+	APPLY_NO AS "applyNo",
+	FILE_DIR AS "fileDir",
+	FILE_NAME AS "fileName",
+	FILE_STORAGE_PATH AS "fileStoragePath",
+	THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+	CREATE_BY AS "createBy1",
+	CREATE_DATE AS "createDate1"
+	FROM PL_VIDEO_PATH  
+	WHERE APPLY_NO = #{param1} and AUTHORITY&lt;=#{param2}
+	</select>
+<insert id="saveCreVideoPath">
+	INSERT INTO PL_VIDEO_PATH(
+	APPLY_NO ,
+	FILE_DIR ,
+	FILE_NAME ,
+	FILE_STORAGE_PATH ,
+	THUMBNAIL_STORAGE_PATH,
+	AUTHORITY,
+	CREATE_BY ,
+	CREATE_DATE
+	) VALUES (
+	#{param1.applyNo},
+	#{param1.fileDir},
+	#{param1.fileName},
+	#{param1.fileStoragePath},
+	#{param1.thumbnailStoragePath},
+	#{param2},
+	#{param1.createBy1},
+	cast(#{param1.createDate1} AS DATETIME)
+     )
+	</insert>
+	
+	<delete id="deleteByVideoPath">
+	delete from PL_VIDEO_PATH where FILE_STORAGE_PATH=#{applyNo}
+	</delete>
+</mapper>

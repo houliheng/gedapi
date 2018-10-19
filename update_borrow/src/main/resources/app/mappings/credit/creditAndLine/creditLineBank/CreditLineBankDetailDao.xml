@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditLineBank.CreditLineBankDetailDao">
+    
+	<sql id="creditLineBankDetailColumns">
+		a.id AS "id",
+		a.line_bank_id AS "creditLineBank.id",
+		b.CUST_NAME AS "creditLineBank.custName",
+		b.BANKCARD_NO AS "creditLineBank.bankcardNo",
+		a.line_month AS "lineMonth",
+		a.curre_valid_line_amount AS "curreValidLineAmount",
+		a.income_amount AS "incomeAmount",
+		a.expense_amount AS "expenseAmount",
+		a.cycle_end_amount as "cycleEndAmount",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditLineBankDetailJoins">
+		INNER JOIN cre_credit_line_bank b ON b.id = a.line_bank_id
+	</sql>
+    
+	<select id="get" resultType="CreditLineBankDetail">
+		SELECT 
+			<include refid="creditLineBankDetailColumns"/>
+		FROM cre_credit_line_bank_detail a
+		<include refid="creditLineBankDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getBankDetail" resultType="string">
+		SELECT
+			COUNT(a.ID) AS countNum
+		FROM
+			cre_credit_line_bank_detail a
+		INNER JOIN cre_credit_line_bank b ON a.LINE_BANK_ID = b.ID
+		WHERE
+			a.DEL_FLAG = '0'
+		AND b.DEL_FLAG = '0'
+		AND b.ROLE_TYPE = #{roleType}
+		AND b.APPLY_NO = #{applyNo}
+		GROUP BY
+			b.CUST_ID,
+			b.ID
+		HAVING
+			COUNT(a.ID) >= #{minNum};
+	</select>
+	
+	
+	<select id="findLineMonthList" resultType="String">
+		select GROUP_CONCAT(b.line_month) 
+		from cre_credit_line_bank a
+		inner join cre_credit_line_bank_detail b
+		on a.id = b.LINE_BANK_ID
+		where a.apply_no = #{applyNo}
+		and a.cust_id = #{custId}
+		and a.del_flag = '0'
+		and b.del_flag = '0'
+		group by b.LINE_BANK_ID
+		having count(1) >= #{minNum}
+	</select>
+	
+	<select id="findLineBankDetailByLineMonth" resultType="CreditLineBankDetail">
+		SELECT 
+			<include refid="creditLineBankDetailColumns"/>
+		FROM cre_credit_line_bank_detail a
+		<include refid="creditLineBankDetailJoins"/>
+		<where>
+			a.del_flag = '0' AND a.line_bank_id = #{lineBankId} AND a.line_month = #{lineMonth}
+		</where>
+	</select>
+	
+	<select id="findList" resultType="CreditLineBankDetail">
+		SELECT 
+			<include refid="creditLineBankDetailColumns"/>
+		FROM cre_credit_line_bank_detail a
+		<include refid="creditLineBankDetailJoins"/>
+		<where>
+			a.del_flag = '0'
+			<if test="creditLineBank.id != null and creditLineBank.id != ''">
+				AND a.line_bank_id = #{creditLineBank.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getAvgAndSum" resultType="map">
+		SELECT
+			SUM(a.INCOME_AMOUNT) AS sumIncomeAmount,
+			SUM(a.EXPENSE_AMOUNT) AS sumExpenseAmount,
+			AVG(a.CURRE_VALID_LINE_AMOUNT) AS avgCurreValidLineAmount
+		FROM
+			cre_credit_line_bank_detail a
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="creditLineBankId != null and creditLineBankId != ''">
+				AND a.LINE_BANK_ID = #{creditLineBankId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_line_bank_detail a
+		<include refid="creditLineBankDetailJoins"/>
+		<where>
+			
+			<if test="creditLineBank.id != null and creditLineBank.id != ''">
+				AND a.line_bank_id = #{creditLineBank.id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditLineBankDetail">
+		SELECT 
+			<include refid="creditLineBankDetailColumns"/>
+		FROM cre_credit_line_bank_detail a
+		<include refid="creditLineBankDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_line_bank_detail(
+			id,
+			line_bank_id,
+			line_month,
+			curre_valid_line_amount,
+			income_amount,
+			expense_amount,
+			cycle_end_amount,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{creditLineBank.id},
+			#{lineMonth},
+			#{curreValidLineAmount},
+			#{incomeAmount},
+			#{expenseAmount},
+			#{cycleEndAmount},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_line_bank_detail SET 	
+			line_bank_id = #{creditLineBank.id},
+			line_month = #{lineMonth},
+			curre_valid_line_amount = #{curreValidLineAmount},
+			income_amount = #{incomeAmount},
+			expense_amount = #{expenseAmount},
+			cycle_end_amount = #{cycleEndAmount},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_line_bank_detail
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE line_bank_id = #{creditLineBank.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<update id="banchDelete">
+		UPDATE cre_credit_line_bank_detail a SET a.DEL_FLAG='1'
+		WHERE id IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		#{idList}
+		</foreach>
+	</update>
+	
+</mapper>

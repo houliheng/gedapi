@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVCustInfoDao">
+    
+	<sql id="sVCustInfoColumns">
+		a.id AS "id",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.person_id_start_date AS "personIdStartDate",
+		a.person_id_end_date AS "personIdEndDate",
+		a.mobile_num AS "mobileNum",
+		a.nation_no AS "nationNo",
+		a.birth_day AS "birthDay",
+		a.age_no AS "ageNo",
+		a.sex_no AS "sexNo",
+		a.wed_status AS "wedStatus",
+		a.children_son AS "childrenSon",
+		a.children_girl AS "childrenGirl",
+		a.household_spending_month AS "householdSpendingMonth",
+		a.top_education_no AS "topEducationNo",
+		a.home_phone_no AS "homePhoneNo",
+		a.hose_phone_no AS "hosePhoneNo",
+		a.reg_in_date AS "regInDate",
+		a.city_in_date AS "cityInDate",
+		a.reg_province AS "regProvince",
+		a.reg_city AS "regCity",
+		a.reg_distinct AS "regDistinct",
+		a.reg_details AS "regDetails",
+		a.is_local AS "isLocal",
+		a.cont_province AS "contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS "contDistinct",
+		a.cont_details AS "contDetails",
+		a.addr_resi AS "addrResi",
+		a.is_fixedhouse AS "isFixedhouse",
+		a.living_status AS "livingStatus",
+		a.living_status_desc AS "livingStatusDesc",
+		a.per_annual_income AS "perAnnualIncome",
+		a.source_of_income AS "sourceOfIncome",
+		a.email_no AS "emailNo",
+		a.micro_no AS "microNo",
+		a.wechat_no AS "wechatNo",
+		a.qq_no AS "qqNo",
+		a.other_contact_type AS "otherContactType",
+		a.category_main AS "categoryMain",
+		a.category_large AS "categoryLarge",
+		a.category_medium AS "categoryMedium",
+		a.category_small AS "categorySmall",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="sVCustInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustInfo">
+		SELECT 
+			<include refid="sVCustInfoColumns"/>
+		FROM ift_sv_cust_info a
+		<include refid="sVCustInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustInfo">
+		SELECT 
+			<include refid="sVCustInfoColumns"/>
+		FROM ift_sv_cust_info a
+		<include refid="sVCustInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_sv_cust_info a
+		<include refid="sVCustInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustInfo">
+		SELECT 
+			<include refid="sVCustInfoColumns"/>
+		FROM ift_sv_cust_info a
+		<include refid="sVCustInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_cust_info(
+			id,
+			cust_name,
+			id_type,
+			id_num,
+			person_id_start_date,
+			person_id_end_date,
+			mobile_num,
+			nation_no,
+			birth_day,
+			age_no,
+			sex_no,
+			wed_status,
+			children_son,
+			children_girl,
+			household_spending_month,
+			top_education_no,
+			home_phone_no,
+			hose_phone_no,
+			reg_in_date,
+			city_in_date,
+			reg_province,
+			reg_city,
+			reg_distinct,
+			reg_details,
+			is_local,
+			cont_province,
+			cont_city,
+			cont_distinct,
+			cont_details,
+			addr_resi,
+			is_fixedhouse,
+			living_status,
+			living_status_desc,
+			per_annual_income,
+			source_of_income,
+			email_no,
+			micro_no,
+			wechat_no,
+			qq_no,
+			other_contact_type,
+			category_main,
+			category_large,
+			category_medium,
+			category_small,
+			create_date
+		) VALUES
+		<foreach item="custInfo" collection="list" index="index" separator=",">
+		(
+			REPLACE(UUID(),'-',''),
+			#{custInfo.custName},
+			#{custInfo.idType},
+			#{custInfo.idNum},
+			#{custInfo.personIdStartDate},
+			#{custInfo.personIdEndDate},
+			#{custInfo.mobileNum},
+			#{custInfo.nationNo},
+			#{custInfo.birthDay},
+			#{custInfo.ageNo},
+			#{custInfo.sexNo},
+			#{custInfo.wedStatus},
+			#{custInfo.childrenSon},
+			#{custInfo.childrenGirl},
+			#{custInfo.householdSpendingMonth},
+			#{custInfo.topEducationNo},
+			#{custInfo.homePhoneNo},
+			#{custInfo.hosePhoneNo},
+			#{custInfo.regInDate},
+			#{custInfo.cityInDate},
+			#{custInfo.regProvince},
+			#{custInfo.regCity},
+			#{custInfo.regDistinct},
+			#{custInfo.regDetails},
+			#{custInfo.isLocal},
+			#{custInfo.contProvince},
+			#{custInfo.contCity},
+			#{custInfo.contDistinct},
+			#{custInfo.contDetails},
+			#{custInfo.addrResi},
+			#{custInfo.isFixedhouse},
+			#{custInfo.livingStatus},
+			#{custInfo.livingStatusDesc},
+			#{custInfo.perAnnualIncome},
+			#{custInfo.sourceOfIncome},
+			#{custInfo.emailNo},
+			#{custInfo.microNo},
+			#{custInfo.wechatNo},
+			#{custInfo.qqNo},
+			#{custInfo.otherContactType},
+			#{custInfo.categoryMain},
+			#{custInfo.categoryLarge},
+			#{categoryMedium},
+			#{categorySmall},
+			CURRENT_TIMESTAMP
+		)
+		</foreach>
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_sv_cust_info SET 	
+			cust_name = #{custName},
+			id_type = #{idType},
+			id_num = #{idNum},
+			person_id_start_date = #{personIdStartDate},
+			person_id_end_date = #{personIdEndDate},
+			mobile_num = #{mobileNum},
+			nation_no = #{nationNo},
+			birth_day = #{birthDay},
+			age_no = #{ageNo},
+			sex_no = #{sexNo},
+			wed_status = #{wedStatus},
+			children_son = #{childrenSon},
+			children_girl = #{childrenGirl},
+			household_spending_month = #{householdSpendingMonth},
+			top_education_no = #{topEducationNo},
+			home_phone_no = #{homePhoneNo},
+			hose_phone_no = #{hosePhoneNo},
+			reg_in_date = #{regInDate},
+			city_in_date = #{cityInDate},
+			reg_province = #{regProvince},
+			reg_city = #{regCity},
+			reg_distinct = #{regDistinct},
+			reg_details = #{regDetails},
+			is_local = #{isLocal},
+			cont_province = #{contProvince},
+			cont_city = #{contCity},
+			cont_distinct = #{contDistinct},
+			cont_details = #{contDetails},
+			addr_resi = #{addrResi},
+			is_fixedhouse = #{isFixedhouse},
+			living_status = #{livingStatus},
+			living_status_desc = #{livingStatusDesc},
+			per_annual_income = #{perAnnualIncome},
+			source_of_income = #{sourceOfIncome},
+			email_no = #{emailNo},
+			micro_no = #{microNo},
+			wechat_no = #{wechatNo},
+			qq_no = #{qqNo},
+			other_contact_type = #{otherContactType},
+			category_main = #{categoryMain},
+			category_large = #{categoryLarge},
+			category_medium = #{categoryMedium},
+			category_small = #{categorySmall}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_sv_cust_info
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

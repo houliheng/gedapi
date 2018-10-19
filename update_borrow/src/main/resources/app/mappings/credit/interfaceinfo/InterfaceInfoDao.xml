@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.interfaceinfo.dao.InterfaceInfoDao">
+
+	<sql id="interfaceInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.interface_name AS "interfaceName",
+		a.message AS "message",
+		a.del_flag AS "delFlag",
+		a.send_date AS "sendDate",
+		a.create_date AS "createDate",
+		a.json AS "json"
+	</sql>
+
+	<sql id="interfaceInfoJoins">
+	</sql>
+
+
+	<select id="findSVtoThemisResult" resultType="InterfaceInfo">
+		SELECT
+			<include refid="interfaceInfoColumns"/>
+		FROM cre_interface_info a
+		<include refid="interfaceInfoJoins"/>
+		WHERE a.APPLY_NO = #{applyNo}
+		and a.INTERFACE_NAME = #{interfaceName}
+		order by CREATE_DATE desc LIMIT 1
+	</select>
+
+	<select id="get" resultType="InterfaceInfo">
+		SELECT
+			<include refid="interfaceInfoColumns"/>
+		FROM cre_interface_info a
+		<include refid="interfaceInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="InterfaceInfo">
+		SELECT
+			<include refid="interfaceInfoColumns"/>
+		FROM cre_interface_info a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{applyNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="interfaceName != null and interfaceName != ''">
+				AND a.interface_name LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{interfaceName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="message != null and message != ''">
+				AND a.message LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{message}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="sendDate != null and sendDate != ''">
+				AND a.send_date = #{sendDate}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				AND a.create_date = #{createDate}
+			</if>
+		</where>
+				ORDER BY create_date DESC
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+			count(a.id)
+		FROM cre_interface_info a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{applyNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="interfaceName != null and interfaceName != ''">
+				AND a.interface_name LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{interfaceName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="message != null and message != ''">
+				AND a.message LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{message}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="sendDate != null and sendDate != ''">
+				AND a.send_date = #{sendDate}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				AND a.create_date = #{createDate}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="InterfaceInfo">
+		SELECT
+			<include refid="interfaceInfoColumns"/>
+		FROM cre_interface_info a
+		<include refid="interfaceInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_interface_info(
+			id,
+			apply_no,
+			interface_name,
+			message,
+			del_flag,
+			send_date,
+			create_date,
+			json
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{interfaceName},
+			#{message},
+			#{delFlag},
+			#{sendDate},
+			#{createDate},
+			#{json}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_interface_info SET
+			apply_no = #{applyNo},
+			interface_name = #{interfaceName},
+			message = #{message},
+			send_date = #{sendDate},
+			create_date = #{createDate},
+			json = #{json}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE cre_interface_info SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

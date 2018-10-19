@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkDaily.dao.CheckDailyDao">
+
+	<sql id="checkDailyColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.checked_by AS "checkedBy",
+		a.check_daily_result AS "checkDailyResult",
+		a.check_daily_advice AS "checkDailyAdvice",
+		a.check_daily_proc AS "checkDailyProc"
+	</sql>
+
+	<sql id="checkDailyJoins">
+	</sql>
+
+	<select id="get" resultType="CheckDaily">
+		SELECT
+		<include refid="checkDailyColumns" />
+		FROM pl_check_daily a
+		<include refid="checkDailyJoins" />
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+	<select id="findList" resultType="CheckDaily">
+		SELECT
+		<include refid="checkDailyColumns" />
+		FROM pl_check_daily a
+		<include refid="checkDailyJoins" />
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询日常检查已分配、待检查、已检查列表 -->
+	<select id="findCheckDailyList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		A.ID AS "taskId",
+		C.CONTRACT_NO AS "contractNo",
+		C.APPLY_NO AS "applyNo",
+		C.LOAN_DATE AS "loanDate",
+		C.CUST_NAME AS "custName",
+		C.LOAN_AMOUNT AS "loanAmount",
+		C.CON_END_DATE AS "conEndDate",
+		DAY (
+		DATE_SUB(C.LOAN_DATE, INTERVAL 1 DAY)
+		) AS "repayDate",
+		C.APPRO_PRODUCT_TYPE_NAME AS "approProductTypeName",
+		C.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		A.ALLOCATE_DATE AS "allocateDate",
+		A.CHECKED_DATE AS "checkedDate",
+		D.CHECK_DAILY_PROC AS "checkDailyProc"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT C
+		INNER JOIN pl_check_daily D ON C.CONTRACT_NO = D.CONTRACT_NO
+		INNER JOIN pl_check_daily_allocate A ON A.CHECK_DAILY_ID = D.ID
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office O ON C.OPERATE_ORG_ID = O.ID
+		WHERE
+		CURRENT_DATE &gt;= DATE_ADD(LOAN_DATE, INTERVAL 29 DAY)
+		<if test="contractNo != null and contractNo != ''">
+			AND C.CONTRACT_NO like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			AND C.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			AND C.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+		<if test="checkDailyProc != null and checkDailyProc != ''">
+			AND D.CHECK_DAILY_PROC = #{checkDailyProc}
+		</if>
+		<if test="allocateType != null and allocateType != ''">
+			AND A.ALLOCATE_TYPE = #{allocateType}
+		</if>
+		<if test="operateOrgId != null and operateOrgId != ''">
+			AND (C.OPERATE_ORG_ID = #{operateOrgId} OR O.parent_ids LIKE concat(#{operateOrgParentIds},#{operateOrgId},',%'))
+		</if>
+		<if test="checkedById != null and checkedById != ''">
+			AND A.CHECKED_BY_ID = #{checkedById}
+		</if>
+		<if test="allocateById != null and allocateById != ''">
+			AND A.ALLOCATE_BY_ID = #{allocateById}
+		</if>
+		<choose>
+			<when test="orderByElement != null and orderByElement != ''">
+				ORDER BY ${orderByElement}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询日常检查待分配列表（SQL待优化） -->
+	<select id="findToAllocateList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		C.CONTRACT_NO AS "contractNo",
+		C.APPLY_NO AS "applyNo",
+		C.LOAN_DATE AS "loanDate",
+		C.CUST_NAME AS "custName",
+		C.LOAN_AMOUNT AS "loanAmount",
+		C.CON_END_DATE AS "conEndDate",
+		DAY (
+		DATE_SUB(C.LOAN_DATE, INTERVAL 1 DAY)
+		) AS "repayDate",
+		C.APPRO_PRODUCT_TYPE_NAME AS "approProductTypeName",
+		C.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		A.ALLOCATE_DATE AS "allocateDate",
+		MAX(A.CHECKED_DATE) AS "lastCheckedDate",
+		D.CHECK_DAILY_PROC AS "lastCheckDailyProc",
+		COUNT(A.ID) AS "checkDailyTimes",
+		S.REPAY_CONTRACT_STATUS AS "contractStatus",
+		T.CHECKED_TYPE AS "check25Result"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT C
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status S ON C.CONTRACT_NO = S.CONTRACT_NO
+		INNER JOIN pl_check_25_allocate T ON C.CONTRACT_NO = T.CONTRACT_NO
+		LEFT JOIN pl_check_daily D ON T.CONTRACT_NO = D.CONTRACT_NO
+		LEFT JOIN pl_check_daily_allocate A ON A.CHECK_DAILY_ID = D.ID
+		WHERE
+			<!-- #第一个还款日之后# -->
+		CURRENT_DATE &gt;= DATE_ADD(C.LOAN_DATE, INTERVAL 29 DAY) 
+			<!--#合同状态为还款中（排除走清收、催收、法务的合同）# -->
+		<if test="repayContractStatusList != null and repayContractStatusList != ''">
+			AND S.REPAY_CONTRACT_STATUS IN
+			<foreach item="repayContractStatusList" collection="repayContractStatusList" open="(" close=")" separator=",">
+				#{repayContractStatusList}
+			</foreach>
+		</if>
+			<!--#25日复核结果为提交或签署保证合同# -->
+		<if test="checkedTypeList != null and checkedTypeList != ''">
+			AND T.CHECKED_TYPE IN
+			<foreach item="checkedTypeList" collection="checkedTypeList" open="(" close=")" separator=",">
+				#{checkedTypeList}
+			</foreach>
+		</if>
+			<!--#不存在历史日常检查，或者历史日常检查不是展期申请中、展期通过、借新还旧审核中# -->
+		<if test="checkDailyProcList != null and checkDailyProcList != ''">
+			AND (
+			D.CHECK_DAILY_PROC IS NULL
+			OR D.CHECK_DAILY_PROC NOT IN
+			<foreach item="checkDailyProcList" collection="checkDailyProcList" open="(" close=")" separator=",">
+				#{checkDailyProcList}
+			</foreach>
+			)
+		</if>
+			<!--#不存在在办的日常检查任务# -->
+		<if test="allocateTypeList != null and allocateTypeList != ''">
+			AND (
+			A.ALLOCATE_TYPE IS NULL
+			OR A.ALLOCATE_TYPE NOT IN
+			<foreach item="allocateTypeList" collection="allocateTypeList" open="(" close=")" separator=",">
+				#{allocateTypeList}
+			</foreach>
+			)
+		</if>
+		GROUP BY
+		C.CONTRACT_NO
+		ORDER BY
+		lastCheckedDate,
+		C.LOAN_DATE
+	</select>
+	
+	<!-- 查询日常检查待办列表 -->
+	<select id="findCheckDailyContractList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		CONTRACT_NO AS "contractNo",
+		LOAN_DATE AS "loanDate",
+		CUST_NAME AS
+		"custName",
+		LOAN_AMOUNT AS "loanAmount",
+		CON_END_DATE AS "conEndDate",
+		DAY (
+		DATE_SUB(LOAN_DATE, INTERVAL 1 DAY)
+		) AS "repayDate",
+		APPRO_PRODUCT_TYPE_NAME AS "approProductTypeName",
+		APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT C
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office O ON C.OPERATE_ORG_ID = O.ID
+		WHERE
+		CURRENT_DATE &gt;= DATE_ADD(LOAN_DATE, INTERVAL 29 DAY)
+		<if test="contractNo != null and contractNo != ''">
+			AND C.CONTRACT_NO like concat(#{contractNo},'%')
+		</if>
+		<if test="correctContractNo != null and correctContractNo != ''">
+			AND C.CONTRACT_NO = #{correctContractNo}
+		</if>
+		<if test="notInContractNos != null and notInContractNos != ''">
+			AND C.CONTRACT_NO NOT IN
+			<foreach item="notInContractNos" collection="notInContractNos" open="(" close=")" separator=",">
+				#{notInContractNos}
+			</foreach>
+		</if>
+		<if test="inContractNos != null and inContractNos != ''">
+			AND C.CONTRACT_NO IN
+			<foreach item="inContractNos" collection="inContractNos" open="(" close=")" separator=",">
+				#{inContractNos}
+			</foreach>
+		</if>
+		<if test="custName != null and custName != ''">
+			AND C.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="operateOrgId != null and operateOrgId != ''">
+			AND (C.OPERATE_ORG_ID = #{operateOrgId} OR O.parent_ids LIKE concat(#{operateOrgParentIds},#{operateOrgId},',%'))
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			AND C.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+		<choose>
+			<when test="orderByElement != null and orderByElement != ''">
+				ORDER BY ${orderByElement}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListByParams" resultType="CheckDailyAllocate">
+		SELECT
+		a.id AS "id",
+		a.check_daily_id AS "checkDailyId",
+		a.contract_no AS "contractNo",
+		a.allocate_by_id AS "allocateById",
+		a.allocate_by AS "allocateBy",
+		a.checked_by_id AS "checkedById",
+		a.checked_by AS "checkedBy",
+		a.allocate_type AS "allocateType",
+		a.allocate_date AS "allocateDate",
+		a.checked_date AS "checkedDate",
+		b.id AS "checkDaily.id",
+		b.contract_no AS "checkDaily.contractNo",
+		b.checked_by AS "checkDaily.checkedBy",
+		b.check_daily_result AS "checkDaily.checkDailyResult",
+		b.check_daily_advice AS "checkDaily.checkDailyAdvice",
+		b.check_daily_proc AS "checkDaily.checkDailyProc"
+		FROM pl_check_daily_allocate a
+		INNER JOIN pl_check_daily b ON a.check_daily_id = b.id AND a.contract_no = b.contract_no
+		<where>
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="allocateType != null and allocateType != ''">
+				AND a.allocate_type = #{allocateType}
+			</if>
+			<if test="checkDailyProc != null and checkDailyProc != ''">
+				AND b.CHECK_DAILY_PROC = #{checkDailyProc}
+			</if>
+			<if test="checkedById != null and checkedById != ''">
+				AND a.checked_by_id = #{checkedById}
+			</if>
+			<if test="taskId != null and taskId != ''">
+				AND a.id = #{taskId}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.contract_no)
+		FROM pl_check_daily a
+		<include refid="checkDailyJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CheckDaily">
+		SELECT
+		<include refid="checkDailyColumns" />
+		FROM pl_check_daily a
+		<include refid="checkDailyJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="assign">
+		INSERT INTO pl_check_daily_allocate(
+		id,
+		contract_no,
+		allocate_by_id,
+		allocate_by,
+		checked_by_id,
+		checked_by,
+		allocate_type,
+		check_daily_id,
+		allocate_date,
+		checked_date
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{allocateById},
+		#{allocateBy},
+		#{checkedById},
+		#{checkedBy},
+		#{allocateType},
+		#{checkDaily.id},
+		#{allocateDate},
+		#{checkedDate}
+		)
+	</insert>
+
+	<insert id="insert">
+		INSERT INTO pl_check_daily(
+		id,
+		contract_no,
+		checked_by,
+		check_daily_result,
+		check_daily_advice,
+		check_daily_proc
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{checkedBy},
+		#{checkDailyResult},
+		#{checkDailyAdvice},
+		#{checkDailyProc}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_check_daily SET
+		check_daily_result = #{checkDailyResult},
+		check_daily_advice = #{checkDailyAdvice},
+		check_daily_proc = #{checkDailyProc}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateCheckDailyProc">
+		UPDATE pl_check_daily SET
+		check_daily_result = #{checkDailyResult},
+		check_daily_advice = #{checkDailyAdvice},
+		check_daily_proc = #{checkDailyProc}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_check_daily
+		WHERE contract_no = #{contractNo}
+	</update>
+	
+	<!-- 查询日常检查任务下发人员列表 -->
+	<select id="findCheckDailyOperatorList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		U.id AS "userId",
+		U.`name` AS "userName",
+		O.`name` AS "orgName"
+		FROM
+		SYS_USER U
+		LEFT JOIN SYS_OFFICE O ON U.office_id = O.id
+		WHERE
+		U.office_id = #{orgId}
+		<if test="userName != null and userName != ''">
+			AND U. NAME like concat('%',#{userName},'%')
+		</if>
+	</select>
+	
+	<!-- 查询日常检查合同编号List -->
+	<select id="findContractNoList" resultType="String">
+		SELECT
+		DISTINCT a.CONTRACT_NO
+		FROM
+		pl_check_daily_allocate a
+		INNER JOIN pl_check_daily b ON a.CHECK_DAILY_ID = b.ID
+		WHERE 1=1
+		<if test="checkedById != null and checkedById != ''">
+			AND a.CHECKED_BY_ID = #{checkedById}
+		</if>
+		<if test="allocateType != null and allocateType != '' and (checkDailyProcList == null or checkDailyProcList == '')">
+			AND a.ALLOCATE_TYPE = #{allocateType}
+		</if>
+		<if test="allocateType != null and allocateType != '' and checkDailyProcList != null and checkDailyProcList != ''">
+			AND
+			(a.ALLOCATE_TYPE = #{allocateType} OR b.CHECK_DAILY_PROC IN
+			<foreach item="checkDailyProcList" collection="checkDailyProcList" open="(" close=")" separator=",">
+				#{checkDailyProcList}
+			</foreach>
+			)
+		</if>
+	</select>
+	
+	<!-- 查询日常检查合同编号List -->
+	<select id="getContractNoList" resultType="String">
+		SELECT
+		a.CONTRACT_NO
+		FROM
+		pl_check_daily a
+		WHERE 1=1
+		<if test="checkedBy != null and checkedBy != ''">
+			AND a.CHECKED_BY = #{checkedBy}
+		</if>
+		<if test="checkDailyProc != null and checkDailyProc != ''">
+			AND a.CHECK_DAILY_PROC = #{checkDailyProc}
+		</if>
+	</select>
+	
+	<!-- 查询日常检查流程及合同编号 -->
+	<select id="findContractNoAndTaskId" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.id AS "taskId",
+		a.CONTRACT_NO AS "contractNo"
+		FROM
+		pl_check_daily_allocate a
+		WHERE 1=1
+		<if test="checkedById != null and checkedById != ''">
+			AND a.CHECKED_BY_ID = #{checkedById}
+		</if>
+		<if test="allocateType != null and allocateType != ''">
+			AND a.ALLOCATE_TYPE = #{allocateType}
+		</if>
+	</select>
+	
+	<!-- 根据合同编号查询日常检查次数及最近的日常检查时间 -->
+	<select id="findCheckDailyCountNum" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		MAX(a.CHECKED_DATE) AS "lastCheckedDate",
+		COUNT(a.ID) AS "checkDailyTimes"
+		FROM
+		pl_check_daily_allocate a
+		INNER JOIN pl_check_daily b ON a.CHECK_DAILY_ID = b.ID
+		WHERE
+		a.CONTRACT_NO = #{contractNo}
+	</select>
+
+</mapper>

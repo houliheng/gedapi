@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkTwentyFiveAllocate.dao.CheckTwentyFiveAllocateDao">
+
+	<sql id="checkTwentyFiveAllocateColumns">
+		a.id as "id",
+		a.contract_no AS "contractNo",
+		a.allocate_by_id AS "allocateById",
+		a.allocate_by AS "allocateBy",
+		a.checked_by_id AS "checkedById",
+		a.checked_by AS "checkedBy",
+		a.checked_type AS "checkedType"
+	</sql>
+
+	<sql id="checkTwentyFiveAllocateJoins">
+	</sql>
+
+	<select id="get" resultType="CheckTwentyFiveAllocate">
+		SELECT
+		<include refid="checkTwentyFiveAllocateColumns" />
+		FROM pl_check_25_allocate a
+		<include refid="checkTwentyFiveAllocateJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CheckTwentyFiveAllocate">
+		SELECT
+		<include refid="checkTwentyFiveAllocateColumns" />
+		FROM pl_check_25_allocate a
+		<include refid="checkTwentyFiveAllocateJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_check_25_allocate a
+		<include refid="checkTwentyFiveAllocateJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CheckTwentyFiveAllocate">
+		SELECT
+		<include refid="checkTwentyFiveAllocateColumns" />
+		FROM pl_check_25_allocate a
+		<include refid="checkTwentyFiveAllocateJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_check_25_allocate(
+		id,
+		contract_no,
+		allocate_by_id,
+		allocate_by,
+		checked_by_id,
+		checked_by,
+		checked_type
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{allocateById},
+		#{allocateBy},
+		#{checkedById},
+		#{checkedBy},
+		#{checkedType}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_check_25_allocate SET
+		contract_no = #{contractNo},
+		allocate_by_id = #{allocateById},
+		allocate_by = #{allocateBy},
+		checked_by_id = #{checkedById},
+		checked_by = #{checkedBy},
+		checked_type = #{checkedType}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_check_25_allocate
+		WHERE id = #{id}
+	</update>
+
+	<insert id="saveList">
+		INSERT INTO pl_check_25_allocate(
+		id,
+		contract_no,
+		checked_by_id,
+		checked_by,
+		allocate_by_id,
+		allocate_by,
+		checked_type
+		) VALUES
+		<foreach item="checkTwentyFiveAllocate" collection="checkTwentyFiveAllocates" index="index" separator=",">
+			(
+			#{checkTwentyFiveAllocate.id},
+			#{checkTwentyFiveAllocate.contractNo},
+			#{checkTwentyFiveAllocate.checkedById},
+			#{checkTwentyFiveAllocate.checkedBy},
+			#{checkTwentyFiveAllocate.allocateById},
+			#{checkTwentyFiveAllocate.allocateBy},
+			'1'
+			)
+
+		</foreach>
+	</insert>
+	
+	<!-- 已分配待复核 -->
+	<select id="getContractNos" resultType="java.lang.String">
+		SELECT contract_no FROM pl_check_25_allocate a
+		<where>
+			<if test="allocateById != null and allocateById != ''">
+				and a.ALLOCATE_BY_ID = #{allocateById}
+			</if>
+			<if test="checkedTypeList != null and checkedTypeList.size() > 0 ">
+				and a.CHECKED_TYPE in
+				<foreach item="checkedType" collection="checkedTypeList" open="(" close=")" separator=",">
+					#{checkedType}
+				</foreach>
+			</if>
+			<if test="checkedBy != null and checkedBy != ''">
+				and a.CHECKED_BY = #{checkedBy}
+			</if>
+			<if test="checkedById != null and checkedById != ''">
+				and a.CHECKED_BY_ID = #{checkedById}
+			</if>
+		</where>
+	</select>
+
+	<update id="updateCheckedTypeByContractNo">
+		update pl_check_25_allocate set CHECKED_TYPE = #{checkedType} where contract_no = #{contractNo} and CHECK_AGAIN_FLAG is null
+	</update>
+	
+	<!-- 待分配 -->
+	<select id="getToAllocatedPLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1 DAY)) AS
+		"monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id = o.id
+		where not
+		exists(select
+		b.contract_no from pl_check_25_allocate b where a.contract_no = b.contract_no and b.CHECK_AGAIN_FLAG is null )
+	<!-- 放开贷后25复核分配查询数据的日期间隔   -->
+	<!-- 	<if test="dateFlag == 0">
+			and CURRENT_DATE &lt;= DATE_ADD(a.LOAN_DATE, INTERVAL 25 DAY)
+		</if> -->
+		<if test="dateFlag == 1">
+			and CURRENT_DATE &gt; DATE_ADD(a.LOAN_DATE, INTERVAL 25 DAY) and CURRENT_DATE &lt; DATE_ADD(a.LOAN_DATE, INTERVAL 29 DAY)
+		</if>
+		<if test="dateFlag == 2">
+			and CURRENT_DATE &gt;= DATE_ADD(a.LOAN_DATE, INTERVAL 29 DAY)
+		</if>
+		<if test="contractNo != null and contractNo != ''">
+			and a.CONTRACT_NO like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			and a.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+		<if test="companyId != null and companyId != ''">
+			and (a.operate_org_id = #{companyId} OR o.parent_ids LIKE concat(#{companyParentIds},#{companyId},',%'))
+		</if>
+		<if test="contractStatusList != null and contractStatusList.size() > 0">
+			AND b.REPAY_CONTRACT_STATUS IN
+			<foreach item="contractStatus" collection="contractStatusList" open="(" close=")" separator=",">
+				#{contractStatus}
+			</foreach>
+		</if>
+	</select>
+	<!-- 已分配 -->
+	<select id="getHasAllocatedPLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		b.id as "allocateId",
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1
+		DAY)) AS
+		"monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		b.CHECKED_TYPE AS "checkedType"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a inner join
+		pl_check_25_allocate b on a.contract_no = b.contract_no
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				and a.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="approProductTypeId != null and approProductTypeId != ''">
+				and a.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+			</if>
+			<if test="allocateById != null and allocateById != ''">
+				and b.ALLOCATE_BY_ID = #{allocateById}
+			</if>
+			<if test="checkedTypeList != null and checkedTypeList.size() > 0 ">
+				and b.CHECKED_TYPE in
+				<foreach item="checkedType" collection="checkedTypeList" open="(" close=")" separator=",">
+					#{checkedType}
+				</foreach>
+			</if>
+			<if test="checkedById != null and checkedById != ''">
+				and b.CHECKED_BY_ID = #{checkedById}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 已复核（查询当前机构及以下机构） -->
+	<select id="getAllHasAllocatedPLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		b.id as "allocateId",
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1
+		DAY)) AS
+		"monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		b.CHECKED_TYPE AS "checkedType",
+		b.CHECKED_BY AS "checkedBy"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id = o.id
+		inner join pl_check_25_allocate b on a.contract_no = b.contract_no
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				and a.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="approProductTypeId != null and approProductTypeId != ''">
+				and a.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+			</if>
+			<if test="allocateById != null and allocateById != ''">
+				and b.ALLOCATE_BY_ID = #{allocateById}
+			</if>
+			<if test="checkedTypeList != null and checkedTypeList.size() > 0 ">
+				and b.CHECKED_TYPE in
+				<foreach item="checkedType" collection="checkedTypeList" open="(" close=")" separator=",">
+					#{checkedType}
+				</foreach>
+			</if>
+			<if test="checkedById != null and checkedById != ''">
+				and b.CHECKED_BY_ID = #{checkedById}
+			</if>
+			<if test="companyId != null and companyId != ''">
+				and (a.operate_org_id = #{companyId} OR o.parent_ids LIKE concat(#{companyParentIds},#{companyId},',%'))
+			</if>
+		</where>
+	</select>
+
+	<select id="findContractNosForDaily" resultType="String">
+		SELECT
+		DISTINCT
+		a.CONTRACT_NO
+		FROM
+		pl_check_25_allocate a
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		WHERE
+		a.CHECKED_TYPE IN
+		<foreach item="checkTypeList" collection="checkTypeList" open="(" close=")" separator=",">
+			#{checkTypeList}
+		</foreach>
+		AND b.REPAY_CONTRACT_STATUS IN
+		<foreach item="contractStatusList" collection="contractStatusList" open="(" close=")" separator=",">
+			#{contractStatusList}
+		</foreach>
+	</select>
+
+	<update id="checkedAgain">
+		update pl_check_25_allocate set CHECK_AGAIN_FLAG = '1' where contract_no = #{contractNo}
+	</update>
+
+	<select id="getTwentyFiveByContractNo" resultType="CheckTwentyFiveAllocate">
+		select
+		<include refid="checkTwentyFiveAllocateColumns" />
+		from pl_check_25_allocate a where a.contract_no = #{contractNo} and a.CHECKED_TYPE in ('2','3')
+	</select>
+	
+	<select id="getSevenPLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+	SELECT
+		b.DEDUCT_DATE as "deductDate",
+		d.MOBILE_NUM as "mobileNum",
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1 DAY)) AS "monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM 
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a 
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id = o.id
+		left join 
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_relation c on a.APPLY_NO = c.APPLY_NO and c.ROLE_TYPE = '1' and c.del_flag ='0' 
+		left join 
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_cust_info d on c.CUST_ID = d.ID
+		 
+		where  TO_DAYS(b.DEDUCT_DATE)-TO_DAYS(NOW())  in ('7','3','1') 
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="mobileNum != null and mobileNum != ''">
+			and d.MOBILE_NUM like concat('%',#{mobileNum},'%')
+		</if>
+		<if test="contractStatusList != null and contractStatusList.size() > 0">
+		    AND b.REPAY_CONTRACT_STATUS IN
+			<foreach item="contractStatus" collection="contractStatusList" open="(" close=")" separator=",">
+				#{contractStatus}
+			</foreach>
+		</if>
+	</select>
+
+</mapper>

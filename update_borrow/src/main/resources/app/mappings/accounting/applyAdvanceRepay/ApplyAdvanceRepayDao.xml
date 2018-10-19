@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyAdvanceRepay.dao.ApplyAdvanceRepayDao">
+	<sql id="applyAdvanceRepayColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.advance_deduct_type AS "advanceDeductType",
+		a.advance_deduct_type_name AS "advanceDeductTypeName",
+		a.advance_deduct_fee AS "advanceDeductFee",
+		a.advance_deduct_fee_exempt AS
+		"advanceDeductFeeExempt",
+		a.remain_deduct_amount AS "remainDeductAmount",
+		a.remain_deduct_amount_exempt AS "remainDeductAmountExempt",
+		a.all_deduct_amount AS "allDeductAmount",
+		a.all_deduct_amount_apply AS "allDeductAmountApply",
+		a.advance_description AS
+		"advanceDescription",
+		a.advance_deduct_status AS "advanceDeductStatus",
+		a.approve_deduct_fee AS "approveDeductFee",
+		a.approve_remain_deduct_amount AS "approveRemainDeductAmount",
+		a.approve_all_deduct_amount AS "approveAllDeductAmount",
+		a.approve_description AS
+		"approveDescription",
+		a.proc_ins_id AS "procInsId",
+		a.org_id AS "orgId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	<sql id="applyAdvanceRepayJoins">
+	</sql>
+	<select id="remainRepayPlan" resultType="java.lang.String">
+		SELECT SUM(s.SUM_)
+		FROM
+		(SELECT SUM(a.MANAGEMENT_FEE) + SUM(a.CAPITAL_AMOUNT)-SUM(IFNULL(b.FACT_MANAGEMENT_FEE ,0))-SUM(IFNULL(FACT_CAPITAL_AMOUNT ,0)) AS SUM_
+		FROM ACC_REPAY_PLAN a
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS b ON
+		A.CONTRACT_NO=B.CONTRACT_NO AND A.PERIOD_NUM=B.PERIOD_NUM
+		WHERE a.CONTRACT_NO =#{contractNo} AND a.PERIOD_NUM >= #{periodNum}
+		UNION ALL
+		SELECT INTEREST_AMOUNT - IFNULL(b.FACT_INTEREST_AMOUNT ,0)AS SUM_
+		FROM ACC_REPAY_PLAN a
+		LEFT JOIN ACC_STA_REPAY_PLAN_STATUS b ON
+		a.CONTRACT_NO=b.CONTRACT_NO AND a.PERIOD_NUM=b.PERIOD_NUM
+		WHERE a.CONTRACT_NO =#{contractNo} AND a.PERIOD_NUM = #{periodNum} )s
+	</select>
+	<select id="getAdvanceRepayForOneMonth" resultType="java.lang.String">
+		SELECT
+		INTEREST_AMOUNT FROM ACC_REPAY_PLAN WHERE CONTRACT_NO = #{contractNo}
+		AND PERIOD_NUM = #{periodNum}
+	</select>
+	<select id="getAdvanceRepayForThreePercents" resultType="java.lang.String">
+		SELECT CONTRACT_AMOUNT * 0.03 AS SUM_ FROM ACC_CONTRACT WHERE CONTRACT_NO =#{contractNo}
+	</select>
+	<select id="get" resultType="ApplyAdvanceRepay">
+		SELECT
+		<include refid="applyAdvanceRepayColumns" />
+		FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		WHERE a.id = #{id}
+	</select>
+	<select id="getMinPeriodNumByContractNoAndDeductDate" resultType="java.lang.String">
+		select min(PERIOD_NUM)
+		from acc_repay_plan where
+		contract_no = #{contractNo} and DEDUCT_DATE >=
+		#{deductDate}
+	</select>
+
+	<select id="getApplyAdvanceRepayByContractNoAndstatus" resultType="ApplyAdvanceRepay">
+		SELECT
+		<include refid="applyAdvanceRepayColumns" />
+		FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		WHERE a.contract_no = #{contractNo}
+		and a.ADVANCE_DEDUCT_STATUS = #{advanceDeductStatus}
+	</select>
+
+	<select id="getApplyAdvanceRepayByContractNoAndProcInsId" resultType="ApplyAdvanceRepay">
+		SELECT
+		<include refid="applyAdvanceRepayColumns" />
+		FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		WHERE a.contract_no = #{contractNo}
+		and a.PROC_INS_ID = #{procInsId}
+	</select>
+
+	<select id="findList" resultType="ApplyAdvanceRepay">
+		SELECT
+		<include refid="applyAdvanceRepayColumns" />
+		FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		<where>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''"> ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getCount" resultType="long">
+		SELECT count(a.id) FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		<where>
+		</where>
+	</select>
+	<select id="findAllList" resultType="ApplyAdvanceRepay">
+		SELECT
+		<include refid="applyAdvanceRepayColumns" />
+		FROM acc_advance_deduct_repay a
+		<include refid="applyAdvanceRepayJoins" />
+		<where>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''"> ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<insert id="insert">
+		INSERT INTO acc_advance_deduct_repay(
+		id,
+		contract_no,
+		period_num,
+		advance_deduct_type,
+		advance_deduct_type_name,
+		advance_deduct_fee,
+		advance_deduct_fee_exempt,
+		remain_deduct_amount,
+		remain_deduct_amount_exempt,
+		all_deduct_amount,
+		all_deduct_amount_apply,
+		advance_description,
+		advance_deduct_status,
+		approve_deduct_fee,
+		approve_remain_deduct_amount,
+		approve_all_deduct_amount,
+		approve_description,
+		proc_ins_id,
+		org_id,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{periodNum},
+		#{advanceDeductType},
+		#{advanceDeductTypeName},
+		#{advanceDeductFee},
+		#{advanceDeductFeeExempt},
+		#{remainDeductAmount},
+		#{remainDeductAmountExempt},
+		#{allDeductAmount},
+		#{allDeductAmountApply},
+		#{advanceDescription},
+		#{advanceDeductStatus},
+		#{approveDeductFee},
+		#{approveRemainDeductAmount},
+		#{approveAllDeductAmount},
+		#{approveDescription},
+		#{procInsId},
+		#{orgId},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE acc_advance_deduct_repay SET
+		contract_no = #{contractNo},
+		period_num = #{periodNum},
+		advance_deduct_type = #{advanceDeductType},
+		advance_deduct_type_name = #{advanceDeductTypeName},
+		advance_deduct_fee = #{advanceDeductFee},
+		advance_deduct_fee_exempt =
+		#{advanceDeductFeeExempt},
+		remain_deduct_amount = #{remainDeductAmount},
+		remain_deduct_amount_exempt = #{remainDeductAmountExempt},
+		all_deduct_amount = #{allDeductAmount},
+		all_deduct_amount_apply = #{allDeductAmountApply},
+		advance_description = #{advanceDescription},
+		advance_deduct_status = #{advanceDeductStatus},
+		approve_deduct_fee = #{approveDeductFee},
+		approve_remain_deduct_amount = #{approveRemainDeductAmount},
+		approve_all_deduct_amount = #{approveAllDeductAmount},
+		approve_description = #{approveDescription},
+		proc_ins_id =
+		#{procInsId},
+		org_id = #{orgId},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		DELETE FROM acc_advance_deduct_repay WHERE id = #{id}
+	</update>
+</mapper>

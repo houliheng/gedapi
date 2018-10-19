@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.extendRepayPlan.dao.ExtendRepayPlanDao">
+
+	<sql id="extendRepayPlanColumns">
+		a.id as "id",
+		a.contract_no AS "contractNo",
+		a.extend_period_num AS "extendPeriodNum",
+		a.extend_repay_date AS
+		"extendRepayDate",
+		a.extend_service_fee AS "extendServiceFee",
+		a.extend_management_fee AS "extendManagementFee",
+		a.extend_interest AS
+		"extendInterest",
+		a.extend_capital AS "extendCapital",
+		a.extend_penalty
+		AS "extendPenalty",
+		a.extend_fine AS "extendFine",
+		a.extend_repay_all AS
+		"extendRepayAll"
+	</sql>
+
+	<sql id="extendRepayPlanJoins">
+	</sql>
+
+	<select id="get" resultType="ExtendRepayPlan">
+		SELECT
+		<include refid="extendRepayPlanColumns" />
+		FROM pl_extend_repay_plan a
+		<include refid="extendRepayPlanJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findMaxExtendPeriodNum" resultType="int">
+		SELECT
+		IFNULL(max(a.EXTEND_PERIOD_NUM),0)
+		FROM pl_extend_repay_plan a
+		WHERE
+		a.contract_no = #{contractNo}
+	</select>
+
+	<select id="findList" resultType="ExtendRepayPlan">
+		SELECT
+		<include refid="extendRepayPlanColumns" />
+		FROM pl_extend_repay_plan a
+		<include refid="extendRepayPlanJoins" />
+		<where>
+			a.contract_no = #{contractNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_extend_repay_plan a
+		<include refid="extendRepayPlanJoins" />
+		<where>
+			a.contract_no = #{contractNo}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ExtendRepayPlan">
+		SELECT
+		<include refid="extendRepayPlanColumns" />
+		FROM pl_extend_repay_plan a
+		<include refid="extendRepayPlanJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_extend_repay_plan(
+		id,
+		contract_no,
+		extend_period_num,
+		extend_repay_date,
+		extend_service_fee,
+		extend_management_fee,
+		extend_interest,
+		extend_capital,
+		extend_penalty,
+		extend_fine,
+		extend_repay_all
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{extendPeriodNum},
+		#{extendRepayDate},
+		#{extendServiceFee},
+		#{extendManagementFee},
+		#{extendInterest},
+		#{extendCapital},
+		#{extendPenalty},
+		#{extendFine},
+		#{extendRepayAll}
+		)
+	</insert>
+
+	<insert id="saveExtendRepayPlan"
+		parameterType="com.resoft.multds.credit.PLRepayPlan.entity.PLRepayPlan">
+		INSERT INTO pl_extend_repay_plan(
+		id,
+		contract_no,
+		extend_period_num,
+		extend_repay_date,
+		extend_service_fee,
+		extend_management_fee,
+		extend_interest,
+		extend_capital,
+		extend_repay_all,
+		EXTEND_PENALTY
+		) VALUES
+		<foreach item="repayPlan" collection="repayPlanList" index="index"
+			separator=",">
+			(
+			#{repayPlan.id},
+			#{repayPlan.contractNo},
+			#{repayPlan.periodNum},
+			#{repayPlan.deductDate},
+			#{repayPlan.serviceFee},
+			#{repayPlan.managementFee},
+			#{repayPlan.interestAmount},
+			#{repayPlan.capitalAmount},
+			#{repayPlan.repayAmount},
+			#{repayPlan.overduePenalty}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE pl_extend_repay_plan SET
+		contract_no =
+		#{contractNo},
+		extend_period_num = #{extendPeriodNum},
+		extend_repay_date = #{extendRepayDate},
+		extend_service_fee =
+		#{extendServiceFee},
+		extend_management_fee = #{extendManagementFee},
+		extend_interest = #{extendInterest},
+		extend_capital = #{extendCapital},
+		extend_penalty = #{extendPenalty},
+		extend_fine = #{extendFine},
+		extend_repay_all = #{extendRepayAll}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_extend_repay_plan
+		WHERE id = #{id}
+	</update>
+
+
+	<update id="deleteExtendRepayPlan">
+		DELETE FROM pl_extend_repay_plan
+		WHERE contract_no=
+		#{contractNO}
+	</update>
+
+</mapper>

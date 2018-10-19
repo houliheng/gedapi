@@ -1,0 +1,15 @@
+/**
+ * 
+ * @reqno:H1507080027
+ * @date-designer:20150709-zhangxingyu
+ * @e-out-char : icon - sys:iconselect : 自定义的图标标签
+ * @db-j : sys_menu : icon 图标字段
+ * @date-author:20150709-zhangxingyu:该css文件用来存放新加入的图标样式，
+ * 						新加入了.icon-sys-arrow-left ,.icon-sys-arrow-right,.icon-sys-table等样式
+ *						在background-image属性后面加上!important表示优先使用，不会被其他css覆盖
+ */
+.icon-sys-arrow-left {background-image: url("../../images/icons/arrow_left.png")!important;background-position: 0% 0%;width: 16px;height: 16px;}
+.icon-sys-arrow-right {background-image: url("../../images/icons/arrow_right.png")!important;background-position: 0% 0%;width: 16px;height: 16px;}
+.icon-sys-table {background-image: url("../../images/icons/table.png")!important;background-position: 0% 0%;width: 16px;height: 16px;}
+.icon-sys-add {background-image: url("../../images/icons/add.png")!important;background-position: 0% 0%;width: 16px;height: 16px;}
+.icon-sys-accept {background-image: url("../../images/icons/accept.png")!important;background-position: 0% 0%;width: 16px;height: 16px;}

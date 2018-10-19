@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.guranteeProjectList.dao.GuranteeProjectListDao">
+    
+	<select id="findList" resultType="GuranteeProjectList">
+	SELECT
+	a.CONTRACT_NO as contractNo,
+	a.CUST_NAME as borrowName,
+	a.CONTRACT_AMOUNT as borrowMoney,
+	a.APPRO_PERIOD_VALUE as periodValue,
+	a.APPRO_YEAR_RATE as yearRate,
+	b.REPAY_CONTRACT_STATUS as accountStatus,
+	j.APPLY_STATUS as applyStatus,
+	e.LOAN_STATUS as loanStatus,
+	IFNULL(a.MARGIN_AMOUNT,0) as bail,
+	a.APPLY_LOAN_REPAY_TYPE as approveLoanRepayType,
+	d.FACT_GUARANTEE_GOLD as guranteeGold,
+	a.CUST_ID as custId,
+	a.APPLY_NO as applyNo
+	FROM
+	${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract a LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_contract_status b on a.CONTRACT_NO = b.CONTRACT_NO
+	LEFT JOIN  ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract d on a.contract_no = d.contract_no 
+	LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register j ON a.APPLY_NO = j.APPLY_NO
+	LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_loan_status e on e.CONTRACT_NO = a.CONTRACT_NO and e.APPLY_NO = a.APPLY_NO
+	<where>
+		a.GURANTEE_RELATION = '0'
+		<if test="applyStatus != null and applyStatus != ''">
+			and j.APPLY_STATUS = #{applyStatus}
+		</if>
+		<if test="loanStatus != null and loanStatus != ''">
+			and e.loan_status = #{loanStatus}
+		</if>
+		<if test="accountStatus != null and accountStatus != ''">
+			and b.REPAY_CONTRACT_STATUS = #{accountStatus}
+		</if>
+		<if test="borrowName != null and borrowName != ''">
+			and a.CUST_NAME like  CONCAT('%',#{borrowName},'%')
+		</if>
+		<if test="mobilePhone != null and mobilePhone != ''">
+			and j.MOBILE_NUM like  CONCAT('%',#{mobilePhone},'%')
+		</if>
+	</where>
+	GROUP BY a.CONTRACT_NO
+	</select>
+	
+	
+	
+	<select id="findListByLoanStatus" resultType="GuranteeProjectList">
+		SELECT
+	a.CONTRACT_NO as contractNo,
+	a.CUST_NAME as borrowName,
+	a.CONTRACT_AMOUNT as borrowMoney,
+	a.APPRO_PERIOD_VALUE as periodValue,
+	a.APPRO_YEAR_RATE as yearRate,
+	b.loan_status as loanStatus,
+	IFNULL(a.MARGIN_AMOUNT,0) as bail,
+	IFNULL(a.FACT_GUARANTEE_FEE,0) as guranteeServicceFee
+	FROM
+	${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract a LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_loan_status b on a.APPLY_NO = b.APPLY_NO and a.CONTRACT_NO = b.CONTRACT_NO where b.LOAN_STATUS is not NULL
+	<where>
+			<if test="loanStatus !=  null and loanStatus != ''">
+			and a.loan_status = #{loanStatus}
+			</if>
+			<if test="loanStatus !=  null and loanStatus != ''">
+			and a.loan_status = #{loanStatus}
+			</if>
+	</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findListByAccountStatus" resultType="GuranteeProjectList">
+		SELECT
+	a.CONTRACT_NO as contractNo,
+	a.CUST_NAME as borrowName,
+	a.CONTRACT_AMOUNT as borrowMoney,
+	a.APPRO_PERIOD_VALUE as periodValue,
+	a.APPRO_YEAR_RATE as yearRate,
+	b.loan_status as loanStatus,
+	IFNULL(a.MARGIN_AMOUNT,0) as bail,
+	IFNULL(a.FACT_GUARANTEE_FEE,0) as guranteeServicceFee
+	FROM
+	${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract a LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_loan_status b on a.APPLY_NO = b.APPLY_NO and a.CONTRACT_NO = b.CONTRACT_NO where b.LOAN_STATUS is not NULL
+	<where>
+			<if test="loanStatus !=  null and loanStatus != ''">
+			and a.loan_status = #{loanStatus}
+			</if>
+	</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_guarantee_company a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	
+	<select id="findGuranteeProjectListByContractNo" resultType="GuranteeProjectList">
+		SELECT
+	a.CONTRACT_NO AS contractNo,
+	a.CUST_NAME AS borrowName,
+	a.CONTRACT_AMOUNT AS borrowMoney,
+	a.APPRO_PERIOD_VALUE AS periodValue,
+	c.LOAN_STATUS AS loanStatus,
+	j.APPLY_STATUS AS applyStatus,
+	a.APPRO_YEAR_RATE AS yearRate,
+	IFNULL(a.MARGIN_AMOUNT, 0) AS bail,
+	d.FACT_GUARANTEE_FEE AS guranteeServicceFee,
+	a.APPLY_LOAN_REPAY_TYPE AS approveLoanRepayType,
+	d.FACT_GUARANTEE_GOLD AS guranteeGold
+FROM
+	${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract a
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register j ON a.APPLY_NO = j.APPLY_NO
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_loan_status c ON a.CONTRACT_NO = c.CONTRACT_NO
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract d ON a.CONTRACT_NO = d.CONTRACT_NO
+WHERE
+	a.CONTRACT_NO = #{contractNo} 
+AND a.GURANTEE_RELATION = '0'
+	</select>
+</mapper>

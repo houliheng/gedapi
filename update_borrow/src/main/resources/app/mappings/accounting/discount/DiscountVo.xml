@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.discount.dao.DiscountVoDao">
+    
+	
+	
+	<select id="findList" resultType="DiscountVo">
+		SELECT DISTINCT
+		a.cust_name AS custName,
+		a.contract_no AS contractNo,
+		a.CONTRACT_AMOUNT as contractAmount,
+		a.APPRO_PRODUCT_NAME as approProductName,
+		b.PERIOD_NUM as periodNum,
+		x.NAME AS "orgLevel4.name",
+		y.NAME AS "orgLevel3.name",
+		z.NAME AS "orgLevel2.name",
+		IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0) as repayAmount,
+		IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.SERVICE_FEE,0)+IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)+ (case WHEN e.FINE_AMOUNT is not NULL THEN IFNULL(c.OVERDUE_PENALTY, 0) ELSE 0.00 END) + IFNULL(e.FINE_AMOUNT,0) - IFNULL(b.DISCOUNT_FEE,0) -IFNULL(d.FACT_REPAY_AMOUNT,0)-IFNULL(d.FACT_PENALTY_AMOUNT,0)-IFNULL(d.FACT_FINE_AMOUNT,0)-IFNULL(f.PENALTY_EXEMPT_AMOUNT,0)-IFNULL(f.FINE_EXEMPT_AMOUNT,0) as stayAmount,
+		IFNULL(d.FACT_REPAY_AMOUNT,0)+IFNULL(d.FACT_PENALTY_AMOUNT,0)+IFNULL(d.FACT_FINE_AMOUNT,0) as factAmount,
+		IFNULL(b.DISCOUNT_FEE,0) as discountFee,
+		d.REPAY_PERIOD_STATUS as periodStatus,
+		c.DEDUCT_DATE as deductDate
+		FROM
+		acc_discount b
+		LEFT JOIN acc_contract a ON a.CONTRACT_NO = b.CONTRACT_NO
+		LEFT JOIN acc_repay_plan c ON b.CONTRACT_NO = c.CONTRACT_NO and b.PERIOD_NUM = c.PERIOD_NUM
+		LEFT JOIN acc_sta_repay_plan_status d ON b.CONTRACT_NO = d.CONTRACT_NO AND b.PERIOD_NUM = d.PERIOD_NUM
+		LEFT JOIN acc_sta_overdue_status e on e.CONTRACT_NO = b.contract_no and b.PERIOD_NUM = e.PERIOD_NUM
+		LEFT JOIN acc_sta_penalty_fine_exempt f on f.CONTRACT_NO = b.CONTRACT_NO and f.PERIOD_NUM = b.PERIOD_NUM
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office x ON a.ORG_LEVEL4 = x.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office y ON x.parent_id = y.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office z ON y.parent_id = z.id
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o ON a.OPERATE_ORG_ID = o.id
+		<where>
+			and (a.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.FACT_DISCOUNT_FEE is NULL and b.DISCOUNT_DATE is NULL
+			and 
+			IFNULL(d.FACT_REPAY_AMOUNT,0)+IFNULL(d.FACT_PENALTY_AMOUNT,0)+IFNULL(d.FACT_FINE_AMOUNT,0) = IFNULL(c.SERVICE_FEE,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)+ (case WHEN e.FINE_AMOUNT is not NULL THEN IFNULL(c.OVERDUE_PENALTY, 0) ELSE 0.00 END) + IFNULL(e.FINE_AMOUNT,0) - IFNULL(b.DISCOUNT_FEE,0)-IFNULL(f.PENALTY_EXEMPT_AMOUNT,0)-IFNULL(f.FINE_EXEMPT_AMOUNT,0)
+			<if test="custName != null and custName !=  ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo !=  ''">
+				and a.contract_no like concat('%',#{contractNo},'%')
+			</if>
+			<if test="periodStatus != null and periodStatus !=  ''">
+				and d.REPAY_PERIOD_STATUS =#{periodStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				order by b.CONTRACT_NO,b.PERIOD_NUM
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	
+	
+</mapper>

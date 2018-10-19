@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.borrowNew.dao.BorrowNewDao">
+
+	<sql id="borrowNewColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.apply_by_id AS "applyById",
+		a.apply_by AS "applyBy",
+		a.checked_by_id_dq AS "DQcheckedById",
+		a.checked_by_id_zb AS "ZBcheckedById",
+		a.checked_by_dq AS "DQcheckedBy",
+		a.checked_by_zb AS "ZBcheckedBy",
+		a.apply_advice AS "applyAdvice",
+		a.check_result AS "checkResult",
+		a.check_advice_dq AS "DQcheckAdvice",
+		a.check_advice_zb AS "ZBcheckAdvice",
+		a.apply_date AS "applyDate",
+		a.check_date_dq AS "DQcheckDate",
+		a.check_date_zb AS "ZBcheckDate"
+	</sql>
+
+	<sql id="borrowNewJoins">
+	</sql>
+
+	<select id="get" resultType="BorrowNew">
+		SELECT
+		<include refid="borrowNewColumns" />
+		FROM pl_borrow_new a
+		<include refid="borrowNewJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="BorrowNew">
+		SELECT
+		<include refid="borrowNewColumns" />
+		FROM pl_borrow_new a
+		<if test="operateOrgId != null and operateOrgId != ''">
+			INNER JOIN
+			${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract
+			c ON a.CONTRACT_NO = c.CONTRACT_NO
+			LEFT JOIN
+			${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+			o ON c.OPERATE_ORG_ID = o.ID
+		</if>
+		<where>
+			<if test="ZBOrDQ != null and ZBOrDQ != '' and ZBOrDQ == 'DQ' ">
+				AND a.CHECK_RESULT = '0'
+			</if>
+			<if test="ZBOrDQ != null and ZBOrDQ != '' and ZBOrDQ == 'ZB' ">
+				AND a.CHECK_RESULT = '1'
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.CONTRACT_NO LIKE CONCAT(#{contractNo},"%")
+			</if>
+			<if test="applyBy != null and applyBy != ''">
+				AND a.APPLY_BY LIKE CONCAT("%",#{applyBy},"%")
+			</if>
+<!-- 			<if test="checkedBy != null and checkedBy != ''"> -->
+<!-- 				AND a.CHECKED_BY LIKE CONCAT("%",#{checkedBy},"%") -->
+<!-- 			</if> -->
+ 			<if test="checkResult != null and checkResult != ''">
+				AND a.CHECK_RESULT = #{checkResult}
+ 			</if>
+			<if test="operateOrgId != null and operateOrgId != ''">
+				AND (c.OPERATE_ORG_ID = #{operateOrgId} OR o.parent_ids
+				LIKE concat('%',#{operateOrgId},',%'))
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.APPLY_DATE desc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_borrow_new a
+		<include refid="borrowNewJoins" />
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.CONTRACT_NO LIKE CONCAT(#{contractNo},"%")
+			</if>
+			<if test="applyBy != null and applyBy != ''">
+				AND a.APPLY_BY = #{applyBy}
+			</if>
+			<if test="checkedBy != null and checkedBy != ''">
+				AND a.CHECKED_BY = #{checkedBy}
+			</if>
+			<if test="checkResult != null and checkResult != ''">
+				AND a.CHECK_RESULT = #{checkResult}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="BorrowNew">
+		SELECT
+		<include refid="borrowNewColumns" />
+		FROM pl_borrow_new a
+		<include refid="borrowNewJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_borrow_new(
+		id,
+		contract_no,
+		apply_by_id,
+		apply_by,
+		checked_by_id_zb,
+		checked_by_id_dq,
+		checked_by_dq,
+		checked_by_zb,
+		apply_advice,
+		check_result,
+		check_advice_dq,
+		check_advice_zb,
+		apply_date,
+		check_date_dq,
+		check_date_zb
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{applyById},
+		#{applyBy},
+		#{ZBcheckedById},
+		#{DQcheckedById},
+		#{DQcheckedBy},
+		#{ZBcheckedBy},
+		#{applyAdvice},
+		#{checkResult},
+		#{DQcheckAdvice},
+		#{ZBcheckAdvice},
+		#{applyDate},
+		#{DQcheckDate},
+		#{ZBcheckDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_borrow_new SET
+		contract_no = #{contractNo},
+		apply_by_id = #{applyById},
+		apply_by = #{applyBy},
+		checked_by_id_zb = #{ZBcheckedById},
+		checked_by_id_dq = #{DQcheckedById},
+		checked_by_dq = #{DQcheckedBy},
+		checked_by_zb = #{ZBcheckedBy},
+		apply_advice = #{applyAdvice},
+		check_result = #{checkResult},
+		check_advice_dq = #{DQcheckAdvice},
+		check_advice_zb = #{ZBcheckAdvice},
+		apply_date = #{applyDate},
+		check_date_dq = #{DQcheckDate},
+		check_date_zb = #{ZBcheckDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_borrow_new
+		WHERE id = #{id}
+	</update>
+
+</mapper>

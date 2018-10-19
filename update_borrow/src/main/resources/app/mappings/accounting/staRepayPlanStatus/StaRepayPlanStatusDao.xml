@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.staRepayPlanStatus.dao.StaRepayPlanStatusDao">
+
+	<sql id="staRepayPlanStatusColumns">
+		a.data_dt AS "dataDt",
+		a.ORG_LEVEL4
+		as
+		"orgLevel4.id",
+		d.name as "orgLevel4.name",
+		a.ORG_LEVEL3 as
+		"orgLevel3.id",
+		e.name as "orgLevel3.name",
+		a.ORG_LEVEL2 as
+		"orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.contract_no
+		AS "contractNo",
+		a.period_num AS "periodNum",
+		a.repay_period_status AS
+		"repayPeriodStatus",
+		a.fact_service_fee AS "factServiceFee",
+		a.fact_management_fee AS "factMangementFee",
+		a.fact_capital_amount AS
+		"factCapitalAmount",
+		a.fact_interest_amount AS "factInterestAmount",
+		a.fact_penalty_amount AS "factPenaltyAmount",
+		a.fact_fine_amount AS
+		"factFineAmount",
+		a.FACT_BREAK_AMOUNT as "factBreakAmount",
+		a.CAPITAL_INTEREST_REPAY_DATE as
+		"capitalInterestRepayDate",
+		a.ALL_REPAY_DATE as "allRepayDate",
+		a.back_amount as "backAmount",
+		a.FACT_ADD_AMOUNT as "factAddAmount"
+	</sql>
+
+	<sql id="staRepayPlanStatusJoins">
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join
+		sys_office e on
+		a.ORG_LEVEL3 = e.id
+		left join sys_office f on
+		a.ORG_LEVEL2 = f.id
+	</sql>
+
+	<select id="get" resultType="StaRepayPlanStatus">
+		SELECT
+		<include refid="staRepayPlanStatusColumns" />
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo}
+	</select>
+
+
+	<select id="findStaRepayPlanStatus" resultType="StaRepayPlanStatus">
+		SELECT
+		ifnull(b.PENALTY_EXEMPT_AMOUNT,'0.00') as "penaltyExemptAmount",
+		ifnull(b.FINE_EXEMPT_AMOUNT,'0.00') as "fineEepmtAmount",
+		<include refid="staRepayPlanStatusColumns" />
+		FROM acc_sta_repay_plan_status a left join
+		acc_sta_penalty_fine_exempt b
+		on a.CONTRACT_NO = b.CONTRACT_NO and a.PERIOD_NUM = b.PERIOD_NUM
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo} order by a.PERIOD_NUM
+	</select>
+
+	<select id="findStaRepayPlanStatusData" resultType="java.util.Map">
+		SELECT
+		b.FINE_AMOUNT as "fineAmount",
+		c.deduct_date AS "dataDt",
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		d.name as "orgLevel4.name",
+		a.ORG_LEVEL3 as
+		"orgLevel3.id",
+		e.name as "orgLevel3.name",
+		a.ORG_LEVEL2 as
+		"orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.contract_no
+		AS "contractNo",
+		a.period_num AS "periodNum",
+		a.repay_period_status AS
+		"repayPeriodStatus",
+		ifnull(a.fact_service_fee,0) AS "factServiceFee",
+		ifnull(a.fact_management_fee,0) AS "factMangementFee",
+		ifnull(a.fact_capital_amount,0) AS "factCapitalAmount",
+		ifnull(a.fact_interest_amount,0) AS
+		"factInterestAmount",
+		ifnull(a.fact_penalty_amount,0) AS "factPenaltyAmount",
+		ifnull(a.fact_fine_amount,0) AS "factFineAmount",
+		ifnull(a.FACT_BREAK_AMOUNT,0) as "factBreakAmount",
+		a.CAPITAL_INTEREST_REPAY_DATE as "capitalInterestRepayDate",
+		a.ALL_REPAY_DATE as
+		"allRepayDate",
+		ifnull(a.back_amount,0) as "backAmount",
+		ifnull(a.FACT_ADD_AMOUNT,0) as "factAddAmount"
+		FROM acc_sta_repay_plan_status a
+		left join acc_repay_plan c on a.contract_no = c.contract_no
+		and a.period_num = c.period_num
+		left join acc_sta_overdue_status b
+		on
+		a.CONTRACT_NO = b.CONTRACT_NO and a.PERIOD_NUM = b.PERIOD_NUM
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo} order by a.PERIOD_NUM
+	</select>
+
+	<select id="getPreviousStageStatusByByContractNoAndPeriodNum" resultType="java.lang.String">
+		SELECT
+		a.repay_period_status
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo} and a.period_num = #{periodNum}
+	</select>
+
+	<select id="getPreviousStageStatusByContractNo" resultType="java.lang.String">
+		SELECT
+		a.CAPITAL_INTEREST_REPAY_DATE
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo}
+		and <![CDATA[a.period_num < #{periodNum}]]>
+	</select>
+
+	<select id="findList" resultType="StaRepayPlanStatus">
+		SELECT
+		<include refid="staRepayPlanStatusColumns" />
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		where 1=1
+		<if test="contractNo !=null  and contractNo != ''">
+			and a.contract_no = #{contractNo}
+		</if>
+		<if test="periodNum !=null  and periodNum != ''">
+			and and a.period_num = #{periodNum}
+		</if>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="StaRepayPlanStatus">
+		SELECT
+		<include refid="staRepayPlanStatusColumns" />
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO acc_sta_repay_plan_status(
+		data_dt,
+		org_level2,
+		org_level3,
+		org_level4,
+		contract_no,
+		period_num,
+		repay_period_status,
+		fact_service_fee,
+		fact_management_fee,
+		fact_capital_amount,
+		fact_interest_amount,
+		fact_penalty_amount,
+		fact_fine_amount,
+		CAPITAL_INTEREST_REPAY_DATE,
+		ALL_REPAY_DATE
+		) VALUES (
+		#{dataDt},
+		#{orgLevel2.id},
+		#{orgLevel3.id},
+		#{orgLevel4.id},
+		#{contractNo},
+		#{periodNum},
+		#{repayPeriodStatus},
+		#{factServiceFee},
+		#{factMangementFee},
+		#{factCapitalAmount},
+		#{factInterestAmount},
+		#{factPenaltyAmount},
+		#{factFineAmount},
+		#{capitalInterestRepayDate},
+		#{allRepayDate}
+		)
+	</insert>
+
+
+	<insert id="saveAccApplyChangeRepay">
+		INSERT INTO acc_apply_change_repay(
+		org_level2,
+		org_level3,
+		org_level4,
+		contract_no,
+		period_num,
+		back_amount,
+		REPAY_PERIOD_STATUS,
+		<if test="factServiceFee != null and factServiceFee != ''">
+			fact_service_fee,
+		</if>
+		<if test="factMangementFee != null and factMangementFee != ''">
+			fact_management_fee,
+		</if>
+		<if test="factCapitalAmount != null and factCapitalAmount != ''">
+			fact_capital_amount,
+		</if>
+		<if test="factInterestAmount != null and factInterestAmount != ''">
+			fact_interest_amount,
+		</if>
+		<if test="factPenaltyAmount != null and factPenaltyAmount != ''">
+			fact_penalty_amount,
+		</if>
+		<if test="factFineAmount != null and factFineAmount != ''">
+			fact_fine_amount,
+		</if>
+		<if test="factAddAmount != null and factAddAmount != ''">
+			FACT_ADD_AMOUNT,
+		</if>
+		DEDUCT_DATE,
+		IS_LOCK,
+		CAPITAL_INTEREST_REPAY_DATE,
+		ALL_REPAY_DATE,
+		CREATE_TIME,
+		CREATE_BY
+		) VALUES (
+		#{orgLevel2.id},
+		#{orgLevel3.id},
+		#{orgLevel4.id},
+		#{contractNo},
+		#{periodNum},
+		#{backAmount},
+		#{repayPeriodStatus},
+		<if test="factServiceFee != null and factServiceFee != ''">
+			#{factServiceFee},
+		</if>
+		<if test="factMangementFee != null and factMangementFee != ''">
+			#{factMangementFee},
+		</if>
+		<if test="factCapitalAmount != null and factCapitalAmount != ''">
+			#{factCapitalAmount},
+		</if>
+		<if test="factInterestAmount != null and factInterestAmount != ''">
+			#{factInterestAmount},
+		</if>
+		<if test="factPenaltyAmount != null and factPenaltyAmount != ''">
+			#{factPenaltyAmount},
+		</if>
+		<if test="factFineAmount != null and factFineAmount != ''">
+			#{factFineAmount},
+		</if>
+		<if test="factAddAmount != null and factAddAmount != ''">
+			#{factAddAmount},
+		</if>
+		#{dataDt},
+		'1',
+		#{capitalInterestRepayDate},
+		#{allRepayDate},
+		#{createDate},
+		#{createBy.id}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE acc_sta_repay_plan_status SET
+		data_dt = #{dataDt},
+		org_level2 = #{orgLevel2.id},
+		org_level3 = #{orgLevel3.id},
+		org_level4 = #{orgLevel4.id},
+		contract_no = #{contractNo},
+		period_num = #{periodNum},
+		repay_period_status = #{repayPeriodStatus},
+		fact_service_fee = #{factServiceFee},
+		fact_management_fee = #{factMangementFee},
+		fact_capital_amount = #{factCapitalAmount},
+		fact_interest_amount = #{factInterestAmount},
+		fact_penalty_amount = #{factPenaltyAmount},
+		fact_fine_amount = #{factFineAmount},
+		CAPITAL_INTEREST_REPAY_DATE = #{capitalInterestRepayDate},
+		ALL_REPAY_DATE = #{allRepayDate}
+		WHERE contract_no = #{contractNo}
+	</update>
+
+	<update id="delete">
+		DELETE FROM acc_sta_repay_plan_status
+		WHERE
+		contract_no = #{contractNo}
+	</update>
+	
+	
+	<select id="findUpdateRepayPeroidStatus" resultType="StaRepayPlanStatus">
+		SELECT
+	MAX(a.PERIOD_NUM) AS periodNum,
+	(SELECT
+		d.REPAY_PERIOD_STATUS
+	FROM
+		acc_sta_repay_plan_status d
+	WHERE
+		d.CONTRACT_NO = #{contractNo}
+	AND d.PERIOD_NUM = (
+		SELECT
+			MAX(c.PERIOD_NUM)
+		FROM
+			acc_sta_repay_plan_status c
+		WHERE
+			c.CONTRACT_NO = #{contractNo}
+	)) AS repayPeriodStatus
+	FROM
+		acc_sta_repay_plan_status a
+	inner JOIN acc_contract b ON a.CONTRACT_NO = b.CONTRACT_NO
+	WHERE
+		a.contract_no = #{contractNo}
+	</select>
+	
+	
+	
+	<select id="getPeriod" resultType="StaRepayPlanStatus">
+		select period_num as periodNum,CONTRACT_NO as contractNo,repay_period_status as repayPeriodStatus from acc_sta_repay_plan_status where contract_no = #{contractNo} and period_num >= #{periodNum}  
+	</select>
+	
+	
+	
+	<select id="findStatusByContractNo" resultType="StaRepayPlanStatus">
+		SELECT 
+		a.REPAY_PERIOD_STATUS as repayPeriodStatus,f.APPLY_NO as contractNo
+		FROM acc_sta_repay_plan_status a
+		left join acc_contract f on f.CONTRACT_NO = a.CONTRACT_NO
+		WHERE a.contract_no = #{contractNo} and a.PERIOD_NUM = (select MAX(PERIOD_NUM) from acc_repay_plan where CONTRACT_NO = #{contractNo})
+	</select>
+	
+	<select id="queryContractStayMoney" resultType="java.math.BigDecimal">
+	SELECT
+	IFNULL(sum(
+		IFNULL(a.SERVICE_FEE, 0) + IFNULL(a.MANAGEMENT_FEE, 0) + IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0) + IFNULL(a.OVERDUE_PENALTY, 0) + IFNULL(c.FINE_AMOUNT, 0) - IFNULL(b.FACT_SERVICE_FEE, 0) - IFNULL(b.FACT_MANAGEMENT_FEE, 0) - IFNULL(b.FACT_CAPITAL_AMOUNT, 0) - IFNULL(b.FACT_INTEREST_AMOUNT, 0) - IFNULL(b.FACT_PENALTY_AMOUNT, 0) - IFNULL(b.FACT_FINE_AMOUNT, 0) - IFNULL(d.PENALTY_EXEMPT_AMOUNT, 0) - IFNULL(d.FINE_EXEMPT_AMOUNT, 0)
+	),0)
+	FROM
+	acc_repay_plan a
+	LEFT JOIN acc_sta_repay_plan_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+	AND a.PERIOD_NUM = b.PERIOD_NUM
+	LEFT JOIN acc_sta_overdue_status c ON a.CONTRACT_NO = c.CONTRACT_NO
+	AND a.period_num = c.PERIOD_NUM
+	LEFT JOIN acc_sta_penalty_fine_exempt d on a.CONTRACT_NO = d.CONTRACT_NO and a.PERIOD_NUM = d.PERIOD_NUM
+	WHERE
+	a.CONTRACT_NO = #{contractNo}  and ((b.REPAY_PERIOD_STATUS is NULL) or b.REPAY_PERIOD_STATUS in("0300","0200")) 
+	<![CDATA[AND a.DEDUCT_DATE <= #{deductDate} ]]>
+	</select>
+	<select id="findRepayPlanDetailByContract" resultType="StaRepayPlanStatus">
+	SELECT
+	a.PERIOD_NUM AS periodNum,
+	IFNULL(a.SERVICE_FEE, 0) + IFNULL(a.MANAGEMENT_FEE, 0) + IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0) + 
+(case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0 END) + IFNULL(c.FINE_AMOUNT, 0) - IFNULL(b.FACT_REPAY_AMOUNT, 0) - IFNULL(b.FACT_PENALTY_AMOUNT, 0) - IFNULL(b.FACT_FINE_AMOUNT, 0) - IFNULL(d.PENALTY_EXEMPT_AMOUNT, 0) - IFNULL(d.FINE_EXEMPT_AMOUNT, 0) - IFNULL(m.DISCOUNT_FEE,0) AS factCapitalAmount,
+	DATE_FORMAT(a.DEDUCT_DATE, "%Y-%m-%d") AS dataDt,
+	b.REPAY_PERIOD_STATUS AS repayPeriodStatus,
+	IFNULL(c.FINE_AMOUNT, 0) AS factFineAmount,
+	(case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0.00 END) AS factPenaltyAmount,
+	IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0) AS factInterestAmount,
+	IFNULL(a.SERVICE_FEE, 0) AS factServiceFee,
+	IFNULL(a.MANAGEMENT_FEE, 0) AS factMangementFee,
+	IFNULL(m.DISCOUNT_FEE,0) as factAddAmount,
+	IFNULL(a.SERVICE_FEE, 0) + IFNULL(a.MANAGEMENT_FEE, 0) + IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0) + 
+(case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0 END) + IFNULL(c.FINE_AMOUNT, 0) as backAmount,
+IFNULL(b.FACT_REPAY_AMOUNT, 0) + IFNULL(b.FACT_PENALTY_AMOUNT, 0) + IFNULL(b.FACT_FINE_AMOUNT, 0) as fineEepmtAmount
+
+FROM
+	acc_repay_plan a
+LEFT JOIN acc_sta_repay_plan_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+AND a.PERIOD_NUM = b.PERIOD_NUM
+LEFT JOIN acc_sta_overdue_status c ON a.CONTRACT_NO = c.CONTRACT_NO
+AND a.period_num = c.PERIOD_NUM
+LEFT JOIN acc_sta_penalty_fine_exempt d ON a.CONTRACT_NO = d.CONTRACT_NO
+AND a.PERIOD_NUM = d.PERIOD_NUM
+LEFT JOIN acc_discount m on a.CONTRACT_NO = m.CONTRACT_NO and a.PERIOD_NUM =m.PERIOD_NUM
+WHERE
+	a.CONTRACT_NO = #{contractNo}
+AND (
+	b.REPAY_PERIOD_STATUS IS NULL
+	OR b.REPAY_PERIOD_STATUS IN ("0300", "0200")
+)
+ORDER BY a.PERIOD_NUM
+	</select>
+	
+	
+	<select id="findContractRepayDetail" resultType="com.resoft.credit.guranteeProjectList.entity.RepayPlanDetail">
+		SELECT
+	a.PERIOD_NUM AS periodNum,
+	IFNULL(a.SERVICE_FEE, 0) + IFNULL(a.MANAGEMENT_FEE, 0) + IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0)+ (case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0 END) + IFNULL(c.FINE_AMOUNT, 0) - IFNULL(b.FACT_REPAY_AMOUNT, 0) - IFNULL(b.FACT_PENALTY_AMOUNT, 0) - IFNULL(b.FACT_FINE_AMOUNT, 0) - IFNULL(d.PENALTY_EXEMPT_AMOUNT, 0) - IFNULL(d.FINE_EXEMPT_AMOUNT, 0) AS repayMoney,
+ IFNULL(a.CAPITAL_AMOUNT, 0) + IFNULL(a.INTEREST_AMOUNT, 0) as principal,
+ IFNULL(e.COMPENSATORY_AMOUNT, 0) as compenMoney,
+ IFNULL(b.FACT_REPAY_AMOUNT, 0) + IFNULL(b.FACT_PENALTY_AMOUNT, 0) + IFNULL(b.FACT_FINE_AMOUNT, 0) as factRepayMoney,
+ c.FINE_AMOUNT as defaultInterest,
+ (case WHEN c.FINE_AMOUNT is not NULL THEN IFNULL(a.OVERDUE_PENALTY, 0) ELSE 0.00 END) as penalty,
+ b.REPAY_PERIOD_STATUS as repayStatus,a.PERIOD_NUM
+FROM
+	acc_repay_plan a
+LEFT JOIN acc_sta_repay_plan_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+AND a.PERIOD_NUM = b.PERIOD_NUM
+LEFT JOIN acc_sta_overdue_status c ON a.CONTRACT_NO = c.CONTRACT_NO
+AND a.period_num = c.PERIOD_NUM
+LEFT JOIN acc_sta_penalty_fine_exempt d ON a.CONTRACT_NO = d.CONTRACT_NO
+AND a.PERIOD_NUM = d.PERIOD_NUM
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_compensatory_detail e ON a.CONTRACT_NO = e.CONTRACT_NO
+AND a.PERIOD_NUM = e.PERIOD_NUM
+AND e.COMPENSATORY_STATUS = '0'
+WHERE
+	a.CONTRACT_NO = #{contractNo}
+GROUP BY a.PERIOD_NUM  
+	</select>
+	
+	
+	<select id="findMaxDateByContract" resultType="StaRepayPlanStatus">
+		SELECT
+	MAX(a.DEDUCT_DATE) as dataDt
+FROM
+	acc_repay_plan a
+LEFT JOIN acc_sta_repay_plan_status b ON a.CONTRACT_NO = b.CONTRACT_NO
+AND a.PERIOD_NUM = b.PERIOD_NUM
+WHERE
+	a.CONTRACT_NO = #{contractNo}
+AND b.REPAY_PERIOD_STATUS IN ('0100', '0400')
+	</select>
+	
+	
+	<update id = "updateAdvancePeriodNum" >
+		UPDATE acc_sta_repay_plan_status a SET
+		a.repay_period_status = (CASE WHEN (SELECT month(DEDUCT_DATE) from acc_repay_plan WHERE CONTRACT_NO = #{contractNo} AND PERIOD_NUM = a.period_num)= month(#{date}) THEN '0400' ELSE '0500' END),
+		a.FACT_CAPITAL_AMOUNT = (SELECT CAPITAL_AMOUNT from acc_repay_plan WHERE contract_no = #{contractNo} and period_num = a.period_num),
+		a.FACT_BREAK_AMOUNT = (CASE WHEN PERIOD_NUM = #{periodNum} THEN #{advancePenyMoney} ELSE '0.00' END),
+		a.FACT_REPAY_AMOUNT = (SELECT CAPITAL_AMOUNT from acc_repay_plan WHERE contract_no = #{contractNo} and period_num = a.period_num),
+		a.FACT_SERVICE_FEE = '0.00',
+		a.FACT_MANAGEMENT_FEE = '0.00',
+		a.FACT_INTEREST_AMOUNT = '0.00',
+		a.FACT_PENALTY_AMOUNT = '0.00',
+		a.FACT_FINE_AMOUNT = '0.00'
+		WHERE a.contract_no = #{contractNo} and a.PERIOD_NUM >= #{periodNum}
+	</update>
+	
+	<select id="getStaByContractNoAndPeriodNum" resultType="StaRepayPlanStatus">
+		SELECT
+		<include refid="staRepayPlanStatusColumns" />
+		FROM acc_sta_repay_plan_status a
+		<include refid="staRepayPlanStatusJoins" />
+		WHERE a.contract_no = #{contractNo} and a.period_num = #{periodNum}
+	</select>
+	
+	<insert id="add">
+		INSERT INTO acc_sta_repay_plan_status(
+		data_dt,
+		org_level2,
+		org_level3,
+		org_level4,
+		contract_no,
+		period_num,
+		repay_period_status,
+		fact_service_fee,
+		fact_management_fee,
+		fact_capital_amount,
+		fact_interest_amount,
+		fact_penalty_amount,
+		fact_fine_amount,
+		CAPITAL_INTEREST_REPAY_DATE,
+		ALL_REPAY_DATE,
+		FACT_REPAY_AMOUNT,
+		FACT_BREAK_AMOUNT
+		) VALUES (
+		#{dataDt},
+		#{orgLevel2.id},
+		#{orgLevel3.id},
+		#{orgLevel4.id},
+		#{contractNo},
+		#{periodNum},
+		#{repayPeriodStatus},
+		#{factServiceFee},
+		#{factMangementFee},
+		#{factCapitalAmount},
+		#{factInterestAmount},
+		#{factPenaltyAmount},
+		#{factFineAmount},
+		#{capitalInterestRepayDate},
+		#{allRepayDate},
+		#{factRepayAmount},
+		#{factBreakAmount}
+		)
+	</insert>
+	
+	<update id="deleteStaRepay">
+		DELETE FROM acc_sta_repay_plan_status
+		WHERE
+		contract_no = #{contractNo} and period_num = #{periodNum}
+	</update>
+
+	<select id="listWithContractNoList" resultType="StaRepayPlanStatus">
+		select
+			contract_no as "contractNo",
+			period_num as "periodNum",
+			repay_period_status as "repayPeriodStatus"
+		from acc_sta_repay_plan_status
+		<where>
+			<choose>
+				<when test="contractNoList != null and contractNoList.size() > 0">
+					contract_no in
+					<foreach collection="contractNoList" item="contractNo" index="index"
+							 open="(" separator="," close=")">
+						#{contractNo}
+					</foreach>
+				</when>
+				<otherwise>
+					0 = 1
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<select id="getFactMoneyByContractAndPeriodNum" resultType="java.math.BigDecimal">
+		select IFNULL(SUM(IFNULL(b.FACT_REPAY_AMOUNT, 0) + IFNULL(b.FACT_PENALTY_AMOUNT, 0) + IFNULL(b.FACT_FINE_AMOUNT, 0)),0) from acc_sta_repay_plan_status b where b.CONTRACT_NO=#{contractNo} and b.PERIOD_NUM = #{periodNum}
+	</select>
+</mapper>

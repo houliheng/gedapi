@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.industry.dao.IndustryDao">
+    
+    <sql id="industryColumns">
+		a.indu_code AS "induCode",
+		a.indu_name AS "induName",
+		a.parent_indu_code AS "parentInduCode",
+		a.indu_level AS "induLevel",
+		a.indu_order AS "induOrder",
+		a.indu_desc AS "induDesc",
+		a.is_edited AS "isEdited",
+		a.start_time AS "startTime",
+		a.end_time AS "endTime",
+		a.create_time AS "createTime"
+	</sql>
+	
+	<sql id="industryJoins">
+	</sql>
+	
+	<!-- 
+	 * @reqno:H1512210027
+ 	 * @date-designer:2016年1月6日-songmin
+ 	 * @date-author:2016年1月6日-songmin:根据上级行业分类编码获取下级行业分类编码
+ 	 * @db-z:sys_industry:indu_code、indu_name、indu_order
+ 	 * 本功能用于前台的行业分类级联，所以排除掉了多余的查询字段，根行业分类通过root进行查询
+	 -->
+    <select id="findByParentCode" resultType="Industry">
+		SELECT 
+			a.indu_code AS "induCode",
+			a.indu_name AS "induName"
+		FROM sys_industry a
+		WHERE a.parent_indu_code = #{parentInduCode} order by a.indu_order
+	</select>
+	
+</mapper>

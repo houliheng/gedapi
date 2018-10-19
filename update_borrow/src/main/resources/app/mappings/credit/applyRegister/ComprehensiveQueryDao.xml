@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.ComprehensiveQueryDao">
+	<select id="get" resultType="ApplyRegisterVO">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS "applyProductTypeCode",
+		a.apply_product_id
+		AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS "channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS "registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS "orgId",
+		c.name AS "company.name",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		b.CONTRACT_AMOUNT as "contractAmount"
+		FROM
+		cre_apply_register a
+		INNER JOIN sys_office c ON c.id = a.ORG_ID
+		LEFT JOIN cre_contract b on a.apply_no = b.apply_no
+		WHERE a.id = #{id} and a.del_flag = '0' limit 1
+	</select>
+
+	<select id="getActTaskParamByApplyNo" resultType="com.resoft.credit.applyRegister.entity.ActTaskParam">
+		SELECT
+		a.ID_ AS "taskId",
+		a.TASK_DEF_KEY_ AS "taskDefKey",
+		a.EXECUTION_ID_ AS "execId",
+		a.PROC_DEF_ID_ AS "procDefId",
+		a.PROC_INST_ID_ AS "procInstId"
+		FROM
+		ACT_RU_TASK a
+		INNER JOIN CRE_APPLY_REGISTER b ON a.PROC_INST_ID_ =
+		b.PROC_INS_ID
+		WHERE b.APPLY_NO = #{applyNo} limit 1;
+	</select>
+	
+	<!-- 总部综合查询列表 -->
+	<select id="findHQList" resultType="java.util.Map">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS "applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS "channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS "registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS "orgId",
+		c.name AS "company.name",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+		FROM
+		cre_apply_register a
+		INNER JOIN
+		sys_office c ON c.id = a.ORG_ID
+		inner join cre_office_apply_relation d on d.apply_no = a.apply_no
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO 
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="custName != null and custName != ''">
+				AND a.CUST_NAME LIKE concat('%',#{custName},'%')
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE concat(#{applyNo},'%')
+			</if>
+			<if test="registerName != null and registerName != ''">
+				AND a.REGISTER_NAME LIKE concat('%',#{registerName},'%')
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE concat(#{idNum},'%')
+			</if>
+			<if test="orgId != null and orgId != ''">
+				AND (a.ORG_ID = #{orgId} OR c.parent_ids LIKE concat('%',#{orgId},',%'))
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.APPLY_STATUS = #{applyStatus}
+			</if>
+			<if test="company != null and company.id != null and company.id != ''">
+				AND d.OFFICE_ID = #{company.id}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+			</if>
+		</where>
+		limit #{pageStart},#{pageEnd}
+	</select>
+
+	<select id="findHQListCount" resultType="java.lang.Long">
+		SELECT
+		count(1)
+		FROM
+		cre_apply_register a
+		INNER JOIN sys_office c ON c.id = a.ORG_ID
+		inner join cre_office_apply_relation d on d.apply_no = a.apply_no
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO 
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="custName != null and custName != ''">
+				AND a.CUST_NAME LIKE concat('%',#{custName},'%')
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE concat(#{applyNo},'%')
+			</if>
+			<if test="registerName != null and registerName != ''">
+				AND a.REGISTER_NAME LIKE concat('%',#{registerName},'%')
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE concat(#{idNum},'%')
+			</if>
+			<if test="orgId != null and orgId != ''">
+				AND (a.ORG_ID = #{orgId} OR c.parent_ids LIKE concat('%',#{orgId},',%'))
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.APPLY_STATUS = #{applyStatus}
+			</if>
+			<if test="officeId != null and officeId != ''">
+				AND d.OFFICE_ID = #{officeId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findComprehensiveQueryList" resultType="java.util.Map">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS "applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS "channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS "registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS "orgId",
+		c.name AS "company.name",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+		FROM cre_apply_register a
+		INNER JOIN sys_office c ON c.id = a.ORG_ID
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="custName != null and custName != ''">
+				AND a.CUST_NAME LIKE concat('%',#{custName},'%')
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE concat(#{applyNo},'%')
+			</if>
+			<if test="registerName != null and registerName != ''">
+				AND a.REGISTER_NAME LIKE concat('%',#{registerName},'%')
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE concat(#{idNum},'%')
+			</if>
+			<if test="orgId != null and orgId != ''">
+				AND (a.ORG_ID = #{orgId} OR c.parent_ids LIKE concat('%',#{orgId},',%'))
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.APPLY_STATUS = #{applyStatus}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+			</if>
+		</where>
+		limit #{pageStart},#{pageEnd}
+	</select>
+
+	<select id="findComprehensiveQueryListCount" resultType="java.lang.Long">
+		SELECT
+		count(1)
+		FROM
+		cre_apply_register a
+		INNER JOIN sys_office c ON c.id = a.ORG_ID
+		LEFT JOIN cre_contract cc ON cc.APPLY_NO = a.APPLY_NO 
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="custName != null and custName != ''">
+				AND a.CUST_NAME LIKE concat('%',#{custName},'%')
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE concat(#{applyNo},'%')
+			</if>
+			<if test="registerName != null and registerName != ''">
+				AND a.REGISTER_NAME LIKE concat('%',#{registerName},'%')
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.ID_TYPE = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE concat(#{idNum},'%')
+			</if>
+			<if test="orgId != null and orgId != ''">
+				AND (a.ORG_ID = #{orgId} OR c.parent_ids LIKE concat('%',#{orgId},',%'))
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.APPLY_STATUS = #{applyStatus}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND cc.CONTRACT_NO LIKE CONCAT('%',#{contractNo},'%')
+			</if>
+		</where>
+	</select>
+
+	<!--查询子列表 -->
+	<select id="findComprehensiveQuerySubList" resultType="java.util.Map">
+		select
+		c.CUST_NAME as "subCustName",
+		a.APPLY_NO as "subApplyNo",
+		c.ID_TYPE as "subIdType",
+		c.ID_NUM as "subIdNum",
+		b.APPLY_AMOUNT as "subApplyAmount",
+		a.CONTRACT_AMOUNT as "subContractAmount",
+		b.register_date AS "subRegisterDate",
+		d.NAME AS "companyName"
+		from
+		cre_check_approve_union a
+		INNER JOIN cre_apply_register b on a.APPLY_NO = b.APPLY_NO
+		INNER JOIN cre_cust_info c on a.CUST_ID = c.ID
+		INNER JOIN sys_office d ON d.id = b.ORG_ID
+		where b.DEL_FLAG = '0' AND a.apply_no = #{applyNo}
+	</select>
+
+
+
+	<select id="showDown" resultType="java.util.Map">
+		SELECT
+		T.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'utask_zgsjlsh' AS TASKDEFINITIONKEY,
+		a.APPLY_NO AS applyNo,
+		a.CUST_NAME AS custName,
+		T.ID_ AS ID,
+		a.PROC_INS_ID AS procInsId,
+		T.START_TIME_ AS STARTTIME
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT NULL
+		AND END_TIME_ IS NOT NULL
+		AND (
+		DELETE_REASON_ = 'completed'
+		OR DELETE_REASON_ = 'jump'
+		)
+		) T
+		INNER JOIN CRE_APPLY_REGISTER a ON T.PROC_INST_ID_ = a.PROC_INS_ID
+		LEFT JOIN CRE_APPLY_INFO T2 ON a.APPLY_NO = T2.APPLY_NO
+		LEFT JOIN SYS_OFFICE T3 ON a.ORG_ID = T3.ID
+		AND T3.TYPE = 1
+		WHERE
+		a.ID = #{applyRegisterVOId}
+		LIMIT 1
+	</select>
+</mapper>

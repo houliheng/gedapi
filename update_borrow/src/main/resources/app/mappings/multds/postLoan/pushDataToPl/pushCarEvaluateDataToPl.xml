@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.postloan.pushdatatopl.dao.PlMortgageCarEvaluateInfoDao">
+				
+	<insert id="insertCarEvaluateDataToPl">
+		INSERT INTO pl_mortgage_car_evaluate_info(
+			id,
+			car_id,
+			mortgage_Rate,
+			motor_vehi_regi_certi_no,
+			vehicle_no,
+			engine_num,
+			vehicle_shelf_no,
+			net_purchase_price,
+			travel_kms,
+			annual_inspection_status,
+			use_property,
+			car_status,
+			is_keep_papers,
+			is_handle,
+			used_changes,
+			used_years,
+			is_common,
+			car_evaluate_price,
+			market_price1,
+			market_phone1,
+			market_price2,
+			market_phone2,
+			market_price3,
+			market_phone3,
+			is_procedure_complete,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES 
+		<foreach item="mortgageCarEvaluaInfolist" collection="mortgageCarEvaluaInfolist" index="index" separator=",">
+		(
+			#{mortgageCarEvaluaInfolist.id},
+			#{mortgageCarEvaluaInfolist.carId},
+			#{mortgageCarEvaluaInfolist.mortgageRate},
+			#{mortgageCarEvaluaInfolist.motorVehiRegiCertiNo},
+			#{mortgageCarEvaluaInfolist.vehicleNo},
+			#{mortgageCarEvaluaInfolist.engineNum},
+			#{mortgageCarEvaluaInfolist.vehicleShelfNo},
+			#{mortgageCarEvaluaInfolist.netPurchasePrice},
+			#{mortgageCarEvaluaInfolist.travelKms},
+			#{mortgageCarEvaluaInfolist.annualInspectionStatus},
+			#{mortgageCarEvaluaInfolist.useProperty},
+			#{mortgageCarEvaluaInfolist.carStatus},
+			#{mortgageCarEvaluaInfolist.isKeepPapers},
+			#{mortgageCarEvaluaInfolist.isHandle},
+			#{mortgageCarEvaluaInfolist.usedChanges},
+			#{mortgageCarEvaluaInfolist.usedYears},
+			#{mortgageCarEvaluaInfolist.isCommon},
+			#{mortgageCarEvaluaInfolist.carEvaluatePrice},
+			#{mortgageCarEvaluaInfolist.marketPrice1},
+			#{mortgageCarEvaluaInfolist.marketPhone1},
+			#{mortgageCarEvaluaInfolist.marketPrice2},
+			#{mortgageCarEvaluaInfolist.marketPhone2},
+			#{mortgageCarEvaluaInfolist.marketPrice3},
+			#{mortgageCarEvaluaInfolist.marketPhone3},
+			#{mortgageCarEvaluaInfolist.isProcedureComplete},
+			#{mortgageCarEvaluaInfolist.createBy.id},
+			#{mortgageCarEvaluaInfolist.createDate},
+			#{mortgageCarEvaluaInfolist.updateBy.id},
+			#{mortgageCarEvaluaInfolist.updateDate}
+		)
+		</foreach>
+	</insert>
+</mapper>

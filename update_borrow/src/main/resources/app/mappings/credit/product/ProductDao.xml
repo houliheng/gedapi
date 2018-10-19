@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.product.dao.ProductDao">
+<sql id="productColumns">
+		a.id AS "id",
+		a.product_code AS "productCode",
+		a.product_name AS "productName",
+		a.product_type_code AS "productTypeCode",
+		a.proc_def_key AS "procDefKey",
+		a.proc_name AS "procName",
+		a.deduct_date_type AS "deductDateType",
+		a.deduct_date_value AS "deductDateValue",
+		a.description AS "description",
+		a.city_id AS "cityId",
+		a.city_name AS "cityName",
+		a.org_id AS "company.id",
+		a.org_name AS "orgName",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="productJoins">
+	</sql>
+    
+	<select id="get" resultType="Product">
+		SELECT 
+			<include refid="productColumns"/>
+		FROM cre_product a
+		<include refid="productJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Product">
+		SELECT 
+			<include refid="productColumns"/>
+		FROM cre_product a
+		<include refid="productJoins"/>
+		LEFT JOIN SYS_DICT d on d.value = a.PRODUCT_TYPE_CODE and d.type = 'PRODUCT_TYPE' 
+        WHERE 1=1
+        AND  a.del_flag = '0'
+		<if test="productCode != null and productCode != ''">
+			and a.PRODUCT_CODE LIKE	<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{productCode}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+		</if>
+		<if test="productName != null and productName != ''">
+			and a.PRODUCT_NAME LIKE <include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{productName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.PRODUCT_TYPE_CODE = #{productTypeCode} 
+		</if>
+		<if test="company != null and company != '' and company.id != null and company.id != ''">
+		    and a.org_id = #{company.id}
+		</if>
+		order by a.PRODUCT_CODE, a.PRODUCT_TYPE_CODE asc
+	</select>
+	
+	<!-- 获得分页总数 -->
+	<select id="getCount" resultType="long">
+		SELECT 
+            count(a.id)
+        FROM CRE_PRODUCT a 
+        LEFT JOIN SYS_DICT d on d.value = a.PRODUCT_TYPE_CODE and d.type = 'PRODUCT_TYPE' 
+        WHERE 1=1
+        AND  a.del_flag = '0'
+		<if test="productCode != null and productCode != ''">
+			and a.PRODUCT_CODE LIKE	<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{productCode}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+		</if>
+		<if test="productName != null and productName != ''">
+			and a.PRODUCT_NAME LIKE <include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{productName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+		</if>
+		<if test="productTypeCode != null and productTypeCode != ''">
+			AND a.PRODUCT_TYPE_CODE = #{productTypeCode} 
+		</if>
+	</select>
+	
+	<select id="findAllList" resultType="Product">
+		SELECT 
+			<include refid="productColumns"/>
+		FROM cre_product a
+		<include refid="productJoins"/>
+		<where>
+			a.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_product(
+			id,
+			product_code,
+			product_name,
+			product_type_code,
+			proc_def_key,
+			proc_name,
+			deduct_date_type,
+			deduct_date_value,
+			description,
+			city_id,
+			city_name,
+			org_id,
+			org_name,
+			del_flag,
+			remarks,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{productCode},
+			#{productName},
+			#{productTypeCode},
+			#{procDefKey},
+			#{procName},
+			#{deductDateType},
+			#{deductDateValue},
+			#{description},
+			#{cityId},
+			#{cityName},
+			#{company.id},
+			#{company.name},
+			#{delFlag},
+			#{remarks},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_product SET 	
+			product_code = #{productCode},
+			product_name = #{productName},
+			product_type_code = #{productTypeCode},
+			proc_def_key = #{procDefKey},
+			proc_name = #{procName},
+			deduct_date_type = #{deductDateType},
+			deduct_date_value = #{deductDateValue},
+			description = #{description},
+			city_id = #{cityId},
+			city_name = #{cityName},
+			org_id = #{company.id},
+			org_name = #{company.name},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_product SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<select id="findProductByProductType" resultType="Product">
+		select 
+			ID as id,
+			product_name AS "productName"
+		from  
+			CRE_PRODUCT 
+		where PRODUCT_TYPE_CODE=#{productTypeCode} and DEL_FLAG='0'
+	</select>
+	
+	<select id="findCoProductByType" resultType="Product">
+		select 
+			ID as id,
+			product_name AS "productName"
+		from  
+			CRE_PRODUCT 
+		where PRODUCT_TYPE_CODE=#{productTypeCode} 
+			and DEL_FLAG='0' 
+			and PROC_DEF_KEY = #{procDefKey}
+			and ORG_ID=#{company.id}
+	</select>
+	
+	<select id="findCoProductByTypeToApply" resultType="Product">
+		select 
+			ID as id,
+			PROC_DEF_KEY as "procDefKey",
+			product_name AS "productName"
+		from  
+			CRE_PRODUCT 
+		where PRODUCT_TYPE_CODE=#{productTypeCode} 
+			and DEL_FLAG='0' 
+			<if test="procDefKey != null and procDefKey != ''">
+			and PROC_DEF_KEY = #{procDefKey}
+			</if>
+			and ORG_ID=#{company.id}
+	</select>
+	
+	<select id = "findCodeCount" resultType="int">
+		SELECT 
+			  count(1)
+		FROM CRE_PRODUCT a where PRODUCT_CODE = #{productCode}
+	</select>
+
+</mapper>

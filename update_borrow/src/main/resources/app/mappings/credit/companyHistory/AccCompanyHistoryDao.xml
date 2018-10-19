@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.companyHistory.dao.AccCompanyHistoryDao">
+    
+	<sql id="accCompanyHistoryColumns">
+		a.id AS "id",
+		a.status AS "status",
+		a.create_time AS "createTime",
+		a.user_name AS "userName",
+		a.comment AS "comment",
+		a.accountcompany_id AS "accountcompanyId",
+		a.operate AS "operate"
+	</sql>
+	
+	<sql id="accCompanyHistoryJoins">
+	</sql>
+    
+	<select id="get" resultType="AccCompanyHistory">
+		SELECT 
+			<include refid="accCompanyHistoryColumns"/>
+		FROM cre_company_history a
+		<include refid="accCompanyHistoryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AccCompanyHistory">
+		SELECT 
+			<include refid="accCompanyHistoryColumns"/>
+		FROM cre_company_history a
+		<include refid="accCompanyHistoryJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_company_history a
+		<include refid="accCompanyHistoryJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccCompanyHistory">
+		SELECT 
+			<include refid="accCompanyHistoryColumns"/>
+		FROM cre_company_history a
+		<include refid="accCompanyHistoryJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_company_history(
+			status,
+			create_time,
+			user_name,
+			comment,
+			accountcompany_id,
+			operate
+		) VALUES (
+			#{status},
+			#{createTime},
+			#{userName},
+			#{comment},
+			#{accountcompanyId},
+			#{operate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_company_history SET
+			status = #{status},
+			create_time = #{createTime},
+			user_name = #{userName},
+			comment = #{comment},
+			accountcompany_id = #{accountcompanyId},
+			operate = #{operate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_company_history
+		WHERE id = #{id}
+	</update>
+
+	<select id="selectAccByaccountCompanyId" resultType="AccCompanyHistory">
+	SELECT
+	<include refid="accCompanyHistoryColumns"/>
+	FROM cre_company_history a
+	  where accountcompany_id = #{companyId}
+	</select>
+
+</mapper>

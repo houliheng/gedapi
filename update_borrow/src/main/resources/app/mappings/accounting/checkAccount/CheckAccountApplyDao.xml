@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.checkAccount.dao.CheckAccountApplyDao">
+
+    <sql id="checkAccountApplyColumns">
+        id,
+        pro_ins_id as "proInsId",
+        task_id as "taskId",
+        contract_no as"contractNumber",
+        borrow_name as "loanName",
+        trade_date as "tradeDate",
+        check_amount as "checkAmount",
+        out_account_name as "outAccountName",
+        out_account_bank_code as "outAccountBankCode",
+        out_account_bank_name as "outAccountBankName",
+        out_account_number as "outAccountNumber",
+        status as "status",
+        create_id as "createBy.id",
+        create_name as "createBy.name",
+        create_time as "createDate"
+    </sql>
+
+    <sql id="checkAccountApplyJoins">
+    </sql>
+
+    <select id="get" resultType="com.resoft.accounting.checkAccount.entity.CheckAccountApply">
+        select
+          <include refid="checkAccountApplyColumns" />
+        from acc_check_account_apply
+        <where>
+            <choose>
+                <when test="contractNumber != null and contractNumber != ''">
+                    contract_no = #{contractNumber}
+                </when>
+                <when test="id != null">
+                    id = #{id}
+                </when>
+                <otherwise>
+                    0 = 1
+                </otherwise>
+            </choose>
+            <if test="status != null">
+                and status  = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.resoft.accounting.checkAccount.entity.CheckAccountApply"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into acc_check_account_apply (
+          contract_no,
+          borrow_name,
+          trade_date,
+          check_amount,
+          out_account_name,
+          out_account_bank_code,
+          out_account_bank_name,
+          out_account_number,
+          status,
+          create_id,
+          create_name,
+          create_time
+        ) values (
+          #{contractNumber},
+          #{loanName},
+          #{tradeDate},
+          #{checkAmount},
+          #{outAccountName},
+          #{outAccountBankCode},
+          #{outAccountBankName},
+          #{outAccountNumber},
+          #{status},
+          #{createBy.id},
+          #{createBy.name},
+          #{createDate}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.resoft.accounting.checkAccount.entity.CheckAccountApply">
+        update acc_check_account_apply set
+        <if test="proInsId != null and proInsId != ''">
+            pro_ins_id = #{proInsId},
+        </if>
+        <if test="taskId != null">
+            task_id = #{taskId},
+        </if>
+        <if test="tradeDate != null">
+            trade_date = #{tradeDate},
+        </if>
+        <if test="checkAmount != null and checkAmount != ''">
+            check_amount = #{checkAmount},
+        </if>
+        <if test="outAccountName != null and outAccountName != ''">
+            out_account_name = #{outAccountName},
+        </if>
+        <if test="outAccountBankCode != null and outAccountBankCode != ''">
+            out_account_bank_code = #{outAccountBankCode},
+        </if>
+        <if test="outAccountBankName != null and outAccountBankName != ''">
+            out_account_bank_name = #{outAccountBankName},
+        </if>
+        <if test="outAccountNumber != null and outAccountNumber != ''">
+            out_account_number = #{outAccountNumber},
+        </if>
+        <choose>
+            <when test="status != null and status != ''">
+                status = #{status}
+            </when>
+            <otherwise>
+                status = 0
+            </otherwise>
+        </choose>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+</mapper>

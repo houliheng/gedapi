@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.contractarchive.dao.ContractArchiveDao">
+
+	<sql id="contractArchiveColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.cust_name AS "custName",
+		a.is_sender AS "isSender",
+		sd.label AS "isSenderName",
+		a.sender_name AS "senderName",
+		a.sender_time AS "senderTime",
+		a.is_recipitent AS "isRecipitent",
+		sd1.label AS "isRecipitentName",
+		a.recipient_name AS "recipientName",
+		a.recipient_time AS "recipientTime",
+		a.org_num AS "orgNum.id",
+		a.contract_location AS "contractLocation",
+		a.is_borrowing AS "isBorrowing",
+		a.borrowing_name AS "borrowingName",
+		a.borrowing_reason AS "borrowingReason",
+		a.borrowing_time AS "borrowingTime",
+		a.express_no AS "expressNo",
+		a.express_company AS "expressCompany",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		so.name AS "orgNum.name"
+	</sql>
+
+	<sql id="contractArchiveJoins">
+		LEFT JOIN sys_office o19 ON o19.id = a.update_by
+		LEFT JOIN sys_office so ON so.id = a.org_num
+		LEFT JOIN sys_dict sd ON sd.value = a.is_sender and sd.type = 'yes_no'
+		LEFT JOIN sys_dict sd1 ON sd1.value = a.is_recipitent and sd1.type = 'yes_no'
+	</sql>
+
+	<select id="get" resultType="ContractArchive">
+		SELECT
+			<include refid="contractArchiveColumns"/>
+		FROM cre_contract_archive a
+		<include refid="contractArchiveJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findListByContractNo" resultType="ContractArchive">
+		SELECT
+			<include refid="contractArchiveColumns"/>
+		FROM cre_contract_archive a
+		<include refid="contractArchiveJoins"/>
+		<where>
+			a.contract_no = #{contractNo}
+		</where>
+	</select>
+
+	<select id="findByContractNo" resultType="ContractArchive">
+		SELECT
+			<include refid="contractArchiveColumns"/>
+		FROM cre_contract_archive a
+		<include refid="contractArchiveJoins"/>
+		<where>
+			a.id = #{id}
+		</where>
+	</select>
+
+
+	<!--
+	 * @reqno: H1601150180
+	 * @date-designer:2016年01月25日-lirongchao
+	 * @db-z : cre_contract_archive : contract_no,cust_name
+	 * @db-j : sys_office : label
+	 * @db-j : sys_dict : label
+	 * @date-author:2016年01月25日-lirongchao:合同归档信息管理表查询
+	 * 										查询条件-【客户名称（模糊查询）[custName]、合同编号（模糊查询）[contractNo]】
+													【是否发送(下拉框)[isSender]、是否签收(下拉框)[isRecipitent]】
+													【归属机构（参照用户管理查询条件的样式）[orgNum]】
+													【发出日期（开始[startSenderTime]、结束时间[endSenderTime]）、签收日期（开始[startRecipientTime]、结束时间[endRecipientTime]）】
+	 -->
+	<select id="findList" resultType="ContractArchive">
+		SELECT
+			<include refid="contractArchiveColumns"/>
+		FROM cre_contract_archive a
+		<include refid="contractArchiveJoins"/>
+		<where>
+			<include refid="creDataScope_user.dataScopeFilter"/>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{contractNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{custName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="isSender != null and isSender != ''">
+				AND a.is_sender = #{isSender}
+			</if>
+			<if test="isRecipitent != null and isRecipitent != ''">
+				AND a.is_recipitent = #{isRecipitent}
+			</if>
+			<if test="startSenderTime != null and startSenderTime != ''">
+				AND <![CDATA[ DATE(a.sender_time) >= #{startSenderTime}  ]]>
+			</if>
+			<if test="endSenderTime != null and endSenderTime != ''">
+				AND <![CDATA[ DATE(a.sender_time) <= #{endSenderTime}  ]]>
+			</if>
+			<if test="startRecipientTime != null and startRecipientTime != ''">
+				AND <![CDATA[ DATE(a.recipient_time) >= #{startRecipientTime}  ]]>
+			</if>
+			<if test="endRecipientTime != null and endRecipientTime != ''">
+				AND <![CDATA[ DATE(a.recipient_time) <= #{endRecipientTime}  ]]>
+			</if>
+			<if test="orgNum != null and orgNum.id != null and orgNum.id != ''">
+				AND (a.org_num IN (SELECT id FROM sys_office so WHERE so.parent_ids LIKE<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{orgNum.id}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/> and so.type='1')
+				OR a.org_num = #{orgNum.id})
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ContractArchive">
+		SELECT
+			<include refid="contractArchiveColumns"/>
+		FROM cre_contract_archive a
+		<include refid="contractArchiveJoins"/>
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_contract_archive(
+			id,
+			REGISTER_ORG_ID,
+			contract_no,
+			cust_name,
+			is_sender,
+			sender_name,
+			sender_time,
+			is_recipitent,
+			recipient_name,
+			recipient_time,
+			org_num,
+			contract_location,
+			is_borrowing,
+			borrowing_name,
+			borrowing_reason,
+			borrowing_time,
+			express_company,
+			express_no,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{registerOrg.id},
+			#{contractNo},
+			#{custName},
+			#{isSender},
+			#{senderName},
+			#{senderTime},
+			#{isRecipitent},
+			#{recipientName},
+			#{recipientTime},
+			#{orgNum.id},
+			#{contractLocation},
+			#{isBorrowing},
+			#{borrowingName},
+			#{borrowingReason},
+			#{borrowingTime},
+			#{expressCompany},
+			#{expressNo},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	<!--
+	 * @reqno: H1601150171
+	 * @date-designer:2016年01月25日-lirongchao
+	 * @db-z : cre_contract_archive : contract_no,cust_name
+	 * @date-author:2016年01月25日-lirongchao:根据id更新合同归档信息
+	 -->
+	<update id="update">
+		UPDATE cre_contract_archive SET
+			contract_no = #{contractNo},
+			cust_name = #{custName},
+			is_sender = #{isSender},
+			sender_name = #{senderName},
+			sender_time = #{senderTime},
+			is_recipitent = #{isRecipitent},
+			recipient_name = #{recipientName},
+			recipient_time = #{recipientTime},
+			org_num = #{orgNum.id},
+			contract_location = #{contractLocation},
+			is_borrowing = #{isBorrowing},
+			borrowing_name = #{borrowingName},
+			borrowing_reason = #{borrowingReason},
+			borrowing_time = #{borrowingTime},
+			express_company = #{expressCompany},
+			express_no = #{expressNo},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	<!--
+	 * @reqno: H1601150180
+	 * @date-designer:2016年01月25日-lirongchao
+	 * @db-z : cre_contract_archive : contract_no,cust_name
+	 * @date-author:2016年01月25日-lirongchao:批量签收合同归档信息，将is_recipitent（是否签收）改为是
+	 -->
+	<update id = "recipitent" parameterType="java.util.Map">
+		UPDATE cre_contract_archive SET
+			is_recipitent = '1',
+			recipient_name = #{recipientName},
+			recipient_time = sysdate()
+		WHERE id in
+		<foreach item="id" collection="idList" open="(" close=")" separator=",">
+		 #{id}
+		</foreach>
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_contract_archive
+		WHERE id = #{id}
+	</update>
+
+	<select id="getArchiveLstByApplyNo" resultType="ContractArchive">
+			SELECT
+					c.CUST_NAME,
+					b.CONTRACT_NO,
+					b.operate_org_id as 'borrowingReason'
+			FROM
+				cre_check_approve_union a
+			INNER JOIN cre_contract b ON a.CUST_ID = b.CUST_ID
+			INNER JOIN cre_cust_info c ON c.id = b.CUST_ID
+			INNER JOIN cre_apply_loan_status d on b.CONTRACT_NO = d.CONTRACT_NO
+			WHERE
+				a.APPLY_NO = #{applyNo}
+	</select>
+
+	<insert id="insertContractArchiveLst" parameterType="java.util.List">
+		INSERT INTO cre_contract_archive(
+			id,
+			REGISTER_ORG_ID,
+			contract_no,
+			cust_name,
+
+			is_sender,
+			is_recipitent,
+			org_num,
+			is_borrowing,
+
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES
+		<foreach item="contractArchivelst" collection="contractArchivelst" index="index" separator=",">
+		(
+			#{contractArchivelst.id},
+			#{contractArchivelst.registerOrg.id},
+			#{contractArchivelst.contractNo},
+			#{contractArchivelst.custName},
+		    0,
+		    0,
+		    #{contractArchivelst.orgNum.id},
+		    0,
+			#{contractArchivelst.createBy.id},
+			#{contractArchivelst.createDate},
+			#{contractArchivelst.updateBy.id},
+			#{contractArchivelst.updateDate}
+		)
+		</foreach>
+	</insert>
+
+	<select id="getExpressNoCount" resultType="java.lang.Long">
+		SELECT
+			count(DISTINCT EXPRESS_NO)
+		FROM
+		cre_contract_archive a
+		<where>
+			1 = 1
+			<if test="expressNo != null and expressNo != ''">
+				AND a.EXPRESS_NO LIKE concat('%',#{expressNo},'%')
+			</if>
+			<if test="expressCompany != null and expressCompany != ''">
+				AND a.EXPRESS_COMPANY LIKE concat('%',#{expressCompany},'%')
+			</if>
+			<if test="senderName != null and senderName != ''">
+				AND a.SENDER_NAME = #{senderName}
+			</if>
+		</where>
+	</select>
+
+	<!--查询父列表 -->
+	<select id="getDataList" resultType="java.util.Map">
+		SELECT DISTINCT
+			EXPRESS_NO AS "id",
+			EXPRESS_COMPANY AS "expressCompany",
+			SENDER_NAME AS "senderName"
+		FROM
+			cre_contract_archive
+		<where>
+			EXPRESS_NO != ''
+			<if test="custName != null and custName != ''">
+				AND CUST_NAME LIKE concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND CONTRACT_NO LIKE concat('%',#{contractNo},'%')
+			</if>
+			<if test="senderName != null and senderName != ''">
+				AND SENDER_NAME LIKE concat('%',#{senderName},'%')
+			</if>
+		</where>
+		limit #{pageStart},#{pageEnd}
+	</select>
+
+	<!--查询子列表 -->
+	<select id="getSubDataList" resultType="java.util.Map">
+		SELECT
+			a.id AS "id",
+			a.contract_no AS "contractNo",
+			a.cust_name AS "custName",
+			IF (a.is_sender = '1', '是', '否') AS "isSender",
+			a.sender_name AS "senderName",
+			a.sender_time AS "senderTime",
+			IF (a.is_recipitent = '1',	'是', '否') AS "isRecipitent",
+			a.recipient_name AS "recipientName",
+			a.recipient_time AS "recipientTime",
+			a.org_num AS "orgNum.id",
+			a.contract_location AS "contractLocation",
+			a.is_borrowing AS "isBorrowing",
+			a.borrowing_name AS "borrowingName",
+			a.borrowing_reason AS "borrowingReason",
+			a.borrowing_time AS "borrowingTime",
+			a.create_by AS "createBy.id",
+			a.create_date AS "createDate",
+			a.update_by AS "updateBy.id",
+			a.update_date AS "updateDate"
+		FROM
+			cre_contract_archive a
+		WHERE
+			a.EXPRESS_NO = #{expressNo}
+	</select>
+</mapper>

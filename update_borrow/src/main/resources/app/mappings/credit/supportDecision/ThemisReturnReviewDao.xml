@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.supportDecision.dao.ThemisReturnReviewDao">
+    
+	<sql id="themisReturnReviewColumns">
+		a.companycode AS "companycode",
+		a.report_year_month AS "reportYearMonth",
+		a.return_order_col AS "returnOrderCol",
+		a.return_index_code AS "returnIndexCode",
+		a.return_index_name AS "returnIndexName",
+		a.review AS "review",
+		a.apply_no AS "applyNo"
+	</sql>
+	
+	<sql id="themisReturnReviewJoins">
+	</sql>
+    
+	<select id="get" resultType="ThemisReturnReview">
+		SELECT 
+			<include refid="themisReturnReviewColumns"/>
+		FROM ift_themis_return_review a
+		<include refid="themisReturnReviewJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ThemisReturnReview">
+		SELECT 
+			<include refid="themisReturnReviewColumns"/>
+		FROM ift_themis_return_review a
+		<include refid="themisReturnReviewJoins"/>
+		<where>
+			
+			<if test="companycode != null and companycode != ''">
+				AND a.companycode = #{companycode}
+			</if>
+			<if test="reportYearMonth != null and reportYearMonth != ''">
+				AND a.report_year_month = #{reportYearMonth}
+			</if>
+			<if test="returnOrderCol != null and returnOrderCol != ''">
+				AND a.return_order_col = #{returnOrderCol}
+			</if>
+			<if test="returnIndexCode != null and returnIndexCode != ''">
+				AND a.return_index_code = #{returnIndexCode}
+			</if>
+			<if test="returnIndexName != null and returnIndexName != ''">
+				AND a.return_index_name = #{returnIndexName}
+			</if>
+			<if test="review != null and review != ''">
+				AND a.review = #{review}
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_themis_return_review a
+		<include refid="themisReturnReviewJoins"/>
+		<where>
+			
+			<if test="companycode != null and companycode != ''">
+				AND a.companycode = #{companycode}
+			</if>
+			<if test="reportYearMonth != null and reportYearMonth != ''">
+				AND a.report_year_month = #{reportYearMonth}
+			</if>
+			<if test="returnOrderCol != null and returnOrderCol != ''">
+				AND a.return_order_col = #{returnOrderCol}
+			</if>
+			<if test="returnIndexCode != null and returnIndexCode != ''">
+				AND a.return_index_code = #{returnIndexCode}
+			</if>
+			<if test="returnIndexName != null and returnIndexName != ''">
+				AND a.return_index_name = #{returnIndexName}
+			</if>
+			<if test="review != null and review != ''">
+				AND a.review = #{review}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ThemisReturnReview">
+		SELECT 
+			<include refid="themisReturnReviewColumns"/>
+		FROM ift_themis_return_review a
+		<include refid="themisReturnReviewJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ift_themis_return_review(
+			companycode,
+			report_year_month,
+			return_order_col,
+			return_index_code,
+			return_index_name,
+			review,
+			apply_no
+		) VALUES (
+			#{companycode},
+			#{reportYearMonth},
+			#{returnOrderCol},
+			#{returnIndexCode},
+			#{returnIndexName},
+			#{review},
+			#{applyNo}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_themis_return_review SET 	
+			companycode = #{companycode},
+			report_year_month = #{reportYearMonth},
+			return_order_col = #{returnOrderCol},
+			return_index_code = #{returnIndexCode},
+			return_index_name = #{returnIndexName},
+			review = #{review}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_themis_return_review
+		WHERE id = #{id}
+	</update>
+
+
+	<delete id="deleteByApplyNo">
+	delete FROM ift_themis_return_review WHERE apply_no=#{applyNo};
+	</delete>
+	
+</mapper>

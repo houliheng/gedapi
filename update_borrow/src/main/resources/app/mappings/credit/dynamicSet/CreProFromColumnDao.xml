@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 表单数据项分类配置表     CRE_DATA_GROUP_TABLE -->
+<mapper namespace="com.resoft.credit.dynamicSet.dao.CreProFromColumnDao">
+	
+	<!-- 
+	 * @reqno:H1510080092
+	 * @date-designer:2015年10月15日-songmin
+	 * @date-author:2015年10月15日-songmin:CRE_信贷审批_申请录入_贷款申请信息_贷款申请信息_动态配置数据项展现
+	 *		查询数据项：ID、PRODUCT_TYPE（产品类型）、DATA_GROUP（表单数据项分类）、COLUMN_CODE（数据项字段）、COLUMN_NAME（数据项字段显示名称）、IS_REQUIRED（是否必填项（字典类型：yes_no））、COLUMN_LENGTH（字段长度）、SORT（排序）
+	 *		查询条件：PRODUCT_TYPE（产品类型）、SHOW_POSITION（显示位置：1：贷款申请信息；2：客户信息）
+	 *		查询出的结果在程序中解析成Map<DATA_GROUP，LIST<CreDataGroupTable>>的形式，然后结合CRE_DATA_GROUP_TABLE中的DATA_GROUP确定数据存放到哪张表以及字段的对应关系
+	 * @db-z:cre_pro_from_column:ID、PRODUCT_TYPE、DATA_GROUP、COLUMN_CODE、COLUMN_NAME、IS_REQUIRED、COLUMN_LENGTH、SORT
+	 * @db-j:CRE_DATA_GROUP_TABLE:DATA_GROUP
+	-->
+	<!-- 
+	 * @reqno:H1510080094
+	 * @date-designer:2015年10月19日-songmin
+	 * @date-author:2015年10月19日-songmin:查询表单动态配置项时，加入根公司的限定条件，避免在多法人情况下查出多余的数据；排序根据CRE_DATA_GROUP_TABLE、cre_pro_from_column升序排列
+	 * @db-j:CRE_DATA_GROUP_TABLE:COMPANY_ID、SORT
+	 * @db-Z:cre_pro_from_column:SORT
+	-->
+	<!-- 查询动态表单配置项信息-->
+	<select id="findDataColumnSets" resultType="CreProFromColumn">
+		select a.ID as id,
+			   a.PRODUCT_TYPE productType,
+			   a.COLUMN_CODE columnCode,
+			   a.COLUMN_NAME columnName,
+			   a.IS_REQUIRED isRequired,
+		       a.COLUMN_LENGTH columnLength,
+			   a.SORT sort,
+			   DATA_GROUP_ID dataGroupId 
+		from cre_pro_from_column a,CRE_DATA_GROUP_TABLE b
+		where a.DATA_GROUP_ID = b.ID and a.PRODUCT_TYPE=#{productType} and b.SHOW_POSITION=#{showPosition} and  b.COMPANY_ID=#{companyId}
+		order by b.SORT,a.SORT
+	</select>
+	
+</mapper>

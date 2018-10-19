@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditAnalysisMostExtends.CreditAnalysisMostExtendsDao">
+    			   
+	<sql id="creditAnalysisColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		
+		a.CORE_VALUE as coreValue,
+		a.CORE_ADVANTAGE as coreAdvantage,
+		a.CORE_GUARANTEE as coreGuarantee,
+		a.CORE_MEASURES as coreMeasures,
+		
+		a.POLICY_RISK_ANALYSIS as policyRiskAnalysis,
+		a.OPERATE_RISK_ANALYSIS as operateRiskAnalysis,
+		a.CREDIT_RISK_ANALYSIS as creditRiskAnalysis,
+		a.UNEXPECTED_RISK_ANALYSIS as unexpectedRiskAnalysis,
+		
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditAnalysisJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditAnalysisMostExtends">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extends a
+		<include refid="creditAnalysisJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditAnalysisMostExtends">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extends a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_analysis_most_extends a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_analysis_most_extends(
+			id,
+			apply_no,
+			
+			CORE_VALUE,
+			CORE_ADVANTAGE,
+			CORE_GUARANTEE,
+			CORE_MEASURES,
+			
+			POLICY_RISK_ANALYSIS,
+			OPERATE_RISK_ANALYSIS,
+			CREDIT_RISK_ANALYSIS,
+			UNEXPECTED_RISK_ANALYSIS,
+			
+			CREATE_BY,
+			CREATE_DATE,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			
+			#{coreValue},
+			#{coreAdvantage},
+			#{coreGuarantee},
+			#{coreMeasures},
+			
+			#{policyRiskAnalysis},
+			#{operateRiskAnalysis},
+			#{creditRiskAnalysis},
+			#{unexpectedRiskAnalysis},
+			
+			
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_analysis_most_extends SET 	
+			apply_no = #{applyNo},
+			
+			CORE_VALUE = #{coreValue},
+			CORE_ADVANTAGE = #{coreAdvantage},
+			CORE_GUARANTEE = #{coreGuarantee},
+			CORE_MEASURES = #{coreMeasures},
+			
+			POLICY_RISK_ANALYSIS = #{policyRiskAnalysis},
+			OPERATE_RISK_ANALYSIS = #{operateRiskAnalysis},
+			CREDIT_RISK_ANALYSIS = #{creditRiskAnalysis},
+			UNEXPECTED_RISK_ANALYSIS = #{unexpectedRiskAnalysis},
+			
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_analysis_most_extends
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCreditAnalysisMostExtendsByApplyNo" resultType="CreditAnalysisMostExtends">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extends a
+		<where>
+				AND a.apply_no = #{applyNo}
+		</where>		
+	</select>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_credit_analysis_most_extends SET 	
+		
+		<if test="coreValue != null and coreValue != ''">
+			CORE_VALUE = #{coreValue},
+		</if>
+		<if test="coreAdvantage != null and coreAdvantage != ''">
+			CORE_ADVANTAGE = #{coreAdvantage},
+		</if>
+		<if test="coreGuarantee != null and coreGuarantee != ''">
+			CORE_GUARANTEE = #{coreGuarantee},
+		</if>
+		<if test="coreMeasures != null and coreMeasures != ''">
+			CORE_MEASURES = #{coreMeasures},
+		</if>
+		
+		<if test="policyRiskAnalysis != null and policyRiskAnalysis != ''">
+			POLICY_RISK_ANALYSIS = #{policyRiskAnalysis},
+		</if>
+		<if test="operateRiskAnalysis != null and operateRiskAnalysis != ''">
+			OPERATE_RISK_ANALYSIS = #{operateRiskAnalysis},
+		</if>
+		<if test="creditRiskAnalysis != null and creditRiskAnalysis != ''">
+			CREDIT_RISK_ANALYSIS = #{creditRiskAnalysis},
+		</if>
+		<if test="unexpectedRiskAnalysis != null and unexpectedRiskAnalysis != ''">
+			UNEXPECTED_RISK_ANALYSIS = #{unexpectedRiskAnalysis},
+		</if>
+		
+		
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+</mapper>

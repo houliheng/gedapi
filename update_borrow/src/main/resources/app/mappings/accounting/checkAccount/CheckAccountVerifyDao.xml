@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.checkAccount.dao.CheckAccountVerifyDao">
+
+    <sql id="checkAccountRepayColumns">
+        caa.id as "applyId",
+        caa.contract_no as "contractNo",
+        caa.borrow_name as "borrowName",
+        caa.out_account_name as "remittanceName",
+        caa.create_time as "applyDate",
+        caa.trade_date as "tradeDate",
+        caa.check_amount as "checkAmount",
+        cs.repay_contract_status as "repayStatus",
+        so.name as "region"
+    </sql>
+
+    <sql id="checkAccountRepayJoins">
+        inner join acc_sta_contract_status cs on cs.contract_no = caa.contract_no
+        inner join acc_contract c on c.contract_no = caa.contract_no
+        left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office so on so.id = cs.org_level2
+    </sql>
+
+    <select id="list" resultType="com.resoft.accounting.checkAccount.entity.CheckAccountVerify">
+        select
+          <include refid="checkAccountRepayColumns" />
+        from acc_check_account_apply caa
+          <include refid="checkAccountRepayJoins" />
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o on c.operate_org_id = o.id
+        <where>
+            and (c.OPERATE_ORG_ID = #{currentUser.company.id}
+            or o.parent_ids like concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+            and (cs.repay_contract_status = '0600'
+            or cs.repay_contract_status = '0800')
+            and caa.status = 1
+            <if test="contractNo != null and contractNo !=''">
+                and caa.contract_no like CONCAT(#{contractNo},'%')
+            </if>
+            <if test="borrowName != null and borrowName != ''">
+                and c.cust_name like CONCAT('%',#{borrowName},'%')
+            </if>
+            <if test="region != null and region != ''">
+                and so.name like CONCAT('%',#{region},'%')
+            </if>
+            <if test="startDate != null">
+                and <![CDATA[caa.trade_date >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                and <![CDATA[caa.trade_date <= #{endDate}]]>
+            </if>
+            <if test="repayStatus != null and repayStatus != ''">
+                and cs.repay_contract_status = #{repayStatus}
+            </if>
+        </where>
+    </select>
+
+    <select id="listDone" resultType="com.resoft.accounting.checkAccount.entity.CheckAccountVerify">
+        select
+        <include refid="checkAccountRepayColumns" />
+        from acc_check_account_apply caa
+        <include refid="checkAccountRepayJoins" />
+        inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o on c.operate_org_id = o.id
+        <where>
+            and (c.OPERATE_ORG_ID = #{currentUser.company.id}
+            or o.parent_ids like concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+            and (cs.repay_contract_status = '0600'
+            or cs.repay_contract_status = '0800')
+            and caa.status = 2
+            <if test="contractNo != null and contractNo !=''">
+                and caa.contract_no like CONCAT(#{contractNo},'%')
+            </if>
+            <if test="borrowName != null and borrowName != ''">
+                and c.cust_name like CONCAT('%',#{borrowName},'%')
+            </if>
+            <if test="region != null and region != ''">
+                and so.name like CONCAT('%',#{region},'%')
+            </if>
+            <if test="startDate != null">
+                and <![CDATA[caa.trade_date >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                and <![CDATA[caa.trade_date <= #{endDate}]]>
+            </if>
+            <if test="repayStatus != null and repayStatus != ''">
+                and cs.repay_contract_status = #{repayStatus}
+            </if>
+        </where>
+    </select>
+
+</mapper>

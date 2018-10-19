@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.CreGedBorrowStatus.dao.CreGedBorrowStatusDao">
+    
+	<sql id="creGedBorrowStatusColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.status AS "status",
+		a.is_union AS "isUnion",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creGedBorrowStatusJoins">
+	</sql>
+    
+	<select id="get" resultType="CreGedBorrowStatus">
+		SELECT 
+			<include refid="creGedBorrowStatusColumns"/>
+		FROM cre_ged_borrow_status a
+		<include refid="creGedBorrowStatusJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreGedBorrowStatus">
+		SELECT 
+			<include refid="creGedBorrowStatusColumns"/>
+		FROM cre_ged_borrow_status a
+		<include refid="creGedBorrowStatusJoins"/>
+		<where>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+			</if>
+			<if test="status != null ">
+				AND a.status = #{status}
+			</if>
+			<if test="isUnion != null ">
+				AND a.is_union = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_ged_borrow_status a
+		<include refid="creGedBorrowStatusJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreGedBorrowStatus">
+		SELECT 
+			<include refid="creGedBorrowStatusColumns"/>
+		FROM cre_ged_borrow_status a
+		<include refid="creGedBorrowStatusJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_ged_borrow_status(
+			id,
+			apply_no,
+			status,
+			is_union,
+			create_date,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{status},
+			#{isUnion},
+			#{createDate},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_ged_borrow_status SET 	
+			apply_no = #{applyNo},
+			status = #{status},
+			is_union = #{isUnion},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_ged_borrow_status
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateDrawStatus">
+		UPDATE cre_ged_borrow_status SET 	
+			status = #{1}
+		WHERE apply_no = #{0}
+	</update>
+</mapper>

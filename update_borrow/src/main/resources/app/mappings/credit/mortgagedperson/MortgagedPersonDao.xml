@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.mortgagedperson.dao.MortgagedPersonDao">
+
+	<sql id="mortgagedPersonColumns">
+		a.id AS "id",
+		a.mortgagee_name AS "mortgageeName",
+		a.ID_NUM AS "idNum",
+		a.ID_TYPE AS "idType",
+		a.sex_no AS "sexNo",
+		a.mobile_num AS "mobileNum",
+		a.birth_day AS "birthDay",
+		a.bankcard_no AS "bankcardNo",
+		a.BANK_NO AS "bankNo",
+		a.BANK_DETAIL_NAME AS "bankDetailName",
+		a.cont_province AS "contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS "contDistinct",
+		a.capital_terrace_no AS "capitalTerraceNo",
+		a.open_account_status AS "openAccountStatus",
+		a.cont_details AS "contDetails",
+		a.del_flag AS "delFlag",
+		a.CREATE_BY AS "createId",
+		a.CREATE_DATE AS "createDate",
+		a.UPDATE_BY AS "updateId",
+		a.CREATE_DATE AS "updateDate",
+		s.label AS sexNoLabel
+	</sql>
+
+	<sql id="mortgagedPersonJoins">
+		left join SYS_DICT s on a.sex_no = s.value and s.type='sex'
+	</sql>
+    <!-- 
+   	 * @reqno:H1601220056
+	 * @date-designer:2016年1月25日-songmin
+	 * @date-author:2016年1月25日-songmin:CRE_信贷审批_客户信息管理_抵押权人信息管理
+	 * @db-z:cre_mortgaged_person:id、apply_id、mortgagee_name、CARD_ID_NO、sex_no、mobile_num、capital_terrace_no、birth_day、del_flag
+	 * @db-j:SYS_DICT:label、value、type
+	 * 分页查询抵押权人信息数据列表
+   	 -->
+	<select id="findList" resultType="MortgagedPerson">
+		SELECT
+		<include refid="mortgagedPersonColumns" />
+		FROM cre_mortgaged_person a
+		<include refid="mortgagedPersonJoins" />
+		<where>
+			a.del_flag = '0'
+			<if test="mortgageeName != null and mortgageeName != ''">
+				AND a.mortgagee_name LIKE
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix" />
+				#{mortgageeName}
+				<include refid="SYS_PUBLICTAG.stringConcateSuffix" />
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM LIKE
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix" />
+				#{idNum}
+				<include refid="SYS_PUBLICTAG.stringConcateSuffix" />
+			</if>
+			<if test="sexNo != null and sexNo != ''">
+				AND a.sex_no = #{sexNo}
+			</if>
+			<if test="mobileNum != null and mobileNum != ''">
+				AND a.mobile_num LIKE
+				<include refid="SYS_PUBLICTAG.stringConcatePrefix" />
+				#{mobileNum}
+				<include refid="SYS_PUBLICTAG.stringConcateSuffix" />
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.CREATE_DATE DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 
+	 * @reqno:H1601220071
+	 * @date-designer:2016年1月26日-songmin
+	 * @date-author:2016年1月26日-songmin:CRE_信贷审批_客户信息管理_抵押权人信息管理_新增
+	 * @db-z:cre_mortgaged_person:id,apply_id,mortgagee_name,CARD_ID_NO,card_type,sex_no,mobile_num,birth_day,bankcard_no,BANK_NO,BANK_DETAIL_NAME,cont_province,cont_city,cont_distinct,capital_terrace_no,open_account_status,cont_details,del_flag,create_id,create_date,update_id,update_date
+	 * 	新增抵押权人信息
+	-->
+	<insert id="insert">
+		INSERT INTO cre_mortgaged_person(
+		id,
+		mortgagee_name,
+		ID_NUM,
+		ID_TYPE,
+		sex_no,
+		mobile_num,
+		birth_day,
+		bankcard_no,
+		BANK_NO,
+		BANK_DETAIL_NAME,
+		cont_province,
+		cont_city,
+		cont_distinct,
+		capital_terrace_no,
+		open_account_status,
+		cont_details,
+		del_flag,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{mortgageeName},
+		#{idNum},
+		#{idType},
+		#{sexNo},
+		#{mobileNum},
+		#{birthDay},
+		#{bankcardNo},
+		#{bankNo},
+		#{bankDetailName},
+		#{contProvince},
+		#{contCity},
+		#{contDistinct},
+		#{capitalTerraceNo},
+		#{openAccountStatus},
+		#{contDetails},
+		#{delFlag},
+		#{createId},
+		#{createDate},
+		#{updateId},
+		#{updateDate}
+		)
+	</insert>
+	
+	<!--  
+	 * @reqno:H1601250005
+	 * @date-designer:2016年1月27日-songmin
+	 * @date-author:2016年1月27日-songmin:CRE_信贷审批_客户信息管理_抵押权人信息管理7788_修改、删除
+	 * @db-z:cre_mortgaged_person:del_flag、id
+	 *	逻辑删除抵押权人信息。（这里一次性进行多条记录的删除，所以不再使用默认提供的delete作为id
+	-->
+	<update id="deleteList" parameterType="java.util.Map">
+		UPDATE cre_mortgaged_person SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id in
+		<foreach item="id" collection="idList" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+	<select id="get" resultType="MortgagedPerson">
+		SELECT
+		<include refid="mortgagedPersonColumns" />
+		FROM cre_mortgaged_person a
+		<include refid="mortgagedPersonJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<update id="update">
+		UPDATE cre_mortgaged_person SET
+		mortgagee_name = #{mortgageeName},
+		ID_NUM = #{idNum},
+		ID_TYPE = #{idType},
+		sex_no = #{sexNo},
+		mobile_num = #{mobileNum},
+		birth_day = #{birthDay},
+		bankcard_no = #{bankcardNo},
+		BANK_NO = #{bankNo},
+		BANK_DETAIL_NAME =
+		#{bankDetailName},
+		cont_province = #{contProvince},
+		cont_city = #{contCity},
+		cont_distinct = #{contDistinct},
+		capital_terrace_no = #{capitalTerraceNo},
+		open_account_status = #{openAccountStatus},
+		cont_details = #{contDetails},
+		CREATE_BY = #{createId},
+		UPDATE_BY = #{updateId},
+		UPDATE_DATE = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	<select id="getMortgagedPerson" resultType="MortgagedPerson">
+		SELECT
+		a.id AS "id",
+		a.mortgagee_name AS "mortgageeName"
+		FROM cre_mortgaged_person a
+		where a.del_flag = '0' and (a.CAPITAL_TERRACE_NO is not null AND a.CAPITAL_TERRACE_NO != '')
+		<!-- WHERE a.id = #{id} -->
+	</select>
+	
+	<!-- 获取中间人信息 -->
+	<select id="getMiddlePerson" resultType="MortgagedPerson">
+		SELECT
+		a.id AS "id",
+		a.GQGET_CUST_NAME AS "mortgageeName"
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ift_acc_gqget_cust_info a
+	</select>
+
+	
+	<!-- 根据Id获取中间人信息 -->
+	<select id="getMiddlePersonById" resultType="MortgagedPerson">
+		SELECT
+		a.id AS "id",
+		a.ID_NUM AS "idNum",
+		a.PHONE_NO AS "mobileNum",
+		a.GQGET_CUST_NAME AS "mortgageeName",
+		a.GQGET_CUST_ID as "capitalTerraceNo",
+		b.BANKCARD_NO as "bankcardNo",
+		b.BANK_AREA as "contDistinct",
+		b.BANK_OFFICE as "bankNo",
+		b.BANK_NAME as "bankDetailName"
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ift_acc_gqget_cust_info a
+		inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ift_acc_gqget_bankcard_info b
+		on a.GQGET_CUST_ID = b.GQGET_CUST_ID
+		where a.id = #{id} order by b.CREATE_DATE DESC limit 1
+	</select>
+
+	<select id="getMortgagedPersonById" resultType="MortgagedPerson">
+		SELECT
+		a.id AS "id",
+		a.ID_NUM AS "idNum",
+		a.mortgagee_name AS "mortgageeName",
+		a.mobile_num AS "mobileNum",
+		a.bankcard_no AS "bankcardNo",
+		a.bank_no AS "bankNo",
+		a.BANK_DETAIL_NAME AS "bankDetailName",
+		a.cont_province AS
+		"contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS
+		"contDistinct",
+		a.cont_details AS "contDetails",
+		a.CAPITAL_TERRACE_NO AS "capitalTerraceNo"
+		FROM cre_mortgaged_person a
+		WHERE a.id = #{id}
+	</select>
+
+</mapper>

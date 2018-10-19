@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.postloan.debtCollectionLegal.dao.DebtCollectionLegalDao">
+
+	<sql id="debtCollectionLegalColumns">
+		a.id AS "id",
+		a.debt_id as "debtId",
+		a.contract_no AS
+		"contractNo",
+		a.collection_date AS "collectionDate",
+		a.collector AS
+		"collector",
+		a.legal_type AS "legalType",
+		a.legal_org AS "legalOrg",
+		a.legal_status
+		AS "legalStatus",
+		a.legal_result AS "legalResult",
+		a.register AS
+		"register",
+		a.registration_time AS "registrationTime",
+		a.description AS
+		"description",
+		a.collector_name AS "collectorName"
+	</sql>
+
+	<sql id="debtCollectionLegalJoins">
+	</sql>
+
+	<select id="get" resultType="DebtCollectionLegal">
+		SELECT
+		<include refid="debtCollectionLegalColumns" />
+		FROM pl_debt_collection_legal a
+		<include refid="debtCollectionLegalJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getDataCountByContractNo" resultType="int">
+		SELECT
+		ifnull(count(a.id),0)
+		FROM
+		pl_debt_collection_legal a
+		WHERE a.debt_id
+		=
+		#{debtId}
+	</select>
+
+	<select id="findList" resultType="DebtCollectionLegal">
+		SELECT
+		<include refid="debtCollectionLegalColumns" />
+		FROM pl_debt_collection_legal a
+		<include refid="debtCollectionLegalJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_debt_collection_legal a
+		<include refid="debtCollectionLegalJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollectionLegal">
+		SELECT
+		<include refid="debtCollectionLegalColumns" />
+		FROM pl_debt_collection_legal a
+		<include refid="debtCollectionLegalJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_debt_collection_legal(
+		id,
+		debt_id,
+		contract_no,
+		collection_date,
+		collector,
+		legal_type,
+		legal_org,
+		legal_status,
+		legal_result,
+		register,
+		registration_time,
+		description,
+		collector_name
+		)
+		VALUES (
+		#{id},
+		#{debtId},
+		#{contractNo},
+		#{collectionDate},
+		#{collector},
+		#{legalType},
+		#{legalOrg},
+		#{legalStatus},
+		#{legalResult},
+		#{register},
+		#{registrationTime},
+		#{description},
+		#{collectorName}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_debt_collection_legal SET
+		contract_no =
+		#{contractNo},
+		collection_date = #{collectionDate},
+		collector =
+		#{collector},
+		legal_type = #{legalType},
+		legal_org = #{legalOrg},
+		legal_status = #{legalStatus},
+		legal_result = #{legalResult},
+		description = #{description},
+		collector_name = #{collectorName}
+		WHERE id
+		= #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_debt_collection_legal
+		WHERE id = #{id}
+	</update>
+
+</mapper>

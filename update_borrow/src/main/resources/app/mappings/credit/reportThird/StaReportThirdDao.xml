@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.reportThird.dao.StaReportThirdDao">
+
+	<select id="findListThird" resultType="StaReportThird">
+		SELECT
+		a.REVIEWED_BOOK AS "reviewedBook",
+		a.REVIEWED_TARGET AS "reviewedTarget",
+		a.REVIEWED_TOOL AS "reviewedTool",
+		a.DATA_REQUIED AS "dataRequied",
+		a.BAN_RULE AS "banRule",
+		a.REPLACE_MEANS AS "replaceMeans",
+		ifnull(b.bookCount,0) as "bookCount"
+		FROM
+		cre_reviewed_rule a
+		LEFT JOIN(
+		SELECT
+		c.BOOK_id as "BOOK_id",
+		COUNT(DISTINCT c.APPLY_NO) as 'bookCount'
+		FROM
+		cre_reviewed_result c
+		INNER JOIN cre_reviewed_rule d ON c.BOOK_id = d.ID
+		WHERE
+		c.reviewed_result = '0'
+		and d.REVIEWED_SHEET = #{reviewedSheet}
+		<if test="range != null and range != ''">
+			AND d.RANGE = #{range}
+		</if>
+		<if test="range == ''">
+			AND d.RANGE is null
+		</if>
+		GROUP BY
+		c.BOOK_id
+		) b ON a.ID = b.BOOK_id
+		WHERE
+		a.REVIEWED_SHEET = #{reviewedSheet}
+		<if test="range != null and range != ''">
+			AND a.RANGE = #{range}
+		</if>
+		<if test="range == ''">
+			AND a.RANGE is null
+		</if>
+	</select>
+
+</mapper>

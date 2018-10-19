@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditCust.CreditCustLoanDao">
+    
+	<sql id="creditCustLoanColumns">
+		a.id AS "id",
+		a.credit_cust_id AS "creditCust.id",
+		a.bank_name AS "bankName",
+		a.loan_kind AS "loanKind",
+		a.loan_status AS "loanStatus",
+		a.loan_date AS "loanDate",
+		a.expire_date AS "expireDate",
+		a.guarantee_type AS "guaranteeType",
+		a.loan_amount AS "loanAmount",
+		a.balance_amount AS "balanceAmount",
+		a.overdue_amount AS "overdueAmount",
+		a.month_expire_amount AS "monthExpireAmount",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.LOAN_NATURE as "loanNature",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditCustLoanJoins">
+		INNER JOIN cre_credit_cust b ON a.CREDIT_CUST_ID = b.ID
+	</sql>
+    
+	<select id="get" resultType="CreditCustLoan">
+		SELECT 
+			<include refid="creditCustLoanColumns"/>
+		FROM cre_credit_cust_loan a
+		<include refid="creditCustLoanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditCustLoan">
+		SELECT 
+			<include refid="creditCustLoanColumns"/>
+		FROM cre_credit_cust_loan a
+		<include refid="creditCustLoanJoins"/>
+		<where>
+			a.del_flag = '0' and a.credit_cust_id = #{creditCust.id}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_cust_loan a
+		<include refid="creditCustLoanJoins"/>
+		<where>
+			a.del_flag = '0' and a.credit_cust_id = #{creditCust.id}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditCustLoan">
+		SELECT 
+			<include refid="creditCustLoanColumns"/>
+		FROM cre_credit_cust_loan a
+		<include refid="creditCustLoanJoins"/>
+		<where>
+			a.del_flag = '0' and a.credit_cust_id = #{creditCust.id}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_cust_loan(
+			id,
+			credit_cust_id,
+			bank_name,
+			loan_kind,
+			loan_status,
+			loan_date,
+			expire_date,
+			guarantee_type,
+			loan_amount,
+			balance_amount,
+			overdue_amount,
+			month_expire_amount,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			LOAN_NATURE
+		) VALUES (
+			#{id},
+			#{creditCust.id},
+			#{bankName},
+			#{loanKind},
+			#{loanStatus},
+			#{loanDate},
+			#{expireDate},
+			#{guaranteeType},
+			#{loanAmount},
+			#{balanceAmount},
+			#{overdueAmount},
+			#{monthExpireAmount},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{loanNature}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_cust_loan SET 	
+			credit_cust_id = #{creditCustId},
+			bank_name = #{bankName},
+			loan_kind = #{loanKind},
+			LOAN_NATURE = #{loanNature},
+			loan_status = #{loanStatus},
+			loan_date = #{loanDate},
+			expire_date = #{expireDate},
+			guarantee_type = #{guaranteeType},
+			loan_amount = #{loanAmount},
+			balance_amount = #{balanceAmount},
+			overdue_amount = #{overdueAmount},
+			month_expire_amount = #{monthExpireAmount},
+			del_flag = #{delFlag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_credit_cust_loan SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="banchDelete">
+		UPDATE cre_credit_cust_loan a SET a.DEL_FLAG='1'
+		WHERE id IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		#{idList}
+		</foreach>
+	</update>
+	
+	<select id="getSumElements" resultType="Map">
+		SELECT SUM(a.BALANCE_AMOUNT) AS sumBalanceAmount,
+			SUM(a.LOAN_AMOUNT) AS sumLoanAmount,
+			SUM(a.OVERDUE_AMOUNT) AS sumOverdueAmount
+		FROM cre_credit_cust_loan a
+		WHERE a.CREDIT_CUST_ID = #{creditCustId} and a.del_flag = '0'
+	</select>
+	
+</mapper>

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.collateralDisposal.dao.CollateralDisposalDao">
+
+	<sql id="collateralDisposalColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.disposal_status AS "disposalStatus",
+		a.proc_ins_id AS "procInsId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="collateralDisposalJoins">
+	</sql>
+
+	<select id="get" resultType="CollateralDisposal">
+		SELECT
+		<include refid="collateralDisposalColumns" />
+		FROM pl_collateral_disposal a
+		<include refid="collateralDisposalJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findOrgUserList" resultType="java.util.Map">
+		select
+		csu.login_name as "loginName"
+		, csu.name as "name"
+		, csu.id as "id"
+		,cso1.name as "companyName"
+		from sys_ally sa
+		INNER JOIN sys_user_ally sua on sa.id = sua.allyid
+		INNER JOIN sys_user csu on sua.userid = csu.ID
+		INNER JOIN
+		sys_office cso1 on csu.company_id = cso1.id
+		WHERE sa.id = #{allyId}
+		and csu.login_flag = '1' and csu.del_flag = '0'
+		and csu.company_id = #{companyId}
+	</select>
+
+	<select id="findContractNoAndOverdueDataByProcInsId" resultType="TaskTempEntity">
+		SELECT
+		c.CUST_NAME AS "custName",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		a.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		cci.CONT_PROVINCE as "contProvince",
+		cci.CONT_CITY as
+		"contCity",
+		cci.CONT_DISTINCT as "contDistinct",
+		cci.CONT_DETAILS as "contDetails",
+		r.MOBILE_NUM AS "mobileNum"
+		FROM
+		pl_collateral_disposal a
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c ON c.CONTRACT_NO = a.CONTRACT_NO
+		INNER
+		JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON a.CONTRACT_NO = s.CONTRACT_NO
+		AND a.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON
+		p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_cust_info cci on c.CUST_ID = cci.ID
+		<where>
+			a.PROC_INS_ID = #{procInsId}
+		</where>
+	</select>
+
+	<select id="findOverDueList" resultType="java.util.Map">
+		select 
+		c.contract_no as "contractNo",
+		asos.period_num as "periodNum",
+		art.ID_ as "taskId",
+		pcd.PROC_INS_ID as "procInsId"
+		from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status asos on c.CONTRACT_NO = asos.CONTRACT_NO
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status asrps on asrps.CONTRACT_NO = asos.CONTRACT_NO and asos.PERIOD_NUM = asrps.PERIOD_NUM
+		LEFT JOIN pl_collateral_disposal
+		pcd on asos.CONTRACT_NO = pcd.CONTRACT_NO and asos.PERIOD_NUM = pcd.PERIOD_NUM
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.act_ru_task art on pcd.PROC_INS_ID = art.PROC_INST_ID_
+		where asos.OVERDUE_DAYS >=#{overdueDays}
+		and
+		<if test="flag == 'none'">
+			pcd.ID is NULL
+		</if>
+		<if test="flag == 'dqrwxfToDo'">
+			(pcd.ID is not NULL and art.TASK_DEF_KEY_ = 'utask_dqrwxf')
+		</if>
+		<if test="flag == 'qyrwczToDo'">
+			(pcd.ID is not NULL and art.TASK_DEF_KEY_ ='utask_qyrwcz')
+		</if>
+		<if test="flag == 'dqrwczToDo'">
+			(pcd.ID is not NULL and art.TASK_DEF_KEY_ = 'utask_dqrwcz')
+		</if>
+		and asrps.REPAY_PERIOD_STATUS = '0300'
+		and (c.APPLY_NO in (select apply_no from pl_mortgage_car_info cmci)
+		or c.APPLY_NO in (select apply_no from pl_mortgage_house_info cmhi)
+		or c.APPLY_NO in (select apply_no from pl_mortgage_other_info cmoi)) ORDER BY c.CONTRACT_NO
+	</select>
+
+	<select id="findList" resultType="TaskTempEntity">
+		SELECT
+		c.CUST_NAME AS "custName",
+		r.apply_no AS "applyNo",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		s.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		c.ORG_LEVEL2 AS
+		"orgLevel2.id",
+		c.ORG_LEVEL3 AS "orgLevel3.id",
+		c.ORG_LEVEL4 AS "orgLevel4.id",
+		o2. NAME AS "orgLevel2.name",
+		o3. NAME AS "orgLevel3.name",
+		o4. NAME AS "orgLevel4.name",
+		r.MOBILE_NUM AS "mobileNum",
+		r.REGISTER_NAME AS "registerName"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON c.CONTRACT_NO = s.CONTRACT_NO
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON
+		ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		LEFT JOIN pl_collateral_disposal aaa ON c.CONTRACT_NO = aaa.CONTRACT_NO
+		AND aaa.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN sys_office o2 ON o2.id = c.ORG_LEVEL2
+		INNER JOIN sys_office o3 ON o3.id = c.ORG_LEVEL3
+		INNER
+		JOIN sys_office o4 ON o4.id = c.ORG_LEVEL4
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		<where>
+			<![CDATA[s.OVERDUE_DAYS >= 30]]>
+			and (c.APPLY_NO in (select apply_no from pl_mortgage_car_info cmci)
+			or c.APPLY_NO in (select apply_no from pl_mortgage_house_info cmhi)
+			or c.APPLY_NO in (select apply_no from pl_mortgage_other_info cmoi))
+			AND aaa.id IS NULL
+			and ps.REPAY_PERIOD_STATUS = '0300'
+			<if test="custName != null and custName != ''">
+				AND c.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like concat('%',#{contractNo},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findToDoneList" resultType="TaskTempEntity">
+		SELECT
+		c.CUST_NAME AS "custName",
+		r.apply_no AS "applyNo",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		s.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		c.ORG_LEVEL2 AS
+		"orgLevel2.id",
+		c.ORG_LEVEL3 AS "orgLevel3.id",
+		c.ORG_LEVEL4 AS "orgLevel4.id",
+		o2.name AS "orgLevel2.name",
+		o3.name AS "orgLevel3.name",
+		o4.name AS "orgLevel4.name",
+		r.MOBILE_NUM as "mobileNum",
+		aht.ASSIGNEE_ as "oprateId",
+		r.REGISTER_NAME AS "registerName"
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON c.CONTRACT_NO = s.CONTRACT_NO
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON
+		ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN pl_collateral_disposal aaa on c.CONTRACT_NO = aaa.CONTRACT_NO AND aaa.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 ON
+		o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 ON o3.id = c.ORG_LEVEL3
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 ON o4.id = c.ORG_LEVEL4
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		inner join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.act_hi_taskinst aht on aaa.PROC_INS_ID = aht.PROC_INST_ID_
+		and
+		aht.TASK_DEF_KEY_ = 'utask_dqrwxf'
+		<where>
+			<![CDATA[s.OVERDUE_DAYS >= 30]]>
+			and aaa.id is not null
+			and aaa.create_by = #{createById}
+			<if test="custName != null and custName != ''">
+				AND c.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like concat('%',#{contractNo},'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_collateral_disposal a
+		<include refid="collateralDisposalJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CollateralDisposal">
+		SELECT
+		<include refid="collateralDisposalColumns" />
+		FROM pl_collateral_disposal a
+		<include refid="collateralDisposalJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_collateral_disposal(
+		id,
+		contract_no,
+		period_num,
+		disposal_status,
+		proc_ins_id,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		del_flag
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{periodNum},
+		#{disposalStatus},
+		#{procInsId},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_collateral_disposal SET
+		contract_no = #{contractNo},
+		period_num = #{periodNum},
+		disposal_status = #{disposalStatus},
+		proc_ins_id = #{procInsId},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE pl_collateral_disposal SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateDisposalStatusByContractNoAndPeriodNum">
+		UPDATE pl_collateral_disposal SET
+		disposal_status = #{disposalStatus}
+		WHERE contract_no = #{contractNo} and period_num = #{periodNum}
+	</update>
+
+</mapper>

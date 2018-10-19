@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.stockOperateDetail.dao.StockOperateDetailDao">
+    
+	<sql id="stockOperateDetailColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.grade AS "grade",
+		a.operate AS "operate",
+		a.receiver AS "receiver",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="stockOperateDetailJoins">
+	</sql>
+    
+	<select id="get" resultType="StockOperateDetail">
+		SELECT 
+			<include refid="stockOperateDetailColumns"/>
+		FROM cre_stock_operate_detail a
+		<include refid="stockOperateDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="StockOperateDetail">
+		SELECT 
+			<include refid="stockOperateDetailColumns"/>
+		FROM cre_stock_operate_detail a
+		<include refid="stockOperateDetailJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_operate_detail a
+		<include refid="stockOperateDetailJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="StockOperateDetail">
+		SELECT 
+			<include refid="stockOperateDetailColumns"/>
+		FROM cre_stock_operate_detail a
+		<include refid="stockOperateDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_operate_detail(
+			id,
+			apply_no,
+			grade,
+			operate,
+			receiver,
+			create_by,
+			create_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{grade},
+			#{operate},
+			#{receiver},
+			#{createBy.id},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_operate_detail SET 	
+			apply_no = #{applyNo},
+			grade = #{grade},
+			operate = #{operate},
+			receiver = #{receiver}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_stock_operate_detail
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

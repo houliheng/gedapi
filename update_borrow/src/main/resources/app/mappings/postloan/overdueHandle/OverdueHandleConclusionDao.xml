@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.overdueHandle.dao.OverdueHandleConclusionDao">
+    
+	<sql id="overdueHandleConclusionColumns">
+		a.id AS "id",
+		a.task_def_key AS "taskDefKey",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.conclusion_desc AS "conclusionDesc",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="overdueHandleConclusionJoins">
+	</sql>
+    
+	<select id="get" resultType="OverdueHandleConclusion">
+		SELECT 
+			<include refid="overdueHandleConclusionColumns"/>
+		FROM pl_overdue_handle_conclusion a
+		<include refid="overdueHandleConclusionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OverdueHandleConclusion">
+		SELECT 
+			<include refid="overdueHandleConclusionColumns"/>
+		FROM pl_overdue_handle_conclusion a
+		<include refid="overdueHandleConclusionJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND a.period_num = #{periodNum}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_overdue_handle_conclusion a
+		<include refid="overdueHandleConclusionJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND a.period_num = #{periodNum}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="OverdueHandleConclusion">
+		SELECT 
+			<include refid="overdueHandleConclusionColumns"/>
+		FROM pl_overdue_handle_conclusion a
+		<include refid="overdueHandleConclusionJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_overdue_handle_conclusion(
+			id,
+			task_def_key,
+			contract_no,
+			period_num,
+			conclusion_desc,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{taskDefKey},
+			#{contractNo},
+			#{periodNum},
+			#{conclusionDesc},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_overdue_handle_conclusion SET 	
+			task_def_key = #{taskDefKey},
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			conclusion_desc = #{conclusionDesc},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_overdue_handle_conclusion
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findConclusionByParams" resultType="OverdueHandleConclusion">
+		SELECT 
+			<include refid="overdueHandleConclusionColumns"/>
+		FROM pl_overdue_handle_conclusion a
+		WHERE a.contract_no = #{contractNo}
+		AND a.period_num = #{periodNum}
+		AND a.task_def_key = #{taskDefKey}
+		limit 1
+	</select>
+</mapper>

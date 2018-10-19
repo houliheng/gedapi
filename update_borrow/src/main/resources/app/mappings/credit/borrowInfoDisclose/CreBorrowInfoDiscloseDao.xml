@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.borrowInfoDisclose.dao.CreBorrowInfoDiscloseDao">
+    
+	<sql id="creBorrowInfoDiscloseColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.cust_name AS "custName",
+		a.loan_date AS "loanDate",
+		a.contract_amount AS "contractAmount",
+		a.period_value AS "periodValue",
+		a.org_level2 AS "orgLevel2",
+		a.org_level3 AS "orgLevel3",
+		a.org_level4 AS "orgLevel4",
+		a.first_disclo_date AS "firstDiscloDate",
+		a.disclo_frequency AS "discloFrequency",
+		a.push AS "push",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="creBorrowInfoDiscloseJoins">
+	</sql>
+    
+	<select id="get" resultType="CreBorrowInfoDisclose">
+		SELECT 
+			<include refid="creBorrowInfoDiscloseColumns"/>
+		FROM cre_borrow_info_disclose a
+		<include refid="creBorrowInfoDiscloseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreBorrowInfoDisclose">
+		SELECT 
+			<include refid="creBorrowInfoDiscloseColumns"/>
+		FROM cre_borrow_info_disclose a
+		<include refid="creBorrowInfoDiscloseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{contractNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{custName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="beginLoanDate != null and endLoanDate != null and beginLoanDate != '' and endLoanDate != ''">
+				AND a.loan_date BETWEEN #{beginLoanDate} AND #{endLoanDate}
+			</if>
+			<if test="beginFirstDiscloDate != null and endFirstDiscloDate != null and beginFirstDiscloDate != '' and endFirstDiscloDate != ''">
+				AND a.first_disclo_date BETWEEN #{beginFirstDiscloDate} AND #{endFirstDiscloDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_borrow_info_disclose a
+		<include refid="creBorrowInfoDiscloseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{contractNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{custName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="beginLoanDate != null and endLoanDate != null and beginLoanDate != '' and endLoanDate != ''">
+				AND a.loan_date BETWEEN #{beginLoanDate} AND #{endLoanDate}
+			</if>
+			<if test="beginFirstDiscloDate != null and endFirstDiscloDate != null and beginFirstDiscloDate != '' and endFirstDiscloDate != ''">
+				AND a.first_disclo_date BETWEEN #{beginFirstDiscloDate} AND #{endFirstDiscloDate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreBorrowInfoDisclose">
+		SELECT 
+			<include refid="creBorrowInfoDiscloseColumns"/>
+		FROM cre_borrow_info_disclose a
+		<include refid="creBorrowInfoDiscloseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_borrow_info_disclose(
+			id,
+			contract_no,
+			cust_name,
+			loan_date,
+			contract_amount,
+			period_value,
+			org_level2,
+			org_level3,
+			org_level4,
+			first_disclo_date,
+			disclo_frequency,
+			push,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{custName},
+			#{loanDate},
+			#{contractAmount},
+			#{periodValue},
+			#{orgLevel2},
+			#{orgLevel3},
+			#{orgLevel4},
+			#{firstDiscloDate},
+			#{discloFrequency},
+			#{push},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_borrow_info_disclose SET 	
+			contract_no = #{contractNo},
+			cust_name = #{custName},
+			loan_date = #{loanDate},
+			contract_amount = #{contractAmount},
+			period_value = #{periodValue},
+			org_level2 = #{orgLevel2},
+			org_level3 = #{orgLevel3},
+			org_level4 = #{orgLevel4},
+			first_disclo_date = #{firstDiscloDate},
+			disclo_frequency = #{discloFrequency},
+			push = #{push},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_borrow_info_disclose SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

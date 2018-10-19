@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.applyPenaltyFineExempt.dao.ApplyPenaltyFineExemptVODao">
+
+	<sql id="applyPenaltyFineExemptVOColumns">
+		A.PERIOD_NUM as "periodNum"
+		,B.CUST_NAME as "custName"
+		,A.CONTRACT_NO as "contractNo"
+		,B.ORG_LEVEL4 as "orgLevel4.id"
+		,x.name
+		as "orgLevel4.name"
+		,y.id as "orgLevel3.id"
+		,y.name as
+		"orgLevel3.name"
+		,z.id as "orgLevel2.id"
+		,z.name as
+		"orgLevel2.name"
+		,B.PERIOD_VALUE as "approPeriodValue"
+		,D.REPAY_PERIOD_STATUS as "repayPeriodStatus"
+		,B.DEDUCT_DATE as
+		"deductDate"
+		,B.REPAY_AMOUNT as "repayAmount"
+		,C.OVERDUE_DAYS as
+		"overdueDays"
+		,B.OVERDUE_PENALTY as "penaltyAmount"
+		,C.FINE_AMOUNT as
+		"fineAmount"
+		,D.FACT_PENALTY_AMOUNT as
+		"factPenaltyAmount"
+		,D.FACT_FINE_AMOUNT as "factFineAmount"
+		,A.PENALTY_EXEMPT_AMOUNT as
+		"penaltyExemptAmount"
+		,A.FINE_EXEMPT_AMOUNT as "fineExemptAmount"
+		,cc.CONTRACT_AMOUNT as "contractAmount"
+	</sql>
+
+	<sql id="applyPenaltyFineExemptVOJoins">
+		inner join acc_contract cc on cc.contract_no = a.contract_no
+		inner JOIN
+		acc_repay_plan B
+		ON A.CONTRACT_NO = B.CONTRACT_NO
+		AND
+		A.PERIOD_NUM =
+		B.PERIOD_NUM
+		inner JOIN acc_sta_overdue_status C
+		ON
+		A.CONTRACT_NO =
+		C.CONTRACT_NO
+		AND A.PERIOD_NUM = C.PERIOD_NUM
+		inner JOIN
+		acc_sta_repay_plan_status D
+		ON A.CONTRACT_NO = D.CONTRACT_NO
+		AND
+		A.PERIOD_NUM = D.PERIOD_NUM
+		left join sys_office x on b.ORG_LEVEL4 = x.id
+		left join sys_office y on x.parent_id = y.id
+		left join sys_office z on y.parent_id = z.id
+	</sql>
+
+	<select id="get" resultType="ApplyPenaltyFineExemptVO">
+		SELECT
+		<include refid="applyPenaltyFineExemptVOColumns" />
+		FROM acc_sta_penalty_fine_exempt A
+		<include refid="applyPenaltyFineExemptVOJoins" />
+		where a.contract_no =#{contractNo}
+	</select>
+
+	<select id="findList" resultType="ApplyPenaltyFineExemptVO">
+		SELECT
+		<include refid="applyPenaltyFineExemptVOColumns" />
+		FROM acc_sta_penalty_fine_exempt A
+		<include refid="applyPenaltyFineExemptVOJoins" />
+		inner join
+		sys_office o on cc.OPERATE_ORG_ID = o.id
+		inner join acc_apply_penalty_fine_exempt aa on a.contract_no = aa.contract_no and a.PERIOD_NUM = aa.PERIOD_NUM
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids
+			LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="custName != null and custName != ''">
+				and B.CUST_NAME like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and A.CONTRACT_NO like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="repayPeriodStatus != null and repayPeriodStatus != ''">
+				and D.REPAY_PERIOD_STATUS = #{repayPeriodStatus}
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+				and B.DEDUCT_DATE between #{startTime} and #{endTime}
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[B.DEDUCT_DATE >= #{startTime}]]> 
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[B.DEDUCT_DATE <= #{endTime}]]> 
+			</if>
+			<if test="penaltyStartTime != null and penaltyStartTime != '' and penaltyEndTime != null and penaltyEndTime != '' ">
+				and aa.through_time2 between #{penaltyStartTime} and #{penaltyEndTime}
+			</if>
+			<if test="penaltyStartTime !=null and penaltyStartTime != '' ">
+				and  <![CDATA[aa.through_time2 >= #{penaltyStartTime}]]> 
+			</if>
+			<if test="penaltyEndTime !=null and penaltyEndTime != '' ">
+				and  <![CDATA[aa.through_time2 <= #{penaltyEndTime}]]> 
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_sta_penalty_fine_exempt A
+		<include refid="applyPenaltyFineExemptVOJoins" />
+		<where>
+			<if test="custName != null and custName != ''">
+				and B.CUST_NAME like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and A.CONTRACT_NO like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="repayPeriodStatus != null and repayPeriodStatus != ''">
+				and D.REPAY_PERIOD_STATUS = #{repayPeriodStatus}
+			</if>
+			<if test="startTime != null and startTime != '' and endTime != null and endTime != '' ">
+				and B.DEDUCT_DATE between #{startTime} and #{endTime}
+			</if>
+			<if test="penaltyStartTime != null and penaltyStartTime != '' and penaltyEndTime != null and penaltyEndTime != '' ">
+				and a.through_time2 between #{penaltyStartTime} and #{penaltyEndTime}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyPenaltyFineExemptVO">
+		SELECT
+		<include refid="applyPenaltyFineExemptVOColumns" />
+		FROM acc_sta_penalty_fine_exempt A
+		<include refid="applyPenaltyFineExemptVOJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

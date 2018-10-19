@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.stockTaskReceive.dao.StockTaskReceiveDao">
+    
+	<sql id="stockTaskReceiveColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.stockinfo_id AS "stockInfoId",
+		a.code AS "code",
+		a.receiver AS "receiver",
+		a.status AS "status",
+		a.end_time AS "endTime",
+		a.grade AS "grade",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.IS_STOCK_POST AS "isStockPost",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="stockTaskReceiveJoins">
+		<if test="applyNo != null and applyNo != '' ">
+			 and a.apply_no LIKE CONCAT('%',#{applyNo},'%' )
+		</if>
+		<if test="receiver != null and receiver != '' ">
+			 and a.receiver = #{receiver}
+		</if>
+		<if test="status != null and status != '' ">
+			 and a.status = #{status}
+		</if>
+		<!-- 判断是待办列表还是已办列表 -->
+		<if test="isDone != null and isDone != '' and isDone==0">
+			and (a.status != '1' OR a.status IS NULL)
+		</if>
+		<if test="isDone != null and isDone != '' and isDone==1">
+			and a.status = '1'
+		</if>
+	</sql>
+    
+	<select id="get" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/>
+		FROM cre_stock_task_receive a
+		<include refid="stockTaskReceiveJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getReceiveByApplyNoAndGrade" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/>
+		FROM cre_stock_task_receive a
+		WHERE a.apply_No = #{applyNo}
+			and a.grade=#{grade}
+			and  a.del_flag='0'
+	</select>
+	
+		<select id="findList" resultType="StockTaskReceive">
+		SELECT DISTINCT
+			b.PROC_INS_ID as procInsId,
+			
+			q2.PROC_DEF_ID_ AS procDefId,
+ 			q2.EXECUTION_ID_ AS executionId,
+			CASE WHEN a.GRADE = '1'
+			    THEN "utask_zgsfksh"
+			    WHEN a.GRADE = '2'
+			    THEN "utask_dqfkzysh"
+			    WHEN a.GRADE = '3'
+			    THEN "utask_qyfksh"
+			    WHEN a.GRADE = '4'
+			    THEN "utask_fgsfksh"
+			 END AS taskDefKey,  
+			c.ID_ as ruId,
+			b.ID_TYPE as idType,
+			b.ID_NUM as idNum,
+			b.CUST_NAME as custName,
+			t2.APPLY_AMOUNT as applyAmount,
+			t3.name as orgName,
+			CASE WHEN a.GRADE='1'
+				then "总部"
+			WHEN a.GRADE='2'
+				then "大区"
+			WHEN a.GRADE='3'
+				then "区域"
+			WHEN a.GRADE='4'
+				then "分公司"
+			END as gradeDesc,
+			b.CUST_NAME AS custName,
+ 			CASE WHEN q.`END_TIME_` IS NULL THEN '流程进行中'
+			ELSE  '流程结束' END AS processStatus,
+			<include refid="stockTaskReceiveColumns"/>
+		FROM cre_stock_task_receive a 
+			LEFT JOIN cre_apply_register b
+				ON a.`APPLY_NO`=b.`APPLY_NO`
+			LEFT JOIN cre_apply_info t2
+				ON a.`APPLY_NO`=t2.`APPLY_NO`
+			LEFT JOIN sys_office t3
+				 ON b.ORG_ID = t3.id
+			LEFT JOIN act_ru_task c
+				ON c.`PROC_INST_ID_`=b.`PROC_INS_ID`
+			LEFT JOIN act_hi_procinst q
+				ON q.`PROC_INST_ID_`=b.`PROC_INS_ID`
+			LEFT JOIN act_hi_taskinst q2  
+				ON b.PROC_INS_ID = q2.PROC_INST_ID_ 
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.apply_no = b.apply_no
+			<include refid="stockTaskReceiveJoins"/>
+		</where>
+		GROUP BY q2.PROC_INST_ID_ ,a.stockinfo_id 
+		ORDER BY a.create_date desc
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			COUNT(*)
+		FROM cre_stock_task_receive a 
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<include refid="stockTaskReceiveJoins"/>
+		</where>
+	</select>
+	
+	<select id="selectActRuTasKCountByInstId" resultType="int" parameterType="java.util.Map">
+		SELECT
+			count(1)
+		FROM
+			act_hi_taskinst t1
+		WHERE t1.PROC_INST_ID_ = #{procInstId}
+		AND t1.task_def_key_ = #{taskDefKey}
+	</select>
+	
+	<select id="getById" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/> 
+		FROM cre_stock_task_receive a
+		where a.id = #{id}
+	</select>
+	
+		<!-- 根据股权信息表主键查询接收表数据 -->
+	<select id="selectByStockInfoId" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/> 
+		FROM cre_stock_task_receive a
+		where a.STOCKINFO_ID = #{stockInfoId}
+	</select>
+	
+	<select id="selectActRuTask" resultType="java.util.Map">
+		select 
+			PROC_DEF_ID_ as procDefId,
+			EXECUTION_ID_ as executionId,
+			TASK_DEF_KEY_ as taskDefKey
+		from act_ru_task where PROC_INST_ID_ = #{procInsId}
+		limit 0,1
+	</select>
+		<!-- 查询当前估值岗或估值中心的估值信息 -->
+	<select id="selectStockInfoIdByApplyNoAndType" resultType="java.lang.String">
+		select a.id from cre_stock_info a  
+			where a.APPLY_NO = #{applyNo} and a.DEL_FLAG = 0
+			order by a.CREATE_DATE  desc limit 0,1
+	</select>
+	<select id="selectActRuTasKDefKeyByInstId" resultType="java.lang.String">
+		SELECT
+			task_def_key_
+		FROM
+			act_hi_taskinst t1 where t1.PROC_INST_ID_ = #{procInstId}
+			order by START_TIME_ desc LIMIT 0,1
+	</select>
+	
+	<select id="selectProcInstIdByApplyNo" resultType="java.lang.String">
+		SELECT
+			PROC_INS_ID
+		FROM
+			cre_apply_register t1 where APPLY_NO = #{applyNo} LIMIT 0,1
+	</select>
+	
+	<select id="findAllList" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/>
+		FROM cre_stock_task_receive a
+		<include refid="stockTaskReceiveJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_task_receive(
+			id,
+			apply_no,
+			stockinfo_id,
+			code,
+			receiver,
+			status,
+			end_time,
+			grade,
+			create_by,
+			create_date,
+			del_flag,
+			is_stock_post
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{stockInfoId},
+			#{code},
+			#{receiver},
+			#{status},
+			#{endTime},
+			#{grade},
+			#{createBy.id},
+			#{createDate},
+			#{delFlag},
+			#{isStockPost}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_task_receive SET 	
+			apply_no = #{applyNo},
+			stockinfo_id = #{stockInfoId},
+			code = #{code},
+			receiver = #{receiver},
+			status = #{status},
+			end_time = #{endTime},
+			grade = #{grade}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_stock_task_receive SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findStockTaskReciveByParam" resultType="StockTaskReceive">
+		SELECT 
+			<include refid="stockTaskReceiveColumns"/>
+		FROM cre_stock_task_receive a
+		WHERE a.apply_no = #{applyNo} and grade = #{grade} and del_flag = '0'
+	</select>
+	
+	<update id="updateStockTaskReciveState">
+		UPDATE cre_stock_task_receive SET 	
+			status = #{status}
+		WHERE apply_no = #{applyNo} and grade in (${grade}) and del_flag = '0' 
+		<if test="status!= null and status != '' and status == '0'.toString() ">  
+        	AND status = '1'  
+    	</if> 
+	</update>
+	
+	<delete id="deleteStockInfoByApplyGrade">
+	delete from cre_stock_task_receive
+	WHERE apply_no = #{applyNo}
+				and grade=#{grade}
+	</delete>
+</mapper>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+贷款申请信息SQLMapper  CRE_APPLY_INFO
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreApplyInfoDao">
+	<!-- 
+	 * @reqno:H1509130076
+	 * @date-designer:2015年10月12日-songmin
+	 * @date-author:2015年10月12日-songmin:根据用户申请ID获取用户贷款申请的产品信息
+	 * @db-z:CRE_APPLY_INFO:APPLY_PRODUCT_TYPE_CODE  申请产品类型编码
+	 * 						APPLY_PRODUCT_TYPE_NAME  申请产品类型名称
+	 * 						APPLY_ID  申请id
+	 * 2015年10月13日：该查询已废弃，以后不再使用，由下面findLoanInfoByApplyId替换
+	<select id="findLoadProductInfoByApplyId" resultType="CreApplyInfo">
+		select 
+			APPLY_PRODUCT_TYPE_CODE as applyProductTypeCode,
+			APPLY_PRODUCT_TYPE_NAME as applyProductTypeName
+		from CRE_APPLY_INFO 
+		where APPLY_ID=#{applyId}
+	</select>
+	 -->
+	<!-- 
+	 * @reqno:H1509130075
+	 * @date-designer:2015年10月13日-songmin
+	 * @date-author:2015年10月13日-songmin:CRE_信贷审批_贷款初审_结论信息_查询
+	 * 				根据申请ID，查询客户的贷款申请记录信息（备注：该查询和上面的查询由于在查询字段数量和关联关系的复杂度上都复杂得多，所以单独提出来写了一个查询，并没有将2个查询合并为一个查询）
+	 *				查询数据：申请人，证件类型，证件号，产品类型，产品名称，产口期限，产品年利率，申请额度，还款方式，借款用途，月还款；
+	 * @db-z:CRE_APPLY_INFO:APPLY_ID（申请ID）、APPLY_PRODUCT_TYPE_NAME（产品类型）、APPLY_PRODUCT_NAME（产品名称）、APPLY_PERIOD_ID（产口期限：f.PERIOD_TYPE、g.label）、APPLY_PERIOD_VALUE（产口期限值）、
+	 * 						APPLY_YEAR_RATE（产品年利率）、APPLY_AMOUNT（申请额度）、LOAN_REPAY_TYPE（还款方式：d.label）、LOAN_PURPOSE（借款用途：e.label）、ACCEPT_HIGHEST_AMOUNT（月还款）
+	 * @db-j:CRE_APPLY_REGISTER:CUST_NAME（申请人）、ID_TYPE（证件类型：c.label）、ID_NUM（证件号）
+	 * @db-j:CRE_PRODUCT_PERIOD:PERIOD_TYPE（产品期限类型）
+	 * @db-j:SYS_DICT:label(属性名)、value（属性值）
+	 -->
+	<!--
+	 * @reqno:H1510080091
+	 * @date-designer:2015年10月15日-songmin
+	 * @date-author:2015年10月15日-songmin:CRE_信贷审批_申请录入_贷款申请信息_贷款申请信息默认数据项展现
+	 * 		查询结果封装从以前共用字段的方式切换为单独字段进行存放，示例idType-idTypeLabel
+	-->
+	 <!-- 
+	 * @reqno:H1511130067
+	 * @date-designer:20151116-chenshaojia
+	 * @date-author:20151116-chenshaojia:CRE_系统管理_产品管理_从业务使用方便考虑，需把【产品管理】功能，从账务系统移动到信贷审批系统，需求不做变动
+	 * @db-z: CRE_PRODUCT_PERIOD
+	 * 从jee_acc合并代码至jee_cre 将表名 由ACC_PRODUCT_PERIOD 改为 CRE_PRODUCT_PERIOD
+	 -->
+	<select id="findLoanInfoByApplyId"  resultType="CreApplyInfo">
+		SELECT 
+			b.APPLY_ID as applyId,
+			b.APPLY_PRODUCT_ID as applyProductId,
+			a.CUST_NAME custName,
+			a.ID_TYPE idType,
+			c.label as idTypeLabel,
+			a.ID_NUM as idNum,
+			b.APPLY_PRODUCT_TYPE_CODE as applyProductTypeCode,
+			b.APPLY_PRODUCT_TYPE_NAME applyProductTypeName,
+			b.APPLY_PRODUCT_NAME applyProductName,
+			b.APPLY_PERIOD_ID,
+			f.PERIOD_TYPE applyPeriodType,
+			g.label as applyPeriodTypeLabel,
+			b.APPLY_PERIOD_VALUE applyPeriodValue,
+			b.APPLY_YEAR_RATE applyYearRate,
+			b.APPLY_AMOUNT applyAmount,
+			b.LOAN_REPAY_TYPE loanRepayType,
+			d.label as loanRepayTypeLabel,
+			b.LOAN_PURPOSE loanPurpose,
+			e.label as loanPurposeLabel,
+			b.ACCEPT_HIGHEST_AMOUNT as acceptHighestAmount,
+			b.MONTH_REPAY_AMOUNT as monthRepayAmount,
+			b.DESCRIPTION  description,
+			b.OTHER_LOAN_PURPOSE otherLoanPurpose
+		FROM CRE_APPLY_INFO b 
+		LEFT JOIN CRE_APPLY_REGISTER a on b.APPLY_ID = a.ID
+		LEFT JOIN SYS_DICT c on a.ID_TYPE=c.value and c.TYPE='CUSTOMER_P_ID_TYPE' 
+		LEFT JOIN SYS_DICT d on b.LOAN_REPAY_TYPE=d.value AND d.TYPE='LOAN_REPAY_TYPE' 
+		LEFT JOIN SYS_DICT e on b.LOAN_PURPOSE=e.value AND e.TYPE='LOAN_PURPOST'  
+		LEFT JOIN CRE_PRODUCT_PERIOD f on b.APPLY_PERIOD_ID=f.ID
+		LEFT JOIN SYS_DICT g on f.PERIOD_TYPE=g.value  AND g.TYPE='PRODUCT_PERIOD_TYPE' 
+		WHERE 
+			  b.APPLY_ID=#{applyId}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1509230044
+	 * @date-designer:2015年10月13日-songmin
+	 * @date-author:2015年10月13日-songmin:CRE_信贷审批_申请录入_产品类型选择_查询
+	 * 			判断是否登记过申请贷款的产品类型
+	 * @db-z:CRE_APPLY_INFO:APPLY_ID
+	 -->
+	<select id="checkExists" resultType="java.lang.Long">
+		select count(1) from CRE_APPLY_INFO where APPLY_ID=#{applyId}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1509230043
+	 * @date-designer:2015年10月14日-songmin
+	 * @date-author:2015年10月14日-songmin:CRE_信贷审批_申请录入_产品类型选择_查询
+	 * 			登记具体贷款信息之前先登记客户申请贷款产品类型信息
+	 * @db-z:CRE_APPLY_INFO:APPLY_ID
+	 -->
+	 <!-- 
+	 * @reqno:H1512160007
+	 * @date-designer:2015年12月24日-songmin
+	 * @date-author:2015年12月24日-songmin:修改id  savePreProduct-〉insert
+	 -->
+	<insert id="insert">
+		insert into CRE_APPLY_INFO(
+			ID,
+			APPLY_ID,
+			APPLY_PRODUCT_TYPE_CODE,
+			APPLY_PRODUCT_TYPE_NAME,
+			APPLY_PRODUCT_ID,
+			APPLY_PRODUCT_NAME,
+			APPLY_PERIOD_ID,
+			APPLY_PERIOD_VALUE,
+			APPLY_YEAR_RATE)
+		values(
+			#{id},
+			#{applyId},
+			#{applyProductTypeCode},
+			#{applyProductTypeName},
+			#{applyProductId},
+			#{applyProductName},
+			#{applyPeriodId},
+			#{applyPeriodValue},
+			#{applyYearRate}
+		)
+	</insert>
+	<!-- 
+	 * @reqno:H1512160007
+	 * @date-designer:2015年12月17日-songmin
+	 * @date-author:2015年12月17日-songmin:CRE_信贷审批_进件管理_企业客户登记_同步业务数据
+	 * 		修改客户贷款申请信息的产品类型和名称（产品期限未在业务逻辑中出现）
+	 *		该操作在企业客户登记页面执行，登记提交后将不会再次执行
+	 * @db-z:CRE_APPLY_INFO:APPLY_PRODUCT_TYPE_CODE、APPLY_PRODUCT_TYPE_NAME、APPLY_PRODUCT_ID、APPLY_PRODUCT_NAME、APPLY_ID
+	 -->
+	 <update id="update">
+		update CRE_APPLY_INFO 
+		set APPLY_PRODUCT_TYPE_CODE=#{applyProductTypeCode},
+			APPLY_PRODUCT_TYPE_NAME=#{applyProductTypeName},
+			APPLY_PRODUCT_ID=#{applyProductId},
+			APPLY_PRODUCT_NAME=#{applyProductName}
+		where 
+			APPLY_ID=#{applyId}
+	</update>
+	<!-- 
+	 * @reqno:H1510080095
+	 * @date-designer:2015年10月20日-songmin
+	 * @date-author:2015年10月20日-songmin:CRE_信贷审批_申请录入_贷款申请信息_更新、保存_贷款申请信息数据
+	 *		贷款申请信息录入（实际做修改操作，新增功能已在选择产品类型时录入），这里只录入固定属性的贷款申请信息，其他动态表单数据由动态表单功能完成
+	 * @db-z:cre_apply_info:APPLY_AMOUNT、APPLY_PRODUCT_ID、APPLY_PRODUCT_NAME、APPLY_PERIOD_ID、
+	 *						APPLY_PERIOD_VALUE、APPLY_YEAR_RATE、LOAN_REPAY_TYPE、LOAN_PURPOSE、
+	 *						OTHER_LOAN_PURPOSE、ACCEPT_HIGHEST_AMOUNT、DESCRIPTION、UPDATE_TIME、
+	 *						UPDATOR_ID、ID
+	 * 修改数据项：申请金额、申请产品ID、申请产品名称、申请期限ID、申请期限值、年利率、还款方式、借款用途、其他用途说明、可接受最高月还款额、补充说明、更新时间、更新人ID
+	 * 修改条件：ID
+	 -->
+	<update id="loanApplyRecord">
+		update cre_apply_info 
+		set APPLY_AMOUNT=#{applyAmount},
+			APPLY_PRODUCT_ID=#{applyProductId},
+			APPLY_PRODUCT_NAME=#{applyProductName},
+			APPLY_PERIOD_ID=#{applyPeriodId},
+			APPLY_PERIOD_VALUE=#{applyPeriodValue},
+			APPLY_YEAR_RATE=#{applyYearRate},
+			LOAN_REPAY_TYPE=#{loanRepayType},
+			/*MONTH_REPAY_AMOUNT=null,*/
+			LOAN_PURPOSE=#{loanPurpose},
+			OTHER_LOAN_PURPOSE=#{otherLoanPurpose},
+			ACCEPT_HIGHEST_AMOUNT=#{acceptHighestAmount},
+			/*KIND_LOAN=null,*/
+			DESCRIPTION=#{description},
+			UPDATE_TIME=#{updateTime},
+			UPDATOR_ID=#{updatorId},
+			OTHER_LOAN_PURPOSE=#{otherLoanPurpose},
+				<!-- 
+	 * @reqno: H1511120073
+	 * @date-designer:20151116-lirongchao
+	 * @db-z : CRE_PRODUCT_PERIOD :PERIOD_VALUE
+	 * @db-j : SYS_DICT :label
+	 * @date-author:20151116-lirongchao: 1.申请录入、录入复核_贷款申请信息中，当贷款申请信息栏目中的产品期限、还批贷额度、
+	 									款方式变动时，页面自动调用后台，计算出最新的月还款额度，反填到批复信息栏目中的“月还款”数据项中；
+	 									同时在提交时，把月还款保存到数据库中；
+										2.备注：计算方法在账务系统中实现，跨系统调用，接口参数：额度、产品期限、产品年利率、还款方式；
+										当前环节-保存时添加月还款字段
+	 -->
+			MONTH_REPAY_AMOUNT=#{monthRepayAmount}
+		where APPLY_ID=#{applyId}
+	</update>
+	
+	<!-- 
+
+	
+	 * @reqno: H1509140040
+	 * @date-designer:20151021-lirongchao
+	 * @db-j: cre_apply_info :APPLY_PRODUCT_TYPE_CODE
+	 * @date-author:20151021-lirongchao: 当用户在待办任务列表点击办理代办任务类型为“面签”的任务时，
+	 * 										在跳转到“面签”任务前，先判断本申请id,
+	 * 										在合同编号生成规则表是否存在相应记录，
+	 * 										如无，则进行合同编号生成
+	 * 									    生成合同编号的规则：
+	 * 										YYYYMMDD-00001-合同类型-当前用户所在区域编码；
+	 * 										其中“00001”为序号，每个公司每天从00001开始递增；
+	 
+
+	--> 
+	<!-- 
+	 * @reqno:H1512160007
+	 * @date-designer:2015年12月17日-songmin
+	 * @date-author:2015年12月17日-songmin:CRE_信贷审批_进件管理_企业客户登记_同步业务数据
+	 * 		根据申请ID，获取贷款申请信息中客户的贷款申请编号和产品ID记录
+	 *		原查询中增加产品ID查询字段
+	 * @db-z:cre_apply_info:APPLY_PRODUCT_ID
+	 -->
+	<!--
+	 * @reqno:H1601280119
+	 * @date-designer:2016年1月28日-lirongchao
+	 * @db-z:cre_apply_info:id,apply_id,ID_TYPE,ID_NUM,LIST_STATUS,cust_type,mobile
+	 * @date-author:2016年1月28日-lirongchao:CRE_信贷审批_进件管理_客户登记列表_个人客户登记_改造
+	 										因新表和旧表差异，所以需要修改表结构
+	-->	 	 
+	<select id="findList" resultType="CreApplyInfo">
+		SELECT 
+			APPLY_PRODUCT_TYPE_CODE,
+			APPLY_PRODUCT_ID,
+			APPLY_PRODUCT_NAME,
+			APPLY_PRODUCT_TYPE_NAME
+		FROM cre_apply_info a
+		<where>
+			1=1
+			<if test="applyId != null and applyId != ''">
+				AND a.apply_id = #{applyId}
+			</if>
+		</where>
+	</select>
+	<!-- 
+	
+	 * @reqno: H1510280019
+	 * @date-designer:20151105-lirongchao
+	 * @db-z :sys_user :login_name,name,id
+	 * @db-j :sys_office :name
+	 * @date-author:20151105-lirongchao: 1.申请录入页面：
+ 页面布局：上下布局，上面为工具栏（包括：影像上传、影像查阅、关闭）；下面为tab页签（包括：贷款申请信息、客户信息、录入结论）；
+2.本需求是在“影像查阅”后面添加：“转办” 按钮；
+3.点击“转办”按钮，弹出窗口，窗口名称“转办人员选择”；
+4.窗口页面内容：上下布局，分别为：
+  表头按钮：转办、关闭；
+  人员列表，数据项：单选框按钮、序号、登陆名、姓名、归属部门、归属机构；
+5.人员列表，加载与当前用户同一机构下的用户，供选择；列表要做成分布显示
+6.选择一个用户，点击“转办”按钮，进行转办，前台提示转办成功，关闭窗口，同时刷新待办任务列表；
+7.点击“关闭”按钮，关闭窗口；
+	 当前环节-获取相同机构下的人员，不包括自己
+	 -->	
+<!-- 	<select id="finduserList" resultType="User"> -->
+<!-- 		SELECT  -->
+<!-- 			a.id, -->
+<!-- 			a.login_name, -->
+<!-- 			a.name, -->
+<!-- 			o.name officeId, -->
+<!-- 			of.name companyId -->
+<!-- 		FROM sys_user a -->
+<!-- 		LEFT JOIN sys_office o ON o.id=a.office_id -->
+<!-- 		LEFT JOIN sys_office of ON of.id=a.company_id	 -->
+<!-- 		WHERE a.company_id=#{companyId} and a.id != #{id} -->
+<!-- 	</select>		 -->
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditReport.dao.CreditReportDao">
+   <select id="findStoragePathByApplyNo"  resultType="String">
+		SELECT  FILE_STORAGE_PATH
+		FROM  	cre_video_path
+		WHERE	FILE_NAME like "%.pdf" 
+		AND		APPLY_NO=#{applyNo}
+   </select>
+	<select id ="findFileNameByApplyNo" resultType="String">
+		SELECT 	FILE_NAME
+		FROM		cre_video_path
+		WHERE	FILE_NAME like "%.pdf" 
+		AND		APPLY_NO=#{applyNo}
+	</select>
+	<select id ="findPdfList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+			APPLY_NO AS "applyNo",
+			FILE_NAME AS "fileName",
+			FILE_STORAGE_PATH AS "fileStoragePath"
+		FROM
+			cre_video_path a
+		WHERE APPLY_NO = #{applyNo}
+		AND a.FILE_NAME LIKE CONCAT("%",".pdf")
+	</select>
+</mapper>

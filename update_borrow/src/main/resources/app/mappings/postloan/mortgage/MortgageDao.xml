@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.mortgage.dao.MortgageDao">
+
+	<select id="getAllDealAmount" resultType="java.util.Map">
+		select 
+		DEAL_STATUS as dealStatus,
+		DEAL_AMOUNT as "dealAmount"
+		from(
+		select IFNULL(DEAL_STATUS,0) as DEAL_STATUS,ifnull(DEAL_AMOUNT,0) as DEAL_AMOUNT from pl_mortgage_car_info where APPLY_NO = #{applyNo}
+		UNION ALL
+		select IFNULL(DEAL_STATUS,0) as DEAL_STATUS,ifnull(DEAL_AMOUNT,0) as DEAL_AMOUNT from pl_mortgage_house_info where APPLY_NO = #{applyNo}
+		UNION ALL
+		select IFNULL(DEAL_STATUS,0) as DEAL_STATUS,ifnull(DEAL_AMOUNT,0) as DEAL_AMOUNT from pl_mortgage_other_info where APPLY_NO = #{applyNo}
+		)tmp
+	</select>
+
+	<update id="updateMortgageCarData">
+		update pl_mortgage_car_info set
+		DEAL_AMOUNT = #{dealAmount},
+		DEAL_DESCRIPTION = #{dealDescription},
+		DEAL_STATUS = #{dealStatus}
+		WHERE id = #{mortgageId}
+	</update>
+
+	<update id="updateMortgageHouseData">
+		update pl_mortgage_house_info set
+		DEAL_AMOUNT = #{dealAmount},
+		DEAL_DESCRIPTION = #{dealDescription},
+		DEAL_STATUS = #{dealStatus}
+		WHERE id = #{mortgageId}
+	</update>
+
+	<update id="updateMortgageOtherData">
+		update pl_mortgage_other_info set
+		DEAL_AMOUNT = #{dealAmount},
+		DEAL_DESCRIPTION = #{dealDescription},
+		DEAL_STATUS = #{dealStatus}
+		WHERE id = #{mortgageId}
+	</update>
+
+</mapper>

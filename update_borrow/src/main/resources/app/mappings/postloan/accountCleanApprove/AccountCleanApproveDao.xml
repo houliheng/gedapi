@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.accountCleanApprove.dao.AccountCleanApproveDao">
+    
+	<sql id="accountCleanApproveColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.apply_by_id AS "applyById",
+		a.apply_by AS "applyBy",
+		a.checked_by_id AS "checkedById",
+		a.checked_by AS "checkedBy",
+		a.apply_advice AS "applyAdvice",
+		a.check_result AS "checkResult",
+		a.check_advice AS "checkAdvice",
+		a.apply_date AS "applyDate",
+		a.check_date AS "checkDate",
+		a.hq_checked_by_id AS "hqCheckedById",
+		a.hq_checked_by AS "hqCheckedBy",
+		a.hq_check_result AS "hqCheckResult",
+		a.hq_check_advice AS "hqCheckAdvice",
+		a.hq_check_date AS "hqCheckDate"
+	</sql>
+	
+	<sql id="accountCleanApproveJoins">
+	</sql>
+    
+	<select id="get" resultType="AccountCleanApprove">
+		SELECT 
+			<include refid="accountCleanApproveColumns"/>
+		FROM pl_account_clean_approve a
+		<include refid="accountCleanApproveJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AccountCleanApprove">
+		SELECT 
+			<include refid="accountCleanApproveColumns"/>
+		FROM pl_account_clean_approve a
+		<include refid="accountCleanApproveJoins"/>
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.CONTRACT_NO LIKE CONCAT(#{contractNo},"%")
+			</if>
+			<if test="applyBy != null and applyBy != ''">
+				AND a.APPLY_BY LIKE CONCAT("%",#{applyBy},"%")
+			</if>
+			<if test="checkedBy != null and checkedBy != ''">
+				AND a.CHECKED_BY LIKE CONCAT("%",#{checkedBy},"%")
+			</if>
+			<if test="checkResult != null and checkResult != ''">
+				AND a.CHECK_RESULT = #{checkResult}
+			</if>
+			<if test="checkResultVO != null and checkResultVO != ''">
+				AND a.CHECK_RESULT != #{checkResultVO}
+			</if>
+			<if test="hqCheckResult != null and hqCheckResult != ''">
+				AND a.HQ_CHECK_RESULT = #{hqCheckResult}
+			</if>
+			<if test="hqCheckResultVO != null and hqCheckResultVO != ''">
+				AND a.HQ_CHECK_RESULT != #{hqCheckResultVO}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_account_clean_approve a
+		<include refid="accountCleanApproveJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccountCleanApprove">
+		SELECT 
+			<include refid="accountCleanApproveColumns"/>
+		FROM pl_account_clean_approve a
+		<include refid="accountCleanApproveJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_account_clean_approve(
+			id,
+			contract_no,
+			apply_by_id,
+			apply_by,
+			checked_by_id,
+			checked_by,
+			apply_advice,
+			check_result,
+			check_advice,
+			apply_date,
+			check_date,
+			hq_checked_by_id,
+			hq_checked_by,
+			hq_check_result,
+			hq_check_advice,
+			hq_check_date
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{applyById},
+			#{applyBy},
+			#{checkedById},
+			#{checkedBy},
+			#{applyAdvice},
+			#{checkResult},
+			#{checkAdvice},
+			#{applyDate},
+			#{checkDate},
+			#{hqCheckedById},
+			#{hqCheckedBy},
+			#{hqCheckResult},
+			#{hqCheckAdvice},
+			#{hqCheckDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_account_clean_approve SET 	
+			contract_no = #{contractNo},
+			apply_by_id = #{applyById},
+			apply_by = #{applyBy},
+			checked_by_id = #{checkedById},
+			checked_by = #{checkedBy},
+			apply_advice = #{applyAdvice},
+			check_result = #{checkResult},
+			check_advice = #{checkAdvice},
+			apply_date = #{applyDate},
+			check_date = #{checkDate},
+			hq_checked_by_id = #{hqCheckedById},
+			hq_checked_by = #{hqCheckedBy},
+			hq_check_result = #{hqCheckResult},
+			hq_check_advice = #{hqCheckAdvice},
+			hq_check_date = #{hqCheckDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_account_clean_approve
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 已分配 -->
+	<select id="getAccountCleanApprovePLContract" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+	SELECT
+		a.APPLY_NO as "applyNo",
+		a.CONTRACT_NO AS "contractNo",
+		a.LOAN_DATE AS "loanDate",
+		a.CUST_NAME AS "custName",
+		a.CONTRACT_AMOUNT AS "contractAmount",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.CON_END_DATE AS "conEndDate",
+		DAY(DATE_SUB(a.LOAN_DATE,INTERVAL 1 DAY)) AS "monthlyRepaymentDate",
+		a.APPRO_PRODUCT_TYPE_ID AS "approProductTypeId",
+		a.APPRO_PERIOD_VALUE AS "approPeriodValue"
+		FROM 
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.ACC_CONTRACT a  inner join pl_account_clean_approve b on a.contract_no = b.contract_no
+		where not exists(select contract_no from pl_account_clean_allocate c where b.contract_no = c.contract_no)
+		<if test="contractNo != null and contractNo != ''">
+			and a.CONTRACT_NO like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			and a.CUST_NAME like concat('%',#{custName},'%')
+		</if>
+		<if test="approProductTypeId != null and approProductTypeId != ''">
+			and a.APPRO_PRODUCT_TYPE_ID = #{approProductTypeId}
+		</if>
+		<if test="checkResult != null and checkResult != ''">
+			and b.CHECK_RESULT = #{checkResult}
+		</if>
+		<if test="checkedById != null and checkedById != ''">
+			and b.CHECKED_BY_ID = #{checkedById}
+		</if>
+		<if test="hqCheckResult != null and hqCheckResult != ''">
+			and b.HQ_CHECK_RESULT = #{hqCheckResult}
+		</if>
+	</select>
+	
+	<update id="updateHQCheckResultByContractNo" >
+	    update pl_account_clean_approve set HQ_CHECK_RESULT = #{hqCheckResult} where contract_no = #{contractNo}
+	</update>
+	
+	<select id="getAccountCleanApproveList" resultType="AccountCleanApprove">
+		SELECT 
+			<include refid="accountCleanApproveColumns"/>
+		FROM pl_account_clean_approve a
+		<include refid="accountCleanApproveJoins"/>
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.CONTRACT_NO LIKE CONCAT(#{contractNo},"%")
+			</if>
+			<if test="applyById != null and applyById != ''">
+				AND a.APPLY_BY_ID = #{applyById}
+			</if>
+			<if test="checkedById != null and checkedById != ''">
+				AND a.CHECKED_BY_ID = #{checkedById}
+			</if>
+			<if test="checkResultList != null and checkResultList.size() > 0 ">
+	      		 and a.CHECK_RESULT  in
+			<foreach item="checkResult" collection="checkResultList"
+				open="(" close=")" separator=",">
+				#{checkResult}
+			</foreach>
+			</if>
+			<if test="hqCheckResultList != null and hqCheckResultList.size() > 0 ">
+	      		 and a.HQ_CHECK_RESULT  in
+			<foreach item="hqCheckResult" collection="hqCheckResultList"
+				open="(" close=")" separator=",">
+				#{hqCheckResult}
+			</foreach>
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.CONTRACT_NO like CONCAT('%',#{contractNo},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

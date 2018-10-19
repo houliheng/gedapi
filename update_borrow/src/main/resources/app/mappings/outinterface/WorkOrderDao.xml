@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.WorkOrderDao">
+
+	<select id="getWorkOrderDto" resultType="com.resoft.outinterface.SV.client.entry.request.WorkOrderDto">
+		SELECT
+			b.APPLY_PRODUCT_TYPE_CODE AS "loanType",
+			a.APPLY_AMOUNT AS "loanAmount",
+			a.SV_PLATFORM AS "customerNo",
+			b.CHANNEL_SOURCE_TYPE AS "remarks"
+		FROM
+			cre_apply_register b
+		INNER JOIN cre_apply_info a ON b.APPLY_NO = a.APPLY_NO
+		WHERE
+			a.APPLY_NO = #{applyNo};
+	</select>
+
+	<select id="findCust" resultType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		SELECT
+			a.ID AS "workId",
+			#{process} AS "process",
+			a.CUST_NAME AS "surveyName",
+			a.MOBILE_NUM AS "phoneNo",
+			a.CONT_PROVINCE AS "provinces",
+			a.CONT_CITY AS "city",
+			a.CONT_DISTINCT AS "district",
+			a.CONT_DETAILS AS "address",
+			case when  #{roleType}="1" then NULL
+			when (b.RELATION_FOR_APPLY in ('2','3','4'))
+			then "5" when (b.RELATION_FOR_APPLY  in ('5','6')) then '4'
+			when b.RELATION_FOR_APPLY = '7' then '3'
+			when b.RELATION_FOR_APPLY = '8' then '10'
+			when b.RELATION_FOR_APPLY = '1' then '11'
+			when b.RELATION_FOR_APPLY = '99' then '9'
+			else b.RELATION_FOR_APPLY end  AS "masterRelation",
+			"" AS "remarks",
+			#{isMaster} AS "isMaster",
+			case when b.DEL_FLAG = '1' then b.IS_PUSH+2
+			else b.IS_PUSH+1 end AS "flag"
+		FROM cre_cust_info a
+		INNER JOIN cre_apply_relation b ON a.ID = b.CUST_ID
+		WHERE b.APPLY_NO = #{applyNo} AND b.ROLE_TYPE = #{roleType} AND b.IS_PUSH = '0' AND b.SV_FLAG='1';
+	</select>
+
+	<update id="updateRelation" parameterType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		UPDATE cre_apply_relation SET
+			IS_PUSH = '1'
+		WHERE APPLY_NO = #{applyNo}
+		AND CUST_ID IN
+		<foreach item="relation" collection="relationInfoList" open="(" close=")" separator=",">
+			#{relation.workId}
+		</foreach>
+	</update>
+
+	<select id="findCompany" resultType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		SELECT
+			a.ID AS "WorkId",
+			#{process} AS "process",
+			a.BUSI_REG_NAME AS "surveyName",
+			a.CORPORATION_MOBILE AS "phoneNo",
+			a.REG_PROVINCE AS "provinces",
+			a.REG_CITY AS "city",
+			a.REG_DISTINCT AS "district",
+			a.REG_DETAILS AS "address",
+			case when  #{roleType}="1" then NULL
+			when b.RELATION_FOR_APPLY is null
+			then "9" else b.RELATION_FOR_APPLY end  AS "masterRelation",
+			a.IS_EARNINGS AS "remarks",
+			#{isMaster} AS "isMaster",
+			case when b.DEL_FLAG = '1' then b.IS_PUSH+2
+			else b.IS_PUSH+1 end AS "flag"
+		FROM cre_company_info a
+		INNER JOIN cre_apply_relation b ON a.ID = b.CUST_ID
+		WHERE b.APPLY_NO = #{applyNo} AND b.ROLE_TYPE = #{roleType} AND b.IS_PUSH = '0' AND b.SV_FLAG='1';
+	</select>
+
+	<select id="findHouse" resultType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		SELECT
+			a.ID AS "workId",
+			#{process} AS "process",
+			"房屋" AS "surveyName",
+			#{phoneNo} AS "phoneNo",
+			a.CONT_PROVINCE AS "provinces",
+			a.CONT_CITY AS "city",
+			a.CONT_DISTINCT AS "district",
+			a.CONT_DETAILS AS "address",
+			"6" AS "masterRelation",
+			"" AS "remarks",
+			#{isMaster} AS "isMaster",
+			case when a.DEL_FLAG = '1' then a.IS_PUSH+2
+			else a.IS_PUSH+1 end AS "flag"
+		FROM cre_mortgage_house_info a
+		WHERE a.APPLY_NO = #{applyNo} AND a.IS_PUSH = '0' AND a.SV_FLAG='1';
+	</select>
+
+	<update id="updateHouse" parameterType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		UPDATE cre_mortgage_house_info SET
+			IS_PUSH = '1'
+		WHERE id IN
+		<foreach item="houseInfo" collection="houseInfoList" open="(" close=")"
+			separator=",">
+			#{houseInfo.workId}
+		</foreach>
+	</update>
+
+	<select id="findCar" resultType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		SELECT
+			a.ID AS "workId",
+			#{process} AS "process",
+			"车辆" AS "surveyName",
+			#{phoneNo} AS "phoneNo",
+			a.OPERATE_PROVINCE AS "provinces",
+			a.OPERATE_CITY AS "city",
+			a.OPERATE_DISTINCT AS "district",
+			a.OPERATE_DETAILS AS "address",
+			"6" AS "masterRelation",
+			a.VEHICLE_NO AS "remarks",
+			#{isMaster} AS "isMaster",
+			case when a.DEL_FLAG = '1' then a.IS_PUSH+2
+			else a.IS_PUSH+1 end AS "flag"
+		FROM cre_mortgage_car_info a
+		WHERE a.APPLY_NO = #{applyNo} AND a.IS_PUSH = '0' AND a.SV_FLAG='1';
+	</select>
+
+	<update id="updateCar" parameterType="com.resoft.outinterface.SV.client.entry.request.SurveyInfoDto">
+		UPDATE cre_mortgage_car_info SET
+			IS_PUSH = '1'
+		WHERE id IN
+		<foreach item="carInfo" collection="carInfoList" open="(" close=")"
+			separator=",">
+			#{carInfo.workId}
+		</foreach>
+	</update>
+
+	<select id ="findOrg" resultType="java.util.Map">
+		SELECT
+			a.org_value AS orgNo,
+			c.ORG_ID AS orgId
+		FROM
+			cre_org_mapping a
+		INNER JOIN sys_office b ON a.id = b.code
+		INNER JOIN cre_apply_register c ON b.id = c.ORG_ID
+		WHERE
+			c.APPLY_NO = #{applyNo}
+	</select>
+
+	<select id ="getMortage" resultType="java.util.Map">
+		SELECT
+			a.MOBILE_NUM AS "phoneNo",
+			a.CONT_PROVINCE AS "provinces",
+			a.CONT_CITY AS "city",
+			a.CONT_DISTINCT AS "district",
+			a.CONT_DETAILS AS "address"
+		FROM cre_cust_info a
+		INNER JOIN cre_apply_relation b ON a.ID = b.CUST_ID
+		WHERE b.APPLY_NO = #{applyNo} AND b.ROLE_TYPE = '1' AND b.DEL_FLAG='0'
+	</select>
+
+</mapper>

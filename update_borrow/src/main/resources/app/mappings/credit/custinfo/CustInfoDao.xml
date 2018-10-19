@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.custinfo.dao.CustInfoDao">
+	<!-- @reqno:H1601220021 @date-designer:2016年1月28日-gaofeng @date-author:2016年1月28日-gaofeng:客户基本信息Dao
+		sql -->
+	<sql id="custInfoColumns">
+		a.id AS "id",
+		a.ESTATE_VALUATION as "estateValuation",
+		a.cust_name AS "custName",
+		a.id_type AS
+		"idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.nation_no
+		AS "nationNo",
+		a.birth_day AS "birthDay",
+		a.age_no AS "ageNo",
+		a.sex_no
+		AS "sexNo",
+		a.wed_status AS "wedStatus",
+		a.is_have_company AS
+		"isHaveCompany",
+		a.children_son AS
+		"childrenSon",
+		a.children_girl AS
+		"childrenGirl",
+		a.provides_num AS
+		"providesNum",
+		a.household_spending_month AS "householdSpendingMonth",
+		a.top_education_no AS "topEducationNo",
+		a.home_phone_no AS
+		"homePhoneNo",
+		a.hose_phone_no AS "hosePhoneNo",
+		a.reg_in_date AS
+		"regInDate",
+		a.city_in_date AS "cityInDate",
+		a.reg_province AS
+		"regProvince",
+		a.reg_city AS "regCity",
+		a.reg_distinct AS "regDistinct",
+		a.reg_details AS "regDetails",
+		a.is_local AS "isLocal",
+		a.cont_province
+		AS "contProvince",
+		a.cont_city AS "contCity",
+		a.cont_distinct AS
+		"contDistinct",
+		a.cont_details AS "contDetails",
+		a.addr_resi AS
+		"addrResi",
+		a.is_fixedhouse AS "isFixedHouse",
+		a.living_status AS
+		"livingStatus",
+		a.living_status_desc AS "livingStatusDesc",
+		a.per_annual_income AS "perAnnualIncome",
+		a.source_of_income AS
+		"sourceOfIncome",
+		a.email_no AS "emailNo",
+		a.micro_no AS "microNo",
+		a.wechat_no AS "wechatNo",
+		a.qq_no AS "qqNo",
+		a.other_contact_type AS
+		"otherContactType",
+		a.category_main AS "categoryMain",
+		a.category_large
+		AS "categoryLarge",
+		a.category_medium AS "categoryMedium",
+		a.category_small AS "categorySmall",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.PERSON_ID_START_DATE AS
+		"personIdStartDate",
+		a.PERSON_ID_END_DATE AS "personIdEndDate",
+		a.ENERGENT_NAME AS "energentName",
+		a.ENERGENT_MOBILE_NUM AS
+		"energentMobileNum",
+		a.REMARKS AS "remarks",
+		a.house_address AS "houseAddress"
+		/*a.REGISTER_TYPE AS "registerType"*/
+	</sql>
+
+	<sql id="custInfoJoins">
+	</sql>
+	
+	<select id="getCustByRoleAndApplyNo" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_apply_relation b
+		INNER JOIN cre_cust_info a
+		ON a.id = b.CUST_ID
+		WHERE b.apply_no = #{applyNo}
+			and b.ROLE_TYPE = #{roleType}
+		and a.DEL_FLAG = '0'
+	</select>
+
+	<select id="findMainBorrowerByApplyNo" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_apply_register b
+		INNER JOIN cre_cust_info a
+		ON a.id_num =
+		b.id_num
+		WHERE b.apply_no = #{applyNo}
+		and a.DEL_FLAG = '0'
+	</select>
+
+	<select id="getAllCardNoByApplyNo" resultType="java.util.Map">
+		SELECT b.ID as "id",
+		B.MOBILE_NUM as "mobileNum",
+		B.ID_NUM as "idNum"
+		FROM cre_apply_relation A
+		INNER JOIN cre_cust_info B
+		ON B.ID =
+		A.CUST_ID
+		WHERE A.APPLY_NO =
+		#{applyNo}
+		AND A.ROLE_TYPE IN
+		('1','3','4') and a.DEL_FLAG = '0'
+		and B.DEL_FLAG = '0'
+	</select>
+
+	<select id="getAllMobileByApplyNo" resultType="java.util.Map">
+		SELECT b.ID as "id",
+		b.CONTACT_MOBILE as "mobileNum"
+		FROM cre_apply_relation A
+		INNER JOIN
+		cre_apply_contact_info B
+		ON A.ID = B.RELATION_ID
+		WHERE A.APPLY_NO =
+		#{applyNo} and a.ROLE_TYPE = '1' and b.DEL_FLAG = '0'
+	</select>
+
+	<select id="get" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_cust_info a
+		<include refid="custInfoJoins" />
+		WHERE a.id = #{id}
+		AND a.DEL_FLAG = '0'
+	</select>
+	<!-- * @reqno:H1601280119 * @date-designer:2016年2月02日-lirongchao * @db-z:cre_cust_info:id,apply_id,ID_TYPE,ID_NUM,LIST_STATUS,cust_type,mobileNum
+		* @date-author:2016年1月28日-lirongchao:根据身份证号查询客户信息 -->
+	<select id="getIdNum" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_cust_info a
+		<include refid="custInfoJoins" />
+		WHERE a.id_NUM = #{idNum}
+		and a.del_flag = '0'
+	</select>
+
+	<select id="findList" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		,b.login_name as "loginName"
+		FROM cre_cust_info a left join sys_user b  on a.update_by = b.id
+		<include refid="custInfoJoins" />
+		<where>
+				a.DEL_FLAG = '0'
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE
+				<if test="dbName == 'oracle'">'%'||#{custName}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{custName}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{custName},'%')</if>
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.id_type = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.id_num LIKE
+				<if test="dbName == 'oracle'">'%'||#{idNum}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{idNum}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{idNum},'%')</if>
+			</if>
+			<if test="mobileNum != null and mobileNum != ''">
+				AND a.mobile_num LIKE
+				<if test="dbName == 'oracle'">'%'||#{mobileNum}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{mobileNum}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{mobileNum},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_cust_info a
+		<include refid="custInfoJoins" />
+		<where>
+			a.DEL_FLAG = '0'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_cust_info(
+		id,
+		is_have_company,
+		ESTATE_VALUATION,
+		house_address,
+		cust_name,
+		id_type,
+		id_num,
+		mobile_num,
+		nation_no,
+		birth_day,
+		age_no,
+		sex_no,
+		wed_status,
+		children_son,
+		children_girl,
+		provides_num,
+		household_spending_month,
+		top_education_no,
+		home_phone_no,
+		hose_phone_no,
+		reg_in_date,
+		city_in_date,
+		reg_province,
+		reg_city,
+		reg_distinct,
+		reg_details,
+		is_local,
+		cont_province,
+		cont_city,
+		cont_distinct,
+		cont_details,
+		addr_resi,
+		is_fixedhouse,
+		living_status,
+		living_status_desc,
+		per_annual_income,
+		source_of_income,
+		email_no,
+		micro_no,
+		wechat_no,
+		qq_no,
+		other_contact_type,
+		category_main,
+		category_large,
+		category_medium,
+		category_small,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		<if test="personIdEndDate != null and personIdEndDate != ''">
+			PERSON_ID_END_DATE,
+		</if>
+		PERSON_ID_START_DATE,
+		ENERGENT_NAME,
+		ENERGENT_MOBILE_NUM,
+		REMARKS
+		) VALUES
+		(
+		#{id},
+		#{isHaveCompany},
+		#{estateValuation},
+		#{houseAddress},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{nationNo},
+		#{birthDay},
+		#{ageNo},
+		#{sexNo},
+		#{wedStatus},
+		#{childrenSon},
+		#{childrenGirl},
+		#{providesNum},
+		#{householdSpendingMonth},
+		#{topEducationNo},
+		#{homePhoneNo},
+		#{hosePhoneNo},
+		#{regInDate},
+		#{cityInDate},
+		#{regProvince},
+		#{regCity},
+		#{regDistinct},
+		#{regDetails},
+		#{isLocal},
+		#{contProvince},
+		#{contCity},
+		#{contDistinct},
+		#{contDetails},
+		#{addrResi},
+		#{isFixedHouse},
+		#{livingStatus},
+		#{livingStatusDesc},
+		#{perAnnualIncome},
+		#{sourceOfIncome},
+		#{emailNo},
+		#{microNo},
+		#{wechatNo},
+		#{qqNo},
+		#{otherContactType},
+		#{categoryMain},
+		#{categoryLarge},
+		#{categoryMedium},
+		#{categorySmall},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		<if test="personIdEndDate != null and personIdEndDate != ''">
+			#{personIdEndDate},
+		</if>
+		#{personIdStartDate},
+		#{energentName},
+		#{energentMobileNum},
+		#{remarks}
+		)
+	</insert>
+	
+	<!--<update id="saveRegisterType">
+		UPDATE cre_cust_info SET
+			REGISTER_TYPE = #{registerType}
+		WHERE id = #{custId}
+			and DEL_FLAG = '0'
+	</update>-->
+	<update id="update">
+		UPDATE cre_cust_info SET
+		<if test="custName != null and custName != ''">
+		cust_name = #{custName},
+		</if>
+		<if test="idType != null and idType != ''">
+		id_type = #{idType},
+		</if>
+		<if test="idNum != null and idNum != ''">
+		id_num = #{idNum},
+		</if>
+		<if test="isHaveCompany != null and isHaveCompany != ''">
+		is_have_company = #{isHaveCompany},
+		</if>
+		<if test="mobileNum != null and mobileNum != ''">
+		mobile_num = #{mobileNum},
+		</if>
+		<if test="nationNo != null and nationNo != ''">
+		nation_no = #{nationNo},
+		</if>
+		<if test="birthDay != null and birthDay != ''">
+		birth_day = #{birthDay},
+		</if>
+		<if test="ageNo != null and ageNo != ''">
+		age_no = #{ageNo},
+		</if>
+		<if test="sexNo != null and sexNo != ''">
+		sex_no = #{sexNo},
+		</if>
+		<if test="wedStatus != null and wedStatus != ''">
+			wed_status = #{wedStatus},
+		</if>
+		<if test="childrenSon != null and childrenSon != ''">
+			children_son = #{childrenSon},
+		</if>
+		<if test="childrenGirl != null and childrenGirl != ''">
+			children_girl = #{childrenGirl},
+		</if>
+		<if test="providesNum != null and providesNum != ''">
+			provides_num = #{providesNum},
+		</if>
+		<if test="householdSpendingMonth != null and householdSpendingMonth != ''">
+			household_spending_month = #{householdSpendingMonth},
+		</if>
+		<if test="topEducationNo != null and topEducationNo != ''">
+		top_education_no = #{topEducationNo},
+		</if>
+		<if test="homePhoneNo != null and homePhoneNo != ''">
+			home_phone_no = #{homePhoneNo},
+		</if>
+		<if test="hosePhoneNo != null and hosePhoneNo != ''">
+			hose_phone_no = #{hosePhoneNo},
+		</if>
+		<if test="regInDate != null and regInDate != ''">
+			reg_in_date = #{regInDate},
+		</if>
+		<if test="regInDate != null and regInDate != ''">
+		city_in_date = #{cityInDate},
+		</if>
+		<if test="regProvince != null and regProvince != ''">
+		reg_province = #{regProvince},
+		</if>
+		<if test="regCity != null and regCity != ''">
+		reg_city = #{regCity},
+		</if>
+		<if test="regDistinct != null and regDistinct != ''">
+		reg_distinct = #{regDistinct},
+		</if>
+		<if test="regDetails != null and regDetails != ''">
+		reg_details = #{regDetails},
+		</if>
+		<if test="isLocal != null and isLocal != ''">
+		is_local = #{isLocal},
+		</if>
+		<if test="contProvince != null and contProvince != ''">
+		cont_province = #{contProvince},
+		</if>
+		<if test="contCity != null and contCity != ''">
+		cont_city = #{contCity},
+		</if>
+		<if test="contDistinct != null and contDistinct != ''">
+		cont_distinct = #{contDistinct},
+		</if>
+		<if test="contDetails != null and contDetails != ''">
+		cont_details = #{contDetails},
+		</if>
+		<if test="addrResi != null and addrResi != ''">
+			addr_resi = #{addrResi},
+		</if>
+		<if test="isFixedHouse != null and isFixedHouse != ''">
+		is_fixedhouse =#{isFixedHouse},
+		</if>
+		<if test="livingStatus != null and livingStatus != ''">
+		living_status = #{livingStatus},
+		</if>
+		<if test="livingStatusDesc != null and livingStatusDesc != ''">
+		living_status_desc = #{livingStatusDesc},
+		</if>
+		<if test="perAnnualIncome != null and perAnnualIncome != ''">
+		per_annual_income = #{perAnnualIncome},
+		</if>
+		<if test="sourceOfIncome != null and sourceOfIncome != ''">
+		source_of_income = #{sourceOfIncome},
+		</if>
+		<if test="emailNo != null and emailNo != ''">
+			email_no = #{emailNo},
+		</if>
+		<if test="microNo != null and microNo != ''">
+			micro_no = #{microNo},
+		</if>
+		<if test="wechatNo != null and wechatNo != ''">
+			wechat_no = #{wechatNo},
+		</if>
+		<if test="qqNo != null and qqNo != ''">
+			qq_no = #{qqNo},
+		</if>
+		<if test="otherContactType != null and otherContactType != ''">
+			other_contact_type = #{otherContactType},
+		</if>
+		<if test="categoryMain != null and categoryMain != ''">
+		category_main = #{categoryMain},
+		</if>
+		<if test="categoryLarge != null and categoryLarge != ''">
+		category_large = #{categoryLarge},
+		</if>
+		<if test="categoryMedium != null and categoryMedium != ''">
+		category_medium = #{categoryMedium},
+		</if>
+		<if test="categorySmall != null and categorySmall != ''">
+		category_small = #{categorySmall},
+		</if>
+		<!-- <if test="personIdEndDate != null and personIdEndDate != ''"> -->
+			PERSON_ID_END_DATE = #{personIdEndDate},
+		<!-- </if> -->
+		<if test="personIdStartDate != null and personIdStartDate != ''">
+		PERSON_ID_START_DATE = #{personIdStartDate},
+		</if>
+		<if test="energentName != null and energentName != ''">
+			ENERGENT_NAME = #{energentName},
+		</if>
+		<if test="energentMobileNum != null and energentMobileNum != ''">
+			ENERGENT_MOBILE_NUM = #{energentMobileNum},
+		</if>
+		<if test="remarks != null and remarks != ''">
+			REMARKS = #{remarks},
+		</if>
+		<if test="estateValuation != null and estateValuation != ''">
+		ESTATE_VALUATION = #{estateValuation},
+		</if>
+		<if test="houseAddress != null and houseAddress != ''">
+		house_address = #{houseAddress},
+		</if>
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+		and DEL_FLAG = '0'
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_cust_info
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据证件类型、证件号、手机号、角色类型查询客户信息List（关联relation表） -->
+	<select id="findCustInfoList" parameterType="java.util.Map"
+		resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_apply_relation b
+		INNER JOIN cre_cust_info a ON b.cust_id =
+		a.id
+		WHERE ((a.ID_NUM = #{idNum} AND b.ROLE_TYPE = #{roleType})
+		OR
+		(a.MOBILE_NUM = #{mobileNum} AND b.ROLE_TYPE = #{roleType}))
+		and a.DEL_FLAG = '0'
+	</select>
+
+	<!-- 根据证件类型、证件号查询客户信息List（单表） -->
+	<select id="findCustInfoByIdCard" parameterType="java.util.Map"
+		resultType="CustInfo">
+		SELECT * FROM cre_cust_info a
+		<where>
+			a.DEL_FLAG = '0'
+			<if test="idNum != null and idNum != ''">
+				AND a.ID_NUM = #{idNum}
+			</if>
+		</where>
+	</select>
+
+	<!-- 根据证件类型、证件号查询客户信息List（单表） -->
+	<select id="findCustInfoByIdCardAndMobileNum" parameterType="java.util.Map"
+		resultType="CustInfo">
+		SELECT * FROM cre_cust_info a
+		where (a.ID_NUM = #{idNum} or
+		a.MOBILE_NUM = #{mobileNum})
+		and a.DEL_FLAG = '0'
+	</select>
+
+
+	<!-- 根据客户登记信息更新客户基本信息 -->
+	<update id="updateByApplyRegister">
+		UPDATE cre_cust_info SET
+		cust_name = #{custName},
+		id_type = #{idType},
+		id_num = #{idNum},
+		mobile_num = #{mobileNum},
+		update_by = #{updateBy.id},
+		update_date =
+		#{updateDate}
+		WHERE id = #{id}
+		and DEL_FLAG = '0'
+	</update>
+
+	<!-- 批量删除 -->
+	<update id="banchDelete">
+		UPDATE cre_apply_relation a
+		SET a.DEL_FLAG = '1',
+			a.IS_PUSH = '0'
+		WHERE a.APPLY_NO =
+		#{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		AND a.CUST_ID IN
+		<foreach item="idList" collection="idList" open="(" close=")"
+			separator=",">
+			#{idList}
+		</foreach>
+	</update>
+	
+	<delete id="newBanchDelete">
+		delete from cre_apply_relation
+		WHERE APPLY_NO =
+		#{applyNo}
+		AND ROLE_TYPE = #{roleType}
+		AND CUST_ID IN
+		<foreach item="idList" collection="idList" open="(" close=")"
+			separator=",">
+			#{idList}
+		</foreach>
+	</delete>
+	
+	<!-- 根据身份证号查询用户信息 -->
+	<select id="getInfoByCard" resultType="CustInfo">
+		SELECT
+		<include refid="custInfoColumns" />
+		FROM cre_cust_info a
+		<include refid="custInfoJoins" />
+		<where>
+			a.ID_NUM = #{card}
+			and a.del_flag = '0'
+		</where>
+	</select>
+	
+	<select id="findGedGuaranteeInfo" resultType="CustInfo">
+		SELECT b.ID as "id",
+			<include refid="custInfoColumns" />
+		FROM cre_apply_relation a
+		INNER JOIN cre_cust_info b
+			ON b.ID = a.CUST_ID
+		WHERE a.APPLY_NO = #{applyNo}
+			AND a.ROLE_TYPE IN (#{roleType1},#{roleType2})
+			and a.DEL_FLAG = '0'
+			and B.DEL_FLAG = '0'
+	</select>
+	
+	<select id="findThisCompanyGuarantor" resultType="CustInfo">
+		SELECT
+			<include refid="custInfoColumns" />
+		FROM
+			cre_apply_company_relation b
+		LEFT JOIN cre_cust_info a ON a.ID = b.CUST_ID
+		WHERE
+			b.APPLY_NO = #{applyNo}
+		AND b.COMPANY_ID = #{companyId}
+		AND b.ROLE_TYPE = '1'
+		AND b.DEL_FLAG = '0'
+	</select>
+
+	<select id="getMainWork" resultType="com.resoft.outinterface.SV.client2.WorkField">
+		SELECT
+			b.id as "workId",
+			c.COMPANY_NAME AS "punitName",
+			c.COM_NATURE AS "punitType",
+			c.POST_TYPE AS "pjobCategory",
+			c.POST_LEVEL AS "pjobLevel",
+			c.POST_NAME AS "pjobName",
+			c.DEPARTMENT AS "pdepartmentName",
+			c.COM_PHONE_AR AS "punitTelephone",
+			c.WORK_IN_DATE AS "punitEntryDate",
+			c.SALARY_MODE AS "pwagePaymentMethod",
+			c.MONTH_INCOME AS "pbasicMonthlySalary",
+			c.OTHER_MONTH_INCOME AS "potherMonthlyIncome",
+			c.SALART_DAY AS "ppayrollDay",
+			 d.name AS "punitAddress",
+			c.COMPANY_DETAILS AS "punitDetailAddress"
+		FROM
+			cre_apply_relation a
+		INNER JOIN cre_cust_info b ON a.cust_id = b.id
+		INNER JOIN cre_cust_work_info c ON b.id = c.cust_id
+		LEFT JOIN sys_area d on d.id=c.COMPANY_DISTINCT
+		WHERE
+			a.apply_no = #{applyNo}
+			and a.DEL_FLAG = '0'
+			AND a.IS_PUSH = '0' AND a.SV_FLAG='1' and a.role_type in ('1','3','4')
+	</select>
+
+
+	<!--<select id="getBatchWork" resultType="com.resoft.outinterface.SV.client2.WorkField">
+		SELECT
+			b.id as "workId",
+			c.COMPANY_NAME AS "punitName",
+			c.COM_NATURE AS "punitType",
+			c.POST_TYPE AS "pjobCategory",
+			c.POST_LEVEL AS "pjobLevel",
+			c.POST_NAME AS "pjobName",
+			c.DEPARTMENT AS "pdepartmentName",
+			c.COM_PHONE_AR AS "punitTelephone",
+			c.WORK_IN_DATE AS "punitEntryDate",
+			c.SALARY_MODE AS "pwagePaymentMethod",
+			c.MONTH_INCOME AS "pbasicMonthlySalary",
+			c.OTHER_MONTH_INCOME AS "potherMonthlyIncome",
+			c.SALART_DAY AS "ppayrollDay",
+			c.COMPANY_DISTINCT AS "punitAddress",
+			c.COMPANY_DETAILS AS "punitDetailAddress"
+		FROM
+			cre_apply_company_relation a
+		INNER JOIN cre_cust_info b ON a.cust_id = b.id
+		INNER JOIN cre_cust_work_info c ON b.id = c.cust_id
+		WHERE
+			a.apply_no = #{applyNo}
+			and  a.ROLE_TYPE='1'
+			AND a.IS_PUSH = '0' AND a.SV_FLAG='1' and a.role_type in ('1','3','4')
+	</select>-->
+
+	<select id="getMainRealAddress" resultType="com.resoft.outinterface.SV.client2.ResidenceField">
+		SELECT
+			b.id as "workId",
+			CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.CONT_PROVINCE),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = b.CONT_CITY),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = b.CONT_DISTINCT),'')) AS "presidenceAddress",
+			b.CONT_DETAILS as "presidenceDateilAddress"
+		FROM
+			cre_apply_relation a
+		INNER JOIN cre_cust_info b ON a.CUST_ID = b.id
+		WHERE
+			a.apply_no = #{applyNo}
+			AND a.IS_PUSH = '0' AND a.SV_FLAG='1' and a.role_type in ('1','3','4')
+	</select>
+
+	
+</mapper>

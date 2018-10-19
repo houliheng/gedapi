@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.RepayPlanStatus.dao.RepayPlanStatusDao">
+	<sql id="repayPlanStatus">
+		a.DATA_DT as "createTime",
+		a.CONTRACT_NO as "contractNo",
+		a.PERIOD_NUM as "periodNum",
+		a.REPAY_PERIOD_STATUS as "repayPeriodStatus"
+	</sql>
+	
+	<select id="findStatusByConNoandPerNo" resultType="RepayPlanStatus">
+		select 
+		<include refid="repayPlanStatus" />
+		from acc_sta_repay_plan_status a where a.CONTRACT_NO = #{contractNo} and a.PERIOD_NUM = #{periodNum} order by a.PERIOD_NUM asc
+	</select>
+
+
+</mapper>

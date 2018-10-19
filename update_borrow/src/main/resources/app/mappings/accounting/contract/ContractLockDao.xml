@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.contract.dao.ContractLockDao">
+    
+	
+	<select id="validateIsLock" resultType="ContractLock">
+		SELECT 
+			a.CONTRACT_NO as "contractNo",
+			a.LOCK_FLG as "lockFlag"
+		FROM acc_lock_info a
+		WHERE a.CONTRACT_NO = #{contractNo}
+		<if test="lockFlag != null and lockFlag  != ''">
+			and a.LOCK_FLG = #{lockFlag}
+		</if>
+	</select>
+	
+	<insert id="saveLockInfo">
+		insert into acc_lock_info(contract_no,LOCK_FLG) values(#{contractNo},#{lockFlag})
+	</insert>	
+	
+	<update id="deleteLock">
+		DELETE FROM acc_lock_info WHERE CONTRACT_NO = #{contractNo}
+	</update>
+	
+</mapper>

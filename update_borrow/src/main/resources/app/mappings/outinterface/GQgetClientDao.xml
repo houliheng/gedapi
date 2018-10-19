@@ -1,0 +1,1103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.rest.GQget.client.dao.GQGetClientDao">
+
+	<select id="getAbortiveBidByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.abortiveTender.AbortiveBidDataRequest">
+		SELECT a.id as "bidOfflineId",a.contract_no as "contractNo"
+		FROM cre_contract a WHERE a.apply_NO=#{applyNo}
+	</select>
+
+	<select id="getWithdrawSuccessBidDataByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.bidWithdrawSuccess.WithdrawSuccessBidDataRequest">
+		SELECT a.id as "bidOfflineId",a.contract_no as "contractNo"
+		FROM cre_contract a WHERE a.apply_NO=#{applyNo}
+	</select>
+	<select id="getRepaymentBidDataByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.repaymentWithdraw.RepaymentBidDataRequest">
+		SELECT a.id as "bidOfflineId",a.contract_no as
+		"contractNo",a.con_start_date AS "repaymentDay"
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract a
+		WHERE a.apply_NO=#{applyNo}
+	</select>
+
+	<select id="getBidPaymentByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.BidRepayment">
+		select
+		period_num as "period"
+		,CAPITAL_AMOUNT as "bidPrePrincipal"
+		,INTEREST_AMOUNT as "bidPreInterest"
+		,CAPITAL_AMOUNT+INTEREST_AMOUNT as "bidPreAmount"
+		,BID_CAPITAL_AMOUNT as "contractPrePrincipal"
+		,BID_INTEREST_AMOUNT as
+		"contractPreInterest"
+		,BID_REPAY_AMOUNT as "contractPreAmount"
+		,DIF_CAPITAL_AMOUNT as "preDiffPrincipal"
+		,DIF_INTEREST_AMOUNT as "preDiffInterest"
+		,MANAGEMENT_FEE as "preDiffAmount"
+		,SERVICE_FEE as "preConsultingFee"
+		from
+		cre_repay_plan
+		where
+		apply_no =#{applyno} and
+		task_def_key = 'utask_htmq'
+	</select>
+
+	<select id="getUnderBidPaymentByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.BidRepayment">
+		select
+		period_num as "period"
+		,CAPITAL_AMOUNT as "bidPrePrincipal"
+		,INTEREST_AMOUNT as "bidPreInterest"
+		,CAPITAL_AMOUNT+INTEREST_AMOUNT as "bidPreAmount"
+		,BID_CAPITAL_AMOUNT as "contractPrePrincipal"
+		,BID_INTEREST_AMOUNT as
+		"contractPreInterest"
+		,BID_REPAY_AMOUNT as "contractPreAmount"
+		,DIF_CAPITAL_AMOUNT as "preDiffPrincipal"
+		,DIF_INTEREST_AMOUNT as "preDiffInterest"
+		,MANAGEMENT_FEE as "preDiffAmount"
+		,SERVICE_FEE as "preConsultingFee"
+		from
+		cre_repay_plan
+		where
+		apply_no =#{applyNo} and
+		task_def_key = 'under_dqglr'
+	</select>
+
+
+
+
+	<select id="getBidPaymentByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.BidRepayment">
+		SELECT
+		a.PERIOD_NUM as "period",
+		a.CAPITAL_AMOUNT as "bidPrePrincipal",
+		a.INTEREST_AMOUNT as "bidPreInterest",
+		a.CAPITAL_AMOUNT+INTEREST_AMOUNT as "bidPreAmount",
+		a.BID_CAPITAL_AMOUNT as "contractPrePrincipal",
+		a.BID_INTEREST_AMOUNT as "contractPreInterest",
+		a.BID_REPAY_AMOUNT as "contractPreAmount",
+		a.DIF_CAPITAL_AMOUNT as "preDiffPrincipal",
+		a.DIF_INTEREST_AMOUNT as "preDiffInterest",
+		a.MANAGEMENT_FEE as "preDiffAmount",
+		a.SERVICE_FEE as "preConsultingFee"
+		FROM
+		cre_repay_plan_union a
+		WHERE
+		a.APPROVE_ID =#{param1} and task_def_key = 'utask_htmq'
+	</select>
+
+	<select id="getCreditSuretyByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditSurety">
+		select
+		b.cust_name as "firmCreditName",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_DISTINCT),''),
+		IFNULL(D.CONT_DETAILS,'')) AS firmCreditAddress,
+		'' as "relation",
+		a.company_name as "jobContent" ,
+		d.SEX_NO as "gender",
+		d.ID_NUM as "identityNum",
+		(select label from sys_dict where type='WED_STATUS' and value = d.WED_STATUS) as "maritalDesc",
+		d.house_address as "houseDesc",
+		d.ESTATE_VALUATION as "housePredictAmount"
+		from cre_apply_relation b
+		left join cre_cust_work_info a
+		on a.cust_id =b.cust_id
+		inner join cre_cust_info d
+		on d.ID = b.CUST_ID
+		where b.apply_no = #{applyNo} and b.role_type IN ('1', '3') and d.DEL_FLAG='0' and b.DEL_FLAG='0'
+	</select>
+
+	<select id="getCreditSuretyByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditSurety">
+		SELECT
+		b.cust_name AS "firmCreditName",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = D.CONT_DISTINCT),''),
+		IFNULL(D.CONT_DETAILS,'')) AS firmCreditAddress,
+		'' AS "relation",
+		a.company_name AS "jobContent",
+		d.SEX_NO AS "gender",
+		d.ID_NUM AS "identityNum",
+		(SELECT label FROM sys_dict WHERE type = 'WED_STATUS' AND VALUE =
+		d.WED_STATUS ) AS "maritalDesc",
+		d.house_address AS "houseDesc",
+		d.ESTATE_VALUATION AS "housePredictAmount"
+		FROM
+		cre_apply_relation b
+		INNER JOIN cre_check_approve_union e ON b.APPLY_NO=e.APPLY_NO and e.CUST_ID!=b.CUST_ID
+		INNER JOIN cre_cust_info d ON d.ID = b.CUST_ID
+		LEFT JOIN
+		cre_cust_work_info a ON a.cust_id = b.cust_id
+		WHERE
+		b.apply_no = #{param1}
+		AND b.role_type IN ('1', '3')
+		AND d.DEL_FLAG = '0'
+		AND b.DEL_FLAG = '0'
+		AND e.ID = #{param2}
+	</select>
+
+	<select id="getCreditCompanyByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditCompany">
+		SELECT
+		a.RELATON as relation,
+		a.COMPANY_DESC as companyDesc,
+		a.INCOME_STATE as incomeState,
+		a.OPERATION_STATE as operationState
+		FROM cre_mortgaged_company a
+		WHERE a.APPLY_NO = #{applyNo}
+	</select>
+
+	<select id="getCreditApplianceByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAppliance">
+		SELECT
+		MODEL as "modelNumber",
+		BUYING_PRICE as "purchaseAmount",
+		VALUE_OF_ASSESSMENT as "predictAmount" ,
+		MAKET_VALUE as "bazaarAmount"
+		FROM
+		cre_mortage_equipment
+		WHERE APPLY_NO = #{applyno}
+	</select>
+
+	<select id="getCreditHouseByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditHouse">
+		select
+		<!-- case when s.label is not null then s.label else CONT_DETAILS end as "address" -->
+		CONCAT(s1.name,s2.name,s3.name,CONT_DETAILS) as "address"
+		,building_area as "area"
+		,evaluate_price as "predictAmount"
+		,market_price as "bazaarAmount"
+		,MORTGAGE_NOTE as "impawn_type"
+		from cre_mortgage_house_info
+		<!-- left join
+			(SELECT label,`value` FROM sys_dict WHERE  type = 'AREA_MAPPING_4GET' ) s on CONT_CITY = s.`value` -->
+		left join sys_area s1 on s1.id=CONT_PROVINCE
+		left join sys_area s2 on s2.id=CONT_CITY
+		left join sys_area s3 on s3.id=CONT_DISTINCT
+		where
+		apply_no = #{applyNo}
+	</select>
+
+	<select id="getUnderCreditHouseByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditHouse">
+		select
+		cont_details as "address"
+		,building_area as "area"
+		,evaluate_price as "predictAmount"
+		,market_price as "bazaarAmount"
+		,"3" as "impawn_type"
+		from cre_gqget_asset_house
+		where
+		apply_no = #{applyNo}
+	</select>
+
+	<select id="getAssetHouseByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditHouse">
+		SELECT
+		CONT_DETAILS AS address,
+		BUILDING_AREA AS area,
+		EVALUATE_PRICE AS predictAmount,
+		MARKET_PRICE AS bazaarAmount,
+		'3' AS impawnType
+		FROM cre_gqget_asset_house
+		WHERE APPLY_NO = #{applyNo}
+	</select>
+
+	<select id="getCreditAutomobileByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAutomobile">
+		SELECT
+		concat(
+		a.vehicle_brand,
+		a.vehicle_series
+		) AS "modelNumber",
+		b.used_years AS "useYear",
+		b.car_evaluate_price AS "predictAmount",
+
+		IF (
+
+		IF (
+		IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE1, b.MARKET_PRICE2)
+		>= b.MARKET_PRICE3, b.MARKET_PRICE3, IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE1,b.MARKET_PRICE2))
+		>=
+		IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE2, b.MARKET_PRICE1 ),
+
+		IF (
+		IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE1, b.MARKET_PRICE2) >=
+		b.MARKET_PRICE3, b.MARKET_PRICE3,
+		IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE1, b.MARKET_PRICE2)),
+
+		IF (b.MARKET_PRICE1 >= b.MARKET_PRICE2, b.MARKET_PRICE2, b.MARKET_PRICE1)
+
+		) AS "bazaarAmount"
+		from
+		cre_mortgage_car_info a
+		inner join
+		cre_mortgage_car_evaluate_info b
+		on a.id = b.car_id where apply_no =#{applyNo}
+	</select>
+
+
+	<select id="getUnderCreditAutomobileByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAutomobile">
+		SELECT
+		gqget_vehicle_no AS "modelNumber",
+		gqget_used_years AS "useYear",
+		gqget_car_evaluate_price AS "predictAmount",
+		gqget_market_price AS "bazaarAmount"
+		from
+		cre_gqget_asset_car a
+		where GQGET_APPLY_NO =#{applyNo}
+	</select>
+
+	<select id="getAssetAutomobileByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAutomobile">
+		SELECT
+		GQGET_VEHICLE_NO AS modelNumber,
+		GQGET_USED_YEARS AS useYear,
+		GQGET_CAR_EVALUATE_PRICE AS predictAmount,
+		GQGET_MARKET_PRICE AS bazaarAmount
+		FROM cre_gqget_asset_car
+		WHERE GQGET_APPLY_NO = #{applyNo}
+	</select>
+
+	<select id="getUnderCreditInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditInfo">
+		select
+			e.INTRODUCTION_OF_COMPANY as "firmDesc",
+			e.MIX_LOAN_USAGE as "loanUse",
+			e.SOURCE_OF_PEPAYMENT1 as "refundSource",
+			e.SOURCE_OF_PEPAYMENT2 as "refundSource2",
+			e.SOURCE_OF_PEPAYMENT3 as "refundSource3",
+			e.SOURCE_OF_PEPAYMENT4 as "refundSource4",
+			e.INTRODUCTION_OF_COM_PRODUCTION as "firmProductDesc",
+			a.IS_LOAN+1 as "isLoanRecord",
+			a.IS_OVER_DUE+1 as "isOverdue",
+			a.LOAN_RECODE as "bankLoanCount",
+			a.SOURCE_OF_CREREGIST as "creditRecordLevel"
+			from
+			cre_gqget_com_info e
+			left join
+			cre_under_company_info a on
+			a.apply_no =e.apply_no
+			where e.apply_no =#{applyNo}
+
+	</select>
+
+	<select id="getCreditInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditInfo">
+		select
+		e.INTRODUCTION_OF_COMPANY as "firmDesc",
+		e.operate_actuality as "operateActuality",
+		'' as "incomeActuality",
+		'' as "industryDesc",
+		'' as "loanStatus",
+		e.MIX_LOAN_USAGE as "loanUse",
+		'' as "loanUseType",
+		e.SOURCE_OF_PEPAYMENT1 as "refundSource",
+		e.SOURCE_OF_PEPAYMENT2 as "refundSource2",
+		e.SOURCE_OF_PEPAYMENT3 as "refundSource3",
+		e.SOURCE_OF_PEPAYMENT4 as "refundSource4",
+		'' as "refundSourceType",
+		'' as loanPersonDesc,
+		e.INTRODUCTION_OF_COM_PRODUCTION as "firmProductDesc",
+		''
+		as "firmSumDesc",
+		'' as "creditLevel",
+		a.IS_LOAN+1 as "isLoanRecord",
+		a.IS_OVERDUE+1 as "isOverdue",
+		a.LOAN_RECODE as "bankLoanCount",
+		a.SOURCE_OF_CREDIT_REGISTRIES as "creditRecordLevel",
+		#{param2} as "propertyType"
+		from
+		cre_gqget_com_info e
+		inner join
+		cre_bank_loan a on
+		a.apply_no =e.apply_no
+		where e.apply_no =#{param1}
+	</select>
+
+	<select id="getCreditAdjuntByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAdjunt">
+		select
+		FILE_DIR AS "adjunctType",
+		FILE_STORAGE_PATH AS "adjunctPath"
+		from
+		cre_video_path
+		where APPLY_NO =#{applyNo}
+	</select>
+
+	<select id="getUnderBaseDataByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.BaseData">
+		SELECT
+			c.id AS "bidOfflineId",
+			c.appro_product_type_name AS "bidTitle",
+			c.contract_no AS "contractNo",
+			c.APPRO_PRODUCT_TYPE_CODE AS "loanType",
+			c.contract_amount AS "bidAmount",
+			c.appro_period_value AS "period",
+			CASE
+		WHEN c.appro_loan_repay_type = '5' THEN
+			'1'
+		WHEN c.appro_loan_repay_type = '4' THEN
+			'2'
+		WHEN c.appro_loan_repay_type = '10' THEN
+			'8'
+		ELSE
+			'7'
+		END AS "bidRepaymentType",
+		 CASE
+		WHEN c.appro_loan_repay_type = '4' THEN
+			'2'
+		WHEN c.appro_loan_repay_type = '5' THEN
+			'3'
+		WHEN c.appro_loan_repay_type = '1' THEN
+			'4'
+		WHEN c.appro_loan_repay_type = '2' THEN
+			'5'
+		WHEN c.appro_loan_repay_type = '3' THEN
+			'6'
+		WHEN c.appro_loan_repay_type = '8' THEN
+			'7'
+		WHEN c.appro_loan_repay_type = '7' THEN
+			'8'
+		WHEN c.appro_loan_repay_type = '6' THEN
+			'9'
+		ELSE
+			c.appro_loan_repay_type
+		END AS "contractRepaymentType",
+		 CASE
+		WHEN c.SERVICE_FEE_TYPE = '1' THEN
+			c.ALL_SERVICE_FEE
+		ELSE
+			c.SPECIAL_SERVICE_FEE
+		END AS "service_fee",
+		 c.margin_amount AS "security_amount",
+		 '0' AS "risk_prepare_amount",
+		 b.sign_date AS "borrow_contract_date",
+		 DATE_FORMAT(b.sign_date, '%Y-%m-%d') AS "mortgage_contract_date",
+		 b.GUANETONG_RATE AS "bidYearIrr",
+		 -- ifnull(au.QUALITY_SERVICE_MARGIN_AMOUNT,ch.QUALITY_SERVICE_MARGIN_AMOUNT) as "qualityServiceDeposit",
+		b.APPRO_YEAR_RATE AS "contractYearIrr",
+		 d.LOAN_BE_COMPANY AS "creditorCompany",
+		 '' AS "accountNo",
+		 '1' AS "bidOfflineType"
+		FROM
+			cre_contract c
+		LEFT JOIN cre_check_approve b ON c.apply_no = b.apply_no
+		LEFT JOIN cre_under_company_info d ON d.apply_no = b.apply_no
+		WHERE
+			c.apply_no = #{applyNo}
+			and b.task_def_key = #{taskDefKey}
+
+	</select>
+	<select id="getBaseDataByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.BaseData">
+		SELECT
+		c.id AS "bidOfflineId",
+		c.APPRO_product_name AS "bidTitle",
+		c.contract_no AS "contractNo",
+		c.APPRO_PRODUCT_TYPE_CODE AS "loanType",
+		c.contract_amount AS "bidAmount",
+		c.appro_period_value AS "period",
+		CASE
+		WHEN c.appro_loan_repay_type = '5' THEN
+		'1'
+		WHEN
+		c.appro_loan_repay_type = '4' THEN
+		'2'
+		WHEN
+		c.appro_loan_repay_type = '10' THEN
+		'8'
+		ELSE
+		'7'
+		END AS "bidRepaymentType",
+		CASE
+		WHEN c.appro_loan_repay_type = '4' THEN
+		'2'
+		WHEN c.appro_loan_repay_type = '5' THEN
+		'3'
+		WHEN c.appro_loan_repay_type = '1' THEN
+		'4'
+		WHEN c.appro_loan_repay_type = '2' THEN
+		'5'
+		WHEN c.appro_loan_repay_type
+		= '3' THEN
+		'6'
+		WHEN c.appro_loan_repay_type = '8' THEN
+		'7'
+		WHEN c.appro_loan_repay_type = '7' THEN
+		'8'
+		WHEN c.appro_loan_repay_type = '6' THEN
+		'9'
+		ELSE
+		c.appro_loan_repay_type
+		END AS "contractRepaymentType",
+		CASE
+		WHEN c.SERVICE_FEE_TYPE = '1' THEN
+		c.ALL_SERVICE_FEE
+		ELSE
+		c.SPECIAL_SERVICE_FEE
+		END AS "service_fee",
+		c.margin_amount AS "security_amount",
+		'0' AS "risk_prepare_amount",
+		CURRENT_DATE AS "borrow_contract_date",
+		DATE_FORMAT(c.CREATE_DATE, '%Y-%m-%d') AS "mortgage_contract_date",
+		(
+		SELECT
+		`name`
+		FROM
+		sys_office
+		WHERE
+		id = c.ORG_LEVEL2
+		) AS
+		"area",
+		ch.GUANETONG_RATE AS "bidYearIrr",
+		ifnull(au.QUALITY_SERVICE_MARGIN_AMOUNT,ch.QUALITY_SERVICE_MARGIN_AMOUNT) as "qualityServiceDeposit",
+		ch.APPRO_YEAR_RATE * 12 AS "contractYearIrr",
+		CASE
+		WHEN c.contract_org_platform = '10040001' THEN
+		'1'
+		WHEN c.contract_org_platform =
+		'10040002' THEN
+		'3'
+		WHEN c.contract_org_platform = '10040003' THEN
+		'2'
+		END AS "creditorCompany",
+		'' AS "accountNo",
+		cast((select SEND_GED from cre_apply_register where APPLY_NO = #{param1}) as SIGNED INTEGER) as bidOfflineType
+		FROM
+		cre_contract c
+		left join cre_check_approve_union au on c.APPRO_ID = au.id
+		LEFT JOIN cre_rate_interest r ON c.appro_loan_repay_type = r.loan_repay_type
+		AND
+		c.appro_period_value = r.period_value
+		AND c.appro_product_type_code = r.product_type_code
+		LEFT JOIN cre_check_approve ch ON c.APPLY_NO = ch.APPLY_NO
+		AND ch.PROCESS_SEQUENCE = '8'
+		WHERE c.apply_no =
+		#{param1}
+		<if test="param2 != null and param2 != ''">
+			AND c.APPRO_ID = #{param2}
+		</if>
+	</select>
+
+
+	<select id="getFilialeNameByApplyNo" resultType="String">
+		select
+		b.name AS
+		filialeName
+		from cre_apply_register a
+		inner join sys_office b
+		on a.ORG_ID
+		=b.id
+		where a.APPLY_NO=#{applyNo}
+	</select>
+
+	<select id="getCreditOtherByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditOther">
+		select
+		a.WARE_TYPE as "pleType",
+		a.WARE_DESCRIPTION as "pleDesc"
+		from
+		cre_warehouse_goods a
+		where a.APPLY_NO=#{applyNo}
+	</select>
+
+	<select id="getUnderCreditOtherByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditOther">
+		select
+		"3" as "pleType",
+		 other as "pleDesc"
+		from
+		cre_gqget_com_info a
+		where a.APPLY_NO=#{applyNo}
+	</select>
+
+	<select id="getCreditOtherByApplyNoAndApproId" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditOther">
+		select
+		a.WARE_TYPE as "pleType",
+		a.WARE_DESCRIPTION as "pleDesc"
+		from
+		cre_warehouse_goods_union a
+		where a.APPLY_NO=#{applyNo} and a.APPROVE_ID = #{approveId}
+	</select>
+
+
+	<select id="getUnderCompanyByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCompany">
+		SELECT
+			a.BUSI_REG_NAME AS "loan_company_info",
+			a.BUSI_LIC_REG_NO AS "loan_license_number",
+			a.CORPORATION_NAME AS "corporation_name",
+			a.COMPANY_START_DATE AS "founding_date",
+			a.REGISTER_CAPITAL AS "registered_capital",
+			a.CORPORATION_CARD_ID_NO AS "corporation_cert_no",
+			a.CATEGORY_MAIN AS "corporation_industry",
+			a.REG_DISTINCT AS "operating_area",
+			"2" AS "busi_type",
+			b.EXECUTIVE_PENALTY_INFO AS "administration_punish_info",
+			b.OTHER_WEBLOAN_INFO AS "other_plat_loan_desc",
+			b.PLAT_OVERDUE_COUNT AS "this_overdue_times",
+			b.PLAT_OVERDUE_MONEY AS "this_overdue_money",
+			a.STOCK_INFO AS "shareholder_info",
+			a.CREDIT_CORPORATION AS "corporation_credit_info",
+			CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = a.REGISTER_PROVINCE),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.REGISTER_CITY),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.REGISTER_DISTINCT),''),
+			IFNULL(a.REGISTER_DETAILS,'')) AS "registeredAddress",
+			CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OPERATE_PROVINCE),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OPERATE_CITY),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OPERATE_DISTINCT),''),
+			IFNULL(a.OPERATE_DETAILS,'')) AS "corporationAddress",
+			a.PAID_IN_CAPITAL as paidCapital,
+			CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OFFICE_PROVINCE),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OFFICE_CITY),''),
+			IFNULL((SELECT NAME FROM sys_area WHERE ID = a.OFFICE_DISTINCT),''),
+			IFNULL(a.OFFICE_DETAILS,'')) as "workAddress"
+		FROM
+			cre_under_company_info a
+		LEFT JOIN cre_under_cust_info b ON a.apply_no = b.apply_no
+		where  a.apply_no=#{applyNo}
+
+	</select>
+
+	<select id="getLoanCompanyByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCompany">
+		SELECT
+		CASE
+		WHEN e.CUST_TYPE = '1' THEN
+		e.CUST_NAME
+		ELSE
+		b.BUSI_REG_NAME
+		END AS "loanCompanyInfo",
+		b.CORPORATION_CARD_ID_NO as "corporationCertNo",
+		b.CATEGORY_SMALL as "corporationIndustry",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_DISTINCT),''),
+		IFNULL(b.REG_DETAILS,'')) AS "corporationAddress",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_DISTINCT),''),
+		IFNULL(b.OPERATE_DETAILS,'')) as "workAddress",
+		CASE  WHEN e.CUST_TYPE = '2' and (b.UN_SOC_CREDIT_NO is NULL OR b.UN_SOC_CREDIT_NO = '')
+		THEN b.BUSI_LIC_REG_NO
+		when e.CUST_TYPE = '2' and (b.UN_SOC_CREDIT_NO is not NULL) then b.UN_SOC_CREDIT_NO
+		ELSE e.ID_NUM
+		END AS "loanLicenseNumber",
+		b.CORPORATION_NAME AS "corporationName",
+		b.FOUND_DATE AS "foundingDate",
+		b.REGISTER_CAPITAL AS "registeredCapital",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_DISTINCT),''),
+		IFNULL(b.REG_DETAILS,'')) AS "registeredAddress",
+		b.PAID_CAPITAL as paidCapital,
+		c.borrow_mate_punish as administrationPunishInfo,
+		c.PLATFORM_OVERDUE_TIME as thisOverdueTimes,
+		c.PLATFORM_OVERDUE_MONEY as "thisOverdueMoney",
+		d.CREDIT_COMPANY as corporationCreditInfo,
+		b.OPERATE_AREA as operatingArea,
+		c.borrow_loan_blance as otherPlatLoanDesc,
+		e.CUST_TYPE as busiType,
+		b.CAPITAL_STRUCTURE_COM as shareholderInfo
+		FROM
+		cre_apply_relation r
+		INNER JOIN cre_company_info b ON r.CUST_ID = b.ID
+		INNER JOIN cre_gqget_com_info c on r.APPLY_NO = c.APPLY_NO
+		INNER JOIN cre_credit_analysis d on r.APPLY_NO = d.APPLY_NO
+		INNER JOIN cre_apply_register e on r.APPLY_NO = e.APPLY_NO
+		WHERE
+		r.apply_no = #{applyNo}
+		and r.ROLE_TYPE = '5'
+	</select>
+
+	<select id="getLoanCompanyByApproId" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCompany">
+		select 
+		case when e.CUST_TYPE = '1' then e.CUST_NAME 
+		else b.BUSI_REG_NAME
+		end as "loanCompanyInfo",
+		b.CORPORATION_CARD_ID_NO as "corporationCertNo",
+		b.CATEGORY_SMALL as "corporationIndustry",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_DISTINCT),''),
+		IFNULL(b.REG_DETAILS,'')) AS "corporationAddress",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.OPERATE_DISTINCT),''),
+		IFNULL(b.OPERATE_DETAILS,'')) as "workAddress",
+		CASE  WHEN e.CUST_TYPE = '2' and (b.UN_SOC_CREDIT_NO is NULL OR b.UN_SOC_CREDIT_NO = '')
+		THEN b.BUSI_LIC_REG_NO
+		when e.CUST_TYPE = '2' and (b.UN_SOC_CREDIT_NO is not NULL) then b.UN_SOC_CREDIT_NO
+		ELSE e.ID_NUM
+		END AS "loanLicenseNumber",
+		b.CORPORATION_NAME as "corporationName",
+		b.FOUND_DATE as "foundingDate",
+		b.REGISTER_CAPITAL as "registeredCapital",
+		CONCAT(IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_PROVINCE),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_CITY),''),
+		IFNULL((SELECT NAME FROM sys_area WHERE ID = b.REG_DISTINCT),''),
+		IFNULL(b.REG_DETAILS,'')) as
+		"registeredAddress",
+		b.PAID_CAPITAL as "paidCapital",
+		c.borrow_mate_punish as "administrationPunishInfo",
+		c.PLATFORM_OVERDUE_TIME as "thisOverdueTimes",
+		c.PLATFORM_OVERDUE_MONEY as "thisOverdueMoney",
+		c.CREDIT_COMPANY as "corporationCreditInfo",
+		b.OPERATE_AREA as "operatingArea",
+		c.borrow_loan_blance as "otherPlatLoanDesc",
+		cast(e.CUST_TYPE as SIGNED INTEGER)  as "busiType",
+		b.CAPITAL_STRUCTURE_COM as "shareholderInfo"
+		from
+		cre_check_approve_union a
+		INNER JOIN cre_company_info b on a.CUST_ID = b.ID
+		INNER JOIN cre_gqget_com_info_union c on a.APPLY_NO = c.APPLY_NO and c.APPROVE_ID = a.ID
+		INNER JOIN cre_credit_analysis d on a.APPLY_NO = d.APPLY_NO
+		INNER JOIN cre_apply_register e on a.APPLY_NO = e.APPLY_NO
+		WHERE a.id = #{approId} GROUP BY a.id
+	</select>
+
+	<select id="getLoanCustInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+		select DISTINCT
+		f.LEGAL_PER_PHONE as "mobliePhone"<!-- /*借款人电话*/ -->
+		,f.LEGAL_PER_NAME as "custName"<!-- /*借款人姓名*/ -->
+		,f.LEGAL_PER_NUM "certNo"<!-- /*借款人身份证*/ -->
+		,b.sex_no as "sex"<!-- /*性别*/ -->
+		,b.birth_day as "birthDate"<!-- /*生日*/ -->
+		,b.wed_status as "maritalStatus"<!-- /*婚姻状况*/ -->
+		,c.label as "education"<!-- /*学历*/ -->
+		,d.indu_name as "industry"<!-- /*所属行业*/ -->
+		,e.REP_BANKCARD_NO AS "bankNo"<!-- /*银行卡号*/ -->
+		,(select label from sys_dict where value=e.REP_BANK and type='BANKS' ) AS "bankLongName"<!-- /*银行名称*/ -->
+		,f.COMPANY_BANK_OF_DEPOSIT AS "bankCode"<!-- /*银行号*/ -->
+		,case when s.label is not null then s.label else e.REP_BANK_CITY END as "cityCode"  <!-- /*城市代码*/ -->
+		,CASE WHEN car.cust_type = '2' THEN '1' WHEN car.CUST_TYPE='1' then '0' end as 'busiType'
+		from
+		cre_apply_relation a
+		inner join
+		cre_cust_info b on a.cust_id = b.id
+        inner join
+        cre_ged_account f on f.LEGAL_PER_PHONE = b.MOBILE_NUM
+		inner join
+		cre_apply_register car on car.APPLY_NO = a.APPLY_NO
+		inner join
+		cre_contract e on a.apply_no = e.apply_no and e.cust_id = b.id
+		left join
+		sys_dict c on b.top_education_no = c.value and type = 'education'
+		left join
+		sys_industry d on b.category_main =
+		d.indu_code
+		left join
+		(SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on e.REP_BANK_CITY = s.`value`
+		where
+		a.apply_no = #{param1} and b.DEL_FLAG = '0'
+		<if test="param2 != null and param2 != ''">
+			and e.appro_id = #{param2}
+		</if>
+	</select>
+
+
+    <select id="getComLoanCustInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+        select DISTINCT
+        f.contact_mobile as "mobliePhone"<!-- /*借款人电话*/ -->
+        ,f.legal_name as "custName"<!-- /*借款人姓名*/ -->
+        ,f.legal_card_number "certNo"<!-- /*借款人身份证*/ -->
+        <!--/*,b.sex_no as "sex" /*性别*/ -->
+        <!--b.birth_day as "birthDate" /*生日*/ -->
+        <!--b.wed_status as "maritalStatus"<!- /*婚姻状况*/ -->
+        <!-- ,c.label as "education" /*学历*/ -->
+        ,d.indu_name as "industry"<!-- /*所属行业*/ -->
+        ,f.company_account AS "bankNo"<!-- /*银行卡号*/ -->
+        , f.company_bank_of_deposit_value AS "bankLongName"<!-- /*银行名称*/ -->
+        ,f.COMPANY_BANK_OF_DEPOSIT AS "bankCode"<!-- /*银行号*/ -->
+        ,case when s.label is not null then s.label else e.REP_BANK_CITY END as "cityCode"  <!-- /*城市代码*/ -->
+        ,CASE WHEN car.cust_type = '2' THEN '1' WHEN car.CUST_TYPE='1' then '0' end as 'busiType'
+        from
+        cre_apply_relation a
+        inner join
+        cre_company_info b on a.cust_id = b.id
+        left join
+        cre_ged_account_company f on f.social_credit_code = b.UN_SOC_CREDIT_NO
+        inner join
+        cre_apply_register car on car.APPLY_NO = a.APPLY_NO
+        inner join
+        cre_contract e on a.apply_no = e.apply_no
+    <!--  left join
+    sys_dict c on b.top_education_no = c.value and type = 'education'-->
+    left join
+    sys_industry d on b.category_main =
+    d.indu_code
+    left join
+    (SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on e.REP_BANK_CITY = s.`value`
+    where
+    a.apply_no = #{param1} and b.DEL_FLAG = '0' and a.role_type='5'
+
+</select>
+<select id="getUnderCustInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+    select DISTINCT
+    c.LEGAL_PER_PHONE as "mobliePhone"<!-- /*借款人电话*/ -->
+    ,c.LEGAL_PER_NAME as "custName"<!-- /*借款人姓名*/ -->
+    ,c.LEGAL_PER_NUM "certNo"<!-- /*借款人身份证*/ -->
+    ,c.COMPANY_ACCOUNT AS "bankNo"<!-- /*银行卡号*/ -->
+    ,(select label from sys_dict where value=c.company_bank_of_deposit and type='BANKS' )  AS "bankLongName"<!-- /*银行名称*/ -->
+    ,c.company_bank_of_deposit AS "bankCode"<!-- /*银行号*/ -->
+    ,b.REGISTER_DISTINCT  as "cityCode"  <!-- /*城市代码*/ -->
+    from
+    cre_under_cust_info a
+    left join cre_under_company_info b on a.apply_no = b.apply_no
+    left  join cre_ged_account c  on  c.LEGAL_PER_PHONE = a.MOBILE_NUM
+    where
+    a.apply_no = #{param1}
+
+</select>
+
+<!-- <select id="getLoanCustInfoByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+		select DISTINCT
+		b.mobile_num as "mobliePhone"/*借款人电话*/
+		,b.cust_name as "custName"/*借款人姓名*/
+		,b.id_num "certNo"/*借款人身份证*/
+		,b.sex_no as "sex"/*性别*/
+		,b.birth_day as "birthDate"/*生日*/
+		,b.wed_status as "maritalStatus"/*婚姻状况*/
+		,c.label as "education"/*学历*/
+		,d.indu_name as "industry"/*所属行业*/
+		,e.REP_BANKCARD_NO AS "bankNo"/*银行卡号*/
+		,(select label from sys_dict where value=e.REP_BANK and type='BANKS' ) AS "bankLongName"/*银行名称*/
+		,e.REP_BANK AS "bankCode"/*银行号*/
+		,case when s.label is not null then s.label else e.REP_BANK_CITY END as "cityCode"  /*城市代码*/
+		from
+		cre_company_cust_related a
+		inner join
+		cre_cust_info b on a.cust_id = b.id
+		inner join
+		cre_contract e on a.apply_no = e.apply_no and e.cust_id = a.COMPANY_ID
+		left join
+		sys_dict c on b.top_education_no = c.value and type = 'education'
+		left join
+		sys_industry d on b.category_main = d.indu_code
+		left join
+		(SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on e.REP_BANK_CITY = s.`value`
+		where
+		a.apply_no = #{applyNo} and b.DEL_FLAG = '0'
+		and a.appro_id = #{approId}
+	</select> -->
+	
+	<select id="getLoanCustInfoByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+		select DISTINCT
+			f.LEGAL_PER_PHONE AS "mobliePhone",
+			f.LEGAL_PER_NAME AS "custName",
+			f.LEGAL_PER_NUM "certNo" <!--  -->
+			,d.indu_name as "industry" <!-- /*所属行业*/ -->
+			,a.REP_BANKCARD_NO AS "bankNo" <!-- /*银行卡号*/ -->
+			,(select label from sys_dict where value=f.COMPANY_BANK_OF_DEPOSIT and type='BANKS' ) AS "bankLongName" <!-- /*银行名称*/ -->
+			,f.COMPANY_BANK_OF_DEPOSIT AS "bankCode" <!-- /*银行号*/ -->
+			,case when s.label is not null then s.label else a.REP_BANK_CITY END as "cityCode"   <!-- /*城市代码*/ -->
+			  ,CASE
+				WHEN car.cust_type = '2' THEN '1'
+				WHEN car.CUST_TYPE='1' then '0'
+			  end as 'busiType'
+		from
+		cre_contract a
+		INNER JOIN
+		cre_check_approve_union q on a.APPRO_ID = q.ID
+		inner join
+		cre_company_info b on q.cust_id = b.id 
+		INNER JOIN
+		cre_ged_account f on f.LEGAL_PER_PHONE = b.CORPORATION_MOBILE
+		left join
+		sys_industry d on b.category_main = d.indu_code
+		left join
+		(SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on a.REP_BANK_CITY = s.`value`
+		inner join
+		cre_apply_register car on car.APPLY_NO = q.APPLY_NO
+		where
+		a.apply_no = #{applyNo}
+		and a.appro_id =  #{approId}
+	</select>
+
+
+
+    <select id="getComLoanCustInfoByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCustInfo">
+        select DISTINCT
+        f.contact_mobile AS "mobliePhone",
+        f.legal_name AS "custName",
+        f.legal_card_number "certNo" <!--  -->
+        ,d.indu_name as "industry" <!-- /*所属行业*/ -->
+        ,a.REP_BANKCARD_NO AS "bankNo" <!-- /*银行卡号*/ -->
+        ,(select label from sys_dict where value=f.COMPANY_BANK_OF_DEPOSIT and type='BANKS' ) AS "bankLongName" <!-- /*银行名称*/ -->
+        ,f.COMPANY_BANK_OF_DEPOSIT AS "bankCode" <!-- /*银行号*/ -->
+        ,case when s.label is not null then s.label else a.REP_BANK_CITY END as "cityCode"   <!-- /*城市代码*/ -->
+        ,CASE
+        WHEN car.cust_type = '2' THEN '1'
+        WHEN car.CUST_TYPE='1' then '0'
+        end as 'busiType'
+        from
+        cre_contract a
+        INNER JOIN
+        cre_check_approve_union q on a.APPRO_ID = q.ID
+        inner join
+        cre_company_info b on q.cust_id = b.id
+        INNER JOIN
+        cre_ged_account_company f on f.social_credit_code = b.UN_SOC_CREDIT_NO
+        left join
+        sys_industry d on b.category_main = d.indu_code
+        left join
+        (SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on a.REP_BANK_CITY = s.`value`
+        inner join
+        cre_apply_register car on car.APPLY_NO = q.APPLY_NO
+        where
+        a.apply_no = #{applyNo}
+        and a.appro_id =  #{approveId}
+    </select>
+
+	<select id="getHypothecariusCustInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.HypothecariusCustInfo">
+		select
+		b.mobile_num as "mobliePhone"
+		,b.mortgagee_name as "custName"
+		,b.id_num as "certNo"
+		,b.sex_no as "sex"
+		,b.birth_day as "birthDate"
+		,'' as "maritalStatus"
+		,'' as "education"
+		,'' as "industry"
+		,b.BANKCARD_NO AS "bankNo"<!-- /*银行卡号*/ -->
+		,(select label from sys_dict where value=b.BANK_NO and type='BANKS' ) AS "bankLongName"<!-- /*银行名称*/ -->
+		,b.BANK_NO AS "bankCode"<!-- /*银行号*/ -->
+		,case when s.label is not null then s.label else b.CONT_CITY END as "cityCode"<!-- /*城市代码*/ -->
+		from
+		cre_contract a
+		inner join
+		cre_mortgaged_person b on a.mortgagee_id = b.id
+		left join
+		(SELECT label,`value` FROM sys_dict WHERE type = 'AREA_MAPPING_4GET' ) s on b.CONT_CITY = s.`value`
+		where
+		a.apply_no = #{param1} and appro_product_type_code in ('2','4')
+		<if test="param2 != null and param2 != ''">
+			and a.appro_id = #{param2}
+		</if>
+	</select>
+
+
+	<select id="getMiddleCustInfoByApplyNo" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.MiddleCustInfo">
+		select
+		a.MIDDLEMAN_MOBILE_NUM as "mobliePhone"
+		,a.MIDDLEMAN_NAME as "custName"
+		,a.MIDDLEMAN_ID_NUM as "certNo"
+		,'' as "sex"
+		,'' as "birthDate"
+		,'' as "maritalStatus"
+		,'' as "education"
+		,'' as "industry"
+		,a.MIDDLEMAN_BANKCARD_NO AS "bankNo"<!-- /*银行卡号*/ -->
+		,(select label from sys_dict where value=a.MIDDLEMAN_BANK_NO and type='BANKS' ) AS "bankLongName"<!-- /*银行名称*/ -->
+		,a.MIDDLEMAN_BANK_NO AS "bankCode"<!-- /*银行号*/ -->
+		,a.MIDDLEMAN_CONT_DISTINCT as "cityCode"<!-- /*城市代码*/ -->
+		from
+		cre_contract a
+		where
+		a.apply_no = #{param1}
+		<if test="param2 != null and param2 != ''">
+			and a.appro_id = #{param2}
+		</if>
+	</select>
+
+	<update id="updateApplyLoanStatus">
+		UPDATE cre_apply_loan_status
+		SET LOAN_STATUS =
+		(case
+		when #{param2}='0' then '22'
+		when #{param2}='1' then '24'
+		when #{param2}='2' then '23' end)
+		,FACT_LOAN_AMOUNT = #{param3}
+		WHERE
+		CONTRACT_NO=#{param1}
+	</update>
+	
+	<update id="updateApplyLoanStatusWithdraw">
+		UPDATE cre_apply_loan_status
+		SET LOAN_STATUS = #{param2}
+		,FACT_LOAN_AMOUNT = #{param3}
+		WHERE
+		CONTRACT_NO=#{param1}
+	</update>
+
+	<update id="failSendUpdate">
+		UPDATE cre_apply_loan_status
+		SET LOAN_STATUS = '20'
+		WHERE
+		APPLY_NO=#{applyNo}
+		<if test="contractNo != null and contractNo != ''" >
+			and  contract_no = #{contractNo}
+		</if>
+	</update>
+
+	<update id="updateContract">
+		UPDATE cre_contract
+		SET CAPITAL_TERRACE_NO = #{param2}
+		WHERE
+		CONTRACT_NO=#{param1}
+	</update>
+
+	<select id="getJointcreditCount" resultType="int">
+		SELECT
+		COUNT(APPLY_NO)
+		FROM
+		cre_check_approve_union
+		WHERE
+		APPLY_NO = #{applyNo}
+	</select>
+
+
+	<!-- /*联合授信对应标的信息*/ -->
+	<!-- /*担保企业*/ -->
+	<select id="getCreditCompanyByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditCompany">
+		SELECT
+		a.RELATON AS relation,
+		a.COMPANY_DESC AS companyDesc,
+		a.INCOME_STATE AS incomeState,
+		a.OPERATION_STATE AS operationState
+		FROM
+		cre_mortgaged_company_union a
+		WHERE
+		a.APPROVE_ID = #{param1}
+	</select>
+
+	<!-- /*设备抵押信息*/ -->
+	<select id="getCreditApplianceByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAppliance">
+		SELECT
+		a.MODEL AS "modelNumber",
+		a.BUYING_PRICE AS "purchaseAmount",
+		a.VALUE_OF_ASSESSMENT AS "predictAmount",
+		a.MAKET_VALUE AS "bazaarAmount"
+		FROM
+		cre_mortage_equipment_union a
+		WHERE
+		a.APPROVE_ID = #{param1}
+	</select>
+
+	<!-- /*房产信息*/ -->
+	<select id="getAssetHouseByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditHouse">
+		SELECT
+		a.CONT_DETAILS AS address,
+		a.BUILDING_AREA AS area,
+		a.EVALUATE_PRICE AS predictAmount,
+		a.MARKET_PRICE AS bazaarAmount,
+		'3' AS impawnType
+		FROM
+		cre_gqget_asset_house_union a
+		WHERE
+		a.APPROVE_ID = #{param1}
+	</select>
+
+	<!-- /*车产信息*/ -->
+	<select id="getAssetAutomobileByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditAutomobile">
+		SELECT
+		a.GQGET_VEHICLE_NO AS modelNumber,
+		a.GQGET_USED_YEARS AS useYear,
+		a.GQGET_CAR_EVALUATE_PRICE AS predictAmount,
+		a.GQGET_MARKET_PRICE AS bazaarAmount
+		FROM
+		cre_gqget_asset_car_union a
+		WHERE
+		a.APPROVE_ID =
+		#{param1}
+	</select>
+
+	<!-- /*主借人信息*/ -->
+	<select id="getCreditInfoByApplyNoUnion" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.CreditInfo">
+		SELECT
+		e.INTRODUCTION_OF_COMPANY AS "firmDesc",
+		e.operate_actuality AS "operateActuality",
+		'' AS "incomeActuality",
+		'' AS "industryDesc",
+		'' AS "loanStatus",
+		e.MIX_LOAN_USAGE AS "loanUse",
+		'' AS "loanUseType",
+		e.SOURCE_OF_PEPAYMENT1 AS "refundSource",
+		e.SOURCE_OF_PEPAYMENT2 AS "refundSource2",
+		e.SOURCE_OF_PEPAYMENT3 AS "refundSource3",
+		e.SOURCE_OF_PEPAYMENT4 AS "refundSource4",
+		'' AS "refundSourceType",
+		'' AS loanPersonDesc,
+		e.INTRODUCTION_OF_COM_PRODUCTION AS "firmProductDesc",
+		''
+		AS "firmSumDesc",
+		'' AS "creditLevel",
+		e.IS_LOAN + 1 AS "isLoanRecord",
+		e.IS_OVERDUE + 1 AS "isOverdue",
+		e.LOAN_RECODE AS "bankLoanCount",
+		e.SOURCE_OF_CREDIT_REGISTRIES AS "creditRecordLevel",
+		#{param2} AS "propertyType"
+		FROM
+		cre_gqget_com_info_union e
+		WHERE
+		e.APPROVE_ID =
+		#{param1}
+	</select>
+
+
+	<!-- /*客户信息同步接口*/ -->
+	<!-- /*保存客户信息*/ -->
+	<insert id="insertGqgetInfo">
+		INSERT INTO cre_gqget_cust_info(
+		ID,
+		CUST_ID,
+		ID_NUM,
+		CUST_TYPE,
+		PHONE_NO,
+		BANKCARD_NO,
+		BANK_NO,
+		BANK_OFFICE,
+		CONT_DISTINCT,
+		CONT_DETAILS,
+		CREATE_DATE,
+		CREATE_BY,
+		UPDATE_DATE,
+		UPDATE_BY
+		) VALUES (
+		#{id},
+		#{custId},
+		#{idNum},
+		#{custType},
+		#{phoneNo},
+		#{bankcardNo},
+		#{bankNo},
+		#{bankOffice},
+		#{contDistinct},
+		#{contDetails},
+		#{createDate},
+		#{createBy.id},
+		#{updateDate},
+		#{updateBy.id}
+		)
+	</insert>
+
+	<!-- /*更新客户信息*/ -->
+	<update id="updateGqgetInfo">
+		UPDATE cre_gqget_cust_info SET
+		CUST_ID = #{custId},
+		ID_NUM = #{idNum},
+		CUST_TYPE = #{custType},
+		PHONE_NO = #{phoneNo},
+		BANK_NO = #{bankNo},
+		BANK_OFFICE = #{bankOffice},
+		CONT_DISTINCT = #{contDistinct},
+		CONT_DETAILS = #{contDetails},
+		UPDATE_BY = #{updateBy.id},
+		UPDATE_DATE = #{updateDate}
+		WHERE BANKCARD_NO = #{bankcardNo}
+	</update>
+
+	<select id="getCustInfoByBankcardNo" resultType="com.resoft.outinterface.rest.GQget.server.entry.response.GqgetCustInfo">
+		SELECT
+		CUST_ID,
+		ID_NUM,
+		CUST_TYPE,
+		PHONE_NO,
+		BANKCARD_NO,
+		BANK_NO,
+		BANK_OFFICE,
+		CONT_DISTINCT,
+		CONT_DETAILS
+		FROM
+		cre_gqget_cust_info
+		WHERE
+		BANKCARD_NO = #{bankcardNo}
+	</select>
+	
+	<select id="getCustInfoAndCreditByApplyNO" resultType="com.resoft.outinterface.rest.GQget.client.entry.request.issuingTender.LoanCompany">
+		SELECT
+		a.CUST_TYPE AS busiType,
+		a.CUST_NAME AS "loanCompanyInfo",
+		a.ID_NUM AS "loanLicenseNumber",
+		b.borrow_loan_blance AS otherPlatLoanDesc,
+		b.borrow_mate_punish AS administrationPunishInfo,
+		b.PLATFORM_OVERDUE_TIME as thisOverdueTimes,
+		b.PLATFORM_OVERDUE_MONEY as "thisOverdueMoney",
+		c.CREDIT_COMPANY as corporationCreditInfo
+		from cre_apply_register a INNER JOIN cre_gqget_com_info b on a.APPLY_NO = b.APPLY_NO INNER JOIN cre_credit_analysis c on a.APPLY_NO = c.APPLY_NO where a.APPLY_NO = #{applyNo} and DEL_FLAG = '0'
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.client3.dao.InformationMatchClientDao">
+
+	<select id="findPersonalBasicDataList" resultType="com.resoft.outinterface.SV.client2.PersonalBasicData">
+		select
+		b.id as "workId",
+		b.IS_HAVE_COMPANY as
+		"whetherBusiness",
+		b.ID_TYPE as "documentType",
+		b.ID_NUM as "identificationNumber",
+		b.PERSON_ID_START_DATE as "idStartDate",
+		b.MOBILE_NUM as "mobilePhone",
+		b.NATION_NO as "nation",
+		b.BIRTH_DAY as "birthday",
+		b.AGE_NO as "age" ,
+		b.SEX_NO as "sex",
+		b.WED_STATUS as "maritalStatus",
+		b.TOP_EDUCATION_NO as "highestDegree",
+		b.OTHER_CONTACT_TYPE as "otherContacts",
+		b.PER_ANNUAL_INCOME as "personalAnnualIncome",
+		b.SOURCE_OF_INCOME as
+		"sourceIncome",
+		b.EMAIL_NO as "electronicMail" ,
+		b.MICRO_NO as
+		"microblogNumber",
+		b.WECHAT_NO as "weChatNumber",
+		b.QQ_NO as "QQNumber"
+		from
+		cre_apply_relation a
+		INNER JOIN cre_cust_info b on a.CUST_ID = b.ID
+		where a.ROLE_TYPE in ('1','3','4')
+		and a.apply_no = #{applyNo}
+		and a.SV_FLAG = '1'
+		and a.del_flag = '0'
+		and b.del_flag = '0'
+	
+	</select>
+
+
+	<select id="findCompanyBasicInformationList" resultType="com.resoft.outinterface.SV.client2.CompanyBasicInformation">
+		select
+		b.id as "workId",
+		b.OPERATE_PERIOD as
+		"operatingPeriod",
+		b.BUSI_REG_NAME as "entryName",
+		b.UN_SOC_CREDIT_NO as
+		"unifiedSocialCreditCode",
+		b.ORGANIZATION_NO as
+		"organizationCode",
+		b.BUSI_LIC_REG_NO as
+		"busRegistrationNumber",
+		b.REGISTER_NATIONAL_TAX_NO as "registrationNumberCountry",
+		b.REGISTER_LAND_TAX_NO as "registrationNumberGround",
+		b.COMPANY_LAND_USE as
+		"enterpriseLand",
+		b.COMPANY_TYPE as
+		"enterpriseType",
+		b.COMPANY_PROPERTY as "enterpriseProperty",
+		b.CORPORATION_NAME
+		as "lawPersonName",
+		b.CORPORATION_CARD_ID_NO as
+		"lawPersonNumber",
+		b.CORPORATION_MOBILE as
+		"lawPersonPhoneNumber",
+		b.REGISTER_CAPITAL as "registeredCapital",
+		b.FOUND_DATE as
+		"foundingTime",
+		b.REG_DISTINCT as "registeredAddress",
+		b.REG_DETAILS as
+		"registeredDetailAddress",
+		b.OPERATE_DISTINCT as "businessAddress",
+		b.OPERATE_DETAILS as "businessDetailAddress",
+		b.IS_ADDR_RESI as
+		"whetherConsistent",
+		b.CURR_STAFF_NUM as "numberEmployees",
+		b.OPERATE_AREAS as "operatingArea",
+		b.MAIN_BUSINESS as "mainBusiness",
+		b.ANNUAL_TURNOVER as "annualTurnover",
+		b.SPECIAL_OPERATE_PERMIT as
+		"specialOperatingPermit",
+		b.SPECIAL_OPERATE_START_DATE as
+		"specialPermitStartTime",
+		b.SPECIAL_OPERATE_END_DATE as
+		"specialPermitEndTime",
+		b.IS_HAVE_HOUSES as "whetherProperty"
+		from
+		cre_apply_relation a
+		INNER
+		JOIN cre_company_info b ON a.CUST_ID = b.ID
+		where a.ROLE_TYPE in ('5','6')
+		and a.apply_no = #{applyNo}
+		and a.SV_FLAG = '1'
+		and
+		a.del_flag = '0' and b.del_flag = '0'
+	</select>
+
+
+
+	<select id="findPersonalFamilyDataList" resultType="com.resoft.outinterface.SV.client2.PersonalFamilyData">
+		select
+		b.id as "workId",
+		b.CHILDREN_SON as "numberChildrenMan",
+		b.CHILDREN_GIRL as "numberChildrenWoMan",
+		b.HOUSEHOLD_SPENDING_MONTH as "monthlyHouseholdExpenses",
+		b.HOSE_PHONE_NO as "residentialTelephone",
+		b.REG_DISTINCT as "registeredResidence",
+		b.REG_DETAILS as "registeredDetailResidence",
+		b.IS_LOCAL as "whetherholdRegistration",
+		b.ADDR_RESI as "whetherConsistent",
+		b.LIVING_STATUS as "residentialStatus",
+		b.LIVING_STATUS_DESC as
+		"residentialStatusDescribe"
+		from
+		cre_apply_relation a
+		INNER JOIN
+		cre_cust_info b on
+		a.CUST_ID = b.ID
+		where a.ROLE_TYPE in ('1','3','4')
+		and
+		a.apply_no = #{applyNo}
+		and a.SV_FLAG = '1'
+		and a.del_flag = '0' and b.del_flag = '0'
+	</select>
+
+
+	<select id="findResidenceInformationList" resultType="com.resoft.outinterface.SV.client2.ResidenceInformation">
+		select
+		b.id as "workId",
+		b.CONT_DISTINCT as "residenceAddress",
+		b.CONT_DETAILS as "residenceDateilAddress"
+		from
+		cre_apply_relation a
+		INNER JOIN cre_cust_info b ON b.ID = a.CUST_ID
+		where ROLE_TYPE in ('1','3','4')
+		and
+		a.apply_no = #{applyNo}
+		and a.SV_FLAG = '1'
+		and a.del_flag = '0'
+		and b.del_flag = '0'
+	</select>
+
+
+	<select id="findWorkInformationList" resultType="com.resoft.outinterface.SV.client2.WorkInformation">
+		SELECT
+		b.id as
+		"workId",
+		b.WORK_IN_DATE as "unitEntryDate",
+		b.COMPANY_NAME as
+		"unitName",
+		b.COM_NATURE as "unitType",
+		b.POST_TYPE as "jobCategory",
+		b.POST_LEVEL as
+		"jobLevel",
+		b.POST_NAME as "jobName",
+		b.DEPARTMENT as
+		"departmentName",
+		b.SALARY_MODE as "wagePaymentMethod",
+		b.MONTH_INCOME
+		as "basicMonthlySalary",
+		b.OTHER_MONTH_INCOME as "otherMonthlyIncome",
+		b.COMPANY_DISTINCT as "unitAddress",
+		b.COMPANY_DETAILS as
+		"unitDetailAddress"
+		from cre_apply_relation a
+		INNER JOIN
+		cre_cust_work_info b
+		ON
+		b.cust_id = a.CUST_ID
+		where ROLE_TYPE in ('1','3','4')
+		and
+		a.apply_no = #{applyNo}
+		and a.del_flag = '0'
+	</select>
+
+
+	<select id="findPledgeVehicleInformationList" resultType="com.resoft.outinterface.SV.client2.PledgeVehicleInformation">
+		select
+		b.id as "workId",
+		b.CLIENT_PHONE as
+		"entrustedPersonContactWay",
+		b.PROPERTY_RIGHT as "productAttributes",
+		b.PROPERTY_OF_COM_OWNERS as "propertyShareName",
+		b.PROPERTY_NAME as "propertyOwnerName",
+		b.BUY_DATE as "purchaseTime",
+		b.VEHICLE_BRAND as "vehicleBrand",
+		b.VEHICLE_SERIES as "vehicleType",
+		b.OTHER_INFORMATION as "otherInformation",
+		b.OPERATE_DISTINCT as "carBusinessAddress",
+		b.OPERATE_DETAILS as "carBusinessDetailAddress",
+		b.CORPORATION_NAME as
+		"legalRepresentative",
+		b.CLIENT_NAME as "entrustedHandlePerson",
+		b.CLIENT_COMPANY_RELATION as
+		"entrustedRelationship"
+		from
+		cre_mortgage_car_info b
+		where b.apply_no = #{applyNo}
+		and b.SV_FLAG = '1'
+		and b.del_flag = '0'
+	</select>
+
+	<select id="findPledgeHouseDataList" resultType="com.resoft.outinterface.SV.client2.PledgeHouseData">
+		select
+		b.id as "workId",
+		b.PROPERTY_RIGHT as "propertyRight",
+		b.PROPERTY_NAME as "houseOwnerName",
+		b.HOUSE_USE_PROPERTY as "housePropertyUseNature",
+		b.LAND_USE_PROPERTY as "planningPurposes",
+		b.CONT_DISTINCT as "propertyAddress",
+		b.CONT_DETAILS as "propertyDetailAddress",
+		b.BUILDING_AREA as "buildingArea",
+		b.USING_AREA as "useArea",
+		b.FLOOR_NUM as "hotelFloor",
+		b.HOUSE_TYPE as "propertyTypes"
+		from
+		cre_mortgage_house_info b
+		where b.apply_no = #{applyNo}
+		and b.SV_FLAG = '1'
+		and b.del_flag = '0'
+	</select>
+
+	<select id="findAffiliatedEnterpriseDataList" resultType="com.resoft.outinterface.SV.client2.AffiliatedEnterpriseData">
+		SELECT
+		b.id as "workId",
+		b.RELATED_COMPANY_ORG as
+		"enterpriseOrganizationCode",
+		b.RELATED_COMPANY_NAME as
+		"businessRegistrationName"
+		FROM
+		cre_apply_relation a
+		INNER JOIN
+		cre_company_related b ON a.cust_id =
+		b.COMPANY_ID
+		WHERE
+		a.del_flag = '0'
+		and b.del_flag = '0'
+		and a.apply_no = #{applyNo}
+	</select>
+
+
+	<select id="findMortgageCarEvaluateInfoByCarId" resultType="com.resoft.credit.mortgageCarEvaluateInfo.entity.MortgageCarEvaluateInfo">
+		SELECT a.id AS "id", a.car_id AS "carId",
+		a.motor_vehi_regi_certi_no AS "motorVehiRegiCertiNo",
+		a.vehicle_no AS "vehicleNo", a.engine_num AS "engineNum",
+		a.vehicle_shelf_no AS "vehicleShelfNo",
+		a.net_purchase_price AS "netPurchasePrice", a.travel_kms AS
+		"travelKms", a.IS_PROCEDURE_COMPLETE AS "isProcedureComplete",
+		a.annual_inspection_status AS "annualInspectionStatus", a.use_property
+		AS "useProperty", a.car_status AS "carStatus",
+		a.is_keep_papers AS
+		"isKeepPapers", a.is_handle AS "isHandle", a.used_changes AS
+		"usedChanges", a.used_years AS "usedYears", a.is_common AS "isCommon",
+		a.car_evaluate_price AS "carEvaluatePrice", a.market_price1 AS
+		"marketPrice1", a.market_phone1 AS "marketPhone1",
+		a.market_price2 AS
+		"marketPrice2", a.market_phone2 AS "marketPhone2", a.market_price3 AS
+		"marketPrice3", a.market_phone3 AS "marketPhone3", a.mortgage_rate AS
+		"mortgageRate", a.create_by AS "createBy.id", a.create_date AS
+		"createDate", a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate" FROM cre_mortgage_car_evaluate_info a WHERE a.car_id = #{carId}
+	</select>
+
+	<insert id="saveMortgageCarEvaluateInfo">
+		INSERT INTO cre_mortgage_car_evaluate_info(
+		id,
+		car_id,
+		mortgage_Rate,
+		motor_vehi_regi_certi_no,
+		vehicle_no,
+		engine_num,
+		vehicle_shelf_no,
+		net_purchase_price,
+		travel_kms,
+		annual_inspection_status,
+		use_property,
+		car_status,
+		is_keep_papers,
+		is_handle,
+		used_changes,
+		used_years,
+		is_common,
+		car_evaluate_price,
+		market_price1,
+		market_phone1,
+		market_price2,
+		market_phone2,
+		market_price3,
+		market_phone3,
+		is_procedure_complete,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{carId},
+		#{mortgageRate},
+		#{motorVehiRegiCertiNo},
+		#{vehicleNo},
+		#{engineNum},
+		#{vehicleShelfNo},
+		#{netPurchasePrice},
+		#{travelKms},
+		#{annualInspectionStatus},
+		#{useProperty},
+		#{carStatus},
+		#{isKeepPapers},
+		#{isHandle},
+		#{usedChanges},
+		#{usedYears},
+		#{isCommon},
+		#{carEvaluatePrice},
+		#{marketPrice1},
+		#{marketPhone1},
+		#{marketPrice2},
+		#{marketPhone2},
+		#{marketPrice3},
+		#{marketPhone3},
+		#{isProcedureComplete},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="updateMortgageCarEvaluateInfo">
+		UPDATE cre_mortgage_car_evaluate_info SET
+		car_id = #{carId},
+		motor_vehi_regi_certi_no = #{motorVehiRegiCertiNo},
+		vehicle_no = #{vehicleNo},
+		engine_num = #{engineNum},
+		mortgage_rate = #{mortgageRate},
+		vehicle_shelf_no = #{vehicleShelfNo},
+		net_purchase_price =
+		#{netPurchasePrice},
+		travel_kms = #{travelKms},
+		is_procedure_complete = #{isProcedureComplete},
+		annual_inspection_status = #{annualInspectionStatus},
+		use_property = #{useProperty},
+		car_status = #{carStatus},
+		is_keep_papers = #{isKeepPapers},
+		is_handle = #{isHandle},
+		used_changes = #{usedChanges},
+		used_years = #{usedYears},
+		is_common = #{isCommon},
+		car_evaluate_price = #{carEvaluatePrice},
+		market_price1 = #{marketPrice1},
+		market_phone1 = #{marketPhone1},
+		market_price2 = #{marketPrice2},
+		market_phone2 = #{marketPhone2},
+		market_price3 =
+		#{marketPrice3},
+		market_phone3 = #{marketPhone3},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateMortgageHouseInfo">
+		UPDATE cre_mortgage_house_info SET
+		apply_no = #{applyNo},
+		property_right = #{propertyRight},
+		property_name = #{propertyName},
+		current_use_status = #{currentUseStatus},
+		house_use_property = #{houseUseProperty},
+		land_use_property = #{landUseProperty},
+		house_type = #{houseType},
+		house_card_number = #{houseCardNumber},
+		land_card_number = #{landCardNumber},
+		land_property = #{landProperty},
+		cont_province = #{contProvince},
+		cont_city = #{contCity},
+		cont_distinct = #{contDistinct},
+		cont_details = #{contDetails},
+		building_area = #{buildingArea},
+		using_area = #{usingArea},
+		floor_num = #{floorNum},
+		house_years = #{houseYears},
+		service_life = #{serviceLife},
+		house_purchase_price = #{housePurchasePrice},
+		is_keep_papers = #{isKeepPapers},
+		is_property_line = #{isPropertyLine},
+		is_shift_record = #{isShiftRecord},
+		property_status = #{propertyStatus},
+		is_unique_house = #{isUniqueHouse},
+		evaluate_way = #{evaluateWay},
+		market_price = #{marketPrice},
+		evaluate_price = #{evaluatePrice},
+		mortgagee_id = #{mortgageeId},
+		mortgagee_name = #{mortgageeName},
+		mortgagee_id_num =#{mortgageeIdNum},
+		mortgage_rate = #{mortgageRate},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		mortgage_note = #{mortgageNote}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

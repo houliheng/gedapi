@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.financialStateImport.dao.ThemisReportHeadDao">
+
+	<sql id="themisReportHeadColumns">
+		a.APPYL_NO AS "applyNo",
+		a.user_id AS "user.id",
+		a.password AS "user.password",
+		a.depcode AS "depcode",
+		a.companycode AS "companycode",
+		a.company_chn_name AS "companyChnName",
+		a.company_eng_name AS "companyEngName",
+		a.createdate AS "buildDate",
+		a.companynature AS "companynature",
+		a.main_industry_code AS "mainIndustryCode",
+		a.gb_indu1 AS "gbIndu1",
+		a.gb_indu2 AS "gbIndu2",
+		a.market_class AS "marketClass",
+		a.postcode AS "postcode",
+		a.is_merger AS "isMerger",
+		a.report_type AS "reportType",
+		a.report_unit AS "reportUnit",
+		u1.name AS "user.name"
+	</sql>
+
+	<sql id="themisReportHeadJoins">
+		LEFT JOIN sys_user u1 ON u1.id = a.user_id
+	</sql>
+
+	<select id="findList" resultType="ThemisReportHead">
+		SELECT
+		<include refid="themisReportHeadColumns" />
+		FROM ift_themis_report_head a
+		<include refid="themisReportHeadJoins" />
+		<where>
+			1=1
+			<if test="applyNo != null and applyNo != ''">
+				AND a.APPYL_NO = #{applyNo}
+			</if>
+			<if test="companycode != null and companycode != ''">
+				AND a.companycode = #{companycode}
+			</if>
+		</where>
+	</select>
+	
+	<delete id="deleltByApplyNo">
+	DELETE  FROM  ift_themis_report_head 
+	WHERE  APPYL_NO = #{applyNo}
+	</delete>
+
+	<insert id="insert" parameterType="ThemisReportHead">
+		INSERT INTO ift_themis_report_head(
+		APPYL_NO,
+		USER_ID,
+		PASSWORD,
+		DEPCODE,
+		COMPANYCODE,
+		COMPANY_CHN_NAME,
+		COMPANY_ENG_NAME,
+		CREATEDATE,
+		COMPANYNATURE,
+		MAIN_INDUSTRY_CODE,
+		GB_INDU1,
+		GB_INDU2,
+		MARKET_CLASS,
+		POSTCODE,
+		IS_MERGER,
+		REPORT_TYPE,
+		REPORT_UNIT
+		) VALUES (
+		#{applyNo},
+		#{user.id},
+		#{user.password},
+		#{depcode},
+		#{companycode},
+		#{companyChnName},
+		#{companyEngName},
+		#{buildDate},
+		#{companynature},
+		#{mainIndustryCode},
+		#{gbIndu1},
+		#{gbIndu2},
+		#{marketClass},
+		#{postcode},
+		#{isMerger},
+		#{reportType},
+		#{reportUnit}
+		)
+	</insert>
+
+	<!-- 无主键，修改为按照申请编号修改报表头 -->
+	<update id="update" parameterType="ThemisReportHead">
+		UPDATE ift_themis_report_head SET
+			USER_ID = #{user.id},
+			PASSWORD = #{user.password},
+			DEPCODE = #{depcode},
+			COMPANY_CHN_NAME = #{companyChnName},
+			COMPANY_ENG_NAME = #{companyEngName},
+			CREATEDATE = #{buildDate},
+			COMPANYNATURE = #{companynature},
+			MAIN_INDUSTRY_CODE = #{mainIndustryCode},
+			GB_INDU1 = #{gbIndu1},
+			GB_INDU2 = #{gbIndu2},
+			MARKET_CLASS = #{marketClass},
+			POSTCODE = #{postcode},
+			IS_MERGER = #{isMerger},
+			REPORT_TYPE = #{reportType},
+			REPORT_UNIT = #{reportUnit}
+		WHERE APPYL_NO = #{applyNo}
+		  AND COMPANYCODE = #{companycode}
+			
+	</update>
+
+
+	<select id="getFinancialHeadByApplyNo" resultType="com.resoft.outinterface.SV.client2.EnterpriseFinancialField">
+		SELECT
+			a.COMPANYCODE AS "ccompanyCode",
+			a.COMPANY_ENG_NAME AS "cEnglishName",
+			case
+		when a.COMPANYNATURE='01'
+			  THEN '全民所有制企业'
+		when a.COMPANYNATURE='02'
+			  THEN '集体所有制企业'
+		when a.COMPANYNATURE='03'
+			  THEN '联营企业'
+		when a.COMPANYNATURE='04'
+			  THEN '三资企业'
+		when a.COMPANYNATURE='05'
+			  THEN '私营企业'
+		when a.COMPANYNATURE='06'
+			  THEN '其它企业06' END AS "ccompanyNature",
+		  a.GB_INDU1 AS "cnationOneIndustry",
+			a.GB_INDU2 AS "cnationTwoIndustry",
+			case
+		when a.MARKET_CLASS = '1' THEN '上市'
+		when a.MARKET_CLASS = '2' THEN '未上市' END AS "ccomeInFlag",
+
+		a.POSTCODE AS "cmail",
+		case
+		when a.IS_MERGER = '1' then '否'
+		when a.IS_MERGER = '2' then '是' END AS "creportMergerFlag",
+
+		case
+		when  a.REPORT_UNIT='1' THEN '元'
+		when  a.REPORT_UNIT='2' THEN '千元'
+		when  a.REPORT_UNIT='3' THEN '万元'
+		when  a.REPORT_UNIT='4' THEN '千万元'
+		when  a.REPORT_UNIT='5' THEN '亿' END AS "creportUnit",
+
+			a.REPORT_TYPE AS "creportType"
+		FROM
+			ift_themis_report_head a
+			where a.APPYL_NO=#{applyNo}
+	</select>
+
+</mapper>

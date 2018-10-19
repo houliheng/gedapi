@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.mortgageEvaluateAsset.dao.MortgageEvaluateAssetDao">
+    
+	<sql id="mortgageEvaluateAssetColumns">
+		a.id AS "id",
+		a.apply_no AS "apply_No",
+		a.asset_name AS "assetName",
+		a.book_value AS "bookValue",
+		a.evaluate_price AS "evaluatePrice",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.market_value AS "marketValue",
+		a.is_mortgage AS "isMortgage",
+		a.is_check AS "isCheck",
+		a.detail_comment AS "detailComment",
+		a.remarks AS "remarks",
+		a.more_or_less_value AS "moreOrLessValue",
+		a.more_or_less_rate AS "moreOrLessRate",
+		a.mortgage_date AS "mortgageDate",
+		a.mortgage_user_id AS "mortgageUserId",
+		a.is_push_data as "isPushData"
+	</sql>
+	
+	<sql id="mortgageEvaluateAssetJoins">
+	</sql>
+    
+	<select id="get" resultType="MortgageEvaluateAsset">
+		SELECT 
+			<include refid="mortgageEvaluateAssetColumns"/>
+		FROM pl_mortgage_evaluate_asset a
+		<include refid="mortgageEvaluateAssetJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findToDoListByPage" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		select a.id AS "id",
+		a.apply_No AS "applyNo",
+		a.asset_name AS "assetName",
+		a.book_value AS "bookValue",
+		a.evaluate_price AS "evaluatePrice",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.market_value AS "marketValue",
+		a.is_mortgage AS "isMortgage",
+		a.is_check AS "isCheck",
+		a.detail_comment AS "detailComment",
+		a.remarks AS "remarks",
+		a.more_or_less_value AS "moreOrLessValue",
+		a.more_or_less_rate AS "moreOrLessRate",
+		a.mortgage_date AS "mortgageDate",
+		a.mortgage_user_id AS "mortgageUserId",
+		a.is_push_data as "isPushData"                              
+   		from pl_mortgage_evaluate_asset a
+		where 1=1 
+		 <if test="applyNo!=null and applyNo!=''">
+				AND a.apply_No like CONCAT(#{applyNo},'%') 
+		</if> 
+		 <if test="assetName!=null and assetName!=''">
+				AND a.ASSET_NAME like CONCAT(#{assetName},'%') 
+		</if> 
+		 <if test="id!=null and id!=''">
+				AND a.id = #{id}
+		</if> 
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_mortgage_evaluate_asset a
+		<include refid="mortgageEvaluateAssetJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MortgageEvaluateAsset">
+		SELECT 
+			<include refid="mortgageEvaluateAssetColumns"/>
+		FROM pl_mortgage_evaluate_asset a
+		<include refid="mortgageEvaluateAssetJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_mortgage_evaluate_asset(
+			mortgage_date,
+			mortgage_user_id
+		) VALUES (
+			#{mortgageDate},
+			#{mortgageUserId}
+		)
+	</insert>
+		<!-- 编辑基本信息-->
+	<update id="update">
+		UPDATE pl_mortgage_evaluate_asset SET 	
+			mortgage_date = #{mortgageDate},
+			ASSET_NAME = #{assetName},
+			mortgage_user_id = #{mortgageUserId}
+		WHERE id = #{id}
+	</update>
+	<!-- 修改备注 -->
+	<update id="saveRemark">
+		UPDATE pl_mortgage_evaluate_asset SET 	
+			REMARKS = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_mortgage_evaluate_asset
+		WHERE id = #{id}
+	<!-- 新增资产 -->
+	</update>
+		<insert id="saveAsset">
+		INSERT INTO pl_mortgage_evaluate_asset(
+				id,
+			 apply_no,	
+	         asset_name,
+			 book_value,	
+			 evaluate_price,		
+			 role_type,		
+			 cust_id,		
+			 cust_name,	
+			 market_value,
+			 is_mortgage,	
+			 is_check,		
+			 detail_comment,		
+			 more_or_less_value,	
+			 more_or_less_rate,		
+			 mortgage_date,		
+			 mortgage_user_id,		
+			 remarks,
+			 is_push_data
+		) VALUES (
+		   	#{id},
+			 #{applyNo},	
+	         #{assetName},
+			 #{bookValue},	
+			 #{evaluatePrice},		
+			 #{roleType},		
+			 #{custId},		
+			 #{custName},	
+			 #{marketValue},
+			 #{isMortgage},	
+			 #{isCheck},		
+			 #{detailComment},		
+			 #{moreOrLessValue},	
+			 #{moreOrLessRate},		
+			 #{mortgageDate},		
+			 #{updateBy.id},		
+			 #{remarks},
+			 '1'
+		)
+	</insert>
+	
+		<!-- 修改 -->
+	<update id="updateAsset">
+		UPDATE pl_mortgage_evaluate_asset SET 	
+			 apply_no =#{applyNo},
+			 cust_id =#{custId},
+	         asset_name =#{assetName},
+			 book_value=#{bookValue},	
+			 evaluate_price=#{evaluatePrice},		
+			 role_type=#{roleType},		
+			 cust_id=#{custId},		
+			 cust_name=#{custName},	
+			 market_value=#{marketValue},
+			 is_mortgage=#{isMortgage},	
+			 is_check=#{isCheck},		
+			 detail_comment=#{detailComment},		
+			 more_or_less_value=#{moreOrLessValue},	
+			 more_or_less_rate=#{moreOrLessRate},		
+			 mortgage_date=#{mortgageDate},		
+			 mortgage_user_id=#{updateBy.id},		
+			 remarks=#{remarks},
+			 is_push_data=#{isPushData}  
+		WHERE id = #{id}
+	</update>
+	<select id="findCustNameByRoleType" resultType="java.util.HashMap">
+		SELECT a.cust_id as custId, a.cust_name as custName
+		FROM
+		cre_apply_relation a
+		<where>
+			a.del_flag = '0'
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+			</if>
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+		</where>
+	</select>
+</mapper>

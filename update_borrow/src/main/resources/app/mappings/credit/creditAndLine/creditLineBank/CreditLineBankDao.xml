@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditLineBank.CreditLineBankDao">
+    
+	<sql id="creditLineBankColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.id_num AS "idNum",
+		a.id_type AS "idType",
+		a.bank_name AS "bankName",
+		a.bankcard_no AS "bankcardNo",
+		a.balance_amount AS "balanceAmount",
+		a.printing_date AS "printingDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.AVG_CURRE_VALID_LINE_AMOUNT AS avgCurreValidLineAmount,
+		a.SUM_INCOME_AMOUNT AS sumIncomeAmount,
+		a.SUM_EXPENSE_AMOUNT AS sumExpenseAmount,
+		a.AVERAGE_CYCLE_END_AMOUNT AS  averageCycleEndAmount
+
+	</sql>
+	
+	<sql id="creditLineBankJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditLineBank">
+		SELECT 
+			<include refid="creditLineBankColumns"/>
+		FROM cre_credit_line_bank a
+		<include refid="creditLineBankJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditLineBank">
+		SELECT 
+			<include refid="creditLineBankColumns"/>
+		FROM cre_credit_line_bank a
+		<include refid="creditLineBankJoins"/>
+		<where>
+			a.del_flag = '0' AND a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_line_bank a
+		<include refid="creditLineBankJoins"/>
+		<where>
+			a.del_flag = '0' AND a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditLineBank">
+		SELECT 
+			<include refid="creditLineBankColumns"/>
+		FROM cre_credit_line_bank a
+		<include refid="creditLineBankJoins"/>
+		<where>
+			a.del_flag = '0' AND a.apply_no = #{applyNo}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_line_bank(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			id_num,
+			id_type,
+			bank_name,
+			bankcard_no,
+			balance_amount,
+			AVG_CURRE_VALID_LINE_AMOUNT,
+			SUM_INCOME_AMOUNT,
+			SUM_EXPENSE_AMOUNT,
+			AVERAGE_CYCLE_END_AMOUNT,
+			printing_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{custId},
+			#{custName},
+			#{idNum},
+			#{idType},
+			#{bankName},
+			#{bankcardNo},
+			#{balanceAmount},
+			#{avgCurreValidLineAmount},
+			#{sumIncomeAmount},
+			#{sumExpenseAmount},
+			#{averageCycleEndAmount},
+			#{printingDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_line_bank SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			cust_id = #{custId},
+			cust_name = #{custName},
+			id_num = #{idNum},
+			id_type = #{idType},
+			bank_name = #{bankName},
+			bankcard_no = #{bankcardNo},
+			balance_amount = #{balanceAmount},
+			average_cycle_end_amount = #{averageCycleEndAmount},
+			printing_date = #{printingDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateSumAndAvg">
+		UPDATE cre_credit_line_bank SET 	
+			AVG_CURRE_VALID_LINE_AMOUNT = #{avgCurreValidLineAmount},
+			SUM_INCOME_AMOUNT = #{sumIncomeAmount},
+			SUM_EXPENSE_AMOUNT = #{sumExpenseAmount},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="banchDelete">
+		UPDATE cre_credit_line_bank a SET a.DEL_FLAG='1'
+		WHERE id IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		#{idList}
+		</foreach>
+	</update>
+
+	<select id="getLineBankAndDetail" resultType="com.resoft.outinterface.SV.client2.PersonalWaterField">
+		SELECT
+			a.cust_id as "workId",
+			b.LINE_MONTH as "pMonth",
+		   "" as "pinterestSettlement",
+		   a.BALANCE_AMOUNT as "pBalance" ,
+		   b.INCOME_AMOUNT as "pcashInflow",
+		   b.EXPENSE_AMOUNT as "pcashOutflow",
+		   a.PRINTING_DATE as "pprintTime" ,
+		   a.BANK_NAME as "pbankName",
+		   "" as "pwaterStartDate" ,
+		   "" as "pwaterEndDate"
+		FROM
+			cre_credit_line_bank a
+		LEFT JOIN cre_credit_line_bank_detail b ON a.id = b.LINE_BANK_ID
+		left join cre_apply_relation c on a.apply_no = c.apply_no and a.CUST_ID = c.CUST_ID
+		WHERE
+			a.APPLY_NO = #{applyNo}
+			AND c.IS_PUSH = '0' AND c.SV_FLAG='1'
+			and c.role_type in ('1','3','4')
+	</select>
+
+	
+</mapper>

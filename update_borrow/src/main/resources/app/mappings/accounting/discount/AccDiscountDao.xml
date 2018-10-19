@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.discount.dao.AccDiscountDao">
+    
+	<sql id="accDiscountColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.discount_fee AS "discountFee",
+		a.fact_discount_fee AS "factDiscountFee",
+		a.discount_date AS "discountDate",
+		a.operate_name AS "operateName",
+		a.operate_org_name AS "operateOrgName",
+		a.operate_id AS "operateId",
+		a.operate_org_id AS "operateOrgId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.DISCOUNT_STATUS as discountStatus,
+		a.DISCOUNT_ACCOUNT as discountAccount,
+		a.remarks as remarks,
+		a.DISCOUNT_PERSON as discountPerson
+	</sql>
+	
+	<sql id="accDiscountJoins">
+	</sql>
+    
+	<select id="get" resultType="AccDiscount">
+		SELECT 
+			<include refid="accDiscountColumns"/>
+		FROM acc_discount a
+		<include refid="accDiscountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="DiscountVo">
+		SELECT
+		a.cust_name AS custName,
+		a.contract_no AS contractNo,
+		a.CONTRACT_AMOUNT as contractAmount,
+		a.APPRO_PRODUCT_NAME as approProductName,
+		b.PERIOD_NUM as periodNum,
+		x.NAME AS "orgLevel4.name",
+		y.NAME AS "orgLevel3.name",
+		z.NAME AS "orgLevel2.name",
+		IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0) as repayAmount,
+		IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0) - IFNULL(b.DISCOUNT_FEE,0) as stayAmount,
+		IFNULL(d.FACT_REPAY_AMOUNT,0)+IFNULL(d.FACT_PENALTY_AMOUNT,0)+IFNULL(d.FACT_FINE_AMOUNT,0) as factAmount,
+		IFNULL(b.DISCOUNT_FEE,0) as discountFee,
+		d.REPAY_PERIOD_STATUS as periodStatus
+		FROM
+		acc_discount b
+		LEFT JOIN acc_contract a ON a.CONTRACT_NO = b.CONTRACT_NO
+		LEFT JOIN acc_repay_plan c ON b.CONTRACT_NO = c.CONTRACT_NO and b.PERIOD_NUM = c.PERIOD_NUM
+		LEFT JOIN acc_sta_repay_plan_status d ON b.CONTRACT_NO = d.CONTRACT_NO AND b.PERIOD_NUM = d.PERIOD_NUM
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office x ON a.ORG_LEVEL4 = x.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office y ON x.parent_id = y.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office z ON y.parent_id = z.id
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o ON a.OPERATE_ORG_ID = o.id
+		LEFT JOIN acc_discount_stream e on e.CONTRACT_NO = b.CONTRACT_NO and b.PERIOD_NUM = e.PERIOD_NUM
+		<where>
+			and (a.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and (e.DISCOUNT_STATUS != '0' or e.DISCOUNT_STATUS is NULL)
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				order by b.CONTRACT_NO,b.PERIOD_NUM
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_discount a
+		<include refid="accDiscountJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccDiscount">
+		SELECT 
+			<include refid="accDiscountColumns"/>
+		FROM acc_discount a
+		<include refid="accDiscountJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_discount(
+			id,
+			contract_no,
+			period_num,
+			discount_fee,
+			fact_discount_fee,
+			discount_date,
+			operate_name,
+			operate_org_name,
+			operate_id,
+			operate_org_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			DISCOUNT_PERSON
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{discountFee},
+			#{factDiscountFee},
+			#{discountDate},
+			#{operateName},
+			#{operateOrgName},
+			#{operateId},
+			#{operateOrgId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{discountPerson}
+		)
+	</insert>
+
+	<insert id="insertAccDiscount" parameterType="AccDiscount">
+		INSERT INTO ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_discount(
+			id,
+			contract_no,
+			period_num,
+			discount_fee,
+			fact_discount_fee,
+			discount_date,
+			operate_name,
+			operate_org_name,
+			operate_id,
+			operate_org_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			DISCOUNT_PERSON
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{discountFee},
+			#{factDiscountFee},
+			#{discountDate},
+			#{operateName},
+			#{operateOrgName},
+			#{operateId},
+			#{operateOrgId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{discountPerson}
+		)
+	</insert>
+
+    <delete id="deleteAccDiscount" >
+		delete from  acc_discount  where CONTRACT_NO = #{contractNo}
+
+	</delete>
+
+
+
+	<update id="update">
+		UPDATE acc_discount SET 	
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			discount_fee = #{discountFee},
+			fact_discount_fee = #{factDiscountFee},
+			discount_date = #{discountDate},
+			operate_name = #{operateName},
+			operate_org_name = #{operateOrgName},
+			operate_id = #{operateId},
+			operate_org_id = #{operateOrgId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM acc_discount
+		WHERE id = #{id}
+	</update>
+	<select id="findAccDiscountsByContractNo" resultType="AccDiscount">
+		SELECT 
+			<include refid="accDiscountColumns"/>
+		FROM acc_discount a
+		<include refid="accDiscountJoins"/> 
+		where a.CONTRACT_NO = #{contractNo}
+	</select>
+	
+	<select id="findAccDisCountByContractNoAndPeriodNum" resultType="AccDiscount">
+		SELECT 
+			<include refid="accDiscountColumns"/>
+		FROM acc_discount a
+		<include refid="accDiscountJoins"/>
+		where a.contract_no = #{contractNo} and a.period_num = #{periodNum}
+	</select>
+	
+	<delete id="deleteDiscountByContractAndPeriodNum">
+		delete from  acc_discount  where CONTRACT_NO = #{contractNo} and PERIOD_NUM = #{periodNum}
+	</delete>
+</mapper>

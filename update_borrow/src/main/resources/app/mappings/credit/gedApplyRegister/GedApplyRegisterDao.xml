@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gedApplyRegister.dao.GedApplyRegisterDao">
+
+	<sql id="gedApplyRegisterColumns">
+		a.id AS "id",
+		a.apply_id AS "applyId",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS "channelSourceType",
+		a.register_date AS "registerDate",
+		a.allot_status
+		AS "allotStatus",
+		a.GED_APPLT_STATUS as "gedApplyStatus",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.location_city AS "locationCity"
+	</sql>
+
+	<sql id="gedApplyRegisterJoins">
+
+	</sql>
+
+	<select id="get" resultType="GedApplyRegister">
+		SELECT
+		<include refid="gedApplyRegisterColumns" />
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getGedApplyRegisterByApplyId" resultType="GedApplyRegister">
+		SELECT
+		<include refid="gedApplyRegisterColumns" />
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		WHERE a.APPLY_ID = #{applyId}
+	</select>
+
+	<select id="getApplyRegisterByIFTApplyId" resultType="ApplyRegister">
+		SELECT
+		a.apply_no AS "applyNo",
+		a.proc_ins_id AS "procInsId"
+		FROM cre_apply_register a
+		WHERE a.IFT_APPLY_ID = #{iftApplyId}
+	</select>
+
+	<select id="findList" resultType="GedApplyRegister">
+		SELECT
+		<include refid="gedApplyRegisterColumns" />
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="idNum != null and idNum != ''">
+				and a.id_num like concat(#{idNum},'%')
+			</if>
+		</where>
+		order by a.allot_status,a.create_date desc
+	</select>
+
+	<select id="findgedGedApplyRegisters" resultType="GedApplyRegister">
+		SELECT
+		<include refid="gedApplyRegisterColumns" />
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="idNum != null and idNum != ''">
+				and a.id_num like concat(#{idNum},'%')
+			</if>
+		</where>
+		order by a.allot_status,a.create_date desc
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		<where>
+			<if test="custName != null and custName != ''">
+				a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="idNum != null and idNum != ''">
+				a.id_num like concat(#{idNum},'%')
+			</if>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="GedApplyRegister">
+		SELECT
+		<include refid="gedApplyRegisterColumns" />
+		FROM cre_ged_apply_register a
+		<include refid="gedApplyRegisterJoins" />
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_ged_apply_register(
+		id,
+		apply_id,
+		cust_name,
+		id_type,
+		id_num,
+		mobile_num,
+		apply_amount,
+		channel_source_type,
+		register_date,
+		allot_status,
+		GED_APPLT_STATUS,
+		del_flag,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		location_city
+		) VALUES (
+		#{id},
+		#{applyId},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{applyAmount},
+		#{channelSourceType},
+		#{registerDate},
+		#{allotStatus},
+		#{gedApplyStatus},
+		#{delFlag},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{locationCity}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_ged_apply_register SET
+		apply_id = #{applyId},
+		cust_name = #{custName},
+		id_type = #{idType},
+		id_num = #{idNum},
+		mobile_num = #{mobileNum},
+		apply_amount = #{applyAmount},
+		channel_source_type = #{channelSourceType},
+		register_date = #{registerDate},
+		allot_status = #{allotStatus},
+		GED_APPLT_STATUS = #{gedApplyStatus},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		location_city = #{locationCity}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE cre_ged_apply_register SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<select id="getUserToAllot" resultType="java.util.Map">
+		select
+		su.name as "userName",
+		su.id as "userId",
+		su.login_name as "loginName" ,
+		so.id as "companyId",
+		so.name as "companyName" from sys_user su
+		inner join sys_user_role sur on su.id = sur.user_id
+		inner join sys_office so on su.company_id = so.id
+		where sur.role_id=#{roleId}
+		<if test="userName != null and userName != ''">
+			and su.name LIKE CONCAT('%',#{userName},'%')
+		</if>
+	</select>
+
+</mapper>

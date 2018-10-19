@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditCust.CreditCustDao">
+    
+	<sql id="creditCustColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.printing_date AS "printingDate",
+		a.query_num_year AS "queryNumYear",
+		a.query_num_season AS "queryNumSeason",
+		a.query_num_month AS "queryNumMonth",
+		a.query_report_date_minus AS "queryReportDateMinus",
+		a.credit_months AS "creditMonths",
+		a.mobile_no AS "mobileNo",
+		a.company_phone_no AS "companyPhoneNo",
+		a.all_credit_card_num AS "allCreditCardNum",
+		a.overdue_card_num AS "overdueCardNum",
+		a.unused_card_num AS "unusedCardNum",
+		a.abnormal_card_num AS "abnormalCardNum",
+		a.all_credit_amount AS "allCreditAmount",
+		a.all_used_amount AS "allUsedAmount",
+		a.all_balance_amount AS "allBalanceAmount",
+		a.all_overdue_amount AS "allOverdueAmount",
+		a.used_credit_card_rate AS "usedCreditCardRate",
+		a.max_credit_amount AS "maxCreditAmount",
+		a.max_used_amount AS "maxUsedAmount",
+		a.continue_overdue_num AS "continueOverdueNum",
+		a.all_overdue_num AS "allOverdueNum",
+		a.credit_card_status AS "creditCardStatus",
+		a.sum_loan_amount AS "sumLoanAmount",
+		a.create_by AS "createBy.id",
+		a.sum_balance_amount AS "sumBalanceAmount",
+		a.sum_overdue_amount AS "sumOverdueAmount",
+		a.is_white AS "isWhite",
+		a.mortgage_house_num AS "mortgageHouseNum",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.del_flag AS "delFlag",
+		a.update_date AS "updateDate",
+		a.BANK_LEGAL_INSTITUTE as "bankLegalNum",
+		a.DEBIT_CARDS_LIMIT as "debitCardsLimit",
+		a.FIRST_DEBIT_CARDS_MONTH as "firstDebitCardsMonth",
+		a.RECENT_SIX_MONTH_LINES as "recentSixMonthLines",
+		a.DEBIT_LONG_LIMIT as "debitLongLimit",
+		a.PERSON_HOUSE_LOAD_NUM as "personHouseLoadNum",
+		a.PERSON_COMMER_HOUSE_LOAN as "personCommerHouseLoan",
+		a.OTHER_LOAD_NUM as "otherLoanNum",
+		a.LOAD_LEGAL_ORG as "loanLegalOrg",
+		a.FIRST_LOAN_MONTH as "firstLoanMonth",
+		a.LOAN_LIMIT_MONTH as "loanLimitMonth",
+		a.LOAN_LONG_LIMIT_MONTH as "loanLongLimitMonth",
+		a.RECENT_SIX_RETURN_MONEY as "recentSixMonthMoney",
+		a.GUARANTEE_NUM as "guaranteeNum",
+		a.GURANTEE_CAPITAL_BAL as "guaranteeCapitalBal"
+	</sql>
+	
+	<sql id="creditCustJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditCust">
+		SELECT 
+			<include refid="creditCustColumns"/>
+		FROM cre_credit_cust a
+		<include refid="creditCustJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditCust">
+		SELECT 
+			<include refid="creditCustColumns"/>
+		FROM cre_credit_cust a
+		<include refid="creditCustJoins"/>
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_cust a
+		<include refid="creditCustJoins"/>
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditCust">
+		SELECT 
+			<include refid="creditCustColumns"/>
+		FROM cre_credit_cust a
+		<include refid="creditCustJoins"/>
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_cust(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			id_type,
+			id_num,
+			printing_date,
+			query_num_year,
+			query_num_season,
+			query_num_month,
+			query_report_date_minus,
+			credit_months,
+			mobile_no,
+			company_phone_no,
+			all_credit_card_num,
+			overdue_card_num,
+			unused_card_num,
+			abnormal_card_num,
+			all_credit_amount,
+			all_used_amount,
+			all_balance_amount,
+			all_overdue_amount,
+			used_credit_card_rate,
+			max_credit_amount,
+			max_used_amount,
+			continue_overdue_num,
+			all_overdue_num,
+			credit_card_status,
+			sum_loan_amount,
+			create_by,
+			sum_balance_amount,
+			sum_overdue_amount,
+			is_white,
+			mortgage_house_num,
+			create_date,
+			update_by,
+			del_flag,
+			update_date,
+			BANK_LEGAL_INSTITUTE,
+			DEBIT_CARDS_LIMIT,
+		    FIRST_DEBIT_CARDS_MONTH,
+		    RECENT_SIX_MONTH_LINES,
+		    DEBIT_LONG_LIMIT,
+		    PERSON_HOUSE_LOAD_NUM,
+		    PERSON_COMMER_HOUSE_LOAN,
+		    OTHER_LOAD_NUM,
+		    LOAD_LEGAL_ORG,
+		    FIRST_LOAN_MONTH,
+		    LOAN_LIMIT_MONTH,
+		    LOAN_LONG_LIMIT_MONTH,
+		    RECENT_SIX_RETURN_MONEY,
+		    GUARANTEE_NUM,
+		    GURANTEE_CAPITAL_BAL
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{custId},
+			#{custName},
+			#{idType},
+			#{idNum},
+			#{printingDate},
+			#{queryNumYear},
+			#{queryNumSeason},
+			#{queryNumMonth},
+			#{queryReportDateMinus},
+			#{creditMonths},
+			#{mobileNo},
+			#{companyPhoneNo},
+			#{allCreditCardNum},
+			#{overdueCardNum},
+			#{unusedCardNum},
+			#{abnormalCardNum},
+			#{allCreditAmount},
+			#{allUsedAmount},
+			#{allBalanceAmount},
+			#{allOverdueAmount},
+			#{usedCreditCardRate},
+			#{maxCreditAmount},
+			#{maxUsedAmount},
+			#{continueOverdueNum},
+			#{allOverdueNum},
+			#{creditCardStatus},
+			#{sumLoanAmount},
+			#{createBy.id},
+			#{sumBalanceAmount},
+			#{sumOverdueAmount},
+			#{isWhite},
+			#{mortgageHouseNum},
+			#{createDate},
+			#{updateBy.id},
+			#{delFlag},
+			#{updateDate},
+			#{bankLegalNum},
+			#{debitCardsLimit},
+			#{firstDebitCardsMonth},
+			#{recentSixMonthLines},
+			#{debitLongLimit},
+			#{personHouseLoadNum},
+			#{personCommerHouseLoan},
+			#{otherLoanNum},
+			#{loanLegalOrg},
+			#{firstLoanMonth},
+			#{loanLimitMonth},
+			#{loanLongLimitMonth},
+			#{recentSixMonthMoney},
+			#{guaranteeNum},
+			#{guaranteeCapitalBal}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_cust SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			cust_id = #{custId},
+			cust_name = #{custName},
+			id_type = #{idType},
+			id_num = #{idNum},
+			printing_date = #{printingDate},
+			query_num_year = #{queryNumYear},
+			query_num_season = #{queryNumSeason},
+			query_num_month = #{queryNumMonth},
+			query_report_date_minus = #{queryReportDateMinus},
+			credit_months = #{creditMonths},
+			mobile_no = #{mobileNo},
+			company_phone_no = #{companyPhoneNo},
+			all_credit_card_num = #{allCreditCardNum},
+			overdue_card_num = #{overdueCardNum},
+			unused_card_num = #{unusedCardNum},
+			abnormal_card_num = #{abnormalCardNum},
+			all_credit_amount = #{allCreditAmount},
+			all_used_amount = #{allUsedAmount},
+			all_balance_amount = #{allBalanceAmount},
+			all_overdue_amount = #{allOverdueAmount},
+			used_credit_card_rate = #{usedCreditCardRate},
+			max_credit_amount = #{maxCreditAmount},
+			max_used_amount = #{maxUsedAmount},
+			continue_overdue_num = #{continueOverdueNum},
+			all_overdue_num = #{allOverdueNum},
+			credit_card_status = #{creditCardStatus},
+			sum_loan_amount = #{sumLoanAmount},
+			sum_balance_amount = #{sumBalanceAmount},
+			sum_overdue_amount = #{sumOverdueAmount},
+			is_white = #{isWhite},
+			mortgage_house_num = #{mortgageHouseNum},
+			update_by = #{updateBy.id},
+			del_flag = #{delFlag},
+			update_date = #{updateDate},
+			BANK_LEGAL_INSTITUTE = #{bankLegalNum},
+			DEBIT_CARDS_LIMIT = #{debitCardsLimit},
+			FIRST_DEBIT_CARDS_MONTH = #{firstDebitCardsMonth},
+			RECENT_SIX_MONTH_LINES = #{recentSixMonthLines},
+			DEBIT_LONG_LIMIT = #{debitLongLimit},
+			PERSON_HOUSE_LOAD_NUM = #{personHouseLoadNum},
+			PERSON_COMMER_HOUSE_LOAN = #{personCommerHouseLoan},
+			OTHER_LOAD_NUM = #{otherLoanNum},
+			LOAD_LEGAL_ORG = #{loanLegalOrg},
+			FIRST_LOAN_MONTH = #{firstLoanMonth},
+			LOAN_LIMIT_MONTH = #{loanLimitMonth},
+			LOAN_LONG_LIMIT_MONTH = #{loanLongLimitMonth},
+			RECENT_SIX_RETURN_MONEY = #{recentSixMonthMoney},
+			GUARANTEE_NUM = #{guaranteeNum},
+			GURANTEE_CAPITAL_BAL = #{guaranteeCapitalBal}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_credit_cust SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="banchDelete">
+		UPDATE cre_credit_cust a SET a.DEL_FLAG='1'
+		WHERE id IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		#{idList}
+		</foreach>
+	</update>
+	
+	<!-- /**
+	 * 更新个人征信信息中的贷款总额、贷款余额、贷款逾期总额
+	 * @param creditCust
+	 */ -->
+	<update id="updateSumElements">
+		UPDATE cre_credit_cust SET 	
+			sum_loan_amount = #{sumLoanAmount},
+			sum_balance_amount = #{sumBalanceAmount},
+			sum_overdue_amount = #{sumOverdueAmount},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getCreditByApply" resultType="com.resoft.outinterface.SV.client2.PersonalCreditField">
+		SELECT
+			a.cust_id as "workId",
+			a.QUERY_NUM_YEAR as "pyearInquiry",
+			a.QUERY_NUM_SEASON as "pquarterInquiry"  ,
+			a.QUERY_NUM_MONTH as "pmonthInquiry"  ,
+			a.QUERY_REPORT_DATE_MINUS as "pqueryTimeReportTime"  ,
+			a.CREDIT_MONTHS as "pcreditHistoryMonth"  ,
+			a.MOBILE_NO as "pmobilePhoneNumber" ,
+			a.COMPANY_PHONE_NO as "punitTelephoneNumber" ,
+			a.PRINTING_DATE as "pCreditPrintTime",
+			a.ALL_CREDIT_CARD_NUM as "ptotalQuantity" ,
+			a.OVERDUE_CARD_NUM as "poverdueCardNumber" ,
+			a.UNUSED_CARD_NUM as "pnoUseCardNumber" ,
+			a.ABNORMAL_CARD_NUM as "pabnormalCardNumber" ,
+			a.ALL_CREDIT_AMOUNT as "ptotalCreditAmount"  ,
+			a.ALL_USED_AMOUNT as "ptotalUseAmount" ,
+			a.ALL_BALANCE_AMOUNT as "poverallBalance" ,
+			a.ALL_OVERDUE_AMOUNT as "poverdueAmount" ,
+			a.USED_CREDIT_CARD_RATE as "puseCreditCard" ,
+			a.MAX_CREDIT_AMOUNT as "phighestCreditAmount" ,
+			a.MAX_USED_AMOUNT as "phighestUseAmount",
+			a.CONTINUE_OVERDUE_NUM as "pcontinuousOverdue" ,
+			a.ALL_OVERDUE_NUM as "pcumulativeOverdue" ,
+			a.CREDIT_CARD_STATUS as "pcreditCardStatus" ,
+			b.MONTH_EXPIRE_AMOUNT as "pmonthExpireTotalAmount" ,
+			b.OVERDUE_AMOUNT as "pmonthOverdueTotalAmount"
+		FROM
+			cre_credit_cust a
+		LEFT JOIN cre_credit_cust_loan b ON a.ID = b.CREDIT_CUST_ID
+		left join cre_apply_relation c on a.apply_no = c.apply_no and a.CUST_ID = c.CUST_ID
+		where a.APPLY_NO=#{applyNo}
+		AND c.IS_PUSH = '0' AND c.SV_FLAG='1' and c.role_type in ('1','3','4')
+	</select>
+
+	
+</mapper>

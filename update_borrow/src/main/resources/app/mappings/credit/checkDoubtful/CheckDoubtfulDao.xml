@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkDoubtful.dao.CheckDoubtfulDao">
+    
+	<sql id="checkDoubtfulColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.check_date AS "checkDate",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.risk_point AS "riskPoint",
+		a.description AS "description",
+		a.check_address AS "checkAddress",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkDoubtfulJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckDoubtful">
+		SELECT 
+			<include refid="checkDoubtfulColumns"/>
+		FROM cre_check_doubtful a
+		<include refid="checkDoubtfulJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckDoubtful">
+		SELECT 
+			<include refid="checkDoubtfulColumns"/>
+		FROM cre_check_doubtful a
+		<include refid="checkDoubtfulJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_check_doubtful a
+		<include refid="checkDoubtfulJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckDoubtful">
+		SELECT 
+			<include refid="checkDoubtfulColumns"/>
+		FROM cre_check_doubtful a
+		<include refid="checkDoubtfulJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_check_doubtful(
+			id,
+			apply_no,
+			check_date,
+			check_user_id,
+			check_user_name,
+			risk_point,
+			description,
+			check_address,
+			serial_number,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{checkDate},
+			#{checkUserId},
+			#{checkUserName},
+			#{riskPoint},
+			#{description},
+			#{checkAddress},
+			#{serialNumber},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_check_doubtful SET 	
+			apply_no = #{applyNo},
+			check_date = #{checkDate},
+			check_user_id = #{checkUserId},
+			check_user_name = #{checkUserName},
+			risk_point = #{riskPoint},
+			description = #{description},
+			check_address = #{checkAddress},
+			serial_number = #{serialNumber},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_check_doubtful
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getPageByApplyNo" resultType="CheckDoubtful">
+		SELECT 
+			<include refid="checkDoubtfulColumns"/>
+		FROM cre_check_doubtful a
+			where  a.apply_no = #{_parameter}
+	</select>
+	
+		<select id="getFullMsg" resultType="java.lang.Object">
+					SELECT
+			FULL_MSG_
+			FROM
+				ACT_HI_TASKINST T  
+			LEFT JOIN ACT_HI_COMMENT C ON C.TASK_ID_ = T.ID_  where T.ID_ = #{hitaskid}
+	</select>
+</mapper>

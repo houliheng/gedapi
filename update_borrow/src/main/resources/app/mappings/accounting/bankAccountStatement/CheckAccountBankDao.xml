@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.bankAccountStatement.dao.CheckAccountBankDao">
+	<insert id="insertCheckAccountBank" parameterType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+
+		<![CDATA[
+			INSERT INTO acc_check_account_bank(
+				account_name,account_number,receive_bank_code
+				,receive_bank_name,bank_deposit_branch_name,
+				remark,status,create_time,create_id
+			)VALUES (
+				#{accountName},
+				#{accountNumber},
+				#{receiveBankCode},
+				#{receiveBankName},
+				#{bankDepositBranchName},
+				#{remark},
+				#{status},
+				NOW(),
+				#{createId}
+			)
+		]]>
+	</insert>
+
+	<update id="updateCheckAccountBank" parameterType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+		<![CDATA[  
+			UPDATE acc_check_account_bank
+			set
+		]]>
+		<if test="status==0">
+			status=1
+		</if>
+		<if test="status==1">
+			status=0
+		</if>
+		WHERE  id=#{id}
+	</update>
+	<select id="findListByPage"  resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		<![CDATA[
+			SELECT a.id as id,a.account_name as accountName,a.account_number as accountNumber,
+			a.receive_bank_code as receiveBankCode,a.receive_bank_name as receiveBankName,
+			a.bank_deposit_branch_name as bankDepositBranchName,a.remark as remark,
+			a.status as status,a.create_time as createTime,a.create_id as createId
+			 FROM  acc_check_account_bank a
+
+		]]>
+		<where>
+
+			<if test="receiveBankName!=null and receiveBankName!=''">
+				a.receive_bank_name LIKE CONCAT('%',#{receiveBankName},'%')
+			</if>
+			<if test="accountName!=null and accountName!=''">
+				and a.account_name LIKE CONCAT('%',#{accountName},'%')
+			</if>
+			<if test="accountNumber!=null and accountNumber!=''">
+				and a.account_number LIKE CONCAT('%',#{accountNumber},'%')
+			</if>
+		</where>
+
+
+	</select>
+
+	<select id="loadBank" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+		SELECT DISTINCT receive_bank_name FROM acc_check_account_bank
+	</select>
+	<select id="loadBankImport" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+		SELECT DISTINCT receive_bank_name FROM acc_check_account_bank WHERE status=1
+	</select>
+	<select id="loadReceiveBankNumber" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank" parameterType="string">
+		SELECT DISTINCT account_number FROM acc_check_account_bank
+		WHERE  status=1 AND receive_bank_name=#{receiveBankName}
+	</select>
+	<select id="loadAccountName" resultType="com.resoft.accounting.bankAccountStatement.entity.AccountNameForm" parameterType="string">
+		 SELECT DISTINCT account_name FROM acc_check_account_bank WHERE account_number=#{accountNum}
+	</select>
+
+	<update id="updateAccountBankByModel" parameterType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+		
+		UPDATE acc_check_account_bank
+		<set>
+			<if test="accountNumber!=null and accountNumber!=''">
+				account_number=#{accountNumber},
+			</if>
+			<if test="receiveBankName!=null and receiveBankName!=''">
+				receive_bank_name =#{receiveBankName},
+			</if>
+			<if test="accountName!=null and accountName!=''">
+				 account_name =#{accountName},
+			</if>
+			<if test="bankDepositBranchName!=null and bankDepositBranchName!=''">
+				bank_deposit_branch_name =#{bankDepositBranchName},
+			</if>
+			<if test="remark!=null and remark!=''">
+				remark =#{remark}
+			</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	<select id="getCheckAccountById" parameterType="int" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountBank">
+		SELECT a.id as id,a.account_name as accountName,a.account_number as accountNumber,
+			a.receive_bank_code as receiveBankCode,a.receive_bank_name as receiveBankName,
+			a.bank_deposit_branch_name as bankDepositBranchName,a.remark as remark,
+			a.status as status,a.create_time as createTime,a.create_id as createId
+			 FROM  acc_check_account_bank a WHERE a.id=#{id}
+	</select>
+</mapper>

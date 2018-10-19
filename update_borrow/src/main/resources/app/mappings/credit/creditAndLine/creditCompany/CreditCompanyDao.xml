@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.credit.creditAndLine.dao.creditCompany.CreditCompanyDao">
+
+	<sql id="creditCompanyColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS
+		"roleType",
+		a.company_id AS "companyId",
+		a.company_name AS
+		"companyName",
+		a.credit_months AS "creditMonths",
+		a.id_num AS "idNum",
+		a.guarantee_out_amount AS "guaranteeOutAmount",
+		a.company_phone AS
+		"companyPhone",
+		a.printing_time AS "printingTime",
+		a.is_company_up_down
+		AS "isCompanyUpDown",
+		a.create_by AS "createBy.id",
+		a.six_month_company_income_avg AS "sixMonthCompanyIncomeAvg",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.sum_loan_amount AS "sumLoanAmount",
+		a.sum_balance_amount AS "sumBalanceAmount",
+		a.sum_overdue_amount AS
+		"sumOverdueAmount",
+		a.state_of_taxation AS "stateOfTaxation",
+		a.del_flag AS "delFlag",
+		a.total_payment_one_year_amount AS "totalPaymentOneYearAmount",
+		a.FIRST_RECORD_LOAN_YEAR AS "firstRecordLoanYear",
+		a.OPERATER_ORIGAN_NUM AS "operaterOriganNum"
+	</sql>
+
+	<sql id="creditCompanyJoins">
+	</sql>
+
+	<select id="get" resultType="CreditCompany">
+		SELECT
+		<include refid="creditCompanyColumns" />
+		FROM cre_credit_company a
+		<include refid="creditCompanyJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CreditCompany">
+		SELECT
+		<include refid="creditCompanyColumns" />
+		FROM cre_credit_company a
+		<include refid="creditCompanyJoins" />
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_credit_company a
+		<include refid="creditCompanyJoins" />
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CreditCompany">
+		SELECT
+		<include refid="creditCompanyColumns" />
+		FROM cre_credit_company a
+		<include refid="creditCompanyJoins" />
+		<where>
+			a.del_flag = '0' and a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_credit_company(
+		id,
+		apply_no,
+		role_type,
+		company_id,
+		company_name,
+		credit_months,
+		id_num,
+		guarantee_out_amount,
+		company_phone,
+		printing_time,
+		is_company_up_down,
+		create_by,
+		six_month_company_income_avg,
+		create_date,
+		update_by,
+		update_date,
+		sum_loan_amount,
+		sum_balance_amount,
+		sum_overdue_amount,
+		state_of_taxation,
+		del_flag,
+		total_payment_one_year_amount,
+		FIRST_RECORD_LOAN_YEAR,
+		OPERATER_ORIGAN_NUM
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{roleType},
+		#{companyId},
+		#{companyName},
+		#{creditMonths},
+		#{idNum},
+		#{guaranteeOutAmount},
+		#{companyPhone},
+		#{printingTime},
+		#{isCompanyUpDown},
+		#{createBy.id},
+		#{sixMonthCompanyIncomeAvg},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{sumLoanAmount},
+		#{sumBalanceAmount},
+		#{sumOverdueAmount},
+		#{stateOfTaxation},
+		#{delFlag},
+		#{totalPaymentOneYearAmount},
+		#{firstRecordLoanYear},
+		#{operaterOriganNum}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_credit_company SET
+		apply_no = #{applyNo},
+		role_type = #{roleType},
+		company_id = #{companyId},
+		company_name = #{companyName},
+		credit_months = #{creditMonths},
+		id_num = #{idNum},
+		guarantee_out_amount = #{guaranteeOutAmount},
+		company_phone = #{companyPhone},
+		printing_time = #{printingTime},
+		is_company_up_down = #{isCompanyUpDown},
+		create_by = #{createBy.id},
+		six_month_company_income_avg = #{sixMonthCompanyIncomeAvg},
+		create_date = #{createDate},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		state_of_taxation = #{stateOfTaxation},
+		del_flag = #{delFlag},
+		total_payment_one_year_amount = #{totalPaymentOneYearAmount},
+		FIRST_RECORD_LOAN_YEAR = #{firstRecordLoanYear},
+		OPERATER_ORIGAN_NUM = #{operaterOriganNum}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE cre_credit_company SET
+		del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="banchDelete">
+		UPDATE cre_credit_company a SET a.DEL_FLAG='1'
+		WHERE id IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+		#{idList}
+		</foreach>
+	</update>
+	
+	<!-- /**
+	 * 更新企业征信信息中的贷款总额、贷款余额、贷款逾期总额
+	 * @param creditCust
+	 */ -->
+	<update id="updateSumElements">
+		UPDATE cre_credit_company SET 	
+			sum_loan_amount = #{sumLoanAmount},
+			sum_balance_amount = #{sumBalanceAmount},
+			sum_overdue_amount = #{sumOverdueAmount},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getByapplyNo" resultType="com.resoft.outinterface.SV.client2.CompanyCreditField">
+		SELECT
+			a.COMPANY_ID as "workId",
+			a.COMPANY_PHONE AS "cunitTelephoneNumber",
+			a.CREDIT_MONTHS AS "ccreditHistoryMonth",
+			a.GUARANTEE_OUT_AMOUNT AS "ctotalExternalGuarantee",
+			a.PRINTING_TIME AS "cCreditPrintTime",
+			a.SUM_BALANCE_AMOUNT AS "ctotalAmountOverdueLoans",
+			a.SUM_OVERDUE_AMOUNT AS "ctotalMonthlyLoanAmount"
+
+		FROM
+			cre_credit_company a
+		  left join  cre_apply_relation b on a.apply_no = b.apply_no and a.COMPANY_ID = b.cust_id
+		WHERE
+			a.APPLY_NO = #{applyNo}  AND b.IS_PUSH = '0' AND b.SV_FLAG='1'  and b.role_type in ('5','6')
+	</select>
+
+</mapper>

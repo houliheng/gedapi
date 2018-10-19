@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.mortgageCarEvaluateInfo.dao.MortgageCarEvaluateInfoDao">
+
+	<sql id="mortgageCarEvaluateInfoColumns">
+		a.id AS "id",
+		a.car_id AS "carId",
+		a.motor_vehi_regi_certi_no AS "motorVehiRegiCertiNo",
+		a.vehicle_no AS "vehicleNo",
+		a.engine_num AS "engineNum",
+		a.vehicle_shelf_no AS "vehicleShelfNo",
+		a.net_purchase_price AS "netPurchasePrice",
+		a.travel_kms AS "travelKms",
+		a.IS_PROCEDURE_COMPLETE AS "isProcedureComplete",
+		a.annual_inspection_status AS "annualInspectionStatus",
+		a.use_property AS "useProperty",
+		a.car_status AS "carStatus",
+		a.is_keep_papers AS "isKeepPapers",
+		a.is_handle AS "isHandle",
+		a.used_changes AS "usedChanges",
+		a.used_years
+		AS "usedYears",
+		a.is_common AS "isCommon",
+		a.car_evaluate_price AS "carEvaluatePrice",
+		a.market_price1 AS "marketPrice1",
+		a.market_phone1 AS "marketPhone1",
+		a.market_price2 AS "marketPrice2",
+		a.market_phone2 AS "marketPhone2",
+		a.market_price3 AS "marketPrice3",
+		a.market_phone3
+		AS "marketPhone3",
+		a.mortgage_rate AS "mortgageRate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="mortgageCarEvaluateInfoJoins">
+	</sql>
+
+	<select id="get" resultType="MortgageCarEvaluateInfo">
+		SELECT
+		<include refid="mortgageCarEvaluateInfoColumns" />
+		FROM cre_mortgage_car_evaluate_info a
+		<include refid="mortgageCarEvaluateInfoJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="MortgageCarEvaluateInfo">
+		SELECT
+		<include refid="mortgageCarEvaluateInfoColumns" />
+		FROM cre_mortgage_car_evaluate_info a
+		<include refid="mortgageCarEvaluateInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_mortgage_car_evaluate_info a
+		<include refid="mortgageCarEvaluateInfoJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="MortgageCarEvaluateInfo">
+		SELECT
+		<include refid="mortgageCarEvaluateInfoColumns" />
+		FROM cre_mortgage_car_evaluate_info a
+		<include refid="mortgageCarEvaluateInfoJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_mortgage_car_evaluate_info(
+		id,
+		car_id,
+		mortgage_Rate,
+		motor_vehi_regi_certi_no,
+		vehicle_no,
+		engine_num,
+		vehicle_shelf_no,
+		net_purchase_price,
+		travel_kms,
+		annual_inspection_status,
+		use_property,
+		car_status,
+		is_keep_papers,
+		is_handle,
+		used_changes,
+		used_years,
+		is_common,
+		car_evaluate_price,
+		market_price1,
+		market_phone1,
+		market_price2,
+		market_phone2,
+		market_price3,
+		market_phone3,
+		is_procedure_complete,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{carId},
+		#{mortgageRate},
+		#{motorVehiRegiCertiNo},
+		#{vehicleNo},
+		#{engineNum},
+		#{vehicleShelfNo},
+		#{netPurchasePrice},
+		#{travelKms},
+		#{annualInspectionStatus},
+		#{useProperty},
+		#{carStatus},
+		#{isKeepPapers},
+		#{isHandle},
+		#{usedChanges},
+		#{usedYears},
+		#{isCommon},
+		#{carEvaluatePrice},
+		#{marketPrice1},
+		#{marketPhone1},
+		#{marketPrice2},
+		#{marketPhone2},
+		#{marketPrice3},
+		#{marketPhone3},
+		#{isProcedureComplete},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_mortgage_car_evaluate_info SET
+		car_id = #{carId},
+		motor_vehi_regi_certi_no = #{motorVehiRegiCertiNo},
+		vehicle_no = #{vehicleNo},
+		engine_num = #{engineNum},
+		mortgage_rate = #{mortgageRate},
+		vehicle_shelf_no = #{vehicleShelfNo},
+		net_purchase_price = #{netPurchasePrice},
+		travel_kms = #{travelKms},
+		is_procedure_complete = #{isProcedureComplete},
+		annual_inspection_status = #{annualInspectionStatus},
+		use_property = #{useProperty},
+		car_status = #{carStatus},
+		is_keep_papers = #{isKeepPapers},
+		is_handle = #{isHandle},
+		used_changes = #{usedChanges},
+		used_years = #{usedYears},
+		is_common = #{isCommon},
+		car_evaluate_price = #{carEvaluatePrice},
+		market_price1 = #{marketPrice1},
+		market_phone1 = #{marketPhone1},
+		market_price2 = #{marketPrice2},
+		market_phone2 = #{marketPhone2},
+		market_price3 = #{marketPrice3},
+		market_phone3 = #{marketPhone3},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_mortgage_car_evaluate_info
+		WHERE id = #{id}
+	</update>
+
+	<select id="findMortgageCarByCarId" resultType="MortgageCarInfo">
+		SELECT * FROM cre_mortgage_car_info a where a.id = #{carId}
+	</select>
+
+	<select id="findListByCarId" resultType="MortgageCarEvaluateInfo">
+		SELECT
+		<include refid="mortgageCarEvaluateInfoColumns" />
+		FROM cre_mortgage_car_evaluate_info a
+		<where>
+			a.car_id = #{carId}
+		</where>
+	</select>
+
+
+	<update id="updateByCarId">
+		UPDATE cre_mortgage_car_evaluate_info SET
+		car_id = #{carId},
+		motor_vehi_regi_certi_no = #{motorVehiRegiCertiNo},
+		vehicle_no = #{vehicleNo},
+		engine_num = #{engineNum},
+		vehicle_shelf_no = #{vehicleShelfNo},
+		net_purchase_price = #{netPurchasePrice},
+		travel_kms = #{travelKms},
+		is_procedure_complete = #{isProcedureComplete},
+		annual_inspection_status = #{annualInspectionStatus},
+		use_property = #{useProperty},
+		car_status = #{carStatus},
+		is_keep_papers = #{isKeepPapers},
+		is_handle = #{isHandle},
+		used_changes = #{usedChanges},
+		used_years = #{usedYears},
+		is_common = #{isCommon},
+		car_evaluate_price = #{carEvaluatePrice},
+		market_price1 = #{marketPrice1},
+		market_phone1 = #{marketPhone1},
+		market_price2 = #{marketPrice2},
+		market_phone2 = #{marketPhone2},
+		market_price3 = #{marketPrice3},
+		market_phone3 = #{marketPhone3},
+		update_by = #{updateBy.id},
+		mortgage_rate = #{mortgageRate},
+		update_date = #{updateDate}
+		WHERE car_id = #{carId}
+	</update>
+
+	<select id="getSumCarEvaluatePriceByCarIdList" resultType="java.math.BigDecimal">
+		select ifnull(sum(a.CAR_EVALUATE_PRICE),0)
+		from cre_mortgage_car_evaluate_info a where a.CAR_ID in
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+			#{idList}
+		</foreach>
+	</select>
+	
+	<select id="findListByCarIdList" resultType="MortgageCarEvaluateInfo">
+		SELECT 
+			<include refid="mortgageCarEvaluateInfoColumns"/>
+		FROM cre_mortgage_car_evaluate_info a
+			where  a.car_id in 
+			
+		<foreach item="idList" collection="idList" open="(" close=")"
+			separator=",">
+			#{idList}
+		</foreach>
+	</select>
+	
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+客户信息表   SQLMapper  cre_cust_info
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreCustInfoDao">
+	<!-- 
+	 * @reqno:H1509230043
+	 * @date-designer:2015年10月13日-songmin
+	 * @date-author:2015年10月13日-songmin:把客户名称、证件类型、证件号从CRE_APPLY_REGISTER表中拷贝过来
+	 * @db-z:cre_cust_info:ID、CUST_NAME、ID_TYPE、ID_NUM
+	 -->
+	 <!-- 
+	 * @reqno:H1512210023
+	 * @date-designer:2015年12月30日-songmin
+	 * @date-author:2015年12月30日-songmin:CRE_信贷审批_进件管理_个人客户登记_功能重构
+	 * 	将id（copyRegistInfo）修改为（insert）
+	 * @db-z:cre_cust_info:MOBILE
+	 -->
+	<!--
+	 * @reqno:H1601280119
+	 * @date-designer:2016年1月28日-lirongchao
+	 * @db-z:cre_cust_info:id,apply_id,ID_TYPE,ID_NUM,LIST_STATUS,cust_type,mobile
+	 * @date-author:2016年1月28日-lirongchao:CRE_信贷审批_进件管理_客户登记列表_个人客户登记_改造
+	 										因新表和旧表差异，所以需要修改表结构
+	-->		 
+	<insert id="insert">
+		insert into cre_cust_info(ID,CUST_NAME,ID_TYPE,ID_NUM,MOBILE_NUM) values(#{id},#{custName},#{idType},#{idNum},#{mobile})
+	</insert>
+	
+<!-- 
+ * @reqno:H1510080096
+ * @date-designer:2015年10月20日-songmin
+ * @date-author:2015年10月20日-songmin:CRE_信贷审批_申请录入_客户信息_基本信息【默认数据项】展现
+ 			根据APPLY_ID查询客户信息
+ * @db-z:cre_cust_info:ID、APPLY_ID（申请ID）、CUST_NAME（客户名称）、ID_TYPE（证件类型：CUSTOMER_P_ID_TYPE）、ID_NUM（证件号）、
+ 	BIRTHDAY（出生日期）、SEX（性别：sex）、MOBILE（移动电话）、WEB_STATUS（婚姻状况：WEB_STATUS）、CHILDRENS（子女数量）、PROVIDES（供养人数）、
+ 	PAYMENT（每月家庭支出）、EDUCATION（最高学历：EDUCATION）、AREA_CODE（住宅电话的区号）、PHONE（住宅电话）、RESTIME（现住宅地居住时间）、
+ 	CITY_TIME（来本市时间）、EMAIL（电子邮箱）、WECHAT_NUMBER（微信号码）、QQ（QQ号码）、MICRO_NUMBER（微博号码）、REG_PROVINCE（户籍地址省）、
+ 	REG_CITY（户籍地址市）、REG_DISTINCT（户籍地址区）、REG_DETAILS（户籍地址详细）、IS_LOCAL（是否本地户籍：yes_no）、ADDR_RESI（现居地与户籍地址是否一致：yes_no）、
+ 	CONT_PROVINCE（现居地与户籍地址是否一致：yes_no）、CONT_PROVINCE（通讯地址省-通讯地址即现住宅地址）、CONT_CITY（通讯地址市）、
+ 	CONT_DISTINCT（通讯地址区）、CONT_DETAILS（通讯地址详细）
+ * @db-j:TABLE表名:字段或条件的相关说明
+ -->
+ <select id="get" resultType="CreCustInfo">
+ 	select  a.ID id,
+ 			a.APPLY_ID applyId,
+ 			a.CUST_NAME custName,
+ 			a.ID_TYPE idType,
+ 			a.ID_NUM idNum,
+ 			a.BIRTHDAY birthday,
+ 			a.SEX sex,
+ 			a.MOBILE mobile,
+ 			a.WEB_STATUS webStatus,
+ 			a.CHILDRENS childrens,
+ 			a.PROVIDES provides,
+ 			a.PAYMENT payment,
+ 			a.EDUCATION education,
+ 			a.AREA_CODE areaCode,
+ 			a.PHONE phone,
+ 			a.RESTIME restime,
+ 			a.CITY_TIME cityTime,
+			a.EMAIL email,
+			a.WECHAT_NUMBER wechatNumber,
+			a.QQ qq,
+			a.MICRO_NUMBER microNumber,
+			a.REG_PROVINCE regProvince,
+			a.REG_CITY regCity,
+			a.REG_DISTINCT regDistinct,
+			a.REG_DETAILS regDetails,
+			a.IS_LOCAL isLocal,
+			a.ADDR_RESI addrResi,
+			a.CONT_PROVINCE contProvince,
+			a.CONT_CITY contCity,
+			a.CONT_DISTINCT contDistinct,
+			a.CONT_DETAILS contDetails 
+		from cre_cust_info a
+		where a.APPLY_ID=#{applyId}
+		and a.DEL_FLAG = '0'
+ </select>
+ 	<!-- 因为客户信息表的数据是在登记产品类型时Copy初始化的，所以页面只存在修改操作 -->
+ 	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		修改客户基本信息
+	 *		修改数据项：客户名称、证件类型、证件号、出生日期、性别、移动电话、婚姻状况、子女数量、供养人数、每月家庭支出、最高学历、住宅电话的区号、住宅电话、现住宅地居住时间、来本市时间、电子邮箱、微信号码、QQ、微博号码、户籍地址省、
+	 *		 	户籍地址市、户籍地址区、户籍地址详细、是否本地户籍、现居地与户籍地址是否一致、现居地与户籍地址是否一致、通讯地址省-通讯地址即现住宅地址、通讯地址市、通讯地址区、通讯地址详细
+	 *
+	 * @db-z:cre_cust_info:CUST_NAME（客户名称）、ID_TYPE（证件类型：CUSTOMER_P_ID_TYPE）、ID_NUM（证件号）、
+	 *		 	BIRTHDAY（出生日期）、SEX（性别：sex）、MOBILE（移动电话）、WEB_STATUS（婚姻状况：WEB_STATUS）、CHILDRENS（子女数量）、PROVIDES（供养人数）、
+	 *		 	PAYMENT（每月家庭支出）、EDUCATION（最高学历：EDUCATION）、AREA_CODE（住宅电话的区号）、PHONE（住宅电话）、RESTIME（现住宅地居住时间）、
+	 *		 	CITY_TIME（来本市时间）、EMAIL（电子邮箱）、WECHAT_NUMBER（微信号码）、QQ（QQ号码）、MICRO_NUMBER（微博号码）、REG_PROVINCE（户籍地址省）、
+	 *		 	REG_CITY（户籍地址市）、REG_DISTINCT（户籍地址区）、REG_DETAILS（户籍地址详细）、IS_LOCAL（是否本地户籍：yes_no）、ADDR_RESI（现居地与户籍地址是否一致：yes_no）、
+	 *		 	CONT_PROVINCE（现居地与户籍地址是否一致：yes_no）、CONT_PROVINCE（通讯地址省-通讯地址即现住宅地址）、CONT_CITY（通讯地址市）、
+	 *		 	CONT_DISTINCT（通讯地址区）、CONT_DETAILS（通讯地址详细）、ID、APPLY_ID（申请ID）
+	 -->
+ 	<update id="updateCustInfo">
+ 		update cre_cust_info 
+ 		set
+ 			BIRTHDAY=#{birthday},
+ 			SEX=#{sex},
+ 			MOBILE=#{mobile},
+ 			WEB_STATUS=#{webStatus},
+ 			CHILDRENS=#{childrens},
+ 			PROVIDES=#{provides},
+ 			PAYMENT=#{payment},
+ 			EDUCATION=#{education},
+ 			AREA_CODE=#{areaCode},
+ 			PHONE=#{phone},
+ 			RESTIME=#{restime},
+ 			CITY_TIME=#{cityTime},
+ 			EMAIL=#{email},
+ 			WECHAT_NUMBER=#{wechatNumber},
+ 			QQ=#{qq},
+ 			MICRO_NUMBER=#{microNumber},
+ 			REG_PROVINCE=#{regProvince},
+ 			REG_CITY=#{regCity},
+ 			REG_DISTINCT=#{regDistinct},
+ 			REG_DETAILS=#{regDetails},
+ 			IS_LOCAL=#{isLocal},
+ 			ADDR_RESI=#{addrResi},
+ 			CONT_PROVINCE=#{contProvince},
+ 			CONT_CITY=#{contCity},
+ 			CONT_DISTINCT=#{contDistinct},
+ 			CONT_DETAILS=#{contDetails}
+ 		where 
+ 		 ID=#{id}
+ 		and DEL_FLAG = '0'
+ 	</update>
+</mapper>

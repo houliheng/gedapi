@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditAnalysis.CreditAnalysisDao">
+    
+	<sql id="creditAnalysisColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.loan_purpose_desc AS "loanPurposeDesc",
+		a.business_desc AS "businessDesc",
+		a.category_desc AS "categoryDesc",
+		a.company_desc AS "companyDesc",
+		a.loan_repay_desc AS "loanRepayDesc",
+		a.guarantee_desc AS "guaranteeDesc",
+		a.risk_point AS "riskPoint",
+		a.edge_comment AS "edgeComment",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.LINE_DESC AS "lineDesc",
+		a.CREDIT_DESC AS "creditDesc",
+		a.CREDIT_COMPANY AS "creditCompany"
+	</sql>
+	
+	<sql id="creditAnalysisJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditAnalysis">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis a
+		<include refid="creditAnalysisJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditAnalysis">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_analysis a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreditAnalysis">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_analysis(
+			id,
+			apply_no,
+			loan_purpose_desc,
+			business_desc,
+			category_desc,
+			company_desc,
+			loan_repay_desc,
+			guarantee_desc,
+			risk_point,
+			edge_comment,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			LINE_DESC,
+			CREDIT_DESC,
+			CREDIT_COMPANY
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{loanPurposeDesc},
+			#{businessDesc},
+			#{categoryDesc},
+			#{companyDesc},
+			#{loanRepayDesc},
+			#{guaranteeDesc},
+			#{riskPoint},
+			#{edgeComment},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{lineDesc},
+			#{creditDesc},
+			#{creditCompany}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_analysis SET 	
+			apply_no = #{applyNo},
+			loan_purpose_desc = #{loanPurposeDesc},
+			business_desc = #{businessDesc},
+			category_desc = #{categoryDesc},
+			company_desc = #{companyDesc},
+			loan_repay_desc = #{loanRepayDesc},
+			guarantee_desc = #{guaranteeDesc},
+			risk_point = #{riskPoint},
+			edge_comment = #{edgeComment},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			LINE_DESC = #{lineDesc},
+			CREDIT_DESC = #{creditDesc},
+			CREDIT_COMPANY = #{creditCompany}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_analysis
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCreditAnalysisByApplyNo" resultType="CreditAnalysis">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis a
+		<where>
+				AND a.apply_no = #{applyNo}
+		</where>		
+	</select>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_credit_analysis SET 	
+		<if test="loanPurposeDesc != null and loanPurposeDesc != ''">
+			loan_purpose_desc = #{loanPurposeDesc},
+		</if>
+		<if test="businessDesc != null and businessDesc != ''">
+			business_desc = #{businessDesc},
+		</if>
+		<if test="categoryDesc != null and categoryDesc != ''">
+			category_desc = #{categoryDesc},
+		</if>
+		<if test="companyDesc != null and companyDesc != ''">
+			company_desc = #{companyDesc},
+		</if>
+		<if test="loanRepayDesc != null and loanRepayDesc != ''">
+			loan_repay_desc = #{loanRepayDesc},
+		</if>
+		<if test="guaranteeDesc != null and guaranteeDesc != ''">
+			guarantee_desc = #{guaranteeDesc},
+		</if>
+		<if test="riskPoint != null and riskPoint != ''">
+			risk_point = #{riskPoint},
+		</if>
+		<if test="edgeComment != null and edgeComment != ''">
+			edge_comment = #{edgeComment},
+		</if>
+		<if test="lineDesc != null and lineDesc != ''">
+			LINE_DESC = #{lineDesc},
+		</if>
+		<if test="creditDesc != null and creditDesc != ''">
+			CREDIT_DESC = #{creditDesc},
+		</if>
+		<if test="creditCompany != null and creditCompany != ''">
+			CREDIT_COMPANY = #{creditCompany},
+		</if>
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+</mapper>

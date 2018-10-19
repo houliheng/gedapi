@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.ApplyRegisterDao">
+
+	<sql id="applyRegisterColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.COMPANY_NAME as "companyName",
+		a.COM_ID_TYPE as "comIdType",
+		a.COM_ID_NUM as "comIdNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS
+		"applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS
+		"channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.product_category AS "productCategory",
+		a.participant AS "participant",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS
+		"registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS
+		"company.id",
+		c.name AS "company.name",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.proc_def_key AS "procDefKey",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.IFT_APPLY_ID as "iftApplyId",
+		a.update_date AS "updateDate",
+		a.IS_SAME_MANAGER AS "isSameManager",
+		a.MANAGER_DIFFER_REASON AS "managerDifferReason",
+		a.IS_SAME_PLACE AS "isSamePlace",
+		a.PLACE_DIFFER_REASON AS "placeDifferReason",
+		a.SEND_GED as "sendGED",
+		a.new_old as newOld
+	</sql>
+
+	<sql id="applyRegisterJoins">
+		left join sys_office c on c.id = a.org_id
+	</sql>
+
+	<select id="get" resultType="ApplyRegister">
+		SELECT
+		<include refid="applyRegisterColumns" />
+		FROM cre_apply_register a
+		<include refid="applyRegisterJoins" />
+		WHERE a.id = #{id} and a.del_flag = '0'
+	</select>
+	
+	
+	<select id="checkDouble" resultType="ApplyRegister">
+		SELECT
+		<include refid="applyRegisterColumns" />
+		FROM cre_apply_register a
+		<include refid="applyRegisterJoins" />
+		WHERE a.cust_name = #{custName}
+		and a.id_num = #{idNum}
+		and a.del_flag = '0'
+		and a.apply_status = '2'
+	</select>
+
+	<select id="findList" resultType="ApplyRegister">
+		SELECT
+		<include refid="applyRegisterColumns" />
+		FROM cre_apply_register a
+		<include refid="applyRegisterJoins" />
+		<where>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.id_type = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.id_num like concat(#{idNum},'%')
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.apply_status = #{applyStatus}
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no like concat(#{applyNo},'%')
+			</if>
+			<!-- <if test="company != null and company.id != null and company.id != 
+				''"> -->
+			<!-- AND (a.ORG_ID LIKE concat('%',#{company.id},'%') OR c.parent_ids 
+				LIKE concat('%',#{company.id},'%')) -->
+			<!-- </if> -->
+			<if test="createBy != null and createBy.id != '' and createBy.id != null">
+				AND a.CREATE_BY = #{createBy.id}
+			</if>
+			AND a.del_flag = '0'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_apply_register a
+		<include refid="applyRegisterJoins" />
+		<where>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name = #{custName}
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.id_type = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.id_num = #{idNum}
+			</if>
+			<if test="applyStatus != null and applyStatus != ''">
+				AND a.apply_status = #{applyStatus}
+			</if>
+			<!-- <if test="company.id != null and company.id != ''"> -->
+			<!-- AND a.org_id = #{company.id} -->
+			<!-- </if> -->
+			AND a.del_flag = '0'
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="ApplyRegister">
+		SELECT
+		<include refid="applyRegisterColumns" />
+		FROM cre_apply_register a
+		<include refid="applyRegisterJoins" />
+		WHERE a.del_flag = '0'
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 新增 -->
+	<insert id="insert" parameterType="ApplyRegister">
+		INSERT INTO
+		cre_apply_register(
+		id,
+		apply_no,
+		cust_type,
+		cust_name,
+		COMPANY_NAME,
+		COM_ID_TYPE,
+		COM_ID_NUM,
+		id_type,
+		id_num,
+		mobile_num,
+		apply_product_type_code,
+		apply_product_id,
+		apply_amount,
+		channel_source_type,
+		apply_product_name,
+		product_Category,
+		participant,
+		channel_other_desc,
+		register_name,
+		register_date,
+		org_id,
+		apply_status,
+		proc_ins_id,
+		serial_number,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		IFT_APPLY_ID,
+		IS_SAME_MANAGER,
+		MANAGER_DIFFER_REASON,
+		IS_SAME_PLACE,
+		PLACE_DIFFER_REASON,
+		del_flag,
+		SEND_GED,
+		new_old,
+		PROC_DEF_KEY
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custType},
+		#{custName},
+		#{companyName},
+		#{comIdType},
+		#{comIdNum},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{applyProductTypeCode},
+		#{applyProductId},
+		#{applyAmount},
+		#{channelSourceType},
+		#{applyProductName},
+		#{productCategory},
+		#{participant},
+		#{channelOtherDesc},
+		#{registerName},
+		#{registerDate},
+		#{company.id},
+		#{applyStatus},
+		#{procInsId},
+		#{serialNumber},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{iftApplyId},
+		#{isSameManager},
+		#{managerDifferReason},
+		#{isSamePlace},
+		#{placeDifferReason},
+		#{delFlag},
+		#{sendGED},
+		"0",
+		#{procDefKey}
+		)
+	</insert>
+	<!-- 从ged新增 -->
+	<insert id="saveApplyRegisterFromGedApplyRegister" parameterType="ApplyRegister">
+		INSERT INTO
+		cre_apply_register(
+		id,
+		apply_no,
+		cust_type,
+		cust_name,
+		id_type,
+		id_num,
+		mobile_num,
+		apply_product_type_code,
+		apply_product_id,
+		apply_amount,
+		channel_source_type,
+		apply_product_name,
+		producT_Category,
+		participant,
+		channel_other_desc,
+		register_name,
+		register_date,
+		org_id,
+		apply_status,
+		proc_ins_id,
+		serial_number,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		IFT_APPLY_ID,
+		IS_SAME_MANAGER,
+		MANAGER_DIFFER_REASON,
+		IS_SAME_PLACE,
+		PLACE_DIFFER_REASON,
+		del_flag,
+		send_ged,
+		new_old
+		) VALUES (
+		#{id},
+		#{applyNo},
+		#{custType},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{applyProductTypeCode},
+		#{applyProductId},
+		#{applyAmount},
+		#{channelSourceType},
+		#{applyProductName},
+		#{productCategory},
+		#{participant},
+		#{channelOtherDesc},
+		#{registerName},
+		#{registerDate},
+		#{company.id},
+		#{applyStatus},
+		#{procInsId},
+		#{serialNumber},
+		#{createId},
+		#{createDate},
+		#{updateId},
+		#{updateDate},
+		#{iftApplyId},
+		#{isSameManager},
+		#{managerDifferReason},
+		#{isSamePlace},
+		#{placeDifferReason},
+		#{delFlag},
+		#{sendGED},
+		"0"
+		)
+	</insert>
+	<!-- 修改 -->
+	<update id="updateSendGEDStatus">
+		UPDATE cre_apply_register SET
+		apply_no = #{applyNo},
+		IFT_APPLY_ID = #{iftApplyId},
+		cust_type = #{custType},
+		cust_name = #{custName},
+		COMPANY_NAME = #{companyName},
+		COM_ID_TYPE = #{comIdType},
+		COM_ID_NUM = #{comIdNum},
+		id_type = #{idType},
+		id_num = #{idNum},
+		mobile_num = #{mobileNum},
+		apply_product_type_code = #{applyProductTypeCode},
+		apply_product_id = #{applyProductId},
+		apply_amount = #{applyAmount},
+		channel_source_type = #{channelSourceType},
+		apply_product_name = #{applyProductName},
+		produCt_Category=#{productCategory},
+		participant=#{participant},
+		channel_other_desc = #{channelOtherDesc},
+		apply_status = #{applyStatus},
+		proc_ins_id = #{procInsId},
+		serial_number = #{serialNumber},
+		IS_SAME_MANAGER = #{isSameManager},
+		MANAGER_DIFFER_REASON = #{managerDifferReason},
+		IS_SAME_PLACE = #{isSamePlace},
+		PLACE_DIFFER_REASON = #{placeDifferReason},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		SEND_GED = #{sendGED}
+		WHERE id = #{id}
+	</update>
+	<update id="update">
+		UPDATE cre_apply_register SET
+		apply_no = #{applyNo},
+		IFT_APPLY_ID = #{iftApplyId},
+		cust_type = #{custType},
+		cust_name = #{custName},
+		COMPANY_NAME = #{companyName},
+		COM_ID_TYPE = #{comIdType},
+		COM_ID_NUM = #{comIdNum},
+		id_type = #{idType},
+		id_num = #{idNum},
+		mobile_num = #{mobileNum},
+		apply_product_type_code = #{applyProductTypeCode},
+		apply_product_id = #{applyProductId},
+		apply_amount = #{applyAmount},
+		channel_source_type = #{channelSourceType},
+		apply_product_name = #{applyProductName},
+		produCt_Category=#{productCategory},
+		participant=#{participant},
+		channel_other_desc = #{channelOtherDesc},
+		apply_status = #{applyStatus},
+		proc_ins_id = #{procInsId},
+		serial_number = #{serialNumber},
+		IS_SAME_MANAGER = #{isSameManager},
+		MANAGER_DIFFER_REASON = #{managerDifferReason},
+		IS_SAME_PLACE = #{isSamePlace},
+		PLACE_DIFFER_REASON = #{placeDifferReason},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		SEND_GED = #{sendGED}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据证件类型、证件号和手机号查询信息登记状态 -->
+	<select id="statusResult" parameterType="java.util.Map" resultType="java.lang.String">
+		SELECT DISTINCT APPLY_STATUS FROM
+		cre_apply_register
+		WHERE (ID_NUM = #{idNum} AND DEL_FLAG='0')
+		OR
+		(MOBILE_NUM = #{mobileNum} AND DEL_FLAG='0')
+	</select>
+
+	<!-- 根据id删除 -->
+	<update id="delete">
+		UPDATE cre_apply_register a
+		SET a.DEL_FLAG = '1'
+		WHERE
+		a.ID = #{id}
+	</update>
+
+	<!-- 批量删除 -->
+	<update id="banchDelete">
+		update cre_apply_register set del_flag = '1'
+		where id in
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+			#{idList}
+		</foreach>
+	</update>
+
+	<update id="updateApplyStatus">
+		UPDATE cre_apply_register SET APPLY_STATUS =
+		#{applyStatus} where apply_no = #{applyNo} AND del_flag='0'
+	</update>
+
+	<select id="getRegisterDateByApplyNo" resultType="String">
+		SELECT
+		a.REGISTER_DATE AS "registerDate"
+		FROM cre_apply_register a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+
+
+	<select id="selectRegisterByApplyNo" resultType="String">
+		SELECT
+		a.PROC_DEF_KEY AS "procDefKey"
+		FROM cre_apply_register a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+
+
+	<select id="getApplyRegisterByApplyNo" resultType="ApplyRegister">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.IFT_APPLY_ID as "iftApplyId",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.COMPANY_NAME as "companyName",
+		a.COM_ID_TYPE as "comIdType",
+		a.COM_ID_NUM as "comIdNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS
+		"applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS
+		"channelSourceType",
+		a.apply_product_name AS
+		"applyProductName",
+		a.PRODUCT_CATEGORY AS "productCategory",
+		a.participant AS "participant",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS
+		"registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS
+		"company.id",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS
+		"procInsId",
+		a.PROC_DEF_KEY as "procDefKey",
+		a.IS_SAME_MANAGER AS "isSameManager",
+		a.MANAGER_DIFFER_REASON AS "managerDifferReason",
+		a.IS_SAME_PLACE AS "isSamePlace",
+		a.PLACE_DIFFER_REASON AS "placeDifferReason",
+		a.serial_number AS
+		"serialNumber",
+		a.new_old as newOld
+		FROM cre_apply_register a
+		WHERE a.apply_no = #{applyNo}
+	</select>
+
+	<!--老数据推送冠易贷的时候 修改sengGed 为 2 -->
+	 <update id="updateRegisterByApplyNo" >
+		UPDATE cre_apply_register
+		SET SEND_GED = #{sendGED}
+		WHERE APPLY_NO = #{applyNo}
+	 </update>
+
+
+	<select id="existCompany" resultType="java.lang.String">
+		select a.APPLY_STATUS from
+		cre_apply_register a
+		inner join cre_apply_relation b on a.APPLY_NO = b.APPLY_NO
+		inner join cre_company_info c on b.CUST_ID = c.ID
+		where 1=1
+		<if test="unSocCreditNo != null and unSocCreditNo != ''">
+			and c.UN_SOC_CREDIT_NO = #{unSocCreditNo}
+		</if>
+		<if test="organizationNo != null and organizationNo != ''">
+			and c.ORGANIZATION_NO = #{organizationNo}
+		</if>
+		<if test="busiLicRegNo != null and busiLicRegNo != ''">
+			and c.BUSI_LIC_REG_NO = #{busiLicRegNo}
+		</if>
+		<if test="registerNationalTaxNo != null and registerNationalTaxNo != ''">
+			and c.REGISTER_NATIONAL_TAX_NO = #{registerNationalTaxNo}
+		</if>
+	</select>
+
+	<update id="updateProcInsIdById">
+		UPDATE cre_apply_register
+		SET PROC_INS_ID = #{procInsId},
+		PROC_DEF_KEY = #{procDefKey}
+		WHERE ID = #{id}
+	</update>
+	
+	<select id="getApplyRegisterByApplyNoAndGed" resultType="ApplyRegister">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.COMPANY_NAME as "companyName",
+		a.COM_ID_TYPE as "comIdType",
+		a.COM_ID_NUM as "comIdNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS
+		"applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS
+		"channelSourceType",
+		a.apply_product_name AS "applyProductName",
+		a.product_category AS "productCategory",
+		a.participant AS "participant",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS
+		"registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS
+		"company.id",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS "procInsId",
+		a.proc_def_key AS "procDefKey",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.IFT_APPLY_ID as "iftApplyId",
+		a.update_date AS "updateDate",
+		a.IS_SAME_MANAGER AS "isSameManager",
+		a.MANAGER_DIFFER_REASON AS "managerDifferReason",
+		a.IS_SAME_PLACE AS "isSamePlace",
+		a.PLACE_DIFFER_REASON AS "placeDifferReason",
+		a.new_old as newOld
+		FROM cre_apply_register a
+		WHERE a.apply_no = #{applyNo} and del_flag = '0'
+	</select>
+	
+	<select id="findApplyListsByIdNum" resultType="ApplyRegister">
+		select <include refid="applyRegisterColumns" />
+		FROM cre_apply_register a 
+		<include refid="applyRegisterJoins" />
+		where a.id_num = #{idNum}
+	</select>
+	
+	<select id="findGEDByContractNo" resultType="java.lang.String">
+		select a.SEND_GED from cre_apply_register a
+		LEFT JOIN cre_contract b on b.APPLY_NO=a.APPLY_NO
+		where b.CONTRACT_NO=#{contractNo}
+	</select>
+	
+	<select id="getApplyRegisterByContractNo" resultType="ApplyRegister">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.IFT_APPLY_ID as "iftApplyId",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.COMPANY_NAME as "companyName",
+		a.COM_ID_TYPE as "comIdType",
+		a.COM_ID_NUM as "comIdNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS
+		"applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS
+		"channelSourceType",
+		a.apply_product_name AS
+		"applyProductName",
+		a.PRODUCT_CATEGORY AS "productCategory",
+		a.participant AS "participant",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS
+		"registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS
+		"company.id",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS
+		"procInsId",
+		a.PROC_DEF_KEY as "procDefKey",
+		a.IS_SAME_MANAGER AS "isSameManager",
+		a.MANAGER_DIFFER_REASON AS "managerDifferReason",
+		a.IS_SAME_PLACE AS "isSamePlace",
+		a.PLACE_DIFFER_REASON AS "placeDifferReason",
+		a.serial_number AS
+		"serialNumber",
+		a.new_old as newOld
+		FROM cre_apply_register a
+		left join  ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b on a.apply_no = b.apply_no
+		WHERE b.CONTRACT_NO = #{contractNo}     
+	</select>
+	
+	<update id="updateUnderByApplyNo" >
+		UPDATE cre_apply_register set
+		apply_no = #{applyNo},
+		apply_status = #{applyStatus},
+		PROC_DEF_KEY = #{procDefKey},
+		SEND_GED = #{sendGED},
+		new_old = #{newOld}
+		WHERE APPLY_NO = #{applyNo}
+	 </update>
+	
+	
+	<select id="getApplyRegisterByAccontractNo" resultType="ApplyRegister">
+		SELECT
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.IFT_APPLY_ID as "iftApplyId",
+		a.cust_type AS "custType",
+		a.cust_name AS "custName",
+		a.COMPANY_NAME as "companyName",
+		a.COM_ID_TYPE as "comIdType",
+		a.COM_ID_NUM as "comIdNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.apply_product_type_code AS
+		"applyProductTypeCode",
+		a.apply_product_id AS "applyProductId",
+		a.apply_amount AS "applyAmount",
+		a.channel_source_type AS
+		"channelSourceType",
+		a.apply_product_name AS
+		"applyProductName",
+		a.PRODUCT_CATEGORY AS "productCategory",
+		a.participant AS "participant",
+		a.channel_other_desc AS "channelOtherDesc",
+		a.register_name AS
+		"registerName",
+		a.register_date AS "registerDate",
+		a.org_id AS
+		"company.id",
+		a.apply_status AS "applyStatus",
+		a.proc_ins_id AS
+		"procInsId",
+		a.PROC_DEF_KEY as "procDefKey",
+		a.IS_SAME_MANAGER AS "isSameManager",
+		a.MANAGER_DIFFER_REASON AS "managerDifferReason",
+		a.IS_SAME_PLACE AS "isSamePlace",
+		a.PLACE_DIFFER_REASON AS "placeDifferReason",
+		a.serial_number AS
+		"serialNumber",
+		a.new_old as newOld
+		FROM cre_apply_register a
+		left join  ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b on a.apply_no = b.apply_no
+		WHERE b.CONTRACT_NO = #{contractNo}    limit 1 
+	</select>
+</mapper>

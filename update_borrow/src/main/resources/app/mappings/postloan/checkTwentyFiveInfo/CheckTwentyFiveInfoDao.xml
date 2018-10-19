@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkTwentyFiveInfo.dao.CheckTwentyFiveInfoDao">
+    
+	<sql id="checkTwentyFiveInfoColumns">
+		a.id as "id",
+		a.allocate_id as "allocateId",
+		a.contract_no AS "contractNo",
+		a.role_type AS "roleType",
+		a.check_base AS "checkBase",
+		a.check_web AS "checkWeb",
+		a.check_family AS "checkFamily",
+		a.check_financial AS "checkFinancial",
+		a.check_loan_purpost AS "checkLoanPurpost",
+		a.check_debt AS "checkDebt",
+		a.check_bank AS "checkBank",
+		a.check_credit AS "checkCredit",
+		a.check_property AS "checkProperty",
+		a.check_mortgage AS "checkMortgage",
+		a.check_operate AS "checkOperate",
+		a.check_archive AS "checkArchive",
+		a.check_proc AS "checkProc",
+		a.check_get_fee AS "checkGetFee",
+		a.check_get_address AS "checkGetAddress",
+		a.check_sign AS "checkSign",
+		a.check_base_remark as "checkBaseRemark",
+		a.check_web_remark  AS "checkWebRemark",
+		a.check_family_remark AS "checkFamilyRemark",
+		a.check_financial_remark AS "checkFinancialRemark",
+		a.check_debt_remark AS "checkDebtRemark",
+		a.check_loan_purpost_remark AS "checkLoanPurpostRemark",
+		a.check_bank_remark AS "checkBankRemark",
+		a.check_credit_remark AS "checkCreditRemark",
+		a.check_property_remark AS "checkPropertyRemark",
+		a.check_mortgage_remark AS "checkMortgageRemark",
+		a.check_operate_remark AS "checkOperateRemark",
+		a.check_archive_remark AS "checkArchiveRemark",
+		a.check_proc_remark AS "checkProcRemark",
+		a.check_get_fee_remark AS "checkGetFeeRemark",
+		a.check_get_address_remark AS "checkGetAddressRemark",
+		a.check_sign_remark AS "checkSignRemark"
+	</sql>
+	
+	<sql id="checkTwentyFiveInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckTwentyFiveInfo">
+		SELECT 
+			<include refid="checkTwentyFiveInfoColumns"/>
+		FROM pl_check_25_info a
+		<include refid="checkTwentyFiveInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckTwentyFiveInfo">
+		SELECT 
+			<include refid="checkTwentyFiveInfoColumns"/>
+		FROM pl_check_25_info a
+		<include refid="checkTwentyFiveInfoJoins"/>
+		<where>
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="roleType != null and roleType != ''">
+				AND a.role_type = #{roleType}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_check_25_info a
+		<include refid="checkTwentyFiveInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckTwentyFiveInfo">
+		SELECT 
+			<include refid="checkTwentyFiveInfoColumns"/>
+		FROM pl_check_25_info a
+		<include refid="checkTwentyFiveInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_check_25_info(
+			id,
+			allocate_id,
+			contract_no,
+			role_type,
+			check_base,
+			check_web,
+			check_family,
+			check_financial,
+			check_debt,
+			check_loan_purpost,
+			check_bank,
+			check_credit,
+			check_property,
+			check_mortgage,
+			check_operate,
+			check_archive,
+			check_proc,
+			check_get_fee,
+			check_get_address,
+			check_sign
+		) VALUES (
+			#{id},
+			#{allocateId},
+			#{contractNo},
+			#{roleType},
+			#{checkBase},
+			#{checkWeb},
+			#{checkFamily},
+			#{checkFinancial},
+			#{checkDebt},
+			#{checkLoanPurpost},
+			#{checkBank},
+			#{checkCredit},
+			#{checkProperty},
+			#{checkMortgage},
+			#{checkOperate},
+			#{checkArchive},
+			#{checkProc},
+			#{checkGetFee},
+			#{checkGetAddress},
+			#{checkSign}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_check_25_info SET 	
+			contract_no = #{contractNo},
+			role_type = #{roleType},
+			check_base = #{checkBase},
+			check_web = #{checkWeb},
+			check_family = #{checkFamily},
+			check_financial = #{checkFinancial},
+			check_debt = #{checkDebt},
+			check_loan_purpost = #{checkLoanPurpost},
+			check_bank = #{checkBank},
+			check_credit = #{checkCredit},
+			check_property = #{checkProperty},
+			check_mortgage = #{checkMortgage},
+			check_operate = #{checkOperate},
+			check_archive = #{checkArchive},
+			check_proc = #{checkProc},
+			check_get_fee = #{checkGetFee},
+			check_get_address = #{checkGetAddress},
+			check_sign = #{checkSign}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_check_25_info
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCheckTwentyFiveInfoByContractNo" resultType="CheckTwentyFiveInfo">
+	     select 
+	     <include refid="checkTwentyFiveInfoColumns"/>
+	     from pl_check_25_info a where a.ALLOCATE_ID = #{allocateId} order by role_type
+	</select>
+	
+	<insert id="saveList">
+	INSERT INTO pl_check_25_info(
+			id,
+			allocate_id,
+			contract_no,
+			role_type,
+			check_base,
+			check_web,
+			check_family,
+			check_financial,
+			check_debt,
+			check_loan_purpost,
+			check_bank,
+			check_credit,
+			check_property,
+			check_mortgage,
+			check_operate,
+			check_archive,
+			check_proc,
+			check_get_fee,
+			check_get_address,
+			check_sign,
+			check_base_remark,
+			check_web_remark,
+			check_family_remark,
+			check_financial_remark,
+			check_debt_remark,
+			check_loan_purpost_remark,
+			check_bank_remark,
+			check_credit_remark,
+			check_property_remark,
+			check_mortgage_remark,
+			check_operate_remark,
+			check_archive_remark,
+			check_proc_remark,
+			check_get_fee_remark,
+			check_get_address_remark,
+			check_sign_remark
+		) VALUES
+		<foreach item="checkTwentyFiveInfo" collection="checkTwentyFiveInfoList" index="index" separator=",">
+		 (
+			#{checkTwentyFiveInfo.id},
+			#{checkTwentyFiveInfo.allocateId},
+			#{checkTwentyFiveInfo.contractNo},
+			#{checkTwentyFiveInfo.roleType},
+			#{checkTwentyFiveInfo.checkBase},
+			#{checkTwentyFiveInfo.checkWeb},
+			#{checkTwentyFiveInfo.checkFamily},
+			#{checkTwentyFiveInfo.checkFinancial},
+			#{checkTwentyFiveInfo.checkDebt},
+			#{checkTwentyFiveInfo.checkLoanPurpost},
+			#{checkTwentyFiveInfo.checkBank},
+			#{checkTwentyFiveInfo.checkCredit},
+			#{checkTwentyFiveInfo.checkProperty},
+			#{checkTwentyFiveInfo.checkMortgage},
+			#{checkTwentyFiveInfo.checkOperate},
+			#{checkTwentyFiveInfo.checkArchive},
+			#{checkTwentyFiveInfo.checkProc},
+			#{checkTwentyFiveInfo.checkGetFee},
+			#{checkTwentyFiveInfo.checkGetAddress},
+			#{checkTwentyFiveInfo.checkSign},
+			#{checkTwentyFiveInfo.checkBaseRemark},
+			#{checkTwentyFiveInfo.checkWebRemark},
+			#{checkTwentyFiveInfo.checkFamilyRemark},
+			#{checkTwentyFiveInfo.checkFinancialRemark},
+			#{checkTwentyFiveInfo.checkDebtRemark},
+			#{checkTwentyFiveInfo.checkLoanPurpostRemark},
+			#{checkTwentyFiveInfo.checkBankRemark},
+			#{checkTwentyFiveInfo.checkCreditRemark},
+			#{checkTwentyFiveInfo.checkPropertyRemark},
+			#{checkTwentyFiveInfo.checkMortgageRemark},
+			#{checkTwentyFiveInfo.checkOperateRemark},
+			#{checkTwentyFiveInfo.checkArchiveRemark},
+			#{checkTwentyFiveInfo.checkProcRemark},
+			#{checkTwentyFiveInfo.checkGetFeeRemark},
+			#{checkTwentyFiveInfo.checkGetAddressRemark},
+			#{checkTwentyFiveInfo.checkSignRemark}
+		)
+	</foreach>
+	</insert>
+</mapper>

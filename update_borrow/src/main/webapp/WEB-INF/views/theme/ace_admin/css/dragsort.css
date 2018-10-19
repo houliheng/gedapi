@@ -1,0 +1,142 @@
+.listUl {
+	margin: 0px;
+	padding: 0px;
+	margin-left: 20px;
+}
+
+/*！
+自定义宽度和高度区间
+*/
+.listUl > li[data-colspan="0"]  { width: 99.4%; }
+.listUl > li[data-colspan="1"]  { width: 100px; }
+.listUl > li[data-colspan="2"]  { width: 200px; }
+.listUl > li[data-colspan="3"]  { width: 300px; }
+.listUl > li[data-colspan="4"]  { width: 400px; }
+.listUl > li[data-colspan="5"]  { width: 500px; }
+.listUl > li[data-colspan="6"]  { width: 600px; }
+.listUl > li[data-colspan="7"]  { width: 700px; }
+.listUl > li[data-colspan="8"]  { width: 800px; }
+.listUl > li[data-colspan="9"]  { width: 900px; }
+.listUl > li[data-colspan="10"] { width: 1000px;}
+
+.listUl > li[data-rowspan="1"] { height: 50px;}
+.listUl > li[data-rowspan="2"] { height: 100px;}
+.listUl > li[data-rowspan="3"] { height: 150px;}
+.listUl > li[data-rowspan="4"] { height: 200px;}
+.listUl > li[data-rowspan="5"] { height: 250px;}
+.listUl > li[data-rowspan="6"] { height: 300px;}
+.listUl > li[data-rowspan="7"] { height: 350px;}
+.listUl > li[data-rowspan="8"] { height: 400px;}
+.listUl > li[data-rowspan="9"] { height: 450px;}
+.listUl > li[data-rowspan="10"] { height: 500px;}
+
+.effect-zoe > div[data-rowspan="1"] { width: 50px;}
+.effect-zoe > div[data-rowspan="2"] { width: 100px;}
+.effect-zoe > div[data-rowspan="3"] { width: 150px;}
+.effect-zoe > div[data-rowspan="4"] { width: 200px;}
+.effect-zoe > div[data-rowspan="5"] { width: 250px;}
+.effect-zoe > div[data-rowspan="6"] { width: 300px;}
+.effect-zoe > div[data-rowspan="7"] { width: 350px;}
+.effect-zoe > div[data-rowspan="8"] { width: 400px;}
+.effect-zoe > div[data-rowspan="9"] { width: 450px;}
+.effect-zoe > div[data-rowspan="10"] { width: 500px;}
+
+.list {
+	list-style-type: none;
+	margin:0px 0px 10px 0px;
+}
+
+.list2 {
+	list-style-type: none;
+	margin:0px 0px 10px 0px;
+}
+
+.list2 li {
+	float: left;
+	padding-left:5px;
+	padding-top:5px;
+	width: 600px;
+	height: 400px;
+}
+
+.list li {
+	float: left;
+	padding-left:5px;
+	padding-top:5px;
+	width: 600px;
+	height: 400px;
+}
+
+.Listdiv {
+	height: 400px;
+	background-color: #FFF4C1;
+	position:relative;
+}
+
+.grid {
+	position: relative;
+}
+
+/* Common style */
+.grid > .effect-zoe {
+	position: relative;
+	overflow: hidden;
+}
+
+.effect-zoe figcaption {
+	color: #C5C5C5;
+	text-transform: uppercase;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+
+.effect-zoe figcaption::before,
+.effect-zoe figcaption::after {
+	pointer-events: none;
+}
+
+.effect-zoe figcaption {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+/* Anchor will cover the whole item by default */
+/* For some effects it will show as a button */
+.effect-zoe figcaption > a {
+	margin-top:5px;
+	margin-right : 10px;
+	display: block;
+	width: 20px;
+	height: 20px;
+	background: url('../img/panel_tools.png') no-repeat scroll -16px 0px transparent;
+	float: right;
+	cursor: pointer;
+}
+/**
+					 * @reqno: H1507020033
+					 * @date-designer:20150707-zhunan
+					 * @e-out-other : UserModule - 列表 : 展示自定义首页内容列表
+					 * @e-out-other : ifram - 展示页面 : 展示同的插件用
+					 * @e-out-other : figcaption - 标题 : 用来拖拽的标题
+					 * @date-author:20150707-zhunan: 增加标题样式
+					 */
+.titleCss {
+	display:none;
+}
+
+/* Individual effects */
+.effect-zoe figcaption {
+	margin-top : 0;
+	padding-left : 10px;
+	height: 25px;
+	background: #C5C5C5;
+	color: #3c4a50;
+	-webkit-transition: -webkit-transform 0.35s;
+	transition: transform 0.35s;
+	-webkit-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
+
+}
+
+.placeHolder div { background-color:white !important; border:dashed 1px gray !important; }

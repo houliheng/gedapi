@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyLoanStatus.dao.ApplyLoanStatusDao">
+    
+	<sql id="applyLoanStatusColumns">
+		a.id AS "id",
+		a.org_level2 AS "orgLevel2",
+		a.org_level3 AS "orgLevel3",
+		a.org_level4 AS "orgLevel4",
+		a.apply_no AS "applyNo",
+		a.cust_name AS "custName",
+		a.contract_no AS "contractNo",
+		a.contract_amount AS "contractAmount",
+		a.fact_loan_amount AS "factLoanAmount",
+		a.loan_model AS "loanModel",
+		a.loan_status AS "loanStatus",
+		a.order_loan_date AS "orderLoanDate",
+		a.contract_state AS "contractState",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.service_fee_status as "serviceFeeStatus",
+		a.send as send
+	</sql>
+	
+	<sql id="applyLoanStatusJoins">
+	</sql>
+    
+	<select id="get" resultType="ApplyLoanStatus">
+		SELECT 
+			<include refid="applyLoanStatusColumns"/>
+		FROM cre_apply_loan_status a
+		<include refid="applyLoanStatusJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getApplyLoanStatusByApplyNo" resultType="ApplyLoanStatus">
+		SELECT 
+			<include refid="applyLoanStatusColumns"/>
+		FROM cre_apply_loan_status a
+		<include refid="applyLoanStatusJoins"/>
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="findList" resultType="ApplyLoanStatus">
+		SELECT 
+			<include refid="applyLoanStatusColumns"/>
+		FROM cre_apply_loan_status a
+		<include refid="applyLoanStatusJoins"/>
+		<where>
+				and a.apply_no = #{applyNo}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_apply_loan_status a
+		<include refid="applyLoanStatusJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ApplyLoanStatus">
+		SELECT 
+			<include refid="applyLoanStatusColumns"/>
+		FROM cre_apply_loan_status a
+		<include refid="applyLoanStatusJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			ORDER BY a.update_date DESC
+		</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_apply_loan_status(
+			id,
+			org_level2,
+			org_level3,
+			org_level4,
+			apply_no,
+			cust_name,
+			contract_no,
+			contract_amount,
+			fact_loan_amount,
+			loan_model,
+			loan_status,
+			order_loan_date,
+			contract_state,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{orgLevel2},
+			#{orgLevel3},
+			#{orgLevel4},
+			#{applyNo},
+			#{custName},
+			#{contractNo},
+			#{contractAmount},
+			#{factLoanAmount},
+			#{loanModel},
+			#{loanStatus},
+			#{orderLoanDate},
+			#{contractState},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<insert id="saveApplyLoanStatus">
+		INSERT INTO cre_apply_loan_status(
+			id,
+			org_level2,
+			org_level3,
+			org_level4,
+			apply_no,
+			cust_name,
+			contract_no,
+			contract_amount,
+			fact_loan_amount,
+			loan_model,
+			loan_status,
+			order_loan_date,
+			contract_state,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{orgLevel2},
+			#{orgLevel3},
+			#{orgLevel4},
+			#{applyNo},
+			#{custName},
+			#{contractNo},
+			#{contractAmount},
+			#{factLoanAmount},
+			#{loanModel},
+			#{loanStatus},
+			#{orderLoanDate},
+			#{contractState},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_apply_loan_status SET 	
+			org_level2 = #{orgLevel2},
+			org_level3 = #{orgLevel3},
+			org_level4 = #{orgLevel4},
+			apply_no = #{applyNo},
+			cust_name = #{custName},
+			contract_no = #{contractNo},
+			contract_amount = #{contractAmount},
+			fact_loan_amount = #{factLoanAmount},
+			loan_model = #{loanModel},
+			loan_status = #{loanStatus},
+			order_loan_date = #{orderLoanDate},
+			contract_state = #{contractState},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_apply_loan_status
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findContractStatusByIdCardOrMobile" resultType="String" parameterType="Map">
+		SELECT DISTINCT a.CONTRACT_STATE
+		FROM cre_apply_loan_status a
+		INNER JOIN cre_apply_register b
+		ON a.APPLY_NO = b.APPLY_NO
+		WHERE b.ID_NUM = #{idNum} OR b.MOBILE_NUM = #{mobileNum}
+	</select>
+	
+	<update id="updateContractState">
+	update cre_apply_loan_status set CONTRACT_STATE = '0600' where contract_no = #{contractNo}
+	</update>
+
+	<select id="findUnionCust" resultType="CheckApproveUnion">
+		SELECT
+		ifnull(c.CUST_NAME,o.BUSI_REG_NAME) as "custName",
+		a.APPRO_PRODUCT_NAME,
+		a.APPRO_PERIOD_ID,
+		a.CONTRACT_AMOUNT,
+		b.CONTRACT_NO,
+		d.LOAN_STATUS,
+		a.id,
+		ifnull(c.id,o.id) as "custId",
+		d.id as "loanId"
+		FROM
+		cre_check_approve_union a
+		INNER JOIN cre_contract b ON b.APPRO_ID = a.ID
+		left JOIN cre_cust_info c ON c.id = b.CUST_ID
+		left JOIN cre_company_info o ON o.id = b.CUST_ID
+		INNER JOIN cre_apply_loan_status d on b.CONTRACT_NO = d.CONTRACT_NO
+		WHERE
+		a.APPLY_NO = #{applyNo}
+
+	</select>
+	
+	<update id="updateLoanStatus">
+		UPDATE cre_apply_loan_status SET 	
+			loan_status = #{loanStatus}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新合同号 -->
+	<update id="updateContractNo">
+		UPDATE cre_apply_loan_status SET 	
+			CONTRACT_NO = #{contractNo}
+		WHERE 
+			ID = #{id}
+	</update>
+	
+	<update id="deleteLoanStatusByApplyNo">
+		delete from cre_apply_loan_status WHERE apply_no = #{applyNo}
+	</update>
+	
+	<select id="getLoanStatusNew" resultType="CheckApproveUnion">
+			SELECT
+				DISTINCT LOAN_STATUS
+				FROM
+					cre_check_approve_union a
+				INNER JOIN cre_contract b ON a.CUST_ID = b.CUST_ID AND a.APPLY_NO = b.APPLY_NO
+				INNER JOIN cre_apply_loan_status d ON b.CONTRACT_NO = d.CONTRACT_NO
+				WHERE
+					a.APPLY_NO = #{applyNo}
+	</select>
+	<select id="getLoanStatusByApplyNo" resultType="String">
+			SELECT LOAN_STATUS from cre_apply_loan_status  a
+				WHERE
+					a.APPLY_NO = #{applyNo}
+	</select>
+	
+	<update id="updateDrawStatus">
+		UPDATE cre_apply_loan_status SET 	
+			loan_status = #{1}
+		WHERE apply_no = #{0}
+	</update>
+	
+	<update id="updateServiceFeeByApplyNo">
+		UPDATE cre_apply_loan_status SET 	
+			service_fee_status = '0',flag=#{flag}
+		WHERE CONTRACT_NO = #{contractNo} 
+	</update>
+	
+	<select id = "finApplyLoanStatus" resultType="ApplyLoanStatus">
+		select <include refid="applyLoanStatusColumns"/>
+		from cre_apply_loan_status a where apply_no = #{applyNo}
+		<if test="contractNo != null and contractNo != '' ">
+		AND CONTRACT_NO = #{contractNo}
+		</if>
+	</select>
+	
+	<update id ="updateLoanStatusByApplyNoAndContractNo">
+		update cre_apply_loan_status set loan_status = #{loanStatus} where CONTRACT_NO = #{contractNo}
+	</update>
+	
+	<update id ="updateSendGEDJd">
+		update cre_apply_loan_status set send = '0' where CONTRACT_NO = #{contractNo}
+		<if test="applyNo != null and applyNo != '' ">
+		AND apply_no = #{applyNo}
+		</if>
+	</update>
+	
+	
+	<select id="queryContractLoanStatus" resultType="ApplyLoanStatus">
+		select SEND as send from cre_apply_loan_status where contract_no =#{contractNo}
+	</select>
+</mapper>

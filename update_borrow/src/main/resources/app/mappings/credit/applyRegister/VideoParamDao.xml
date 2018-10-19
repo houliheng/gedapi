@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.VideoParamDao">
+
+	<select id="getAuthorityLevel" resultType="String">
+	Select PARAM_VALUE 
+	from cre_param where PARAM_NAME=#{taskDefKey}
+	</select>
+</mapper>

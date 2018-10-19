@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.loanApply.dao.CreCustContactDao">
+    
+	<sql id="creCustContactColumns">
+		a.id AS "id",
+		a.apply_id AS "applyId",
+		a.contact_name AS "contactName",
+		a.contact_relations AS "contactRelations",
+		a.con_mobil AS "conMobil",
+		a.is_know AS "isKnow",
+		a.phone AS "phone",
+		a.home_details AS "homeDetails",
+		a.dept_name AS "deptName",
+		a.dept_address AS "deptAddress",
+		a.department AS "department",
+		a.post_name AS "postName",
+		a.create_time AS "createTime"
+	</sql>
+	
+	<sql id="creCustContactJoins">
+	</sql>
+    
+	<select id="get" resultType="CreCustContact">
+		SELECT 
+			<include refid="creCustContactColumns"/>
+		FROM cre_cust_contact a
+		<include refid="creCustContactJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<!-- 
+			 * @reqno: H1510080107
+			 * @db-z : cre_cust_contact : apply_id ,id,contact_name,contact_relations
+			 * @db-j : SYS_DICT : label 
+			 * @date-designer:20151021-lirongchao
+			 * @date-author:20151021-lirongchao: 需求-联系人列表数据项：复选择框、姓名、人员类型、移动电话、是否知晓本次贷款、住宅电话、单位名称
+													列表排序：创建时间降序
+													表头按钮：新增、修改、删除、详情
+												当前环节-根据申请id查询联系人列表,
+												排序方式-创建时间降序	
+	
+	 -->
+	 <!-- 
+ 		* @reqno:H1511100082
+ 		* @date-designer:2015年11月17日-songmin
+ 		* @date-author:2015年11月17日-songmin:字典关联查询时去掉共用字段的查询方式
+ 		* @db-z : cre_cust_contact : contact_relations、IS_KNOW
+		* @db-j : SYS_DICT : label
+	-->
+	<select id="findList" resultType="CreCustContact">
+		SELECT 
+		a.id AS "id",
+		a.apply_id AS "applyId",
+		a.contact_name AS "contactName",
+		a.CONTACT_RELATIONS AS "contactRelations",
+		d2.label AS "contactRelationsLabel",
+		a.con_mobil AS "conMobil",
+		a.IS_KNOW  as "isKnow",
+		d1.label AS "isKnowLabel",
+		a.phone AS "phone",
+		a.home_details AS "homeDetails",
+		a.dept_name AS "deptName",
+		a.dept_address AS "deptAddress",
+		a.department AS "department",
+		a.post_name AS "postName",
+		a.create_time AS "createTime"
+		
+		FROM cre_cust_contact a
+		left join SYS_DICT d1 on a.is_know=d1.value 
+		left join SYS_DICT d2 on a.contact_relations=d2.value		
+		<include refid="creCustContactJoins"/>
+		<where>
+			 d1.type='yes_no' and d2.type='CONTACT_RELATIONS' 
+			<if test="applyId != null and applyId != '' ">
+			 AND a.apply_id=#{applyId}
+			</if>
+			<if test="id != null and id != '' ">
+			 AND a.id=#{id}
+			</if>
+		</where>
+		
+		ORDER BY CREATE_TIME DESC
+
+	</select>
+	
+	<select id="findAllList" resultType="CreCustContact">
+		SELECT 
+			<include refid="creCustContactColumns"/>
+		FROM cre_cust_contact a
+		<include refid="creCustContactJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 
+
+	
+	 * @reqno: H1510080108
+	 * @date-designer:20151023-lirongchao
+	 * @db-z : cre_cust_contact : apply_id ,id,contact_name,contact_relation
+	 * @date-author:20151023-lirongchao: 需求-联系人列表数据项：复选择框、姓名、人员类型、移动电话、是否知晓本次贷款、住宅电话、单位名称
+											列表排序：创建时间降序
+											表头按钮：新增、修改、删除、详情
+	 									当前环节-新增一条信息
+	--> 		
+	<insert id="insert">
+		INSERT INTO cre_cust_contact(
+			id,
+			apply_id,
+			contact_name,
+			contact_relations,
+			con_mobil,
+			is_know,
+			phone,
+			home_details,
+			dept_name,
+			dept_address,
+			department,
+			post_name,
+			create_time
+		) VALUES (
+			#{id},
+			#{applyId},
+			#{contactName},
+			#{contactRelations},
+			#{conMobil},
+			#{isKnow},
+			#{phone},
+			#{homeDetails},
+			#{deptName},
+			#{deptAddress},
+			#{department},
+			#{postName},
+			#{createTime}
+		)
+	</insert>
+	<!-- 
+
+	
+	 * @reqno: H1510080109
+	 * @date-designer:20151023-lirongchao
+	 * @db-z : cre_cust_contact : apply_id ,id,contact_name,contact_relation
+	 * @date-author:20151023-lirongchao: 需求:联系人列表数据项：复选择框、姓名、人员类型、移动电话、是否知晓本次贷款、住宅电话、单位名称
+											列表排序：创建时间降序
+											表头按钮：新增、修改、删除、详情
+	 									当前环节:点击修改后，根据id更新后台数据
+	--> 	
+	<update id="update">
+		UPDATE cre_cust_contact SET 	
+			apply_id = #{applyId},
+			contact_name = #{contactName},
+			contact_relations = #{contactRelations},
+			con_mobil = #{conMobil},
+			is_know = #{isKnow},
+			phone = #{phone},
+			home_details = #{homeDetails},
+			dept_name = #{deptName},
+			dept_address = #{deptAddress},
+			department = #{department},
+			post_name = #{postName},
+			create_time = #{createTime}
+		WHERE id = #{id}
+	</update>
+		<!-- 
+
+	
+	 * @reqno: H1510080109
+	 * @date-designer:20151023-lirongchao
+	 * @db-z : cre_cust_contact : apply_id ,id,contact_name,contact_relation
+	 * @date-author:20151023-lirongchao: 需求:联系人列表数据项：复选择框、姓名、人员类型、移动电话、是否知晓本次贷款、住宅电话、单位名称
+											列表排序：创建时间降序
+											表头按钮：新增、修改、删除、详情
+	 									当前环节:点击删除后，根据id删除后台输出
+	--> 	
+	<update id="delete">
+		DELETE FROM cre_cust_contact
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

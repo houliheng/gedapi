@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetComInfoUnion.dao.GqgetComInfoUnionDao">
+    
+	<sql id="gqgetComInfoUnionColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.approve_id AS "approveId",
+		a.overall_ranking AS "overallRanking",
+		a.introduction_of_mainborrower AS "introductionOfMainborrower",
+		a.introduction_of_company AS "introductionOfCompany",
+		a.mix_loan_usage AS "mixLoanUsage",
+		a.other AS "other",
+		a.source_of_pepayment1 AS "sourceOfPepayment1",
+		a.source_of_pepayment2 AS "sourceOfPepayment2",
+		a.source_of_pepayment3 AS "sourceOfPepayment3",
+		a.source_of_pepayment4 AS "sourceOfPepayment4",
+		a.audit_opintion AS "auditOpintion",
+		a.introduction_of_com_production AS "introductionOfComProduction",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.operate_actuality AS "operateActuality",
+		a.property_house AS "propertyHouse",
+		a.property_car AS "propertyCar",
+		a.property_other AS "propertyOther",
+		a.product_type AS "productType",
+		a.is_loan AS "isLoan",
+		a.loan_recode AS "loanRecode",
+		a.is_overdue AS "isOverdue",
+		a.source_of_credit_registries AS "sourceOfCreditRegistries",
+		a.borrow_mate_punish    as borrowAndMatePunish,
+		a.borrow_invole_info    as borrowInvolveInfo,
+		a.borrow_crima_admin_punish as borrowCrimaAdminPunish,
+		a.borrow_loan_blance as borrowNewLoanBlance,
+		a.PLATFORM_OVERDUE_TIME as "platformOverdueTime",
+		a.PLATFORM_OVERDUE_MONEY as "platformOverdueMoney",
+		a.credit_company as creditCompany
+	</sql>
+	
+	<sql id="gqgetComInfoUnionJoins">
+	</sql>
+    
+	<select id="get" resultType="GqgetComInfoUnion">
+		SELECT 
+			<include refid="gqgetComInfoUnionColumns"/>
+		FROM cre_gqget_com_info_union a
+		<include refid="gqgetComInfoUnionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GqgetComInfoUnion">
+		SELECT 
+			<include refid="gqgetComInfoUnionColumns"/>
+		FROM cre_gqget_com_info_union a
+		<include refid="gqgetComInfoUnionJoins"/>
+		<where>
+			
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{applyNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_gqget_com_info_union a
+		<include refid="gqgetComInfoUnionJoins"/>
+		<where>
+			
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{applyNo}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="GqgetComInfoUnion">
+		SELECT 
+			<include refid="gqgetComInfoUnionColumns"/>
+		FROM cre_gqget_com_info_union a
+		<include refid="gqgetComInfoUnionJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_gqget_com_info_union(
+			id,
+			apply_no,
+			approve_id,
+			overall_ranking,
+			introduction_of_mainborrower,
+			introduction_of_company,
+			mix_loan_usage,
+			other,
+			source_of_pepayment1,
+			source_of_pepayment2,
+			source_of_pepayment3,
+			source_of_pepayment4,
+			audit_opintion,
+			introduction_of_com_production,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			operate_actuality,
+			property_house,
+			property_car,
+			property_other,
+			product_type,
+			is_loan,
+			loan_recode,
+			is_overdue,
+			source_of_credit_registries,
+			borrow_mate_punish,
+			borrow_invole_info,
+			borrow_crima_admin_punish,
+			borrow_loan_blance,
+			PLATFORM_OVERDUE_TIME,
+			PLATFORM_OVERDUE_MONEY,
+			CREDIT_COMPANY
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{approveId},
+			#{overallRanking},
+			#{introductionOfMainborrower},
+			#{introductionOfCompany},
+			#{mixLoanUsage},
+			#{other},
+			#{sourceOfPepayment1},
+			#{sourceOfPepayment2},
+			#{sourceOfPepayment3},
+			#{sourceOfPepayment4},
+			#{auditOpintion},
+			#{introductionOfComProduction},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{operateActuality},
+			#{propertyHouse},
+			#{propertyCar},
+			#{propertyOther},
+			#{productType},
+			#{isLoan},
+			#{loanRecode},
+			#{isOverdue},
+			#{sourceOfCreditRegistries},
+			#{borrowAndMatePunish},
+			#{borrowInvolveInfo},
+			#{borrowCrimaAdminPunish},
+			#{borrowNewLoanBlance},
+			#{platformOverdueTime},
+			#{platformOverdueMoney},
+			#{creditCompany}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_gqget_com_info_union SET 	
+			apply_no = #{applyNo},
+			approve_id = #{approveId},
+			overall_ranking = #{overallRanking},
+			introduction_of_mainborrower = #{introductionOfMainborrower},
+			introduction_of_company = #{introductionOfCompany},
+			mix_loan_usage = #{mixLoanUsage},
+			other = #{other},
+			source_of_pepayment1 = #{sourceOfPepayment1},
+			source_of_pepayment2 = #{sourceOfPepayment2},
+			source_of_pepayment3 = #{sourceOfPepayment3},
+			source_of_pepayment4 = #{sourceOfPepayment4},
+			audit_opintion = #{auditOpintion},
+			introduction_of_com_production = #{introductionOfComProduction},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			operate_actuality = #{operateActuality},
+			property_house = #{propertyHouse},
+			property_car = #{propertyCar},
+			property_other = #{propertyOther},
+			product_type = #{productType},
+			is_loan = #{isLoan},
+			loan_recode = #{loanRecode},
+			is_overdue = #{isOverdue},
+			source_of_credit_registries = #{sourceOfCreditRegistries},
+			borrow_mate_punish=#{borrowAndMatePunish},
+			borrow_invole_info=#{borrowInvolveInfo},
+			borrow_crima_admin_punish=#{borrowCrimaAdminPunish},
+			borrow_loan_blance=#{borrowNewLoanBlance},
+			PLATFORM_OVERDUE_TIME=#{platformOverdueTime},
+			PLATFORM_OVERDUE_MONEY=#{platformOverdueMoney},
+			CREDIT_COMPANY = #{creditCompany}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_gqget_com_info_union
+		WHERE id = #{id}
+	</update>
+	
+	
+	<update id="deleteGqgetComInfoUnionData">
+		DELETE FROM cre_gqget_com_info_union WHERE apply_no = #{applyNo}
+	</update>
+	
+	<select id="getGqgetComInfoByParam" resultType="GqgetComInfoUnion">
+		SELECT 
+			<include refid="gqgetComInfoUnionColumns"/>
+		FROM cre_gqget_com_info_union a
+		<include refid="gqgetComInfoUnionJoins"/>
+		WHERE a.apply_no= #{applyNo} and a.approve_id = #{approId}
+	</select>
+	
+</mapper>

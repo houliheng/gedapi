@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.markNorm.dao.CreStockMarkNormDao">
+    
+	<sql id="creStockMarkNormColumns">
+		a.id AS "id",
+		a.description AS "description",
+		a.score AS "score",
+		a.create_date AS "createDate",
+		a.mark_type AS "markType"
+	</sql>
+	
+	<sql id="creStockWhereBases">
+		<where>
+			<if test="markType != null and markType != ''">
+				AND a.mark_type = #{markType}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="creStockMarkNormJoins">
+	</sql>
+    
+	<select id="get" resultType="CreStockMarkNorm">
+		SELECT 
+			<include refid="creStockMarkNormColumns"/>
+		FROM cre_stock_mark_norm a
+		<include refid="creStockMarkNormJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findCheckedByApplyNoList" resultType="CreStockMarkNorm">
+		SELECT 
+			a.id AS "id",
+			a.description AS "description",
+			a.score AS "score",
+			a.create_date AS "createDate",
+			a.mark_type AS "markType",
+			IF(b.MARK_NORM_ID is null,'0','1') as isChecked
+		FROM cre_stock_mark_norm a LEFT JOIN cre_stock_mark_apply_relation b ON a.id = b.MARK_NORM_ID and b.apply_no = #{applyNo}
+		where a.mark_type = #{markType} order by a.create_date asc
+	</select>
+	
+	<select id="findList" resultType="CreStockMarkNorm">
+		SELECT 
+			<include refid="creStockMarkNormColumns"/>
+		FROM cre_stock_mark_norm a
+		<include refid="creStockWhereBases"/>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_mark_norm a
+		<include refid="creStockWhereBases"/>
+	</select>
+	
+	<select id="findAllList" resultType="CreStockMarkNorm">
+		SELECT 
+			<include refid="creStockMarkNormColumns"/>
+		FROM cre_stock_mark_norm a
+		<include refid="creStockWhereBases"/>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_mark_norm(
+			id,
+			description,
+			score,
+			create_date,
+			mark_type
+		) VALUES (
+			#{id},
+			#{description},
+			#{score},
+			#{createDate},
+			#{markType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_mark_norm SET 	
+			description = #{description},
+			score = #{score},
+			mark_type = #{markType}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_stock_mark_norm
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

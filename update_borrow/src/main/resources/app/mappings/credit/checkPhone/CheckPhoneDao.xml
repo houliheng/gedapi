@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkPhone.dao.CheckPhoneDao">
+    
+	<sql id="checkPhoneColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.mobile_num AS "mobileNum",
+		a.dial_time AS "dialTime",
+		a.phone_src AS "phoneSrc",
+		a.dial_resc AS "dialResc",
+		a.listener_type AS "listenerType",
+		a.risk_point AS "riskPoint",
+		a.is_114_check AS "is114Check",
+		a.description AS "description",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkPhoneJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckPhone">
+		SELECT 
+			<include refid="checkPhoneColumns"/>
+		FROM cre_check_phone a
+		<include refid="checkPhoneJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckPhone">
+		SELECT 
+			<include refid="checkPhoneColumns"/>
+		FROM cre_check_phone a
+		<include refid="checkPhoneJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_check_phone a
+		<include refid="checkPhoneJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckPhone">
+		SELECT 
+			<include refid="checkPhoneColumns"/>
+		FROM cre_check_phone a
+		<include refid="checkPhoneJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_check_phone(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			mobile_num,
+			dial_time,
+			phone_src,
+			dial_resc,
+			listener_type,
+			risk_point,
+			is_114_check,
+			description,
+			check_user_id,
+			check_user_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{custId},
+			#{custName},
+			#{mobileNum},
+			#{dialTime},
+			#{phoneSrc},
+			#{dialResc},
+			#{listenerType},
+			#{riskPoint},
+			#{is114Check},
+			#{description},
+			#{checkUserId},
+			#{checkUserName},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_check_phone SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			cust_id = #{custId},
+			cust_name = #{custName},
+			mobile_num = #{mobileNum},
+			dial_time = #{dialTime},
+			phone_src = #{phoneSrc},
+			dial_resc = #{dialResc},
+			listener_type = #{listenerType},
+			risk_point = #{riskPoint},
+			is_114_check = #{is114Check},
+			description = #{description},
+			check_user_id = #{checkUserId},
+			check_user_name = #{checkUserName},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_check_phone
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findListByAppNo" resultType="CheckPhone">
+		select 
+		<include refid="checkPhoneColumns"/>
+		from CRE_CHECK_PHONE a 
+		<include refid="checkPhoneJoins"/>
+		where a.apply_no=#{applyNo} order by a.create_time desc
+	</select>
+	
+	<select id="getCheckPhoneCount" resultType="String">
+	   select count(*)
+	    from CRE_CHECK_PHONE t where t.apply_no = #{applyNo} and cust_id=#{custId}
+	    and role_type = #{roleType}
+	</select>
+	
+	<select id="getCheckPhoneByApplyNo" resultType="CheckPhone">
+		SELECT 
+			<include refid="checkPhoneColumns"/>
+		FROM cre_check_phone a where a.apply_no = #{applyNo}
+	</select>
+</mapper>

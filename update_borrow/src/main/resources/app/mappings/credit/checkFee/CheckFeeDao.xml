@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkFee.dao.CheckFeeDao">
+
+	<sql id="checkFeeColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.is_collect AS
+		"isCollect",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS
+		"checkUserName",
+		a.check_date AS "checkDate",
+		a.check_fee AS "checkFee",
+		a.description AS "description",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.return_check_fee AS "returnCheckFee",
+		a.update_by AS "updateBy.id",
+		a.return_time AS "returnTime",
+		a.update_date AS "updateDate",
+		a.return_user_id AS "returnUserId",
+		a.return_user_name AS "returnUserName",
+		a.description_return AS
+		"descriptionReturn"
+	</sql>
+
+	<sql id="checkFeeJoins">
+	</sql>
+
+	<select id="get" resultType="CheckFee">
+		SELECT
+		<include refid="checkFeeColumns" />
+		FROM cre_check_fee a
+		<include refid="checkFeeJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CheckFee">
+		SELECT
+		<include refid="checkFeeColumns" />
+		FROM cre_check_fee a
+		<include refid="checkFeeJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_check_fee a
+		<include refid="checkFeeJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CheckFee">
+		SELECT
+		<include refid="checkFeeColumns" />
+		FROM cre_check_fee a
+		<include refid="checkFeeJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_check_fee(
+		id,
+		apply_no,
+		is_collect,
+		check_user_id,
+		check_user_name,
+		check_date,
+		check_fee,
+		description,
+		create_by,
+		create_date,
+		return_check_fee,
+		update_by,
+		return_time,
+		update_date,
+		return_user_id,
+		return_user_name,
+		description_return
+		) VALUES
+		(
+		#{id},
+		#{applyNo},
+		#{isCollect},
+		#{checkUserId},
+		#{checkUserName},
+		#{checkDate},
+		#{checkFee},
+		#{description},
+		#{createBy.id},
+		#{createDate},
+		#{returnCheckFee},
+		#{updateBy.id},
+		#{returnTime},
+		#{updateDate},
+		#{returnUserId},
+		#{returnUserName},
+		#{descriptionReturn}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_check_fee SET
+		apply_no = #{applyNo},
+		is_collect = #{isCollect},
+		check_user_id = #{checkUserId},
+		check_user_name = #{checkUserName},
+		check_date = #{checkDate},
+		check_fee = #{checkFee},
+		description = #{description},
+		return_check_fee
+		= #{returnCheckFee},
+		update_by = #{updateBy.id},
+		return_time =
+		#{returnTime},
+		update_date = #{updateDate},
+		return_user_id =
+		#{returnUserId},
+		return_user_name = #{returnUserName},
+		description_return = #{descriptionReturn}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_check_fee
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByApplyNo" resultType="CheckFee">
+		SELECT
+		<include refid="checkFeeColumns" />
+		FROM cre_check_fee a
+		<where>
+			a.apply_no = #{applyNo}
+		</where>
+		limit 1
+	</select>
+
+	<!-- 查询外访费返还列表 -->
+	<!-- 被拒件 -->
+	<select id="findCheckFeeVOList" resultType="CheckFeeVO">
+		SELECT
+			a.id AS "id",
+			a.apply_no AS "applyNo",
+			a.is_collect AS "isCollect",
+			a.check_user_id AS "checkUserId",
+			a.check_user_name AS "checkUserName",
+			a.check_date AS "checkDate",
+			a.check_fee AS "checkFee",
+			a.description AS "description",
+			a.create_by AS "createBy.id",
+			a.create_date AS "createDate",
+			a.return_check_fee AS "returnCheckFee",
+			a.update_by AS "updateBy.id",
+			a.return_time AS "returnTime",
+			a.update_date AS "updateDate",
+			a.return_user_id AS "returnUserId",
+			a.return_user_name AS "returnUserName",
+			a.description_return AS "descriptionReturn",
+			b.CUST_NAME AS "custName",
+			d.CONTRACT_NO AS "contractNo",
+			d.CONTRACT_AMOUNT AS "contractAmount"
+		FROM
+			cre_check_fee a
+		INNER JOIN cre_apply_register b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN cre_contract d ON b.APPLY_NO = d.APPLY_NO
+		LEFT JOIN sys_user e ON a.update_by = e.id
+		<where>
+			b.APPLY_STATUS = #{applyStatus}
+			<if test="custName != null and custName != ''">
+				AND b.CUST_NAME like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				AND d.CONTRACT_NO like concat(#{contractNo},'%')
+			</if>
+			<if test="loginId != null and loginId != ''">
+				AND e.id = #{loginId}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+</mapper>

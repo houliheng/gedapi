@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.mortgageEvaluateInfo.dao.MortgageEvaluateInfoDao">
+    
+	<sql id="mortgageEvaluateInfoColumns">
+		a.contract_no AS "contractNo",
+		a.id_num AS "idNum",
+		a.cust_name AS "custName",
+		a.mobile_num AS "mobileNum",
+		a.city_details AS "cityDetails",
+		a.check_items AS "checkItems",
+		a.count_num AS "countNum",
+		a.mortgage_status AS "mortgageStatus",
+		a.mortgage_contract_no AS "mortgageContractNo",
+		a.other_con_no AS "otherConNo",
+		a.period_value AS "periodValue",
+		a.is_register AS "isRegister",
+		a.register_authority AS "registerAuthority",
+		a.is_evaluate AS "isEvaluate",
+		a.evaluate_org_name AS "evaluateOrgName",
+		a.outer_evaluate_price AS "outerEvaluatePrice",
+		a.last_evaluate_time AS "lastEvaluateTime",
+		a.inner_evaluate_price AS "innerEvaluatePrice",
+		a.mortgage_loan_amount AS "mortgageLoanAmount",
+		a.mortgage_rate AS "mortgageRate",
+		a.is_safe AS "isSafe",
+		a.is_insurance_valid AS "isInsuranceValid",
+		a.is_insurance_incom AS "isInsuranceIncom",
+		a.is_insurance_lic_valid AS "isInsuranceLicValid",
+		a.mortgaged_person_wish AS "mortgagedPersonWish"
+	</sql>
+	
+	<sql id="mortgageEvaluateInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="MortgageEvaluateInfo">
+		SELECT 
+			<include refid="mortgageEvaluateInfoColumns"/>
+		FROM pl_mortgage_evaluate_info a
+		<include refid="mortgageEvaluateInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findMortgageByInfoId" resultType="MortgageEvaluateInfo">
+		SELECT
+		a.id as "id",
+		a.info_Id as"infoId",
+		a.apply_no AS "applyNo",
+		a.is_register AS "isRegister",
+		a.register_authority AS "registerAuthority",
+		a.is_evaluate AS "isEvaluate",
+		a.evaluate_org_name AS "evaluateOrgName",
+		a.outer_evaluate_price AS "outerEvaluatePrice",
+		a.last_evaluate_time AS "lastEvaluateTime",
+		a.inner_evaluate_price AS "innerEvaluatePrice",
+		a.mortgage_loan_amount AS "mortgageLoanAmount",
+		a.mortgage_rate AS "mortgageRate",
+		a.is_safe AS "isSafe",
+		a.is_insurance_valid AS "isInsuranceValid",
+		a.is_insurance_incom AS "isInsuranceIncom",
+		a.is_insurance_lic_valid AS "isInsuranceLicValid",
+		a.mortgaged_person_wish AS "mortgagedPersonWish",
+		a.check_result as "checkResult",
+		a.check_advice as "checkAdvice"
+	    FROM pl_mortgage_evaluate_info a
+	    where a.info_Id =#{infoId}
+	</select>
+		
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_mortgage_evaluate_info a
+		<include refid="mortgageEvaluateInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MortgageEvaluateInfo">
+		SELECT 
+			<include refid="mortgageEvaluateInfoColumns"/>
+		FROM pl_mortgage_evaluate_info a
+		<include refid="mortgageEvaluateInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_mortgage_evaluate_info(
+			id,
+			info_Id,
+			apply_no,
+			is_safe,
+			is_insurance_valid,
+			is_insurance_incom,
+			is_insurance_lic_valid,
+			mortgaged_person_wish,
+			CHECK_RESULT,
+			CHECK_ADVICE
+		) VALUES (
+			#{id},
+			#{infoId},
+			#{applyNo},
+			#{isSafe},
+			#{isInsuranceValid},
+			#{isInsuranceIncom},
+			#{isInsuranceLicValid},
+			#{mortgagedPersonWish},
+			#{checkResult},
+			#{checkAdvice}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_mortgage_evaluate_info SET 	
+			info_id = #{infoId},
+			apply_no = #{applyNo},
+			is_safe = #{isSafe},
+			is_insurance_valid = #{isInsuranceValid},
+			is_insurance_incom = #{isInsuranceIncom},
+			is_insurance_lic_valid = #{isInsuranceLicValid},
+			mortgaged_person_wish = #{mortgagedPersonWish},
+			check_result = #{checkResult},
+			check_advice = #{checkAdvice}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_mortgage_evaluate_info
+		WHERE infoId = #{infoId}
+	</update>
+	
+</mapper>

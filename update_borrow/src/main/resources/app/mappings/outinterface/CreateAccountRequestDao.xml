@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.rest.financialPlatform.dao.FinancialPlatformDao">
+    <!-- 
+	*借款人开户
+	-->
+	<sql id="createAccountRequest">
+		case when a.LOAN_MODEL = '2' then '11020012' 
+               else '11020011' end AS "tradeType",
+		a.CONTRACT_NO AS "contractNo",
+		a.REP_BANKCARD_NO AS "bankCard",
+		a.REP_BANKCARD_NAME AS "name",
+		a.REP_BANK_MOBILE AS "mobile",
+		a.REP_BANK_ID_NUM AS "certNo",
+		a.REP_BANK AS "bankId",
+		a.REP_BANK_DISTINCT AS "cityId"
+	</sql>
+	<select id="getBorrowerByApplyNo" resultType="com.resoft.outinterface.rest.financialPlatform.entry.CreateAccountRequest">
+		 SELECT 
+			<include refid="createAccountRequest"/>
+		FROM cre_contract a
+		WHERE		a.apply_NO=#{applyNo}
+	</select>
+	
+	<!-- 
+	*抵押权人开户
+	-->
+	<sql id="createAccountRequest2">
+		'11020009' AS "tradeType",
+		NULL  AS "contractNo",
+		a.BANKCARD_NO AS "bankCard",
+		a.MORTGAGEE_NAME AS "name",
+		a.MOBILE_NUM AS "mobile",
+		a.ID_NUM AS "certNo",
+		a.BANK_NO AS "bankId",
+		a.CONT_DISTINCT AS "cityId"
+	</sql>
+	<select id="getMortgageeByApplyNo" resultType="com.resoft.outinterface.rest.financialPlatform.entry.CreateAccountRequest">
+		 SELECT 
+			<include refid="createAccountRequest2"/>
+		FROM 	cre_mortgaged_person a
+		WHERE		a.ID_NUM=#{idNum}
+	</select>
+	
+	<!-- 
+	*借款人放款
+	-->
+	<sql id="borrowerLoanJoins">
+		inner join cre_contract b on a.apply_no = b.apply_no
+	</sql>
+	<sql id="borrowerLoan">
+		 case when a.APPRO_PRODUCT_TYPE_CODE = '1' then '11090002'
+                else '11090001' end  AS  "tradeType",
+           b.id  AS "contractId",
+           b.contract_no AS  "contractNo",
+           b.mortgagee_cap_ter_no AS "mortgageeAccNo",
+           b.capital_terrace_no AS "accNo",
+           a.contract_amount AS "contractAmt",
+           a.loan_amount AS "payAmt",
+           b.CONTRACT_ORG_PLATFORM  AS "loanPlatform"
+	</sql>
+	<select id="getBorrowerLoan" resultType="com.resoft.outinterface.rest.financialPlatform.entry.BorrowerLoanRequest">
+		 SELECT 
+			<include refid="borrowerLoan"/>
+		FROM  cre_check_approve a
+			<include refid="borrowerLoanJoins"/>
+		WHERE		a.apply_NO=#{applyNo}
+	</select>
+	<select id="getBorrowerLoanFeeList" resultType="com.resoft.outinterface.rest.financialPlatform.entry.FeeList">
+	SELECT 
+			'10990003' AS "feeType",
+           SERVICE_FEE AS "feeAmt"
+     FROM cre_contract
+     WHERE apply_NO =#{applyNo}
+ union all
+    SELECT
+    		'10990005' AS "feeType",
+           SPECIAL_SERVICE_FEE AS "feeAmt"
+     FROM cre_contract
+     WHERE apply_NO = #{applyNo}
+  union all
+    SELECT
+    		'10990006' AS "feeType",
+           MARGIN_AMOUNT AS "feeAmt"
+     FROM cre_contract
+     WHERE apply_NO = #{applyNo}
+union all
+   SELECT 
+         '10990004' AS "feeType",
+         SUM(MANAGEMENT_FEE) AS "feeAmt"
+         FROM cre_repay_plan
+         WHERE APPLY_NO = #{applyNo}
+	</select>
+	
+	<!-- 
+	*借款人提现申请
+	-->
+	
+	<sql id="borrowerDeposit">
+			'11091001' AS "tradeType",
+           b.ID AS "contractId",
+           a.contract_no  AS  "contractNo",
+           b.capital_terrace_no AS "accNo",
+           a.CONTRACT_AMOUNT AS "contractAmt",
+           a.FACT_LOAN_AMOUNT AS "payAmt",
+           a.ORDER_LOAN_DATE AS "bespokeDate"
+	</sql>
+	<select id="getBorrowerDeposit" resultType="com.resoft.outinterface.rest.financialPlatform.entry.BorrowerDepositRequest">
+		 SELECT 
+			<include refid="borrowerDeposit"/>
+		 FROM cre_apply_loan_status a
+			inner join cre_contract b
+			on a.contract_no = b.contract_no
+		WHERE		a.apply_NO=#{applyNo}
+	</select>
+	
+	<!-- 
+	*抵押权人提现申请
+	-->
+	<sql id="mortgageeDeposit">
+			'11092001' AS "tradeType",
+           a.ID AS "contractId",
+           a.contract_no  AS  "contractNo",
+           a.capital_terrace_no AS "accNo",
+           a.mortgagee_cap_ter_no AS "mortgageeAccNo",
+           a.CONTRACT_AMOUNT AS "contractAmt",
+           a.FACT_LOAN_AMOUNT AS "payAmt"
+	</sql>
+	<select id="getMortgageeDeposit" resultType="com.resoft.outinterface.rest.financialPlatform.entry.MortgageeDepositRequest">
+		 SELECT 
+			<include refid="mortgageeDeposit"/>
+		 FROM cre_contract a
+		WHERE		a.apply_NO=#{applyNo}
+	</select>
+	
+	<!-- 
+	*流标
+	-->
+<sql id="abortiveTender">
+<!-- 11090011:信用标放款后（提现前）流标，11090013：信用标放款前（满标后）流标 ，11090010是抵押标流标-->
+		   case when a.APPRO_PRODUCT_TYPE_CODE = '1' and (c.LOAN_STATUS = '5' or c.Loan_Status = '7') then '11090011'
+		        when a.APPRO_PRODUCT_TYPE_CODE = '1' and (c.LOAN_STATUS = '2' or c.Loan_Status = '4') then '11090013'
+                else '11090010' end  AS "tradeType",
+           b.id  AS "contractId",
+           b.contract_no AS  "contractNo",
+           b.mortgagee_cap_ter_no AS "mortgageeAccNo",
+           b.capital_terrace_no AS "accNo",
+           a.contract_amount AS "contractAmt",
+           a.loan_amount AS "payAmt",
+           b.CONTRACT_ORG_PLATFORM  AS "loanPlatform"
+	</sql>
+	<select id="getAbortiveTender" resultType="com.resoft.outinterface.rest.financialPlatform.entry.AbortiveTenderRequest">
+		 SELECT 
+			<include refid="abortiveTender"/>
+		FROM cre_check_approve a
+		inner join cre_contract b
+		on a.apply_no = b.apply_no inner join cre_apply_loan_status c on
+		a.apply_no = c.apply_no
+		WHERE a.apply_NO=#{applyNo}
+	</select>
+	
+	<select id ="getApplyNoByContractNo" resultType="String">
+ 	select apply_no as "applyNo"
+ 	from cre_contract 
+ 	where contract_no=#{contractNo} 
+	</select>
+	
+	<select id ="getProductTypeByContractNo" resultType="String">
+ 	select appro_product_type_code as "productTypeCode"
+	from cre_contract 
+	where contract_no=#{contractNo} 
+	</select>
+	
+	<update id="borrowerLoanUpdateContract">
+	UPDATE cre_contract 
+	SET			FACT_LOAN_AMOUNT=#{payAmt},
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerLoanUpdateApply">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='5',
+					FACT_LOAN_AMOUNT=#{payAmt},
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerLoanUpdateApplyFai">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='4',
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerLoanUpApply">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='3',
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerDepositUpdateApply">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='8',
+					FACT_LOAN_AMOUNT=#{payAmt},
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerDepositUpdateApplyFai">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='7',
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="borrowerDepositUpApply">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='6',
+					CONTRACT_STATE='0500',
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="abortiveTenderUpApply">
+	UPDATE cre_apply_loan_status 
+	SET			LOAN_STATUS='9',
+					CONTRACT_STATE='0400',
+					UPDATE_DATE=current_timestamp
+	WHERE
+					CONTRACT_NO=#{contractNo}
+	</update>
+	<update id="createAccNo2ContractNo">
+	UPDATE cre_contract 
+	SET			capital_terrace_no=#{1},
+					OPEN_ACCOUNT_STATUS="2"
+	WHERE
+					APPLY_NO=#{0}
+	</update>
+	<update id="createAccNo2Mortgagee">
+	UPDATE cre_mortgaged_person 
+	SET			CAPITAL_TERRACE_NO=#{1},
+					OPEN_ACCOUNT_STATUS="2"
+	WHERE
+					ID_NUM=#{0}
+	</update>
+	<select id="getContractInterest" resultType="BigDecimal">
+	SELECT sum(INTEREST_AMOUNT) 
+	FROM cre_repay_plan 
+	WHERE apply_no = #{applyNo} 
+	GROUP BY apply_no
+	</select>
+	<insert id="abortiveTenderInsert">
+	INSERT INTO ift_cre_return_failure_of_bid 
+	(MCHN,
+	 SEQ_NO, 
+	 TRADE_TYPE, 
+	 SIGNATURE, 
+	 CONTRACT_ID, 
+	 CONTRACT_NO, 
+	 MORTGAGEE_ACC_NO, 
+	 ACC_NO, 
+	 CONTRACT_AMT, 
+	 PAY_AMT, 
+	 LOAN_PLATFORM, 
+	 RESP_CODE, 
+	 RESP_MSG) 
+	 VALUES (
+	 #{mchn},
+	#{seq_no},
+	#{trade_type},
+	#{signature},
+	#{contract_id},
+	#{contract_no},
+	#{mortgagee_acc_no},
+	#{acc_no},
+	#{contract_amt},
+	#{pay_amt},
+	#{loan_platform},
+	#{resp_code},
+	#{resp_msg});
+	</insert>
+	<insert	 id="borrowerLoanInterfaceIn">
+	insert into ift_cre_return_borrower_loan(
+		MCHN, 
+		SEQ_NO, 
+		TRADE_TYPE, 
+		SIGNATURE, 
+		CONTRACT_ID, 
+		CONTRACT_NO, 
+		MORTGAGEE_ACC_NO, 
+		ACC_NO, 
+		CONTRACT_AMT, 
+		PAY_AMT, 
+		LOAN_PLATFORM, 
+		RESP_CODE, 
+		RESP_MSG)
+	VALUE(
+	#{mchn},
+	#{seq_no},
+	#{trade_type},
+	#{signature},
+	#{contract_id},
+	#{contract_no},
+	#{mortgagee_acc_no},
+	#{acc_no},
+	#{contract_amt},
+	#{pay_amt},
+	#{loan_platform},
+	#{resp_code},
+	#{resp_msg});
+	</insert>
+	<insert id="mortgageeDepositInterfaceIn">
+INSERT INTO ift_cre_return_mortgagee_depo
+  (MCHN, 
+  SEQ_NO, 
+  TRADE_TYPE, 
+  SIGNATURE, 
+  CONTRACT_ID,
+  CONTRACT_NO, 
+  ACC_NO, 
+  CONTRACT_AMT, 
+  PAY_AMT, 
+  RESP_CODE, 
+  RESP_MSG) 
+	VALUE(
+	#{mchn},
+	#{seq_no},
+	#{trade_type},
+	#{signature},
+	#{contract_id},
+	#{contract_no},
+	#{acc_no},
+	#{contract_amt},
+	#{pay_amt},
+	#{resp_code},
+	#{resp_msg});
+	</insert>
+	<insert id="borrowerDepositInterfaceIn">
+	INSERT INTO ift_cre_return_borrower_deposit 
+	(MCHN, 
+	SEQ_NO, 
+	TRADE_TYPE, 
+	SIGNATURE, 
+	CONTRACT_ID, 
+	CONTRACT_NO, 
+	ACC_NO, 
+	CONTRACT_AMT, 
+	PAY_AMT, 
+	ORDER_LOAN_DATE, 
+	RESP_CODE, 
+	RESP_MSG) 
+	VALUES (
+	#{mchn},
+	#{seq_no},
+	#{trade_type},
+	#{signature},
+	#{contract_id},
+	#{contract_no},
+	#{acc_no},
+	#{contract_amt},
+	#{pay_amt},
+	#{bespoke_date},
+	#{resp_code},
+	#{resp_msg});
+	</insert>
+</mapper>

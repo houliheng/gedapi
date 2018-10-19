@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.deductApply.dao.DeductApplyDetailVODao">
+	<sql id="deductApplyDetailVOColumns">
+		a.data_dt AS "dataDt",
+		a.deduct_cust_id AS "deductCustId",
+		a.DEDUCT_APPLY_NO AS "streamNo",
+		a.deduct_amount AS "deductAmount",
+		a.contract_no AS "contractNo",
+		a.capital_terrace_no AS
+		"capitalTerraceNo",
+		a.deduct_time AS "deductTime",
+		a.is_lock AS
+		"isLock",
+		a.period_num
+		AS "periodNum"
+	</sql>
+
+	<sql id="deductApplyDetailVOJoins">
+	</sql>
+
+	<select id="get" resultType="DeductApplyVO">
+		SELECT
+		<include refid="deductApplyDetailVOColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyDetailVOJoins" />
+		WHERE a.contract_no = #{id}
+	</select>
+
+	<select id="findList" resultType="DeductApplyVO">
+		select temp.* from (
+		SELECT
+		b.STREAM_NO as "streamNo",
+		b.STRIKE_FLG as "strikeFlag",
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) + ifnull(c.REPAY_INTEREST_AMOUNT, 0) +
+		ifnull(c.REPAY_SERVICE_FEE, 0) + ifnull(c.REPAY_MANAGEMENT_FEE, 0) +
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) +
+		ifnull(c.REPAY_FINE_AMOUNT, 0) +
+		ifnull(c.REPAY_BREAK_AMOUNT, 0) + ifnull(c.REPAY_ADD_AMOUNT, 0)
+		+ ifnull(c.back_amount, 0) as "repayAllAmount",
+		z.NAME as "orgLevel2.name",
+		y.NAME as "orgLevel3.name",
+		x.NAME as "orgLevel4.name",
+		cc.cust_name AS "custName",
+		b.contract_no AS "contractNo",
+		c.period_num AS "periodNum",
+		cc.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		ifnull(c.REPAY_ADD_AMOUNT, 0) as "repayAddAmount",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) AS "repayCapitalAmount",
+		ifnull(c.REPAY_INTEREST_AMOUNT, 0) AS "repayInterestAmount",
+		ifnull(c.REPAY_SERVICE_FEE, 0) AS "repayServiceFee",
+		ifnull(c.REPAY_MANAGEMENT_FEE, 0) AS "repayManagementFee",
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) AS "repayPenaltyAmount",
+		ifnull(c.REPAY_FINE_AMOUNT, 0) AS "repayFineAmount",
+		ifnull(c.REPAY_BREAK_AMOUNT, 0) AS "repayBreakAmount" ,
+		ifnull(c.back_amount, 0) AS "backAmount" ,
+		b.STREAM_TIME AS "streamTime",
+		c.CREATE_TIME as "operateTime",
+		date_format(b.STREAM_TIME,'%Y-%m-%d') AS "streamTimeStr"
+		FROM
+		acc_deduct_result b
+		INNER JOIN acc_deduct_apply a ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		LEFT JOIN acc_repay_detail c ON b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract cc ON b.contract_no =
+		cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.DEDUCT_RESULT in ('1','2')
+			AND c.ACCOUNT_FLG = '1' AND (c.STRIKE_FLG = '0' OR c.STRIKE_FLG IS NULL)
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="deductCustId !=null and deductCustId != '' ">
+				and su.name like CONCAT('%',#{deductCustId},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="streamNo != null and streamNo != ''">
+				and b.stream_no like CONCAT('%',#{streamNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and b.STREAM_TIME between #{startTime} and
+				#{endTime}
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[b.STREAM_TIME >= #{startTime}]]>
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[b.STREAM_TIME <= #{endTime}]]>
+			</if>
+		</where>
+		LIMITSQL
+		)temp
+	</select>
+
+	<select id="getDeductApplyVOForFail" resultType="DeductApplyVO">
+		SELECT
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		b.STREAM_NO as "streamNo",
+		z.NAME as "orgLevel2.name",
+		y.NAME as "orgLevel3.name",
+		x.NAME as "orgLevel4.name",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) + ifnull(c.REPAY_INTEREST_AMOUNT, 0) +
+		ifnull(c.REPAY_SERVICE_FEE, 0) + ifnull(c.REPAY_MANAGEMENT_FEE, 0) +
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) +
+		ifnull(c.REPAY_FINE_AMOUNT, 0) +
+		ifnull(c.REPAY_BREAK_AMOUNT, 0) + ifnull(c.REPAY_ADD_AMOUNT, 0)
+		+ ifnull(c.back_amount, 0) as "repayAllAmount",
+		cc.cust_name AS "custName",
+		ifnull(c.REPAY_ADD_AMOUNT, 0) as "repayAddAmount",
+		b.contract_no AS "contractNo",
+		'' AS "periodNum",
+		cc.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		0 AS "repayCapitalAmount",
+		0 AS "repayInterestAmount",
+		0 AS "repayServiceFee",
+		0 AS "repayManagementFee",
+		0 AS "repayPenaltyAmount",
+		0 AS "repayFineAmount",
+		0 AS "repayBreakAmount",
+		su. NAME AS "deductCustId",
+		b.STREAM_TIME AS "streamTime",
+		ifnull(c.back_amount, 0) AS "backAmount" ,
+		date_format(b.STREAM_TIME,'%Y-%m-%d') AS
+		"streamTimeStr"
+		FROM
+		acc_deduct_result b
+		INNER JOIN
+		acc_deduct_apply a ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract cc ON b.contract_no =
+		cc.contract_no
+		LEFT JOIN acc_repay_detail c ON b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		<where>
+			and b.DEDUCT_APPLY_NO not in (select DEDUCT_APPLY_NO from acc_repay_detail c where c.DEDUCT_APPLY_NO is not null )
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and
+			b.DEDUCT_RESULT in ('1','2')
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and b.STREAM_TIME between #{startTime} and
+				#{endTime}
+			</if>
+		</where>
+		order by b.STREAM_TIME desc
+	</select>
+
+	<select id="getDeductApplyVOForFailCount" resultType="long">
+		SELECT
+		count(1)
+		FROM
+		acc_deduct_result b
+		INNER JOIN acc_deduct_apply a ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract cc ON b.contract_no = cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		<where>
+			and b.DEDUCT_APPLY_NO not in (select DEDUCT_APPLY_NO from acc_repay_detail c where c.DEDUCT_APPLY_NO is not null )
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and
+			b.DEDUCT_RESULT in ('1','2')
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and b.STREAM_TIME between #{startTime} and
+				#{endTime}
+			</if>
+		</where>
+	</select>
+
+	<select id="getDeductApplyVOForSuccess" resultType="DeductApplyVO">
+		SELECT
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		b.STREAM_NO as "streamNo",
+		z.NAME as "orgLevel2.name",
+		y.NAME as "orgLevel3.name",
+		x.NAME as "orgLevel4.name",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) + ifnull(c.REPAY_INTEREST_AMOUNT, 0) +
+		ifnull(c.REPAY_SERVICE_FEE, 0) + ifnull(c.REPAY_MANAGEMENT_FEE, 0) +
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) +
+		ifnull(c.REPAY_FINE_AMOUNT, 0) +
+		ifnull(c.REPAY_BREAK_AMOUNT, 0) + ifnull(c.REPAY_ADD_AMOUNT, 0)
+		+ ifnull(c.back_amount, 0) as "repayAllAmount",
+		cc.cust_name AS "custName",
+		b.contract_no AS "contractNo",
+		c.period_num AS "periodNum",
+		cc.APPRO_PERIOD_VALUE AS "approPeriodValue",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) AS "repayCapitalAmount",
+		ifnull(c.REPAY_INTEREST_AMOUNT, 0) AS "repayInterestAmount",
+		ifnull(c.REPAY_ADD_AMOUNT, 0) as "repayAddAmount",
+		ifnull(c.REPAY_SERVICE_FEE, 0) AS "repayServiceFee",
+		ifnull(c.REPAY_MANAGEMENT_FEE, 0) AS "repayManagementFee",
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) AS "repayPenaltyAmount",
+		ifnull(c.REPAY_FINE_AMOUNT, 0) AS "repayFineAmount",
+		ifnull(c.REPAY_BREAK_AMOUNT,0) AS "repayBreakAmount",
+		ifnull(c.back_amount, 0) AS "backAmount" ,
+		su. NAME AS "deductCustId",
+		b.STREAM_TIME AS "streamTime",
+		date_format(b.STREAM_TIME,'%Y-%m-%d') AS
+		"streamTimeStr"
+		FROM
+		acc_deduct_result b
+		INNER JOIN acc_deduct_apply
+		a ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN acc_repay_detail c ON
+		b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract
+		cc ON b.contract_no = cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID
+		= o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.DEDUCT_RESULT in ('1','2')
+			AND c.ACCOUNT_FLG = '1' AND (c.STRIKE_FLG = '0' OR c.STRIKE_FLG IS NULL)
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and b.STREAM_TIME between #{startTime} and
+				#{endTime}
+			</if>
+		</where>
+		order by b.STREAM_TIME desc,b.contract_no asc,c.period_num asc
+	</select>
+
+	<select id="getDeductApplyVOForSuccessCount" resultType="long">
+		SELECT
+		count(1)
+		FROM
+		acc_deduct_result b
+		INNER JOIN acc_deduct_apply a ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN acc_repay_detail c ON b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract cc ON b.contract_no = cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and b.DEDUCT_RESULT in ('1','2')
+			AND c.ACCOUNT_FLG = '1' AND (c.STRIKE_FLG = '0' OR c.STRIKE_FLG IS NULL)
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and b.STREAM_TIME between #{startTime} and
+				#{endTime}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DeductApplyVO">
+		SELECT
+		<include refid="deductApplyDetailVOColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyDetailVOJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getDeductAmountList" resultType="DeductApplyVO">
+		SELECT
+		DISTINCT b.stream_no AS "streamNo" ,
+		ifnull(b.DEDUCT_AMOUNT, 0) AS "deductAmountResult"
+		FROM
+		acc_repay_detail c
+		INNER JOIN acc_deduct_result b ON b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		<where>
+			c.contract_NO = #{contractNo}
+			and c.ACCOUNT_FLG=1
+			AND (c.STRIKE_FLG != 1 or c.STRIKE_FLG is NULL)
+			and <![CDATA[b.STREAM_TIME >= #{streamTimeStr}]]>
+		</where>
+		order by b.STREAM_TIME asc
+	</select>
+
+	<select id="getRepayDetailData" resultType="java.util.Map">
+		SELECT
+		ifnull(b.DEDUCT_AMOUNT, 0) AS "deductAmountResult",
+		z.id as "orgLevel2Id",
+		c.ORG_LEVEL4 as "orgLevel4Id",
+		y.id as "orgLevel3Id",
+		c.REPAY_DATE as "repayDate",
+		c.DEDUCT_APPLY_NO AS "deductApplyNo",
+		c.CONTRACT_NO as "contractNo",
+		c.PERIOD_NUM as "periodNum",
+		c.stream_no as "streamNo",
+		c.DEDUCT_APPLY_NO as
+		"deductApplyNo",
+		ifnull (c.REPAY_ADD_AMOUNT, 0) AS "repayAddAmount",
+		ifnull(c.REPAY_CAPITAL_AMOUNT, 0) AS "repayCapitalAmount",
+		ifnull(c.REPAY_INTEREST_AMOUNT, 0)
+		AS "repayInterestAmount",
+		ifnull(c.REPAY_SERVICE_FEE, 0) AS
+		"repayServiceFee",
+		ifnull(c.REPAY_MANAGEMENT_FEE, 0) AS "repayManagementFee",
+		ifnull(c.back_amount, 0) AS "backAmount",
+		ifnull(c.REPAY_PENALTY_AMOUNT, 0) AS "repayPenaltyAmount",
+		ifnull(c.REPAY_FINE_AMOUNT, 0) AS "repayFineAmount",
+		ifnull(c.REPAY_BREAK_AMOUNT, 0) AS "repayBreakAmount"
+		FROM
+		acc_repay_detail c
+		INNER JOIN acc_deduct_result b ON b.DEDUCT_APPLY_NO = c.DEDUCT_APPLY_NO
+		left JOIN sys_office x ON c.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		<where>
+			c.contract_NO = #{contractNo}
+			and c.ACCOUNT_FLG=1
+			AND (c.STRIKE_FLG != 1 or c.STRIKE_FLG is NULL)
+			and <![CDATA[b.STREAM_TIME >= #{streamTimeStr}]]>
+			and b.STRIKE_FLG is null
+		</where>
+		order by b.STREAM_TIME asc
+	</select>
+
+	<insert id="saveDataInRepayDetail" parameterType="java.util.List">
+		insert into acc_repay_detail(
+		DATA_DT,
+		ORG_LEVEL2,
+		ORG_LEVEL3,
+		ORG_LEVEL4,
+		CONTRACT_NO,
+		PERIOD_NUM,
+		REPAY_DATE,
+		DEDUCT_APPLY_NO,
+		STREAM_NO,
+		CREATE_TIME,
+		REPAY_SERVICE_FEE,
+		REPAY_MANAGEMENT_FEE,
+		REPAY_INTEREST_AMOUNT,
+		REPAY_CAPITAL_AMOUNT,
+		REPAY_PENALTY_AMOUNT,
+		REPAY_FINE_AMOUNT,
+		REPAY_BREAK_AMOUNT,
+		REPAY_ADD_AMOUNT,
+		back_amount,
+		ACCOUNT_FLG,
+		STRIKE_FLG
+		) VALUES
+		<foreach item="deductApplyVO" collection="deductApplyVOList" index="index" separator=",">
+			(DATE_FORMAT(CURRENT_TIMESTAMP,'%Y-%m-%d'),
+			#{deductApplyVO.orgLevel2Id},
+			#{deductApplyVO.orgLevel3Id},
+			#{deductApplyVO.orgLevel4Id},
+			#{deductApplyVO.contractNo},
+			#{deductApplyVO.periodNum},
+			#{deductApplyVO.repayDate},
+			#{deductApplyVO.deductApplyNo},
+			#{deductApplyVO.streamNo},
+			#{deductApplyVO.createDate},
+			#{deductApplyVO.repayServiceFee},
+			#{deductApplyVO.repayManagementFee},
+			#{deductApplyVO.repayInterestAmount},
+			#{deductApplyVO.repayCapitalAmount},
+			#{deductApplyVO.repayPenaltyAmount},
+			#{deductApplyVO.repayFineAmount},
+			#{deductApplyVO.repayBreakAmount},
+			#{deductApplyVO.repayAddAmount},
+			#{deductApplyVO.backAmount},
+			'1',
+			'0')
+		</foreach>
+	</insert>
+
+	<select id="getDeductAmountByDeductAppyNo" resultType="java.lang.String">
+		select a.DEDUCT_AMOUNT as "deductAmount" from acc_deduct_result a
+		where a.DEDUCT_APPLY_NO = #{deductApplyNo}
+	</select>
+
+</mapper>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.blacklist.dao.BlacklistDao">
+    
+	<sql id="blacklistColumns">
+	a.id AS "id",
+	a.cust_type AS "custType",
+	a.cust_name AS "custName",
+	a.id_type AS "idType",
+	a.id_num AS "idNum",
+	a.mobile_no AS "mobile",
+	a.list_status AS "listStatus",
+	a.create_by AS "createBy.id",
+	a.create_date AS "createDate",
+	a.update_by AS "updateBy.id",
+	a.update_date AS "updateDate",
+	a.del_flag AS "delFlag",
+	su.`name` AS "createBy.name"
+	</sql>
+	
+	<sql id="blacklistJoins">
+		LEFT JOIN SYS_USER su ON su.id = a.create_by
+	</sql>
+	
+	<select id="get" resultType="Blacklist">
+		SELECT 
+			<include refid="blacklistColumns"/>
+		FROM cre_blacklist a
+		<include refid="blacklistJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<!-- 
+	 * @reqno: H1512210030
+	 * @date-designer:2015年12月24日-lirongchao
+	 * @db-z : cre_blacklist : cust_name,id_num,create_date
+	 * @db-j : SYS_USER : id
+	 * @date-author:2015年12月24日-lirongchao:1.查询条件-【客户名称（模糊查询）、状态】、【证件类型、证件号码（模糊查询）】、【移动电话（模糊查询）、创建日期（开始结束时间）】；
+											查询表单按钮-查询、重置；
+											2.列表数据项-单选框按钮、客户名称、状态（黑名单、白名单）、证件类型、证件号、移动电话、创建人、创建日期、操作（详情）
+											3.列表排序-创建日期降序
+											4.表头按钮-加黑、刷白
+											当前环节-查询黑名单表
+	 -->	
+	<select id="findList" resultType="Blacklist">
+		SELECT 
+			<include refid="blacklistColumns"/>
+		FROM cre_blacklist a
+		<include refid="blacklistJoins"/>
+		<where>
+			a.del_flag = '0' 
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{custName}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.id_num LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{idNum}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>				
+
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile_no LIKE 
+					<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{mobile}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>	
+			</if>
+			<if test="createStartTime != null and createStartTime != ''">
+				AND <![CDATA[ DATE(a.create_date) >= #{createStartTime}  ]]>
+			</if>
+			<if test="createEndTime != null and createEndTime != ''">
+				 AND <![CDATA[ DATE(a.create_date) <= #{createEndTime}  ]]>
+			</if>
+			<if test="listStatus != null and listStatus != ''">
+				AND a.list_status = #{listStatus}
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.id_type = #{idType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Blacklist">
+		SELECT 
+			<include refid="blacklistColumns"/>
+		FROM cre_blacklist a
+		<include refid="blacklistJoins"/>
+		<where>
+			a.del_flag = '0'
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_blacklist(
+			id,
+			cust_type,
+			cust_name,
+			id_type,
+			id_num,
+			mobile_no,
+			list_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{custType},
+			#{custName},
+			#{idType},
+			#{idNum},
+			#{mobile},
+			#{listStatus},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	<!-- 
+	在“个人黑名单管理”页面，选择1条上记录，点击加黑(刷白)，判断所选择记录是否是白名单(白名单)，如果不是，给出提示；如果是，则进行加黑操作，弹出加黑窗体，窗体名称“加黑设置”，窗口数据项：【客户名称、移动电话】、【证件类型、证件号】、【设置说明】；
+	  窗体按钮：保存、关闭；
+	  【客户名称、移动电话】、【证件类型、证件号】为只读；【设置说明】必填项，大文本显示，最大输入500汉字；能输入普通字符，如句号、逗号等；
+	  点击保存按钮，更新黑名单表状态为黑名单；同时在加黑详情表添加一条记录明细；保存成功后，提示“保存成功！”、关闭窗体、刷新列表数据；
+	  点击关闭按钮，关闭窗体；
+	  当前环节-保存黑名单管理信息	
+	 -->	
+	<update id="update">
+		UPDATE cre_blacklist SET 	
+			cust_type = #{custType},
+			cust_name = #{custName},
+			id_type = #{idType},
+			id_num = #{idNum},
+			mobile_no = #{mobile},
+			list_status = #{listStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_blacklist SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 
+	 * 根据证件类型、证件号码查询黑名单表数据信息
+	 * 这里的SQL判断使用2中情况：1、证件类型+证件号判断黑白名单2、手机号+个人客户判断黑白名单
+	 * 限定返回最新的黑名单记录
+	 * 后面做修改时需要部分参数信息，这里将需要的参数都做了查询
+	-->
+	<select id="findBlacklistByIdCard" parameterType="java.util.Map" resultType="Blacklist">
+		SELECT 
+			a.id AS "id",
+			a.cust_type AS "custType",
+			a.cust_name AS "custName",
+			a.id_type AS "idType",
+			a.id_num AS "idNum",
+			a.mobile_no AS "mobile",
+			a.list_status AS "listStatus",
+			a.remarks AS "remarks"
+		FROM cre_blacklist a
+		WHERE
+		(a.del_flag = '0' and a.ID_NUM = #{idNum})
+		or (a.del_flag = '0' and a.mobile_no = #{mobileNum})
+		order by UPDATE_DATE desc
+	</select>
+</mapper>

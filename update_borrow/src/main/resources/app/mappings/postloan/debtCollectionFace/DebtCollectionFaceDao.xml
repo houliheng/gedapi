@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.postloan.debtCollectionFace.dao.DebtCollectionFaceDao">
+
+	<sql id="debtCollectionFaceColumns">
+		a.id as "id",
+		a.debt_id as "debtId",
+		a.contract_no AS
+		"contractNo",
+		a.collection_date AS
+		"collectionDate",
+		a.collector AS
+		"collector",
+		a.address_pro AS
+		"addressPro",
+		a.address_city AS
+		"addressCity",
+		a.address_distinct AS
+		"addressDistinct",
+		a.address_detail
+		AS
+		"addressDetail",
+		a.cust_type AS
+		"custType",
+		a.cust_name AS "custName",
+		a.description AS "description",
+		a.cust_result AS "custResult"
+	</sql>
+
+	<sql id="debtCollectionFaceJoins">
+	</sql>
+
+	<select id="get" resultType="DebtCollectionFace">
+		SELECT
+		<include refid="debtCollectionFaceColumns" />
+		FROM pl_debt_collection_face a
+		<include refid="debtCollectionFaceJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getDataCountByContractNo" resultType="int">
+		SELECT
+		ifnull(count(a.id),0)
+		FROM
+		pl_debt_collection_face a
+		WHERE a.debt_id =
+		#{debtId}
+	</select>
+
+	<select id="findList" resultType="DebtCollectionFace">
+		SELECT
+		<include refid="debtCollectionFaceColumns" />
+		FROM pl_debt_collection_face a
+		<include refid="debtCollectionFaceJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_debt_collection_face a
+		<include refid="debtCollectionFaceJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollectionFace">
+		SELECT
+		<include refid="debtCollectionFaceColumns" />
+		FROM pl_debt_collection_face a
+		<include refid="debtCollectionFaceJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_debt_collection_face(
+		id,
+		debt_id,
+		contract_no,
+		collection_date,
+		collector,
+		address_pro,
+		address_city,
+		address_distinct,
+		address_detail,
+		cust_type,
+		cust_name,
+		description,
+		cust_result
+		) VALUES (
+		#{id},
+		#{debtId},
+		#{contractNo},
+		#{collectionDate},
+		#{collector},
+		#{addressPro},
+		#{addressCity},
+		#{addressDistinct},
+		#{addressDetail},
+		#{custType},
+		#{custName},
+		#{description},
+		#{custResult}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_debt_collection_face SET
+		contract_no =
+		#{contractNo},
+		collection_date = #{collectionDate},
+		collector =
+		#{collector},
+		address_pro = #{addressPro},
+		address_city =
+		#{addressCity},
+		address_distinct = #{addressDistinct},
+		address_detail =
+		#{addressDetail},
+		cust_type = #{custType},
+		cust_name = #{custName},
+		description = #{description},
+		cust_result = #{custResult}
+		WHERE id =
+		#{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_debt_collection_face
+		WHERE id = #{id}
+	</update>
+
+</mapper>

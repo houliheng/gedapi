@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.debtCollectionOut.dao.DebtCollectionOutDao">
+
+	<sql id="debtCollectionOutColumns">
+		a.id as "id",
+		a.debt_id as "debtId",
+		a.contract_no AS "contractNo",
+		a.collection_date AS
+		"collectionDate",
+		a.collector AS "collector",
+		a.description AS
+		"description",
+		a.cust_result AS "custResult"
+	</sql>
+
+	<sql id="debtCollectionOutJoins">
+	</sql>
+
+	<select id="get" resultType="DebtCollectionOut">
+		SELECT
+		<include refid="debtCollectionOutColumns" />
+		FROM pl_debt_collection_out a
+		<include refid="debtCollectionOutJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getDataCountByContractNo" resultType="int">
+		SELECT
+		ifnull(count(a.id),0)
+		FROM
+		pl_debt_collection_out a
+		WHERE a.debt_id =
+		#{debtId}
+	</select>
+
+	<select id="findList" resultType="DebtCollectionOut">
+		SELECT
+		<include refid="debtCollectionOutColumns" />
+		FROM pl_debt_collection_out a
+		<include refid="debtCollectionOutJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_debt_collection_out a
+		<include refid="debtCollectionOutJoins" />
+		<where>
+			<if test="debtId != null and debtId != ''">
+				and a.debt_id = #{debtId}
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like #{contractNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollectionOut">
+		SELECT
+		<include refid="debtCollectionOutColumns" />
+		FROM pl_debt_collection_out a
+		<include refid="debtCollectionOutJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_debt_collection_out(
+		id,
+		debt_id,
+		contract_no,
+		collection_date,
+		collector,
+		description,
+		cust_result
+		) VALUES (
+		#{id},
+		#{debtId},
+		#{contractNo},
+		#{collectionDate},
+		#{collector},
+		#{description},
+		#{custResult}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_debt_collection_out SET
+		contract_no =
+		#{contractNo},
+		collection_date = #{collectionDate},
+		collector =
+		#{collector},
+		description = #{description},
+		cust_result = #{custResult}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_debt_collection_out
+		WHERE id = #{id}
+	</update>
+
+</mapper>

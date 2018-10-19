@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.taskCenter.dao.TaskCenterDao">
+
+	<sql id="tableSql">
+		SELECT DISTINCT
+		a.APPLY_NO AS APPLY_NO,
+		a.CUST_NAME AS CUST_NAME,
+		a.CONTRACT_NO AS CONTRACT_NO,
+		o4.`name` AS REGIST_ORG_NAME,
+		o3.`name` AS
+		AREA_NAME,
+		o2.`name` AS LARGE_AREA_NAME,
+		b.PROC_INS_ID AS PROC_INS_ID,
+		b.CREATE_DATE AS CREATE_DATE
+		FROM acc_contract a
+		INNER JOIN
+		acc_apply_margin_repay b ON a.CONTRACT_NO = b.CONTRACT_NO
+		LEFT OUTER
+		JOIN sys_office t3 ON t3.id = a.OPERATE_ORG_ID
+		LEFT OUTER JOIN
+		sys_office o4 ON o4.id = a.ORG_LEVEL4 AND o4.type = '1'
+		LEFT OUTER JOIN
+		sys_office o3 ON o3.id = a.ORG_LEVEL3 AND o3.type = '1'
+		LEFT OUTER JOIN
+		sys_office o2 ON o2.id = a.ORG_LEVEL2 AND o2.type = '1'
+		WHERE 1=1
+		<if test="custName != null and custName !=''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '3'">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '2'">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '1'">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		AND (
+		t3.id = #{selfId}
+		OR t3.parent_ids LIKE '${parentIds}%'
+		)
+		UNION
+		SELECT
+		a.APPLY_NO AS APPLY_NO,
+		a.CUST_NAME AS CUST_NAME,
+		a.CONTRACT_NO AS
+		CONTRACT_NO,
+		o4.`name` AS REGIST_ORG_NAME,
+		o3.`name` AS
+		AREA_NAME,
+		o2.`name` AS LARGE_AREA_NAME,
+		b.PROC_INS_ID AS PROC_INS_ID,
+		b.CREATE_DATE
+		AS CREATE_DATE
+		FROM acc_contract a
+		INNER JOIN
+		acc_apply_penalty_fine_exempt b ON a.CONTRACT_NO = b.CONTRACT_NO
+		LEFT
+		OUTER JOIN sys_office t3 ON t3.id = a.OPERATE_ORG_ID
+		LEFT OUTER JOIN
+		sys_office o4 ON o4.id = a.ORG_LEVEL4 AND o4.type = '1'
+		LEFT OUTER JOIN
+		sys_office o3 ON o3.id
+		= a.ORG_LEVEL3 AND o3.type = '1'
+		LEFT OUTER JOIN
+		sys_office o2 ON o2.id = a.ORG_LEVEL2 AND o2.type = '1'
+		WHERE 1=1
+		<if test="custName != null and custName !=''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '3'">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '2'">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == '1'">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		AND (
+		t3.id = #{selfId}
+		OR t3.parent_ids LIKE '${parentIds}%'
+		)
+	</sql>
+	<!-- 根据传入的procInstId查询ActRuTask实体类，封装了参数execId和proDefId提供流程图、流程轨迹使用 -->
+	<select id="selectSingleRunTask" parameterType="string" resultType="ActRuTask">
+		SELECT
+		t.PROC_DEF_ID_ as procDefId,
+		t.EXECUTION_ID_ as
+		executionId
+		FROM
+		act_ru_task t
+		WHERE
+		t.PROC_INST_ID_ = #{procInstId}
+	</select>
+	<!-- 根据传入的procInstId查询ActHiTaskInst实体类，封装了参数execId和proDefId 提供流程图、流程轨迹使用 -->
+	<select id="selectHisTask" parameterType="string" resultType="ActHiTaskInst">
+		SELECT
+		t.PROC_DEF_ID_ as procDefId,
+		t.EXECUTION_ID_ as executionId
+		FROM
+		act_hi_taskinst t
+		WHERE
+		t.PROC_INST_ID_ = #{procInstId}
+	</select>
+
+	<select id="selectToDoProcess" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		<include refid="tableSql" />
+		) b ON t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is NULL
+		order by
+		t.START_TIME_ desc
+	</select>
+	<select id="selectToDoProcessCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(1) FROM
+		(
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		<include refid="tableSql" />
+		) b ON t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is NULL
+		order by
+		t.START_TIME_ desc
+		) TA
+	</select>
+	<select id="selectDoneProcess" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.END_TIME_ as END_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		<include refid="tableSql" />
+		) b ON t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is not NULL
+		order by t.START_TIME_ desc
+	</select>
+	<!-- 实现办结流程监控的查询列表以及分页功能，查询出count在service中封装在page中 -->
+	<select id="selectDoneProcessCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(1) FROM
+		(
+		SELECT
+		t.START_TIME_ as START_TIME,
+		t.END_TIME_ as
+		END_TIME,
+		t.START_USER_ID_ as START_USER_ID,
+		B.*
+		FROM
+		act_hi_procinst t
+		JOIN (
+		<include refid="tableSql" />
+		) b ON t.PROC_INST_ID_ = b.PROC_INS_ID
+		WHERE
+		t.END_TIME_ is not NULL
+		order by t.START_TIME_ desc
+		) TA
+	</select>
+	<!--展期待办任务 -->
+	<select id="findContractExtendToDoList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		b.CONTRACT_NO AS CONTRACT_NO,
+		b.ID AS EXTEND_ID,
+		b.EXTEND_AMOUNT AS
+		EXTENDAMOUNT,
+		b.EXTEND_START_DATE AS EXTENDSTARTDATE,
+		b.EXTEND_END_DATE
+		AS EXTENDENDDATE,
+		b.EXTEND_PERIOD AS EXTENDPERIOD,
+		b.PROC_INS_ID AS
+		PROC_INS_ID
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+		JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON
+		E.PROC_INST_ID_ = T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT IT.TASK_ID_,syu.login_name as
+		USER_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+		inner join sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		inner join sys_user syu on sua.userid =
+		syu.id
+		WHERE syu.login_name = #{userId} AND IT.TYPE_='candidate'
+		) I ON
+		I.TASK_ID_ =
+		T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		AND (T.ASSIGNEE_ = #{userId} OR (I.USER_ID_ = #{userId} AND
+		T.ASSIGNEE_
+		IS NULL))
+		AND T.PROC_DEF_ID_ LIKE
+		CONCAT(#{procDefIdPre},'%')
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		LIMITSQL
+		) temp
+		INNER JOIN pl_apply_extend b ON temp.PROC_INST_ID_ =
+		b.PROC_INS_ID
+		WHERE 1=1
+		<if test="custName != null and custName !=''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			AND b.CONTRACT_NO LIKE CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 4">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 3">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 2">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+	</select>
+
+	<!--展期已办任务 -->
+	<select id="findContractExtendDoneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		b.CONTRACT_NO AS CONTRACT_NO,
+		b.ID AS EXTEND_ID,
+		b.EXTEND_AMOUNT
+		AS
+		EXTENDAMOUNT,
+		b.EXTEND_START_DATE AS EXTENDSTARTDATE,
+		b.EXTEND_END_DATE
+		AS EXTENDENDDATE,
+		b.EXTEND_PERIOD AS EXTENDPERIOD,
+		b.PROC_INS_ID AS
+		PROC_INS_ID,
+		T.ID_
+		AS ID,
+		T.NAME_ AS NAME,
+		T.TASK_DEF_KEY_
+		AS
+		TASKDEFINITIONKEY,
+		T.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		T.PROC_DEF_ID_ AS
+		PROCESSDEFINITIONID,
+		T.END_TIME_ AS ENDTIME,
+		T.ASSIGNEE_ AS ASSIGNEE,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'finish' AS
+		STATUS,
+		T.START_TIME_ AS
+		STARTTIME
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT
+		NULL
+		AND END_TIME_ IS NOT NULL
+		AND (DELETE_REASON_
+		= 'completed' OR
+		DELETE_REASON_ = 'jump')
+		AND ASSIGNEE_ = #{userId}
+		AND
+		PROC_DEF_ID_ LIKE
+		CONCAT(#{procDefIdPre},'%')
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[END_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[END_TIME_ <= #{cdateEnd}]]>
+		</if>
+		LIMITSQL
+		) T
+		INNER JOIN pl_apply_extend b ON T.PROC_INST_ID_ =
+		b.PROC_INS_ID
+		<!-- INNER JOIN acc_contract a ON a.CONTRACT_NO = b.CONTRACT_NO LEFT OUTER 
+			JOIN sys_office t3 ON t3.id = a.OPERATE_ORG_ID LEFT OUTER JOIN sys_office 
+			o4 ON o4.id = a.ORG_LEVEL4 AND o4.type = '1' LEFT OUTER JOIN sys_office o3 
+			ON o3.id = a.ORG_LEVEL3 AND o3.type = '1' LEFT OUTER JOIN sys_office o2 ON 
+			o2.id = a.ORG_LEVEL2 AND o2.type = '1' WHERE (t3.id = #{currentOrg} OR t3.parent_ids 
+			LIKE CONCAT(#{currentOrgParentIds},'%')) -->
+		<if test="custName != null and custName !=''">
+			AND a.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			AND b.CONTRACT_NO LIKE CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 4">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 3">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 2">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		ORDER BY T.END_TIME_ DESC
+	</select>
+
+	<!--待办任务 -->
+	<select id="findTaskToDoList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		c.CUST_NAME AS "custName",
+		r.apply_no AS "applyNo",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		s.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		c.ORG_LEVEL2 AS "orgLevel2.id",
+		c.ORG_LEVEL3 AS "orgLevel3.id",
+		c.ORG_LEVEL4 AS "orgLevel4.id",
+		o2.name AS "orgLevel2.name",
+		o3.name AS "orgLevel3.name",
+		o4.name AS "orgLevel4.name",
+		r.MOBILE_NUM as "mobileNum",
+		r.REGISTER_NAME AS
+		"registerName",
+		b.PROC_INS_ID AS
+		PROC_INS_ID
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+		JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON
+		E.PROC_INST_ID_ = T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT IT.TASK_ID_,syu.login_name as
+		USER_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+		inner join sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		inner join sys_user syu on sua.userid =
+		syu.id
+		WHERE syu.login_name = #{userId} AND IT.TYPE_='candidate'
+		) I ON
+		I.TASK_ID_ =
+		T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		AND (T.ASSIGNEE_ = #{userId} OR (I.USER_ID_ = #{userId} AND
+		T.ASSIGNEE_
+		IS NULL))
+		AND T.PROC_DEF_ID_ LIKE
+		CONCAT(#{procDefIdPre},'%')
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		LIMITSQL
+		) temp
+		INNER JOIN pl_collateral_disposal b ON temp.PROC_INST_ID_ = b.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c on c.CONTRACT_NO = b.CONTRACT_NO
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON b.CONTRACT_NO = s.CONTRACT_NO and b.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON
+		p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 ON o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 ON o3.id = c.ORG_LEVEL3
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 ON o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		WHERE 1=1
+		<if test="custName != null and custName !=''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			AND b.CONTRACT_NO LIKE CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 4">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 3">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 2">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+
+<!--系统管理员待办任务 -->
+	<select id="findTaskToDoListAdmin" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		temp.ID_ AS ID,
+		temp.NAME_ AS NAME,
+		temp.TASK_DEF_KEY_ AS
+		TASKDEFINITIONKEY,
+		temp.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		temp.PROC_DEF_ID_ AS PROCESSDEFINITIONID,
+		temp.CREATE_TIME_ AS
+		CREATETIME,
+		temp.ASSIGNEE_ AS ASSIGNEE,
+		CASE WHEN temp.ASSIGNEE_ IS NULL
+		THEN 'todo' ELSE
+		'claim' END AS STATUS,
+		temp.EXECUTION_ID_ AS
+		EXECUTIONID,
+		c.CUST_NAME AS "custName",
+		r.apply_no AS "applyNo",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		s.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		c.ORG_LEVEL2 AS "orgLevel2.id",
+		c.ORG_LEVEL3 AS "orgLevel3.id",
+		c.ORG_LEVEL4 AS "orgLevel4.id",
+		o2.name AS "orgLevel2.name",
+		o3.name AS "orgLevel3.name",
+		o4.name AS "orgLevel4.name",
+		r.MOBILE_NUM as "mobileNum",
+		r.REGISTER_NAME AS
+		"registerName",
+		b.PROC_INS_ID AS
+		PROC_INS_ID
+		FROM
+		(
+		SELECT DISTINCT
+		t.ID_,
+		t.NAME_,
+		t.TASK_DEF_KEY_,
+		t.PROC_INST_ID_,
+		t.PROC_DEF_ID_,
+		t.CREATE_TIME_,
+		t.ASSIGNEE_,
+		t.EXECUTION_ID_
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_TASK T
+		JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_EXECUTION E ON E.PROC_INST_ID_ =
+		T.PROC_INST_ID_
+		LEFT JOIN (
+		SELECT IT.TASK_ID_
+		FROM ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_RU_IDENTITYLINK IT
+		inner join
+		sys_user_ally sua on
+		IT.GROUP_ID_ = sua.ALLYID
+		where IT.TYPE_ = 'candidate'
+		) I ON
+		I.TASK_ID_ = T.ID_
+		WHERE
+		T.SUSPENSION_STATE_ = '1'
+		AND E.IS_ACTIVE_ = '1'
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND T.TASK_DEF_KEY_=#{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND T.PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[T.CREATE_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[T.CREATE_TIME_ <= #{cdateEnd}]]>
+		</if>
+		<if test="taskState=='todo'">
+			AND T.ASSIGNEE_ IS NOT NULL
+		</if>
+		<if test="taskState=='claim'">
+			AND T.ASSIGNEE_ IS NULL
+		</if>
+		) temp
+		INNER JOIN pl_collateral_disposal b ON temp.PROC_INST_ID_ = b.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c on c.CONTRACT_NO = b.CONTRACT_NO
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON b.CONTRACT_NO = s.CONTRACT_NO and b.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON
+		p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 ON o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 ON o3.id = c.ORG_LEVEL3
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 ON o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		WHERE 1=1
+		<if test="custName != null and custName !=''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			AND b.CONTRACT_NO LIKE CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 4">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 3">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 2">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		ORDER BY CREATETIME DESC
+	</select>
+	
+	
+	<!--已办任务 -->
+	<select id="findTaskToDoneList" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		T.ID_ AS ID,
+		T.NAME_ AS NAME,
+		T.TASK_DEF_KEY_ AS TASKDEFINITIONKEY,
+		T.PROC_INST_ID_ AS PROCESSINSTANCEID,
+		T.PROC_DEF_ID_ AS
+		PROCESSDEFINITIONID,
+		T.END_TIME_ AS ENDTIME,
+		T.ASSIGNEE_ AS ASSIGNEE,
+		T.EXECUTION_ID_ AS EXECUTIONID,
+		'finish' AS STATUS,
+		T.START_TIME_ AS STARTTIME,
+		c.CUST_NAME AS "custName",
+		r.apply_no AS "applyNo",
+		c.CONTRACT_NO AS "contractNo",
+		c.CONTRACT_AMOUNT AS "contractAmount",
+		s.PERIOD_NUM AS "periodNum",
+		p.REPAY_AMOUNT - ps.FACT_REPAY_AMOUNT AS "overdueAmount",
+		s.OVERDUE_DAYS AS "overdueDays",
+		c.ORG_LEVEL2 AS "orgLevel2.id",
+		c.ORG_LEVEL3 AS "orgLevel3.id",
+		c.ORG_LEVEL4 AS "orgLevel4.id",
+		o2.name AS "orgLevel2.name",
+		o3.name AS "orgLevel3.name",
+		o4.name AS "orgLevel4.name",
+		r.MOBILE_NUM as "mobileNum",
+		r.REGISTER_NAME AS
+		"registerName",
+		b.PROC_INS_ID AS
+		PROC_INS_ID
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.ACT_HI_TASKINST
+		WHERE
+		DELETE_REASON_ IS NOT
+		NULL
+		AND END_TIME_ IS NOT NULL
+		AND (DELETE_REASON_
+		= 'completed' OR
+		DELETE_REASON_ = 'jump')
+		AND ASSIGNEE_ = #{userId}
+		AND
+		PROC_DEF_ID_ LIKE CONCAT(#{procDefIdPre},'%')
+		<if test="taskDefKey!=null and taskDefKey!=''">
+			AND TASK_DEF_KEY_= #{taskDefKey}
+		</if>
+		<if test="proDefKey!=null and proDefKey!=''">
+			AND PROC_DEF_ID_=#{proDefKey}
+		</if>
+		<if test="cdateStart !=null and cdateStart!=''">
+			AND <![CDATA[END_TIME_ >= #{cdateStart}]]>
+		</if>
+		<if test="cdateEnd!=null and cdateEnd!=''">
+			AND <![CDATA[END_TIME_ <= #{cdateEnd}]]>
+		</if>
+		LIMITSQL
+		) T
+		INNER JOIN pl_collateral_disposal b ON T.PROC_INST_ID_ = b.PROC_INS_ID
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract c on c.CONTRACT_NO = b.CONTRACT_NO
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status s ON b.CONTRACT_NO = s.CONTRACT_NO and b.period_num = s.period_num
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan p ON
+		p.CONTRACT_NO = c.CONTRACT_NO
+		AND p.PERIOD_NUM = s.PERIOD_NUM
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status ps ON ps.CONTRACT_NO = p.CONTRACT_NO
+		AND ps.PERIOD_NUM = p.PERIOD_NUM
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o2 ON o2.id = c.ORG_LEVEL2
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o3 ON o3.id = c.ORG_LEVEL3
+		INNER JOIN
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o4 ON o4.id = c.ORG_LEVEL4
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register r ON r.APPLY_NO = c.APPLY_NO
+		<if test="custName != null and custName !=''">
+			AND c.CUST_NAME LIKE CONCAT('%',#{custName},'%')
+		</if>
+		<if test="contractNo != null and contractNo !=''">
+			AND b.CONTRACT_NO LIKE CONCAT(#{contractNo},'%')
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 4">
+			AND o4.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 3">
+			AND o3.id = #{dataScope}
+		</if>
+		<if test="orgLevel != null and orgLevel !='' and orgLevel == 2">
+			AND o2.id = #{dataScope}
+		</if>
+		<if test="applyStartTime != null and applyStartTime !=''">
+			AND <![CDATA[b.CREATE_DATE>=#{applyStartTime}]]>
+		</if>
+		<if test="applyEndTime != null and applyEndTime !=''">
+			AND <![CDATA[b.CREATE_DATE<=#{applyEndTime}]]>
+		</if>
+		ORDER BY T.END_TIME_ DESC
+	</select>
+
+</mapper>

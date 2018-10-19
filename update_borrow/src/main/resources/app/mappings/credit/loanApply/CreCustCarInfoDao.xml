@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+客户车辆信息表   SQLMapper  CRE_CUST_CAR_INFO
+-->
+<mapper namespace="com.resoft.credit.loanApply.dao.CreCustCarInfoDao">
+	<!-- 
+	 * @reqno:H1510080100
+	 * @date-designer:2015年10月21日-songmin
+	 * @date-author:2015年10月21日-songmin:CRE_信贷审批_申请录入_客户信息_车辆信息【默认数据项】展现
+	 * 	根据APPLY_ID查询客户登记的车辆信息
+	 * @db-z:cre_cust_car_info:ID、APPLY_ID（申请id）、CAR_BRAND（车辆品牌）、CAR_TYPE（车辆类型 CAR_TYPE）、CARPLATE_NUM（车牌号码）、
+	 *					 CARENGINE_NUM（发动机号）、CAR_FRAME_NUM（车架号）、CARCOLOR（车身颜色）、USE_PERIOD（已使用年限(个月)）、
+	 *					 CAR_PERIOD（规定年限 CAR_PERIOD）、MILEAGE（累计行驶里程(万公里)）、BUY_PRICE（购入原价（元））、
+	 *					 TENDING_STATE（维护保养情况 TENDING_STATE）、WORK_NATURE（工作性质 WORK_NATURE）
+	 -->
+	<select id="get" resultType="CreCustCarInfo">
+		select 
+			ID id,
+			APPLY_ID applyId,
+			CAR_BRAND carBrand,
+			CAR_TYPE carType,
+			CARPLATE_NUM carplateNum,
+			CARENGINE_NUM carengineNum,
+			CAR_FRAME_NUM carFrameNum,
+			CARCOLOR carcolor,
+			USE_PERIOD usePeriod,
+			CAR_PERIOD carPeriod,
+			MILEAGE mileage,
+			BUY_PRICE buyPrice,
+			TENDING_STATE tendingState,
+			WORK_NATURE workNature
+		from cre_cust_car_info 
+		where APPLY_ID=#{applyId}
+	</select>
+	
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		保存客户车辆信息
+	 *		新增数据项：ID、申请ID、车辆品牌、车辆类型、车牌号码、发动机号、车架号、车身颜色、已使用年限、规定年限、累计行驶里程、购入原价、维护保养情况 、工作性质
+	 *
+	 * @db-z:cre_cust_car_info:ID、APPLY_ID（申请id）、CAR_BRAND（车辆品牌）、CAR_TYPE（车辆类型 CAR_TYPE）、CARPLATE_NUM（车牌号码）、
+	 *					 CARENGINE_NUM（发动机号）、CAR_FRAME_NUM（车架号）、CARCOLOR（车身颜色）、USE_PERIOD（已使用年限(个月)）、
+	 *					 CAR_PERIOD（规定年限 CAR_PERIOD）、MILEAGE（累计行驶里程(万公里)）、BUY_PRICE（购入原价（元））、
+	 *					 TENDING_STATE（维护保养情况 TENDING_STATE）、WORK_NATURE（工作性质 WORK_NATURE）
+	 -->
+	<insert id="insert">
+		insert into cre_cust_car_info(ID,
+			APPLY_ID,
+			CAR_BRAND,
+			CAR_TYPE,
+			CARPLATE_NUM,
+			CARENGINE_NUM,
+			CAR_FRAME_NUM,
+			CARCOLOR,
+			USE_PERIOD,
+			CAR_PERIOD,
+			MILEAGE,
+			BUY_PRICE,
+			TENDING_STATE,
+			WORK_NATURE)
+		values(
+			#{id},
+			#{applyId},
+			#{carBrand},
+			#{carType},
+			#{carplateNum},
+			#{carengineNum},
+			#{carFrameNum},
+			#{carcolor},
+			#{usePeriod},
+			#{carPeriod},
+			#{mileage},
+			#{buyPrice},
+			#{tendingState},
+			#{workNature}
+		)
+	</insert>
+	<!-- 
+	 * @reqno:H1510080106
+	 * @date-designer:2015年10月26日-songmin
+	 * @date-author:2015年10月26日-songmin:CRE_信贷审批_申请录入_客户信息_更新、保存_基本信息、房产信息、车辆信息、工作信息数据
+	 * 		根据ID修改客户车辆信息
+	 *		修改数据项：车辆品牌、车辆类型、车牌号码、发动机号、车架号、车身颜色、已使用年限、规定年限、累计行驶里程、购入原价、维护保养情况 、工作性质
+	 *
+	 * @db-z:cre_cust_car_info:ID、APPLY_ID（申请id）、CAR_BRAND（车辆品牌）、CAR_TYPE（车辆类型 CAR_TYPE）、CARPLATE_NUM（车牌号码）、
+	 *					 CARENGINE_NUM（发动机号）、CAR_FRAME_NUM（车架号）、CARCOLOR（车身颜色）、USE_PERIOD（已使用年限(个月)）、
+	 *					 CAR_PERIOD（规定年限 CAR_PERIOD）、MILEAGE（累计行驶里程(万公里)）、BUY_PRICE（购入原价（元））、
+	 *					 TENDING_STATE（维护保养情况 TENDING_STATE）、WORK_NATURE（工作性质 WORK_NATURE）
+	 -->
+	<update id="update">
+		update cre_cust_car_info 
+		set 
+			CAR_BRAND=#{carBrand},
+			CAR_TYPE=#{carType},
+			CARPLATE_NUM=#{carplateNum},
+			CARENGINE_NUM=#{carengineNum},
+			CAR_FRAME_NUM=#{carFrameNum},
+			CARCOLOR=#{carcolor},
+			USE_PERIOD=#{usePeriod},
+			CAR_PERIOD=#{carPeriod},
+			MILEAGE=#{mileage},
+			BUY_PRICE=#{buyPrice},
+			TENDING_STATE=#{tendingState},
+			WORK_NATURE=#{workNature}
+		where ID=#{id}
+	</update>
+</mapper>

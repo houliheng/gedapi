@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.postloan.pushdatatopl.dao.PlCreditAssetDao">
+				
+	<insert id="insertCreditAssetToPl">
+		INSERT INTO pl_mortgage_evaluate_asset(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			asset_name,
+			market_value,
+			is_mortgage,
+			is_check,
+			detail_comment,
+			remarks,
+			is_push_data
+		) VALUES
+		<foreach item="creditAssetsList" collection="creditAssetsList" index="index" separator=",">
+		 (
+			#{creditAssetsList.id},
+			#{creditAssetsList.applyNo},
+			#{creditAssetsList.roleType},
+			#{creditAssetsList.assetsOwnerId},
+			#{creditAssetsList.assetsOwnerName},
+			#{creditAssetsList.assetsName},
+			#{creditAssetsList.marketValue},
+			#{creditAssetsList.isMortgage},
+			#{creditAssetsList.isCheck},
+			#{creditAssetsList.detailComment},
+			#{creditAssetsList.remarks},
+			'0'
+		)
+		</foreach>
+	</insert>
+	
+</mapper>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyInfo.dao.ApplyInfoDao">
+    
+	<sql id="applyInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.apply_amount AS "applyAmount",
+		a.apply_period_id AS "applyPeriodId",
+		a.apply_period_value AS "applyPeriodValue",
+		a.apply_service_rate AS "applyServiceRate",
+		a.apply_year_rate AS "applyYearRate",
+		a.loan_repay_type AS "loanRepayType",
+		a.month_repay_amount AS "monthRepayAmount",
+		a.apply_cust_type AS "applyCustType",
+		a.accept_highest_amount AS "acceptHighestAmount",
+		a.loan_kind AS "loanKind",
+		a.loan_purpost AS "loanPurpost",
+		a.loan_other_purpose_desc AS "loanOtherPurposeDesc",
+		a.description AS "description",
+		a.is_fraud AS "isFraud",
+		a.is_have_com_loan AS "isHaveComLoan",
+		a.is_have_assure AS "isHaveAssure",
+		a.is_urgent AS "isUrgent",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.SV_PLATFORM AS "svPlatform"
+	</sql>
+	
+	<sql id="applyRegisterColumns">
+		,b.id AS "id",
+		b.apply_no AS "applyNo",
+		b.cust_type AS "applyRegister.custType",
+		b.cust_name AS "applyRegister.custName",
+		b.id_type AS "applyRegister.idType",
+		b.id_num AS "applyRegister.idNum",
+		b.COMPANY_NAME as"applyRegister.companyName",
+		b.COM_ID_TYPE as "applyRegister.comIdType",
+		b.COM_ID_NUM as "applyRegister.comIdNum",
+		b.mobile_num AS "applyRegister.mobileNum",
+		b.apply_product_type_code AS "applyRegister.applyProductTypeCode",
+		b.apply_product_id AS "applyRegister.applyProductId",
+		b.apply_amount AS "applyRegister.applyAmount",
+		b.channel_source_type AS "applyRegister.channelSourceType",
+		b.apply_product_name AS "applyRegister.applyProductName",
+		b.channel_other_desc AS "applyRegister.channelOtherDesc",
+		b.register_name AS "applyRegister.registerName",
+		b.register_date AS "applyRegister.registerDate",
+		b.org_id AS "applyRegister.company.id",
+		b.apply_status AS "applyRegister.applyStatus",
+		b.proc_ins_id AS "applyRegister.procInsId",
+		b.serial_number AS "applyRegister.serialNumber",
+		b.create_by AS "applyRegister.createBy.id",
+		b.product_category AS "applyRegister.productCategory"
+	</sql>
+	
+	<sql id="applyRelationColumns">
+		,c.cust_id AS "applyRelation.custId"
+	</sql>
+	
+	<sql id="sysOfficeColumns">
+		,d.name AS "operateOrgName"
+	</sql>
+	
+	<sql id="applyInfoJoins">
+	</sql>
+    <sql id="applyInfoAindRegisterJoins">
+	  inner join cre_apply_register b on a.apply_no = b.apply_no and b.del_flag = '0'
+	</sql>
+    <sql id="applyRelationJoins">
+	  left join cre_apply_relation c on c.apply_no = b.apply_no and c.role_type = '1' and c.del_flag = '0'
+	</sql>
+    <sql id="sysOfficeJoins">
+	  left join sys_office d on d.id = b.org_id
+	</sql>
+	
+	
+	<select id="checkDoubleInfo" resultType="ApplyInfo">
+		SELECT 
+			<include refid="applyInfoColumns"/>
+		FROM cre_apply_info a
+		<include refid="applyInfoJoins"/>
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="get" resultType="ApplyInfo">
+		SELECT 
+			<include refid="applyInfoColumns"/>
+		FROM cre_apply_info a
+		<include refid="applyInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ApplyInfo">
+		SELECT 
+			<include refid="applyInfoColumns"/>
+		FROM cre_apply_info a
+		<include refid="applyInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_apply_info a
+		<include refid="applyInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ApplyInfo">
+		SELECT 
+			<include refid="applyInfoColumns"/>
+		FROM cre_apply_info a
+		<include refid="applyInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_apply_info(
+			id,
+			apply_no,
+			apply_amount,
+			apply_period_id,
+			apply_period_value,
+			apply_year_rate,
+			apply_service_rate,
+			loan_repay_type,
+			apply_cust_type,
+			loan_kind,
+			loan_purpost,
+			description,
+			is_have_com_loan,
+			is_have_assure,
+			is_urgent,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			SV_PLATFORM
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{applyAmount},
+			#{applyPeriodId},
+			#{applyPeriodValue},
+			#{applyYearRate},
+			#{applyServiceRate},
+			#{loanRepayType},
+			#{applyCustType},
+			#{loanKind},
+			#{loanPurpost},
+			#{description},
+			#{isHaveComLoan},
+			#{isHaveAssure},
+			#{isUrgent},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{svPlatform}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_apply_info SET 	
+			apply_no = #{applyNo},
+			apply_amount = #{applyAmount},
+			apply_period_id = #{applyPeriodId},
+			apply_period_value = #{applyPeriodValue},
+			apply_year_rate = #{applyYearRate},
+			apply_service_rate = #{applyServiceRate},
+			loan_repay_type = #{loanRepayType},
+			month_repay_amount = #{monthRepayAmount},
+			apply_cust_type = #{applyCustType},
+			accept_highest_amount = #{acceptHighestAmount},
+			loan_kind = #{loanKind},
+			loan_purpost = #{loanPurpost},
+			description = #{description},
+			loan_other_purpose_desc = #{loanOtherPurposeDesc},
+			is_fraud = #{isFraud},
+			is_have_com_loan = #{isHaveComLoan},
+			is_have_assure = #{isHaveAssure},
+			is_urgent = #{isUrgent},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			SV_PLATFORM = #{svPlatform}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新合同金额 -->
+	<update id="updateContractAmount">
+		UPDATE cre_apply_info SET
+			CONTRACT_AMOUNT = #{contractAmount}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+	<select id="findApplyInfoByApplyNo" resultType="ApplyInfo">
+		SELECT
+		<include refid="applyInfoColumns"/>
+		<include refid="applyRegisterColumns"/>
+		<include refid="applyRelationColumns"/>
+		<include refid="sysOfficeColumns"/>
+		FROM cre_apply_info a
+		<include refid="applyInfoAindRegisterJoins"/> 
+		<include refid="applyRelationJoins"/> 
+		<include refid="sysOfficeJoins"/> 
+		WHERE a.apply_no = #{applyNo}
+	</select>
+	
+	<select id="findGEDNeedCom" resultType="map">
+		SELECT
+			b.UN_SOC_CREDIT_NO as unSocCreditNo,
+			b.CORPORATION_MOBILE as corporationMobile,
+			b.BUSI_REG_NAME as busiRegName,
+			b.CORPORATION_NAME AS corporationName,
+			b.id AS comId
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		WHERE
+			a.APPLY_NO =  #{applyNo}
+		AND a.ROLE_TYPE = "5"
+		and a.DEL_FLAG='0'	
+	</select>
+	
+	<select id="findGEDNeedInfo" resultType="map">
+		SELECT
+			b.MOBILE_NUM AS mobileNum,
+			b.CUST_NAME AS custName,
+			b.id AS custId
+		FROM
+			cre_apply_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		WHERE
+			a.APPLY_NO =  #{applyNo}
+		AND a.ROLE_TYPE = "1"
+		AND a.DEL_FLAG = '0'
+	</select>
+	
+	
+</mapper>

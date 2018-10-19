@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.compenSatoryList.dao.CompenSatoryListDao">
+
+	
+	<select id="findList" resultType="CompenSatoryList">
+		SELECT
+	CASE WHEN IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)=0
+		THEN "已代偿"
+	WHEN IFNULL(g.COMPENSATORY_AMOUNT,0)=0
+		THEN "未代偿"
+		WHEN  IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)>0
+		THEN "部分代偿"	
+	END as "compenSatoryFlag",
+	c.CONTRACT_NO AS "contractNo",
+	c.PERIOD_NUM AS "periodNum",
+	IFNULL(c.REPAY_AMOUNT,0) AS "repayAmount",
+	IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)AS "capitalInterestAmount",
+	IFNULL(e.FINE_AMOUNT,0) AS "fineAmount",
+	IFNULL(d.FACT_SERVICE_FEE,0)+IFNULL(d.FACT_MANAGEMENT_FEE,0)+IFNULL(d.FACT_INTEREST_AMOUNT,0)+IFNULL(d.FACT_CAPITAL_AMOUNT,0)+IFNULL(d.FACT_PENALTY_AMOUNT,0)+IFNULL(d.FACT_FINE_AMOUNT,0) AS "allAmount",
+	IFNULL(d.FACT_INTEREST_AMOUNT,0)+IFNULL(d.FACT_CAPITAL_AMOUNT,0)+IFNULL(d.FACT_MANAGEMENT_FEE,0) AS "factInterestCapital",
+	IFNULL(d.FACT_FINE_AMOUNT,0) AS "factFineAmount",
+	IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)  AS "remainCompensatoryAmount",
+	g.last_time AS lastTime,
+	c.DEDUCT_DATE as "fineDate"
+FROM
+	cre_apply_register a       
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b
+	on a.apply_no=b.apply_no
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan c					
+	on c.CONTRACT_NO=b.CONTRACT_NO
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status d			
+	on c.CONTRACT_NO=d.CONTRACT_NO AND d.PERIOD_NUM=c.PERIOD_NUM
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status e
+	on c.CONTRACT_NO=e.CONTRACT_NO AND c.PERIOD_NUM=e.PERIOD_NUM
+LEFT JOIN (select MAX(f.UPDATE_DATE) as last_time,f.CONTRACT_NO as CONTRACT_NO,f.PERIOD_NUM as PERIOD_NUM ,SUM(IFNULL(f.COMPENSATORY_AMOUNT,0)) AS COMPENSATORY_AMOUNT
+						from cre_compensatory_detail f where f.COMPENSATORY_STATUS='0' GROUP BY f.CONTRACT_NO,f.PERIOD_NUM) g
+	on g.CONTRACT_NO=c.CONTRACT_NO AND g.PERIOD_NUM = c.PERIOD_NUM
+		<where> 
+			and   a.APPLY_STATUS='4' 
+			and e.CONTRACT_NO is NOT NULL 
+			and a.SEND_GED in ('1','2')
+			and IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) - IFNULL(d.FACT_INTEREST_AMOUNT, 0) - IFNULL(d.FACT_CAPITAL_AMOUNT, 0) - IFNULL(d.FACT_MANAGEMENT_FEE, 0) - IFNULL(g.COMPENSATORY_AMOUNT, 0) >0 
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND c.PERIOD_NUM = #{periodNum}
+			</if>
+			<if test='compenSatoryFlag == "已代偿"'>
+				and	<![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]> 
+			</if>
+			<if test='compenSatoryFlag == "未代偿"'>
+				AND <![CDATA[IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]> 
+			</if>
+			<if test='compenSatoryFlag == "部分代偿"'>
+				AND <![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)>0]]> 
+			</if>
+		</where>
+	</select>
+	
+	<select id="getCount" resultType="long">
+SELECT 
+		count(*)
+	FROM
+	cre_apply_register a
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b
+	on a.apply_no=b.apply_no
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan c
+	on c.CONTRACT_NO=b.CONTRACT_NO
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status d
+	on c.CONTRACT_NO=d.CONTRACT_NO AND d.PERIOD_NUM=c.PERIOD_NUM
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status e
+	on c.CONTRACT_NO=e.CONTRACT_NO AND c.PERIOD_NUM=e.PERIOD_NUM
+LEFT JOIN (select f.CONTRACT_NO as CONTRACT_NO,f.PERIOD_NUM as PERIOD_NUM ,SUM(IFNULL(f.COMPENSATORY_AMOUNT,0)) AS COMPENSATORY_AMOUNT
+						from cre_compensatory_detail f GROUP BY f.CONTRACT_NO,f.PERIOD_NUM) g
+	on g.CONTRACT_NO=c.CONTRACT_NO AND g.PERIOD_NUM = c.PERIOD_NUM
+		<where> 
+			and   a.APPLY_STATUS='4' 
+			and e.CONTRACT_NO is NOT NULL 
+			and a.SEND_GED in ('1','2')
+			and IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) - IFNULL(d.FACT_INTEREST_AMOUNT, 0) - IFNULL(d.FACT_CAPITAL_AMOUNT, 0) - IFNULL(d.FACT_MANAGEMENT_FEE, 0) - IFNULL(g.COMPENSATORY_AMOUNT, 0) >0 
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND c.PERIOD_NUM = #{periodNum}
+			</if>
+			<if test='compenSatoryFlag == "已代偿"'>
+				and	<![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]> 
+			</if>
+			<if test='compenSatoryFlag == "未代偿"'>
+				AND <![CDATA[IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]> 
+			</if>
+			<if test='compenSatoryFlag == "部分代偿"'>
+				AND <![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)>0]]> 
+			</if>
+		</where>
+	</select>
+
+    <!--查询代偿金额总和-->
+	<select id="findsumRemainAmount" resultType="CompenSatoryList">
+		SELECT
+		CASE WHEN IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)=0
+		THEN "已代偿"
+		WHEN IFNULL(g.COMPENSATORY_AMOUNT,0)=0
+		THEN "未代偿"
+		WHEN  IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)>0
+		THEN "部分代偿"
+		END as "compenSatoryFlag",
+		c.CONTRACT_NO AS "contractNo",
+		c.PERIOD_NUM AS "periodNum",
+		IFNULL(c.REPAY_AMOUNT,0) AS "repayAmount",
+		IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)AS "capitalInterestAmount",
+		IFNULL(e.FINE_AMOUNT,0) AS "fineAmount",
+		IFNULL(d.FACT_SERVICE_FEE,0)+IFNULL(d.FACT_MANAGEMENT_FEE,0)+IFNULL(d.FACT_INTEREST_AMOUNT,0)+IFNULL(d.FACT_CAPITAL_AMOUNT,0)+IFNULL(d.FACT_PENALTY_AMOUNT,0)+IFNULL(d.FACT_FINE_AMOUNT,0) AS "allAmount",
+		IFNULL(d.FACT_INTEREST_AMOUNT,0)+IFNULL(d.FACT_CAPITAL_AMOUNT,0)+IFNULL(d.FACT_MANAGEMENT_FEE,0) AS "factInterestCapital",
+		IFNULL(d.FACT_FINE_AMOUNT,0) AS "factFineAmount",
+		IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)  AS "remainCompensatoryAmount",
+		g.last_time AS lastTime,
+		c.DEDUCT_DATE as "fineDate",
+		sum(IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)) as "sumRemainAmount"
+		FROM
+		cre_apply_register a
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b
+		on a.apply_no=b.apply_no
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan c
+		on c.CONTRACT_NO=b.CONTRACT_NO
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_repay_plan_status d
+		on c.CONTRACT_NO=d.CONTRACT_NO AND d.PERIOD_NUM=c.PERIOD_NUM
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status e
+		on c.CONTRACT_NO=e.CONTRACT_NO AND c.PERIOD_NUM=e.PERIOD_NUM
+		LEFT JOIN (select MAX(f.UPDATE_DATE) as last_time,f.CONTRACT_NO as CONTRACT_NO,f.PERIOD_NUM as PERIOD_NUM ,SUM(IFNULL(f.COMPENSATORY_AMOUNT,0)) AS COMPENSATORY_AMOUNT
+		from cre_compensatory_detail f where f.COMPENSATORY_STATUS='0' GROUP BY f.CONTRACT_NO,f.PERIOD_NUM) g
+		on g.CONTRACT_NO=c.CONTRACT_NO AND g.PERIOD_NUM = c.PERIOD_NUM
+		<where>
+			and   a.APPLY_STATUS='4'
+			and e.CONTRACT_NO is NOT NULL
+			and a.SEND_GED in ('1','2')
+			and IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) - IFNULL(d.FACT_INTEREST_AMOUNT, 0) - IFNULL(d.FACT_CAPITAL_AMOUNT, 0) - IFNULL(d.FACT_MANAGEMENT_FEE, 0) - IFNULL(g.COMPENSATORY_AMOUNT, 0) >0
+			<if test="contractNo != null and contractNo != ''">
+				AND c.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND c.PERIOD_NUM = #{periodNum}
+			</if>
+			<if test='compenSatoryFlag == "已代偿"'>
+				and	<![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]>
+			</if>
+			<if test='compenSatoryFlag == "未代偿"'>
+				AND <![CDATA[IFNULL(g.COMPENSATORY_AMOUNT,0)=0]]>
+			</if>
+			<if test='compenSatoryFlag == "部分代偿"'>
+				AND <![CDATA[IFNULL(c.INTEREST_AMOUNT,0)+IFNULL(c.CAPITAL_AMOUNT,0)+IFNULL(c.MANAGEMENT_FEE,0)-IFNULL(d.FACT_INTEREST_AMOUNT,0)-IFNULL(d.FACT_CAPITAL_AMOUNT,0)-IFNULL(d.FACT_MANAGEMENT_FEE,0)-IFNULL(g.COMPENSATORY_AMOUNT,0)>0]]>
+			</if>
+		</where>
+	</select>
+
+
+
+</mapper>

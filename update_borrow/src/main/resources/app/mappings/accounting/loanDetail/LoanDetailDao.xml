@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.loanDetail.dao.LoanDetailDao">
+
+	<sql id="loanDetailColumns">
+		a.ORG_LEVEL4 as "orgLevel4.id",
+		d.name as "orgLevel4.name",
+		<!-- a.ORG_LEVEL3 --> 
+		e.id as "orgLevel3.id",
+		e.name as "orgLevel3.name",
+		<!-- a.ORG_LEVEL2 -->
+		f.id as "orgLevel2.id",
+		f.name as "orgLevel2.name",
+		a.contract_no AS "contractNo",
+		a.cust_name AS "custName",
+		a.loan_date AS "loanDate",
+		a.contract_amount AS "contractAmount",
+		a.loan_amount as "loanAmount",
+		a.service_fee as "serviceFee",
+		a.margin_amount as "marginAmount",
+		a.special_service_fee AS "specialServiceFee",
+		a.FACT_GUARANTEE_FEE as factGuaranteeFee,
+		a.FACT_GUARANTEE_GOLD as factGuaranteeGold,
+		case when m.service_fee_status = '0' then a.SERVICE_FEE ELSE null END as factServiceFee,
+		m.LOAN_STATUS as loanStatus
+	</sql>
+
+	<sql id="loanDetailJoins">
+		left join sys_office d on a.ORG_LEVEL4 = d.id
+		left join
+		sys_office e on <!-- a.ORG_LEVEL3 = e.id -->
+		d.parent_id = e.id 
+		left join sys_office f on
+		<!-- a.ORG_LEVEL2 = f.id -->
+		e.parent_id = f.id
+		inner join
+		sys_office o on a.OPERATE_ORG_ID = o.id
+	</sql>
+
+	<select id="get" resultType="LoanDetail">
+		SELECT
+		<include refid="loanDetailColumns" />
+		FROM acc_contract a
+		<include refid="loanDetailJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="LoanDetail">
+		SELECT
+		<include refid="loanDetailColumns" />
+		FROM acc_contract a
+		<include refid="loanDetailJoins" />
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_loan_status m on a.CONTRACT_NO = m.CONTRACT_NO
+		<where>
+			and (a.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="approProductTypeName != null and approProductTypeName != ''">
+				AND a.APPRO_PRODUCT_TYPE_NAME like CONCAT('%',#{approProductTypeName},'%')
+			</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and ( a.LOAN_DATE between #{startTime} and #{endTime} )
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[a.LOAN_DATE >= #{startTime}]]> 
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[a.LOAN_DATE <= #{endTime}]]> 
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != '' ">
+				AND f.id= #{orgLevel2.id}<!-- a.ORG_LEVEL2 = #{orgLevel2.id} -->
+			</if>
+			<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != '' ">
+				AND e.id= #{orgLevel3.id}<!-- a.ORG_LEVEL3 = #{orgLevel3.id} -->
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != '' ">
+				AND a.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_contract a
+		<include refid="loanDetailJoins" />
+		<where>
+			and (a.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				AND a.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="approProductTypeName != null and approProductTypeName != ''">
+				AND a.APPRO_PRODUCT_TYPE_NAME like CONCAT('%',#{approProductTypeName},'%')
+			</if>
+			<if test="startTime !=null and startTime != '' and endTime !=null and endTime != '' ">
+				and ( a.LOAN_DATE between #{startTime} and #{endTime} )
+			</if>
+			<if test="startTime !=null and startTime != '' ">
+				and  <![CDATA[a.LOAN_DATE >= #{startTime}]]> 
+			</if>
+			<if test="endTime !=null and endTime != '' ">
+				and  <![CDATA[a.LOAN_DATE <= #{endTime}]]> 
+			</if>
+			<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != '' ">
+				AND f.id= #{orgLevel2.id}<!-- a.ORG_LEVEL2 = #{orgLevel2.id} -->
+			</if>
+			<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != '' ">
+				AND e.id= #{orgLevel3.id}<!-- a.ORG_LEVEL3 = #{orgLevel3.id} -->
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != '' ">
+				AND a.ORG_LEVEL4 = #{orgLevel4.id}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="LoanDetail">
+		SELECT
+		<include refid="loanDetailColumns" />
+		FROM acc_contract a
+		<include refid="loanDetailJoins" />
+		<where>
+
+		</where>
+	</select>
+
+</mapper>

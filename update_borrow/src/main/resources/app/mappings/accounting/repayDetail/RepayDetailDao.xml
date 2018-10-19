@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.RepayDetail.dao.RepayDetailDao">
+	
+	<sql id="repayDetail">
+		a.DATA_DT as "createTime",
+		a.CONTRACT_NO as "contractNo",
+		a.PERIOD_NUM as "periodNum",
+		a.REPAY_DATE as "repayDate",
+		a.DEDUCT_APPLY_NO AS "deductApplyNo",
+		a.STREAM_NO AS "streamNo",
+		a.CREATE_TIME as "creTime",
+		a.REPAY_SERVICE_FEE as "repayServiceFee",
+		a.REPAY_MANAGEMENT_FEE as "repayManFee",
+		a.REPAY_INTEREST_AMOUNT as "repayIntAmo",
+		a.REPAY_CAPITAL_AMOUNT as "repayCapAmo",
+		a.REPAY_PENALTY_AMOUNT as "repayPenAmo",
+		a.REPAY_FINE_AMOUNT as "repayFinAmo",
+		a.REPAY_ADD_AMOUNT as "repayAddAmo",
+		a.REPAY_BREAK_AMOUNT as "repayBreAmo",
+		a.BACK_AMOUNT as "backAmo"
+	</sql>
+	
+	<select id="findPeriondByDeducyApplyNo" resultType="RepayDetail">
+		select 
+		<include refid="repayDetail" />
+		from acc_repay_detail a where a.DEDUCT_APPLY_NO = #{deductApplyNo} order by a.PERIOD_NUM asc
+	</select>
+
+
+</mapper>

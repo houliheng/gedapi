@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.creditAndLine.dao.creditAnalysisMostExtend.CreditAnalysisMostExtendDao">
+    
+	<sql id="creditAnalysisColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		
+		a.APPLICATION_DETAILS as applicationDetails,
+		a.VERIFY_METHOD as verifyMethod,
+		a.VERIFY_BASIS as verifyBasis,
+		a.REPAYMENT_SOURCE_BASIS as repaymentSourceBasis,
+		a.SECOND_REPAYMENT_SOURCE as secondRepaymentSource,
+		a.OTHER_REPAYMENT_SOURCE as otherRepaymentSource,
+		a.GUARANTEE_DETAIL as guaranteeDetail,
+		a.GUARANTEE_CORPORATION as guaranteeCorporation,
+		
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creditAnalysisJoins">
+	</sql>
+    
+	<select id="get" resultType="CreditAnalysisMostExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extend a
+		<include refid="creditAnalysisJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreditAnalysisMostExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extend a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_credit_analysis_most_extend a
+		<include refid="creditAnalysisJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO cre_credit_analysis_most_extend(
+			id,
+			apply_no,
+			
+			
+			APPLICATION_DETAILS,
+			VERIFY_METHOD,
+			VERIFY_BASIS,
+			REPAYMENT_SOURCE_BASIS,
+			SECOND_REPAYMENT_SOURCE,
+			OTHER_REPAYMENT_SOURCE,
+			GUARANTEE_DETAIL,
+			GUARANTEE_CORPORATION,
+			
+			CREATE_BY,
+			CREATE_DATE,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			
+			#{applicationDetails},
+			#{verifyMethod},
+			#{verifyBasis},
+			#{repaymentSourceBasis},
+			#{secondRepaymentSource},
+			#{otherRepaymentSource},
+			
+			#{guaranteeDetail},
+			#{guaranteeCorporation},
+			
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_credit_analysis_most_extend SET 	
+			apply_no = #{applyNo},
+			
+			APPLICATION_DETAILS = #{applicationDetails},
+			VERIFY_METHOD = #{verifyMethod},
+			VERIFY_BASIS = #{verifyBasis},
+			REPAYMENT_SOURCE_BASIS = #{repaymentSourceBasis},
+			SECOND_REPAYMENT_SOURCE = #{secondRepaymentSource},
+			OTHER_REPAYMENT_SOURCE = #{otherRepaymentSource},
+			
+			GUARANTEE_DETAIL = #{guaranteeDetail},
+			GUARANTEE_CORPORATION = #{guaranteeCorporation},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_credit_analysis_most_extend
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCreditAnalysisMostExtendByApplyNo" resultType="CreditAnalysisMostExtend">
+		SELECT 
+			<include refid="creditAnalysisColumns"/>
+		FROM cre_credit_analysis_most_extend a
+		<where>
+				AND a.apply_no = #{applyNo}
+		</where>		
+	</select>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_credit_analysis_most_extend SET 	
+		
+		<if test="applicationDetails != null and applicationDetails != ''">
+			APPLICATION_DETAILS = #{applicationDetails},
+		</if>
+		<if test="verifyMethod != null and verifyMethod != ''">
+			VERIFY_METHOD = #{verifyMethod},
+		</if>
+		<if test="verifyBasis != null and verifyBasis != ''">
+			VERIFY_BASIS = #{verifyBasis},
+		</if>
+		<if test="repaymentSourceBasis != null and repaymentSourceBasis != ''">
+			REPAYMENT_SOURCE_BASIS = #{repaymentSourceBasis},
+		</if>
+		<if test="secondRepaymentSource != null and secondRepaymentSource != ''">
+			SECOND_REPAYMENT_SOURCE = #{secondRepaymentSource},
+		</if>
+		<if test="otherRepaymentSource != null and otherRepaymentSource != ''">
+			OTHER_REPAYMENT_SOURCE = #{otherRepaymentSource},
+		</if>
+		
+		<if test="guaranteeDetail != null and guaranteeDetail != ''">
+			GUARANTEE_DETAIL = #{guaranteeDetail},
+		</if>
+		<if test="guaranteeCorporation != null and guaranteeCorporation != ''">
+			GUARANTEE_CORPORATION = #{guaranteeCorporation},
+		</if>
+		
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+</mapper>

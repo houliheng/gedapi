@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.compenSatoryDetail.dao.CompensatoryDetailDao">
+    
+	<sql id="compensatoryDetailColumns">
+		a.id AS "id",
+		a.serial_num AS "serialNum",
+		a.compensatory_status AS "compensatoryStatus",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.compensatory_amount AS "compensatoryAmount",
+		a.compensatory_account AS "compensatoryAccount",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.fail_Reason AS "FAIL_REASON",
+		a.cust_id as "custId",
+		a.to_compensatory_account AS "toCompensatoryAccount",
+		a.COMPENSATORY_TYPE AS "compensatoryType",
+		a.COMPENSATORY_NAME AS "compensatoryName"
+	</sql>
+	
+	<sql id="compensatoryDetailJoins">
+	</sql>
+    
+	<select id="get" resultType="CompensatoryDetail">
+		SELECT 
+			<include refid="compensatoryDetailColumns"/>
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CompensatoryDetail">
+		SELECT 
+			a.id AS "id",
+			a.cust_id as "custId",
+			a.serial_num AS "serialNum",
+			CASE WHEN a.compensatory_status='0'
+			THEN "代偿成功"
+			WHEN a.compensatory_status=null
+			    THEN "代偿正在处理"
+			WHEN a.compensatory_status='1'
+			    THEN "代偿失败"
+			END as "compensatoryStatus",
+			a.contract_no AS "contractNo",
+			a.period_num AS "periodNum",
+			a.compensatory_amount AS "compensatoryAmount",
+			a.compensatory_account AS "compensatoryAccount",
+			a.del_flag AS "delFlag",
+			a.create_date AS "createDate",
+			a.create_by AS "createBy.id",
+			a.update_date AS "updateDate",
+			a.update_by AS "updateBy.id",
+			a.fail_Reason AS "FAIL_REASON"
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="periodNum != null and periodNum != ''">
+				AND a.PERIOD_NUM = #{periodNum}
+			</if>
+			<if test="compensatoryStatus != null and compensatoryStatus != ''">
+				AND a.compensatory_status = #{compensatoryStatus}
+			</if>
+			<if test="compensatoryAccount != null and compensatoryAccount != ''">
+				AND a.compensatory_account = #{compensatoryAccount}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CompensatoryDetail">
+		SELECT 
+			<include refid="compensatoryDetailColumns"/>
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_compensatory_detail(
+			id,
+			cust_id,
+			serial_num,
+			compensatory_status,
+			contract_no,
+			period_num,
+			compensatory_amount,
+			compensatory_account,
+			del_flag,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			FAIL_REASON,
+			to_compensatory_account,
+			SURPLUS_AMOUNT,
+			COMPENSATORY_TYPE,
+			COMPENSATORY_NAME
+		) VALUES (
+			#{id},
+			#{custId},
+			#{serialNum},
+			#{compensatoryStatus},
+			#{contractNo},
+			#{periodNum},
+			#{compensatoryAmount},
+			#{compensatoryAccount},
+			#{delFlag},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{failReason},
+			#{toCompensatoryAccount},
+			#{surplusAmount},
+			#{compensatoryType},
+			#{compensatoryName}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_compensatory_detail SET 	
+			serial_num = #{serialNum},
+			cust_id=#{custId}
+			compensatory_status = #{compensatoryStatus},
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			compensatory_amount = #{compensatoryAmount},
+			compensatory_account = #{compensatoryAccount},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id},
+			FAIL_REASON = #{failReason},
+			TO_COMPENSATORY_ACCOUNT = #{toCompensatoryAccount},
+			COMPENSATORY_TYPE = #{compensatoryType},
+			COMPENSATORY_NAME = #{compensatoryName}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_compensatory_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<select id="findCompenSatorByConAndPer" resultType="CompensatoryDetail">
+		 SELECT
+	SUM(
+		IFNULL(a.COMPENSATORY_AMOUNT, 0) + IFNULL(b.OVERDUE_PENALTY, 0)+IFNULL(c.FINE_AMOUNT,0)
+	) - a.SURPLUS_AMOUNT as compensatoryAmount,
+	a.SURPLUS_AMOUNT AS surplusAmount,
+	a.PERIOD_NUM as periodNum,
+	a.CUST_ID as custId,
+	a.CONTRACT_NO as contractNo
+FROM
+	${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_compensatory_detail a
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan b ON a.PERIOD_NUM = b.PERIOD_NUM AND a.CONTRACT_NO = b.CONTRACT_NO
+LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_sta_overdue_status c ON a.PERIOD_NUM = c.PERIOD_NUM AND a.CONTRACT_NO = c.CONTRACT_NO
+WHERE
+	a.CONTRACT_NO = #{contractNo}
+AND a.FLAG IS NULL and a.COMPENSATORY_STATUS = '0' and a.PERIOD_NUM = #{periodNum} 
+GROUP BY
+	a.PERIOD_NUM
+HAVING SUM(
+		IFNULL(a.COMPENSATORY_AMOUNT, 0) + IFNULL(b.OVERDUE_PENALTY, 0)+IFNULL(c.FINE_AMOUNT,0) 
+	) -  a.SURPLUS_AMOUNT > 0.00
+ORDER BY
+	a.PERIOD_NUM ASC
+	</select>
+	
+	
+	<update id="updateSendZjStatus">
+		update cre_compensatory_detail set 
+		SURPLUS_AMOUNT=#{surplusAmount} where CONTRACT_NO =#{contractNo} and del_flag = '0' and COMPENSATORY_STATUS = '0' and PERIOD_NUM = #{periodNum}
+	</update>
+	
+	
+	
+	<select id="getAmount" resultType="String">
+		SELECT 
+			a.COMPENSATORY_AMOUNT
+		FROM cre_compensatory_detail a
+		<where>
+			a.CONTRACT_NO=#{contractNo}
+			and a.PERIOD_NUM=#{period}
+			and a.COMPENSATORY_STATUS='0'
+		</where>
+	</select>
+	
+	
+	<select id ="queryCompenMoneyByContractNo" resultType="CompensatoryDetail">
+		select ifnull(sum(COMPENSATORY_AMOUNT),0) as compensatoryAmount from cre_compensatory_detail where contract_No = #{contractNo} and COMPENSATORY_STATUS = '0'
+	</select>
+	
+	
+	<select id="getCompenyByContractAndPerNum" resultType="CompensatoryDetail">
+		SELECT 
+		<include refid="compensatoryDetailColumns"/>
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>	
+		<where>
+			a.CONTRACT_NO=#{contractNo}
+			and a.PERIOD_NUM=#{period}
+			and a.COMPENSATORY_STATUS='0' and a.DEL_FLAG = '0'
+		</where>
+	</select>
+	
+	<update id="updateCompensatoryStatusBySeqNum">
+		update cre_compensatory_detail set  COMPENSATORY_STATUS = '0' where SERIAL_NUM = #{seqNo} and DEL_FLAG = '0'
+	</update>
+	
+	<select id="queryCompenMoneyBySeqNo" resultType="CompensatoryDetail">
+		SELECT 
+		<include refid="compensatoryDetailColumns"/>
+		FROM cre_compensatory_detail a
+		<include refid="compensatoryDetailJoins"/>	
+		<where>
+			<if test='flag != null and flag == "0"'>
+			a.SERIAL_NUM = #{seqNum}
+			</if>
+			<if test='flag != null and flag == "1"'>
+			a.REPAYMENT_SEQ_NO = #{seqNum}
+			</if>
+			and a.COMPENSATORY_STATUS='0' and a.DEL_FLAG = '0' 
+		</where>
+	</select>
+	
+	<update id="updateCompensatoryInfoBySeqNum">
+		update cre_compensatory_detail set  REPAYMENT_SEQ_NO = #{seqNo} where SERIAL_NUM = #{seqNum} and DEL_FLAG = '0'
+	</update>
+</mapper>

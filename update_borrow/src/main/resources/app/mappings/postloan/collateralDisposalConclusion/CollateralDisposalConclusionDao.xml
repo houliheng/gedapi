@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.collateralDisposalConclusion.dao.CollateralDisposalConclusionDao">
+
+	<sql id="collateralDisposalConclusionColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.task_def_key AS "taskDefKey",
+		a.deal_all_amount AS "dealAllAmount",
+		a.conclusion_desc AS "conclusionDesc",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS
+		"updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="collateralDisposalConclusionJoins">
+	</sql>
+
+	<select id="get" resultType="CollateralDisposalConclusion">
+		SELECT
+		<include refid="collateralDisposalConclusionColumns" />
+		FROM pl_collateral_disposal_conclusion a
+		<include refid="collateralDisposalConclusionJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findCollateralDisposalConclusionListByContractNoAndPeriodNum" resultType="CollateralDisposalConclusion">
+		SELECT
+		<include refid="collateralDisposalConclusionColumns" />
+		FROM pl_collateral_disposal_conclusion a
+		<include refid="collateralDisposalConclusionJoins" />
+		WHERE a.contract_no = #{contractNo}
+		and a.period_num = #{periodNum}
+		<if test="taskDefKey != null and taskDefKey != ''">
+			a.task_def_key = #{taskDefKey}
+		</if>
+	</select>
+
+	<select id="findList" resultType="CollateralDisposalConclusion">
+		SELECT
+		<include refid="collateralDisposalConclusionColumns" />
+		FROM pl_collateral_disposal_conclusion a
+		<include refid="collateralDisposalConclusionJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM pl_collateral_disposal_conclusion a
+		<include refid="collateralDisposalConclusionJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CollateralDisposalConclusion">
+		SELECT
+		<include refid="collateralDisposalConclusionColumns" />
+		FROM pl_collateral_disposal_conclusion a
+		<include refid="collateralDisposalConclusionJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_collateral_disposal_conclusion(
+		id,
+		contract_no,
+		period_num,
+		task_def_key,
+		deal_all_amount,
+		conclusion_desc,
+		create_by,
+		create_date,
+		update_by,
+		update_date
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{periodNum},
+		#{taskDefKey},
+		#{dealAllAmount},
+		#{conclusionDesc},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_collateral_disposal_conclusion SET
+		contract_no = #{contractNo},
+		period_num = #{periodNum},
+		task_def_key = #{taskDefKey},
+		deal_all_amount = #{dealAllAmount},
+		conclusion_desc = #{conclusionDesc},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_collateral_disposal_conclusion
+		WHERE id = #{id}
+	</update>
+
+</mapper>

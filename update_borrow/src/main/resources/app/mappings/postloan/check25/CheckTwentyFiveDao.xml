@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.check25.dao.CheckTwentyFiveDao">
+    
+	<sql id="checkTwentyFiveColumns">
+		a.id AS "id",
+		a.allocate_id as "allocateId",
+		a.contract_no AS "contractNo",
+		a.checked_by AS "checkedBy",
+		a.check_25_type AS "checkTwentyFiveType",
+		a.check_phone AS "checkPhone",
+		a.check_address AS "checkAddress",
+		a.check_25_result AS "checkTwentyFiveResult",
+		a.check_25_advice AS "checkTwentyFiveAdvice"
+	</sql>
+	
+	<sql id="checkTwentyFiveJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckTwentyFive">
+		SELECT 
+			<include refid="checkTwentyFiveColumns"/>
+		FROM pl_check_25 a
+		<include refid="checkTwentyFiveJoins"/>
+		WHERE a.contract_no = #{contractNo}
+	</select>
+	
+	<select id="findList" resultType="CheckTwentyFive">
+		SELECT 
+			<include refid="checkTwentyFiveColumns"/>
+		FROM pl_check_25 a
+		<include refid="checkTwentyFiveJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="checkedBy != null and checkedBy != ''">
+				AND a.checked_by = #{checkedBy}
+			</if>
+			<if test="checkTwentyFiveType != null and checkTwentyFiveType != ''">
+				AND a.check_25_type = #{checkTwentyFiveType}
+			</if>
+			<if test="checkPhone != null and checkPhone != ''">
+				AND a.check_phone = #{checkPhone}
+			</if>
+			<if test="checkAddress != null and checkAddress != ''">
+				AND a.check_address = #{checkAddress}
+			</if>
+			<if test="checkTwentyFiveResult != null and checkTwentyFiveResult != ''">
+				AND a.check_25_result = #{checkTwentyFiveResult}
+			</if>
+			<if test="checkTwentyFiveAdvice != null and checkTwentyFiveAdvice != ''">
+				AND a.check_25_advice = #{checkTwentyFiveAdvice}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_check_25 a
+		<include refid="checkTwentyFiveJoins"/>
+		<where>
+			
+			<if test="contractNo != null and contractNo != ''">
+				AND a.contract_no = #{contractNo}
+			</if>
+			<if test="checkedBy != null and checkedBy != ''">
+				AND a.checked_by = #{checkedBy}
+			</if>
+			<if test="checkTwentyFiveType != null and checkTwentyFiveType != ''">
+				AND a.check_25_type = #{checkTwentyFiveType}
+			</if>
+			<if test="checkPhone != null and checkPhone != ''">
+				AND a.check_phone = #{checkPhone}
+			</if>
+			<if test="checkAddress != null and checkAddress != ''">
+				AND a.check_address = #{checkAddress}
+			</if>
+			<if test="checkTwentyFiveResult != null and checkTwentyFiveResult != ''">
+				AND a.check_25_result = #{checkTwentyFiveResult}
+			</if>
+			<if test="checkTwentyFiveAdvice != null and checkTwentyFiveAdvice != ''">
+				AND a.check_25_advice = #{checkTwentyFiveAdvice}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckTwentyFive">
+		SELECT 
+			<include refid="checkTwentyFiveColumns"/>
+		FROM pl_check_25 a
+		<include refid="checkTwentyFiveJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_check_25(
+			id,
+			allocate_id,
+			contract_no,
+			checked_by,
+			check_25_type,
+			check_phone,
+			check_address,
+			check_25_result,
+			check_25_advice
+		) VALUES (
+			#{id},
+			#{allocateId},
+			#{contractNo},
+			#{checkedBy},
+			#{checkTwentyFiveType},
+			#{checkPhone},
+			#{checkAddress},
+			#{checkTwentyFiveResult},
+			#{checkTwentyFiveAdvice}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_check_25 SET 	
+			contract_no = #{contractNo},
+			checked_by = #{checkedBy},
+			check_25_type = #{checkTwentyFiveType},
+			check_phone = #{checkPhone},
+			check_address = #{checkAddress},
+			check_25_result = #{checkTwentyFiveResult},
+			check_25_advice = #{checkTwentyFiveAdvice}
+		WHERE contract_No = #{contractNo}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_check_25
+		WHERE contract_no = #{contractNo}
+	</update>
+	
+	<select id="getCheckUserInfo" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+	SELECT
+	U.id AS "checkUserId",
+	U.LOGIN_NAME AS "loginName",
+	U. NAME AS
+	"checkUserName",
+	o1.NAME AS "operatorOffice",
+	O.NAME AS
+	"orgName"
+	FROM
+	SYS_USER U
+	LEFT JOIN SYS_OFFICE O ON U.COMPANY_ID = O.ID
+	LEFT JOIN SYS_OFFICE O1 ON U.office_id = O1.ID
+	where  U.COMPANY_ID = #{companyId}
+	and U.login_flag = '1' and U.del_flag = '0'
+	<if test="checkUserName != null and checkUserName != ''">
+		AND U.NAME like concat('%',#{checkUserName},'%')
+	</if>
+	</select>
+	
+	<select id="getTwentyFiveByAllocateId"  resultType="CheckTwentyFive">
+	  select 
+	  <include refid="checkTwentyFiveColumns"/>
+	  from pl_check_25 a where a.ALLOCATE_ID = #{allocateId} 
+	</select>
+	
+	
+</mapper>

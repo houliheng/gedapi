@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.debtColletion.dao.TurnTaskDao">
+
+	<sql id="turnTaskColumns">
+		a.DEBT_ID AS "debtId",
+		a.contract_no AS "contractNo",
+		a.TURN_DATE AS "turnDate",
+		o.name AS "turnPerson",
+		a.CURR_COLLECTION_FROM AS
+		"currCollectionFrom",
+		a.TURN_BEFORE AS
+		"turnBefore",
+		a.TURN_AFTER AS
+		"turnAfter",
+		a.TURN_STATUS AS
+		"turnStatus"
+	</sql>
+
+
+	<select id="get" resultType="TurnTask">
+		SELECT
+		<include refid="turnTaskColumns" />
+		FROM pl_turn_info a
+		left join sys_user o on o.id =
+		a.TURN_PERSON
+		WHERE
+		a.CONTRACT_NO = #{contractNo} and
+		a.TURN_STATUS = '0'
+	</select>
+
+	<select id="getTurnTaskDetailList" resultType="TurnTask">
+		SELECT
+		<include refid="turnTaskColumns" />
+		FROM pl_turn_info a
+		left join sys_user o on o.id =
+		a.TURN_PERSON
+		where
+		a.TURN_STATUS != '0'
+		and a.CONTRACT_NO =
+		#{contractNo}
+	</select>
+
+	<select id="findList" resultType="TurnTask">
+		SELECT
+		DISTINCT
+		a.DEBT_ID as "debtId",
+		a.contract_no AS
+		"contractNo",
+		a.TURN_DATE AS "turnDate",
+		a.TURN_PERSON AS "turnPerson",
+		a.TURN_BEFORE
+		AS "turnBefore",
+		a.TURN_AFTER AS "turnAfter",
+		a.TURN_STATUS AS
+		"turnStatus",
+		b.data_dt AS
+		"dataDt",
+		b.cust_name AS
+		"custName",
+		b.risk_lelve AS "riskLelve",
+		b.collection_times AS
+		"collectionTimes",
+		b.ta_overdue_times AS
+		"taOverdueTimes",
+		b.contract_amount AS
+		"contractAmount",
+		b.curr_overdue_amount AS
+		"currOverdueAmount",
+		b.operate_org_id AS
+		"operateOrgId",
+		o.name AS
+		"operateOrgName",
+		b.curr_collection_type AS
+		"currCollectionType",
+		b.curr_collection_from
+		AS "currCollectionFrom",
+		b.curr_collection_status AS
+		"currCollectionStatus",
+		b.curr_collector AS
+		"currCollector"
+		FROM
+		pl_turn_info a
+		LEFT JOIN pl_debt_collection b ON
+		a.CONTRACT_NO =
+		b.CONTRACT_NO
+		left join sys_office o on o.id =
+		b.operate_org_id
+		WHERE
+		a.TURN_STATUS != '0'
+		AND a.TURN_AFTER
+		=
+		#{turnAfter}
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			and b.cust_name like concat('%',#{custName},'%')
+		</if>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM
+		pl_turn_info
+		a
+		LEFT JOIN pl_debt_collection b ON
+		a.CONTRACT_NO =
+		b.CONTRACT_NO
+		WHERE
+		a.TURN_STATUS != '0'
+		AND a.TURN_AFTER
+		= #{turnAfter}
+		<if test="contractNo != null and contractNo != ''">
+			and a.contract_no like concat(#{contractNo},'%')
+		</if>
+		<if test="custName != null and custName != ''">
+			and b.cust_name like concat('%',#{custName},'%')
+		</if>
+	</select>
+
+
+	<insert id="insert">
+		INSERT INTO
+		pl_turn_info(
+		DEBT_ID,
+		contract_no,
+		TURN_DATE,
+		TURN_PERSON,
+		CURR_COLLECTION_FROM,
+		TURN_BEFORE,
+		TURN_AFTER,
+		TURN_STATUS
+		)
+		VALUES (
+		#{debtId},
+		#{contractNo},
+		#{turnDate},
+		#{turnPerson},
+		#{currCollectionFrom},
+		#{turnBefore},
+		#{turnAfter},
+		'0'
+		)
+	</insert>
+
+	<update id="updateTurnTask">
+		update pl_turn_info set
+		TURN_STATUS = #{turnStatus}
+		where CONTRACT_NO = #{contractNo} and TURN_STATUS = '0'
+	</update>
+
+
+
+</mapper>

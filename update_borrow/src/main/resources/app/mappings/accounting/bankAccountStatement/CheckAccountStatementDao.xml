@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.bankAccountStatement.dao.CheckAccountStatementDao">
+    <sql id="checkAccountStatementColumns">
+        id AS id,
+        trade_date AS tradeDate,
+        trade_amount AS tradeAmount,
+        enter_account_amount  AS enterAccountAmount,
+        un_account_amount  AS unAccountAmount,
+        user_name  AS userName,
+        account_number  AS accountNumber,
+        bank_code  AS bankCode,
+        branch_bank_name  AS branchBankName,
+        receive_account_name  AS receiveAccountName,
+        receive_account_number  AS receiveAccountNumber,
+        remark  AS remark,
+        status  AS status,
+        create_time  AS createTime,
+        create_id  AS createId
+    </sql>
+    <insert id="insertCheckAccountStatement"
+            parameterType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountStatement">
+
+		<![CDATA[
+
+
+			INSERT INTO acc_check_account_statements(
+				trade_date,trade_amount,enter_account_amount
+				,un_account_amount,user_name,
+				account_number,bank_code,branch_bank_name,receive_account_name,
+				receive_account_number,remark,status,create_time,create_id
+			)VALUES (
+				#{tradeDate},
+				#{tradeAmount},
+				#{enterAccountAmount},
+				#{unAccountAmount},
+				#{userName},
+				#{accountNumber},
+				#{bankCode},
+				#{branchBankName},
+				#{receiveAccountName},
+				#{receiveAccountNumber},
+				#{remark},
+				#{status},
+				now(),
+				#{createId}
+			)
+
+
+        ]]>
+	</insert>
+
+    <select id="findAccountStatementListByPage" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+        <![CDATA[
+			SELECT
+			  a.id AS id,
+			  a.trade_date AS tradeDate,
+			  a.trade_amount AS tradeAmount,
+			  a.enter_account_amount  AS enterAccountAmount,
+			  a.un_account_amount  AS unAccountAmount,
+			  a.user_name  AS userName,
+			  a.account_number  AS accountNumber,
+			  a.bank_code  AS bankCode,
+			  a.branch_bank_name  AS branchBankName,
+			  a.receive_account_name  AS receiveAccountName,
+			  a.receive_account_number  AS receiveAccountNumber,
+			  a.remark  AS remark,
+			  a.status  AS status,
+			  a.create_time  AS createTime,
+			  a.create_id  AS createId
+  			FROM acc_check_account_statements a
+		]]>
+        <where>
+            <if test="createTradeStartTime!=null and createTradeStartTime!=''">
+                <![CDATA[	a.trade_date >= #{createTradeStartTime} ]]>
+            </if>
+            <if test="createTradeEndTime!=null and createTradeEndTime!=''">
+                AND    <![CDATA[	a.trade_date <= #{createTradeEndTime} ]]>
+            </if>
+            <if test="userName!=null and userName!=''">
+                AND a.user_name LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="branchBankName!=null and branchBankName!=''">
+                AND a.branch_bank_name LIKE CONCAT('%',#{branchBankName},'%')
+            </if>
+            <if test="receiveAccountName!=null and receiveAccountName!=''">
+                AND a.receive_account_name LIKE CONCAT('%',#{receiveAccountName},'%')
+            </if>
+            <if test="receiveAccountNumber!=null and receiveAccountNumber!=''">
+                AND a.receive_account_number LIKE CONCAT(#{receiveAccountNumber},'%')
+            </if>
+            <!--<if test="status!=null and status!=''">
+                AND a.status =#{status}
+            </if>-->
+            <if test="status==0">
+                AND a.status =0
+            </if>
+            <if test="status==1">
+                AND a.status =1
+            </if>
+        </where>
+    </select>
+
+    <!-- 批量插入生成的兑换码 -->
+
+    <insert id="insertCheckAccountStatementBatch" parameterType="java.util.List">
+
+        INSERT INTO acc_check_account_statements(
+        trade_date,trade_amount,enter_account_amount
+        ,un_account_amount,user_name,
+        account_number,bank_code,branch_bank_name,receive_account_name,
+        receive_account_number,remark,status,create_time,create_id
+        )VALUES
+        <foreach collection="list" item="reddemCode" index="index" separator=",">
+            (
+            #{reddemCode.tradeDate},
+            #{reddemCode.tradeAmount},
+            #{reddemCode.enterAccountAmount},
+            #{reddemCode.unAccountAmount},
+            #{reddemCode.userName},
+            #{reddemCode.accountNumber},
+            #{reddemCode.bankCode},
+            #{reddemCode.branchBankName},
+            #{reddemCode.receiveAccountName},
+            #{reddemCode.receiveAccountNumber},
+            #{reddemCode.remark},
+            #{reddemCode.status},
+            now(),
+            #{reddemCode.createId}
+            )
+
+        </foreach>
+
+    </insert>
+
+    <delete id="deleteCheckAccountStatement" parameterType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountStatement">
+        DELETE  FROM  acc_check_account_statements
+        WHERE receive_account_number=#{receiveAccountNumber}
+    </delete>
+
+    <select id="listMatchBankStatement" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountStatement">
+        select
+          <include refid="checkAccountStatementColumns" />
+        from acc_check_account_statements
+        <where>
+            <![CDATA[date(trade_date) = date(#{tradeDate})]]>
+            and user_name = #{userName}
+            and bank_code = #{bankCode}
+            and account_number like CONCAT('%', #{accountNumber})
+        </where>
+    </select>
+
+    <select id="listWitchIds" resultType="com.resoft.accounting.bankAccountStatement.entity.CheckAccountStatement">
+        select
+          <include refid="checkAccountStatementColumns" />
+        from acc_check_account_statements
+        <where>
+            id in
+            <foreach collection="ids" item="id" index="index"
+                     open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <update id="updateList">
+        update acc_check_account_statements
+        <trim prefix="set" suffixOverrides=",">
+          <trim prefix="un_account_amount = case id" suffix="end,">
+              <foreach collection="list" item="item">
+                  when #{item.id} then #{item.unAccountAmount}
+              </foreach>
+          </trim>
+          <trim prefix="enter_account_amount = case id" suffix="end,">
+              <foreach collection="list" item="item">
+                  when #{item.id} then #{item.enterAccountAmount}
+              </foreach>
+          </trim>
+          <trim prefix="status = case id" suffix="end,">
+              <foreach collection="list" item="item">
+                  when #{item.id} then #{item.status}
+              </foreach>
+          </trim>
+        </trim>
+        <where>
+            id in
+            <foreach collection="list" item="item" separator="," open="(" close=")" >
+                #{item.id}
+            </foreach>
+        </where>
+    </update>
+
+</mapper>

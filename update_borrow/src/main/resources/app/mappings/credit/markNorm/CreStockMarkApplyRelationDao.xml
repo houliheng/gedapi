@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.markNorm.dao.CreStockMarkApplyRelationDao">
+    
+	<sql id="creStockMarkApplyRelationColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.mark_norm_id AS "markNormId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="creStockMarkApplyRelationJoins">
+	</sql>
+    
+	<select id="get" resultType="CreStockMarkApplyRelation">
+		SELECT 
+			<include refid="creStockMarkApplyRelationColumns"/>
+		FROM cre_stock_mark_apply_relation a
+		<include refid="creStockMarkApplyRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreStockMarkApplyRelation">
+		SELECT 
+			<include refid="creStockMarkApplyRelationColumns"/>
+		FROM cre_stock_mark_apply_relation a
+		<include refid="creStockMarkApplyRelationJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_stock_mark_apply_relation a
+		<include refid="creStockMarkApplyRelationJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreStockMarkApplyRelation">
+		SELECT 
+			<include refid="creStockMarkApplyRelationColumns"/>
+		FROM cre_stock_mark_apply_relation a
+		<include refid="creStockMarkApplyRelationJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_stock_mark_apply_relation(
+			id,
+			apply_no,
+			mark_norm_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{markNormId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_stock_mark_apply_relation SET 	
+			apply_no = #{applyNo},
+			mark_norm_id = #{markNormId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_stock_mark_apply_relation
+		WHERE id = #{id}
+	</update>
+	
+	<update id="deleteRelationByMarkNormId" >
+		DELETE FROM cre_stock_mark_apply_relation where MARK_NORM_ID = #{markNormId}
+	</update>
+	
+	
+	<select id="findRelationByApplyNo" resultType="CreStockMarkApplyRelation">
+		SELECT 
+			t1.id AS "id",
+			t1.apply_no AS "applyNo",
+			t1.mark_norm_id AS "markNormId",
+			t1.create_by AS "createBy.id",
+			t1.create_date AS "createDate",
+			t1.update_by AS "updateBy.id",
+			t1.update_date AS "updateDate"
+		FROM cre_stock_mark_apply_relation t1 , cre_stock_mark_norm t2
+		<where>
+			t2.id = t1.MARK_NORM_ID  
+			and t1.apply_no = #{applyNo}
+			and t2.mark_type = #{markType}
+		</where>		
+	</select>
+	
+	<update id="deleteRelationByApplyNo" >
+		DELETE FROM cre_stock_mark_apply_relation where id in 
+			(select a.id from (select t2.id 
+				from 
+				cre_stock_mark_norm t1 , 
+				cre_stock_mark_apply_relation t2
+				where 
+				t1.mark_type = #{markType}
+				and t2.apply_no = #{applyNo}
+				and t1.id = t2.MARK_NORM_ID 
+			)as a)
+	</update>
+	
+</mapper>

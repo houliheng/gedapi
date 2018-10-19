@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.custRemoveBind.dao.CustRemoveBindDao">
+
+	<sql id="custRemoveBindColumns">
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.cust_name AS
+		"custName",
+		a.MOBILE_NUM as "mobileNum",
+		a.id_type AS "idType",
+		a.id_num
+		AS "idNum",
+		a.user_id AS "user.id",
+		a.org_id AS "company.id",
+		a.is_bind
+		AS "isBind",
+		a.create_by AS "createBy.id",
+		a.create_date AS
+		"createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS
+		"updateDate",
+		u6.name AS "user.name",
+		company.name AS "company.name"
+	</sql>
+
+	<sql id="custRemoveBindJoins">
+		LEFT JOIN sys_user u6 ON u6.id = a.user_id
+		LEFT JOIN
+		sys_office company on a.org_id = company.id
+	</sql>
+
+	<select id="get" resultType="CustRemoveBind" parameterType="String">
+		SELECT
+		<include refid="custRemoveBindColumns" />
+		FROM cre_cust_remove_bind a
+		<include refid="custRemoveBindJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="getByIdCard" resultType="CustRemoveBind" parameterType="CustRemoveBind">
+		SELECT
+		a.id AS "id",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.MOBILE_NUM
+		as "mobileNum",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.user_id AS
+		"user.id",
+		a.org_id AS "company.id",
+		a.is_bind AS
+		"isBind",
+		a.create_by
+		AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS
+		"updateBy.id",
+		a.update_date AS "updateDate"
+		FROM cre_cust_remove_bind a
+		WHERE a.ID_NUM = #{idNum}
+	</select>
+
+	<select id="findList" resultType="CustRemoveBind">
+		SELECT
+		<include refid="custRemoveBindColumns" />
+		FROM cre_cust_remove_bind a
+		<include refid="custRemoveBindJoins" />
+		<where>
+			<include refid="creDataScope_user.dataScopeFilter" />
+<!-- 			<if test="userType != null and userType != '' and userType == 'manage'"> -->
+<!-- 				<if -->
+<!-- 					test="currentUser != null and currentUser.company!= null and currentUser.company.id != null and currentUser.company.id != ''"> -->
+<!-- 					AND (company.id = #{currentUser.company.id} or -->
+<!-- 					company.parent_ids like CONCAT('%',#{currentUser.company.id},',%')) -->
+<!-- 				</if> -->
+<!-- 			</if> -->
+<!-- 			<if test="userType != null and userType != '' and userType == 'common'"> -->
+<!-- 				<if -->
+<!-- 					test="currentUser != null and currentUser.id!= null and currentUser.id != ''"> -->
+<!-- 					AND u6.id = #{currentUser.id} -->
+<!-- 				</if> -->
+<!-- 			</if> -->
+			<if test="custName != null and custName != ''">
+				AND a.cust_name LIKE '%${custName}%'
+			</if>
+			<if test="idType != null and idType != ''">
+				AND a.id_type = #{idType}
+			</if>
+			<if test="idNum != null and idNum != ''">
+				AND a.id_num like '%${idNum}%'
+			</if>
+			<if test="isBind != null and isBind != ''">
+				AND a.is_bind = #{isBind}
+			</if>
+			<if test="user != null and user.name != null and user.name != ''">
+				AND u6.name like '%${user.name}%'
+			</if>
+			<if test="company != null and company.id != null and company.id != ''">
+				AND company.id = #{company.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.is_bind ASC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="CustRemoveBind">
+		SELECT
+		<include refid="custRemoveBindColumns" />
+		FROM cre_cust_remove_bind a
+		<include refid="custRemoveBindJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 管理员绑定的时候查询所有用户信息 -->
+	<!-- <select id="findUserList" resultType="User">
+		SELECT
+		a.id,
+		a.login_name,
+		a.name,
+		o.name AS "office.name",
+		of.name AS "company.name"
+		FROM sys_user a
+		LEFT JOIN sys_office o ON
+		o.id=a.office_id
+		LEFT JOIN sys_office of ON of.id=a.company_id
+		<where>
+			<if test="userType != null and userType != '' and userType == 'manage'">
+				<if
+					test="currentUser != null and currentUser.company!= null and currentUser.company.id != null and currentUser.company.id != ''">
+					AND (of.id = #{currentUser.company.id} or of.parent_ids like
+					CONCAT('%',#{currentUser.company.id},',%'))
+				</if>
+			</if>
+			<if test="userType != null and userType != '' and userType == 'common'">
+				<if
+					test="currentUser != null and currentUser.id!= null and currentUser.id != ''">
+					AND a.id = #{currentUser.id}
+				</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name like '%${name}%'
+			</if>
+			<if test="company != null and company.id != null and company.id != ''">
+				AND (of.id = #{company.id} or of.parent_ids like
+				CONCAT('%',#{company.id},',%'))
+			</if>
+			<choose>
+				<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+					ORDER BY ${page.orderBy}
+				</when>
+				<otherwise>
+					ORDER BY a.id ASC
+				</otherwise>
+			</choose>
+		</where>
+	</select> -->
+
+	<!-- 绑定或者解绑定客户经理信息 -->
+	<update id="bind">
+		UPDATE cre_cust_remove_bind SET
+		user_id = #{user.id},
+		is_bind =
+		#{isBind},
+		<if test="user != null and user.id != null and user.id != ''">
+			org_id = (select company_id from sys_user where id =
+			#{user.id}),
+		</if>
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id in
+		<foreach item="id" collection="ids" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</update>
+
+
+
+	<!-- 新增 -->
+	<insert id="insert">
+		INSERT INTO cre_cust_remove_bind(
+		ID,
+		CUST_ID,
+		CUST_NAME,
+		ID_TYPE,
+		ID_NUM,
+		MOBILE_NUM,
+		USER_ID,
+		ORG_ID,
+		IS_BIND,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE
+		) VALUES (
+		#{id},
+		#{custId},
+		#{custName},
+		#{idType},
+		#{idNum},
+		#{mobileNum},
+		#{user.id},
+		#{company.id},
+		#{isBind},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_cust_remove_bind SET
+		user_id = #{user.id},
+		is_bind =
+		#{isBind},
+		<if test="user != null and user.id != null and user.id != ''">
+			org_id = (select company_id from sys_user where id =
+			#{user.id}),
+		</if>
+		update_by = #{updateBy.id},
+		update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+</mapper>

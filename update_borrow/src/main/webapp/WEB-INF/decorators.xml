@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/WEB-INF/views">
+	
+	<!-- 默认装饰页面, 在需要装饰的页面增加<meta name="decorator" content="default"/> -->
+	<decorator name="blank" page="layouts/blank.jsp" />
+	<decorator name="default" page="layouts/default.jsp" />
+	<!-- 
+	/**
+	 * @reqno: H1509130079
+	 * @date-designer:2015年9月16日-wujing01
+	 * @date-author:2015年9月16日-wujing01:查询还款计划,按创建时间排序
+	*/
+	 -->	
+	<decorator name="default1" page="layouts/default1.jsp" />
+	
+</decorators>

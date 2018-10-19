@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.discountList.dao.DiscountDao">
+
+	<select id="findList" resultType="Discount">
+		SELECT
+		a.cust_name AS custName,
+		a.contract_no AS contractNo,
+		a.CONTRACT_AMOUNT as contractAmount,
+		a.APPRO_PRODUCT_NAME as approProductName,
+		a.APPRO_PERIOD_VALUE as approPeriodValue,
+		x.NAME AS "orgLevel4.name",
+		y.NAME AS "orgLevel3.name",
+		z.NAME AS "orgLevel2.name",
+		b.REPAY_CONTRACT_STATUS as contractStatus,
+	    f.DISCOUNT_SAVE as discountSave,
+	    f.APPLY_NO as "applyNo"
+		FROM
+		acc_contract a 
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office x ON a.ORG_LEVEL4 = x.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office y ON x.parent_id = y.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office z ON y.parent_id = z.id
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o ON a.OPERATE_ORG_ID = o.id
+		left join ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_contract f ON a.contract_no = f.contract_no
+		LEFT JOIN acc_sta_contract_status b ON a.contract_no = b.contract_no	
+		<where>
+			and (a.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="custName != null and custName !=  ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo !=  ''">
+				and a.contract_no LIKE concat('%',#{contractNo},'%')
+			</if>
+			<if test="approProductName != null and approProductName !=  ''">
+				and a.APPRO_PRODUCT_NAME like concat('%',#{approProductName},'%')
+			</if>
+		</where>
+		order by a.LOAN_DATE desc
+	</select>
+
+	<select id="getCount" resultType="long">
+		
+	</select>
+
+	
+	<select id= "finPalnRepayDetailsByContractNo" resultType="Discount">
+	SELECT
+	IFNULL(SUM(IFNULL(a.DISCOUNT_FEE, 0)),0) AS discountFee,
+	IFNULL(SUM(
+		IFNULL(c.FACT_DISCOUNT_FEE, 0)
+	),0) AS factDiscountFee,
+	IFNULL(
+		(
+			SUM(a.DISCOUNT_FEE) - SUM(c.FACT_DISCOUNT_FEE)
+		),
+		0
+	) AS noDiscountFee
+FROM
+	acc_discount a
+LEFT JOIN acc_contract b ON a.contract_no = b.contract_no
+LEFT JOIN acc_discount_stream c on a.CONTRACT_NO = c.CONTRACT_NO and a.PERIOD_NUM =c.PERIOD_NUM 
+WHERE
+	a.contract_no = #{contractNo} and (c.DISCOUNT_STATUS = '0' or c.DISCOUNT_STATUS is NULL)
+	</select>
+	
+	<select id="isImport" resultType="java.lang.Integer">
+		select count(*) FROM acc_discount a where a.contract_no = #{contractNo} 
+	</select>
+</mapper>

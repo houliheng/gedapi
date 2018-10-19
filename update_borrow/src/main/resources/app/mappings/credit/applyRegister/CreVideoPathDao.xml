@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.applyRegister.dao.CreVideoPathDao">
+	<select id="findCreVideoPathQueryList" resultType="CreVideoPath">
+	SELECT
+	REGISTER_DATE AS "registerDate",
+	APPLY_NO AS "applyNo",
+	FILE_DIR AS "fileDir",
+	FILE_NAME AS "fileName",
+	FILE_STORAGE_PATH AS "fileStoragePath",
+	THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+	TASK_DEF_KEY AS "taskDefKey",
+	LOCK_FLAG AS "lockFlag",
+	CREATE_BY AS "createBy1",
+	CREATE_DATE AS "createDate1"
+	FROM CRE_VIDEO_PATH
+	WHERE APPLY_NO = #{param1} AND AUTHORITY&lt;=#{param2}
+	</select>
+
+	<select id="findPostCreVideoPathList" resultType="CreVideoPath">
+	SELECT
+	REGISTER_DATE AS "registerDate",
+	APPLY_NO AS "applyNo",
+	FILE_DIR AS "fileDir",
+	FILE_NAME AS "fileName",
+	FILE_STORAGE_PATH AS "fileStoragePath",
+	THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+	TASK_DEF_KEY AS "taskDefKey",
+	LOCK_FLAG AS "lockFlag",
+	CREATE_BY AS "createBy1",
+	CREATE_DATE AS "createDate1"
+	FROM CRE_VIDEO_PATH
+	WHERE APPLY_NO = #{param1} 
+	</select>
+	<select id="downloadPic" resultType="CreVideoPath">
+		SELECT
+			REGISTER_DATE AS "registerDate",
+			APPLY_NO AS "applyNo",
+			FILE_DIR AS "fileDir",
+			FILE_NAME AS "fileName",
+			FILE_STORAGE_PATH AS "fileStoragePath",
+			THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+			TASK_DEF_KEY AS "taskDefKey",
+			LOCK_FLAG AS "lockFlag",
+			CREATE_BY AS "createBy1",
+			CREATE_DATE AS "createDate1"
+		FROM CRE_VIDEO_PATH
+		<where>
+		 	APPLY_NO = #{param1}
+		 	<if test="param3 != null and param3 != ''">
+			AND FILE_DIR LIKE CONCAT('%', #{param3} , '%')
+		 	</if>
+		</where>
+	</select>
+
+	<delete id="deleteByVideoPath">
+	delete from cre_video_path where FILE_STORAGE_PATH=#{applyNo}
+	</delete>
+<insert id="saveCreVideoPath">
+	INSERT INTO CRE_VIDEO_PATH(
+	REGISTER_DATE ,
+	APPLY_NO ,
+	FILE_DIR ,
+	FILE_NAME ,
+	FILE_STORAGE_PATH ,
+	THUMBNAIL_STORAGE_PATH,
+	TASK_DEF_KEY,
+	AUTHORITY,
+	CREATE_BY ,
+	CREATE_DATE
+	) VALUES (
+	cast(
+	#{param1.registerDate} AS DATE),
+	#{param1.applyNo},
+	#{param1.fileDir},
+	#{param1.fileName},
+	#{param1.fileStoragePath},
+	#{param1.thumbnailStoragePath},
+	#{param1.taskDefKey},
+	#{param2},
+	#{param1.createBy1},
+	cast(#{param1.createDate1} AS DATETIME)
+     )
+	</insert>
+	<select id="findCreVideoPathDbgsList" resultType="CreVideoPath">
+	SELECT
+	REGISTER_DATE AS "registerDate",
+	APPLY_NO AS "applyNo",
+	FILE_DIR AS "fileDir",
+	FILE_NAME AS "fileName",
+	FILE_STORAGE_PATH AS "fileStoragePath",
+	THUMBNAIL_STORAGE_PATH AS "thumbnailStoragePath",
+	TASK_DEF_KEY AS "taskDefKey",
+	LOCK_FLAG AS "lockFlag",
+	CREATE_BY AS "createBy1",
+	CREATE_DATE AS "createDate1"
+	FROM CRE_VIDEO_PATH
+	WHERE APPLY_NO = #{param1} AND AUTHORITY=#{param2}
+	</select>
+	
+	<select id="countNum" resultType="java.lang.Integer">
+		select count(*)  from CRE_VIDEO_PATH WHERE APPLY_NO = #{param1} AND AUTHORITY=#{param2}
+	</select>
+</mapper>

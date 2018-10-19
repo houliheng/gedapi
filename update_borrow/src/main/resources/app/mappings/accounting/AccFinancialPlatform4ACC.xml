@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.resoft.accounting.AccfinancialPlatform.dao.AccAcc4FinancialPlatformDao">
+	<!-- *保证金退还 -->
+	<sql id="refundDeposit">
+		'11099003' AS "tradeType",
+		b.ID AS "contractId",
+		a.contract_no AS "contractNo",
+		b.capital_terrace_no AS "accNo",
+		a.APPRO_MARGIN_AMOUNT AS "refundAmt"
+	</sql>
+	<select id="getRefundDeposit"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccRefundDepositRequest">
+		SELECT
+		<include refid="refundDeposit" />
+		FROM acc_apply_margin_repay a
+		inner join acc_contract b
+		on a.contract_no = b.contract_no
+		WHERE b.apply_no=#{applyNo}
+	</select>
+
+	<!-- *银行卡变更 -->
+	<sql id="bankCardChange">
+		'11029001' AS "tradeType",
+		a.NEW_REP_BANK AS "bankId",
+		a.NEW_REP_BANK_DISTINCT AS "cityId",
+		a.NEW_REP_BANKCARD_NO AS "bankCard",
+		b.capital_terrace_no AS "accNo",
+		a.PICTURE_ADDRESS AS "filePath"
+	</sql>
+	<select id="getBankCardChange"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccBankCardChangeRequest">
+		SELECT
+		<include refid="bankCardChange" />
+		FROM acc_apply_change_bankcard a
+		inner join acc_contract b
+		on a.contract_no = b.contract_no
+		WHERE b.apply_no=#{applyNo}
+		and a.FLOW_STATE = '1'
+	</select>
+
+	<update id="updateAccLoanDate">
+		UPDATE acc_contract a
+		SET LOAN_DATE=#{withDrawDate}
+		WHERE a.CONTRACT_NO = #{contractNo}
+	</update>
+
+
+
+	<!-- *还款划扣 -->
+	<sql id="deductApply">
+		A.DEDUCT_CUST_ID AS "deductCustId",
+		A.DEDUCT_TIME AS "deductTime",
+		A.MID_CAPITAL_TERRACE_NO AS "repayList.midCustId",
+		A.DEDUCT_TYPE AS "repayList.withHoldType",
+		A.DEDUCT_APPLY_NO AS "repayList.serialNumber",
+		NULL AS "repayList.contractId",
+		A.contract_no AS "repayList.contractNo",
+		A.capital_terrace_no AS "repayList.accNo",
+		A.DEDUCT_AMOUNT AS "repayList.amt",
+		NULL AS "repayList.payAmt"
+	</sql>
+	<select id="getRepayListByContractNo"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccDeductApplyRequest">
+		SELECT
+		<include refid="deductApply" />
+		FROM ACC_repay_plan A where a.contractNo = #{contractNo}
+	</select>
+	<select id="getDeductApplyRequest"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccDeductApplyRequest">
+		SELECT
+		<include refid="deductApply" />
+		FROM ACC_DEDUCT_APPLY_TMP A
+		INNER JOIN ACC_LOCK_INFO B ON A.CONTRACT_NO = B.CONTRACT_NO
+	</select>
+	<select id="getDeductApplyRequestByContractNo"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccDeductApplyRequest">
+		SELECT
+		<include refid="deductApply" />
+		FROM ACC_DEDUCT_APPLY_TMP A
+		INNER JOIN ACC_LOCK_INFO B ON A.CONTRACT_NO = B.CONTRACT_NO where
+		a.CONTRACT_NO= #{contractNo}
+	</select>
+	<delete id="deleteDeductApplyRequest">
+		DELETE
+		FROM ACC_DEDUCT_APPLY_TMP
+		WHERE CONTRACT_NO=#{contractNo}
+	</delete>
+
+	<insert id="insertDeductApplyRequest">
+		insert into acc_deduct_apply(
+			DATA_DT,
+			DEDUCT_APPLY_NO ,
+			CONTRACT_NO ,
+			CAPITAL_TERRACE_NO ,
+			DEDUCT_AMOUNT ,
+			DEDUCT_TIME ,
+			DEDUCT_CUST_ID ,
+			IS_LOCK,
+			DEDUCT_TYPE,
+			MOBILE_NUM,
+			BANK_CARD_NO,
+			BANK,
+			CUST_NAME,
+			MID_CAPITAL_TERRACE_NO
+		)SELECT
+			CURRENT_DATE,
+			DEDUCT_APPLY_NO,
+			CONTRACT_NO,
+			CAPITAL_TERRACE_NO,
+			DEDUCT_AMOUNT,
+			DEDUCT_TIME,
+			DEDUCT_CUST_ID,
+			1,
+			DEDUCT_TYPE,
+			MOBILE_NUM,
+			BANK_CARD_NO,
+			BANK,
+			CUST_NAME,
+			MID_CAPITAL_TERRACE_NO
+		FROM ACC_DEDUCT_APPLY_TMP
+		WHERE CONTRACT_NO = #{repayList.contractNo}
+	</insert>
+
+	<insert id="insertDeductApplyListRequest" parameterType="java.util.List">
+		insert into acc_deduct_apply(
+		DATA_DT,
+		DEDUCT_APPLY_NO ,
+		CONTRACT_NO ,
+		CAPITAL_TERRACE_NO ,
+		DEDUCT_AMOUNT ,
+		DEDUCT_TIME ,
+		DEDUCT_CUST_ID ,
+		IS_LOCK)
+		VALUES
+		<foreach item="list" collection="list" index="index"
+			separator=",">
+			(
+			current_date,
+			'${list.repayList.serial_number}',
+			'${list.repayList.contract_no}',
+			'${list.repayList.acc_no}',
+			<if test="list.repayList.amt!=null">
+				${list.repayList.amt},
+			</if>
+			<if test="list.repayList.amt==null">
+				0,
+			</if>
+			<if test="list.deductTime!=null">
+				'${list.deductTime}',
+			</if>
+			<if test="list.deductTime==null">
+				current_time,
+			</if>
+			'${list.deductCustId}',
+			'1');
+		</foreach>
+	</insert>
+	<!-- *入账 -->
+	<sql id="enterAccount">
+		B.ID AS "contractId"
+		,DEDUCT_APPLY_NO AS "serialNumber"
+		,A.CONTRACT_NO AS
+		"contractNo"
+		,A.STREAM_NO AS "accountingNo"
+		,B.CAPITAL_TERRACE_NO AS
+		"accNo"
+		,B.MORTGAGEE_CAP_TER_NO AS "mortgageeAccNo"
+		,B.LOAN_PLATFORM AS
+		"loanPlatform"
+		,A.PERIOD_NUM AS "period"
+	</sql>
+	<select id="getEnterAccounList"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccEnterAccountList">
+		SELECT
+		<include refid="enterAccount" />
+		FROM ACC_REPAY_DETAIL A
+		INNER JOIN ACC_CONTRACT B ON A.CONTRACT_NO = B.CONTRACT_NO
+		LIMIT 5;
+	</select>
+
+
+	<select id="getSettleList"
+		resultType="com.resoft.Accoutinterface.rest.financialPlatform.entry.AccSettleList">
+		SELECT
+		'10990003' AS "accountType",
+		A.REPAY_SERVICE_FEE AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990004' AS "accountType",
+		A.REPAY_MANAGEMENT_FEE AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990002' AS "accountType",
+		A.REPAY_INTEREST_AMOUNT AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990001' AS "accountType",
+		A.REPAY_CAPITAL_AMOUNT AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990008' AS "accountType",
+		A.REPAY_PENALTY_AMOUNT AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990007' AS "accountType",
+		A.REPAY_FINE_AMOUNT AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+		union all
+		SELECT
+		'10990009' AS "accountType",
+		A.REPAY_BREAK_AMOUNT AS "settleAmt"
+		FROM ACC_REPAY_DETAIL A
+		WHERE A.DEDUCT_APPLY_NO=#{0} AND A.PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+	</select>
+	<update id="updateAccountEnter">
+		UPDATE ACC_REPAY_DETAIL
+		SET ACCOUNT_FLG=0
+		WHERE
+		DEDUCT_APPLY_NO=#{0} AND PERIOD_NUM=#{1} AND ACCOUNT_FLG="1"
+	</update>
+
+	<update id="bankCardUpdateSuc">
+		UPDATE acc_apply_change_bankcard
+		SET FLOW_STATE='2',
+		REPLY_TIME=current_timestamp
+		WHERE
+		SEQ_NO=#{seq_no} AND FLOW_STATE='1'
+	</update>
+	<update id="bankCardUpdateFai">
+		UPDATE acc_apply_change_bankcard
+		SET FLOW_STATE='3',
+		REPLY_TIME=current_timestamp
+		WHERE
+		SEQ_NO=#{seq_no} AND FLOW_STATE='1'
+	</update>
+	<insert id="bankCardInterfaceIn">
+		INSERT INTO ift_acc_return_change_bankcard
+		(MCHN,
+		SEQ_NO,
+		TRADE_TYPE,
+		SIGNATURE,
+		BANK_ID,
+		CITY_ID,
+		BANK_CARD,
+		ACC_NO,
+		RESP_CODE,
+		RESP_MSG)
+		VALUES (#{mchn},
+		#{seqNo},
+		#{tradeType},
+		#{signature},
+		#{bankId},
+		#{cityId},
+		#{bankCard},
+		#{accNo},
+		#{respCode},
+		#{respMsg});
+	</insert>
+	<insert id="repaymentResultInDeduct">
+		INSERT INTO ACC_DEDUCT_RESULT
+		(
+		DATA_DT,
+		CAPITAL_TERRACE_NO,
+		CONTRACT_NO,
+		SYS_SEQ_NO,
+		DEDUCT_APPLY_NO,
+		STREAM_NO,
+		STREAM_TIME,
+		DEDUCT_AMOUNT,
+		DEDUCT_RESULT,
+		DEDUCT_USER_ID,
+		IS_LOCK,
+		DESCRIPTION
+		)SELECT
+		CURRENT_DATE
+		,A.ACC_NO
+		,A.CONTRACT_NO
+		,A.SEQ_NO
+		,A.DEDUCT_APPLY_NO
+		,A.ACCOUNTING_NO
+		,A.COMPLETE_TIME
+		,A.REAL_REPAY_AMT
+		,A.RESP_CODE
+		,B.DEDUCT_CUST_ID
+		,'1'
+		,RESP_MSG
+		FROM IFT_ACC_RETURN_DEDUCT_RESULT A
+		INNER JOIN acc_deduct_apply B ON A.DEDUCT_APPLY_NO = B.DEDUCT_APPLY_NO
+		WHERE SEQ_NO = #{seqNo}
+	</insert>
+	<insert id="repaymentWithhodingResultIn" parameterType="java.util.List">
+		INSERT INTO ift_acc_return_deduct_result
+		(MCHN,
+		SEQ_NO,
+		TRADE_TYPE,
+		SIGNATURE,
+		DEDUCT_APPLY_NO,
+		CONTRACT_ID,
+		CONTRACT_NO,
+		ACC_NO,
+		REPAY_AMT,
+		REAL_REPAY_AMT,
+		REMARK,
+		COMPLETE_TIME,
+		ACCOUNTING_NO,
+		RESP_CODE,
+		RESP_MSG)
+		VALUES
+		<foreach item="list" collection="list" index="index"
+			separator=",">
+			(
+			'${list.mchn}',
+			'${list.seqNo}',
+			'${list.tradeType}',
+			'${list.signature}',
+			'${list.rwl.serial_number}',
+			'${list.rwl.contract_id}',
+			'${list.rwl.contract_no}',
+			'${list.rwl.acc_no}',
+			<if test="list.rwl.amt!=null">
+				${list.rwl.amt},
+			</if>
+			<if test="list.rwl.amt==null">
+				0,
+			</if>
+			<if test="list.rwl.real_repay_amt!=null">
+				${list.rwl.real_repay_amt},
+			</if>
+			<if test="list.rwl.real_repay_amt==null">
+				0,
+			</if>
+			'${list.rwl.remark}',
+			<if test="list.rwl.complete_time!=null">
+				'${list.rwl.complete_time}',
+			</if>
+			<if test="list.rwl.complete_time==null">
+				current_time,
+			</if>
+			'${list.rwl.accounting_no}',
+			'${list.respCode}',
+			'${list.respMsg}');
+		</foreach>
+	</insert>
+</mapper>

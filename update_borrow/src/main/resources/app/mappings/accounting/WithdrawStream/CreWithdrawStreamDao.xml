@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.WithdrawStream.dao.CreWithdrawStreamDao">
+    
+	<sql id="creWithdrawStreamColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.apply_no AS "applyNo",
+		a.withdraw_amount AS "withdrawAmount",
+		a.account_balance AS "accountBalance",
+		a.flag AS "flag",
+		a.del_flag AS "delFlag",
+		a.seqno AS "seqno",
+		a.mchn AS "mchn"
+	</sql>
+	
+	<sql id="creWithdrawStreamJoins">
+	</sql>
+    
+	<select id="get" resultType="CreWithdrawStream">
+		SELECT 
+			<include refid="creWithdrawStreamColumns"/>
+		FROM cre_withdraw_stream a
+		<include refid="creWithdrawStreamJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CreWithdrawStream">
+		SELECT 
+			<include refid="creWithdrawStreamColumns"/>
+		FROM cre_withdraw_stream a
+		<include refid="creWithdrawStreamJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_withdraw_stream a
+		<include refid="creWithdrawStreamJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CreWithdrawStream">
+		SELECT 
+			<include refid="creWithdrawStreamColumns"/>
+		FROM cre_withdraw_stream a
+		<include refid="creWithdrawStreamJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_withdraw_stream(
+			id,
+			contract_no,
+			apply_no,
+			withdraw_amount,
+			account_balance,
+			flag,
+			del_flag,
+			seqno,
+			mchn
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{applyNo},
+			#{withdrawAmount},
+			#{accountBalance},
+			#{flag},
+			#{delFlag},
+			#{seqno},
+			#{mchn}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_withdraw_stream SET 	
+			contract_no = #{contractNo},
+			apply_no = #{applyNo},
+			withdraw_amount = #{withdrawAmount},
+			account_balance = #{accountBalance},
+			flag = #{flag},
+			seqno = #{seqno},
+			mchn = #{mchn}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cre_withdraw_stream SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

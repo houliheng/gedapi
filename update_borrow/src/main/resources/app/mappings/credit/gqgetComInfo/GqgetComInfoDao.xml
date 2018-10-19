@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.gqgetComInfo.dao.GqgetComInfoDao">
+    
+	<sql id="gqgetComInfoColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.overall_ranking AS "overallRanking",
+		a.introduction_of_mainborrower AS "intrOfMainborrower",
+		a.introduction_of_company AS "intrOfCompany",
+		a.mix_loan_usage AS "mixLoanUsage",
+		a.other AS "other",
+		a.source_of_pepayment1 AS "sourceOfDepayment1",
+		a.source_of_pepayment2 AS "sourceOfDepayment2",
+		a.source_of_pepayment3 AS "sourceOfDepayment3",
+		a.source_of_pepayment4 AS "sourceOfDepayment4",
+		a.audit_opintion AS "auditOpintion",
+		a.introduction_of_com_production AS "intrOfComProduction",
+		a.operate_actuality AS "operateActuality",
+		a.property_house AS "propertyHouse",
+		a.property_car AS "propertyCar",
+		a.property_other AS "propertyOther",
+		a.product_type AS "productType",
+		a.borrow_mate_punish    as "borrowAndMatePunish",
+		a.borrow_invole_info    as "borrowInvolveInfo",
+		a.borrow_crima_admin_punish as "borrowCrimaAdminPunish",
+		a.borrow_loan_blance as borrowNewLoanBlance,
+		a.PLATFORM_OVERDUE_TIME as "platformOverdueTime",
+		a.PLATFORM_OVERDUE_MONEY as "platformOverdueMoney"
+	</sql>
+	
+	<sql id="gqgetComInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="GqgetComInfo">
+		SELECT 
+			<include refid="gqgetComInfoColumns"/>
+		FROM cre_gqget_com_info a
+		<include refid="gqgetComInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GqgetComInfo">
+		SELECT 
+			<include refid="gqgetComInfoColumns"/>
+		FROM cre_gqget_com_info a
+		<include refid="gqgetComInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_gqget_com_info a
+		<include refid="gqgetComInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="GqgetComInfo">
+		SELECT 
+			<include refid="gqgetComInfoColumns"/>
+		FROM cre_gqget_com_info a
+		<include refid="gqgetComInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+	INSERT INTO cre_gqget_com_info(
+		id,
+		apply_no,
+		overall_ranking,
+		introduction_of_mainborrower,
+		introduction_of_company,
+		mix_loan_usage,
+		other,
+		source_of_pepayment1,
+		source_of_pepayment2,
+		source_of_pepayment3,
+		source_of_pepayment4,
+		audit_opintion,
+		introduction_of_com_production,
+		operate_actuality,
+		property_house,
+		property_car,
+		property_other,
+		product_type,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		borrow_mate_punish,
+		borrow_invole_info,
+		borrow_crima_admin_punish,
+		borrow_loan_blance,
+		PLATFORM_OVERDUE_TIME,
+		PLATFORM_OVERDUE_MONEY
+	) VALUES (
+	#{id},
+	#{applyNo},
+	#{overallRanking},
+	#{intrOfMainborrower},
+	#{intrOfCompany},
+	#{mixLoanUsage},
+	#{other},
+	#{sourceOfDepayment1},
+	#{sourceOfDepayment2},
+	#{sourceOfDepayment3},
+	#{sourceOfDepayment4},
+	#{auditOpintion},
+	#{intrOfComProduction},
+	#{operateActuality},
+	#{propertyHouse},
+	#{propertyCar},
+	#{propertyOther},
+	#{productType},
+	#{createBy.id},
+	#{createDate},
+	#{updateBy.id},
+	#{updateDate},
+	#{borrowAndMatePunish},
+	#{borrowInvolveInfo},
+	#{borrowCrimaAdminPunish},
+	#{borrowNewLoanBlance},
+	#{platformOverdueTime},
+	#{platformOverdueMoney}
+	)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_gqget_com_info SET 	
+			apply_no = #{applyNo},
+			overall_ranking = #{overallRanking},
+			introduction_of_mainborrower = #{intrOfMainborrower},
+			introduction_of_company = #{intrOfCompany},
+			mix_loan_usage = #{mixLoanUsage},
+			other = #{other},
+			operate_actuality = #{operateActuality},
+			property_house = #{propertyHouse},
+			property_car = #{propertyCar},
+			property_other = #{propertyOther},
+			product_type = #{productType},
+			source_of_pepayment1 = #{sourceOfDepayment1},
+			source_of_pepayment2 = #{sourceOfDepayment2},
+			source_of_pepayment3 = #{sourceOfDepayment3},
+			source_of_pepayment4 = #{sourceOfDepayment4},
+			audit_opintion = #{auditOpintion},
+			introduction_of_com_production = #{intrOfComProduction},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			borrow_mate_punish=#{borrowAndMatePunish},
+			borrow_invole_info=#{borrowInvolveInfo},
+			borrow_crima_admin_punish=#{borrowCrimaAdminPunish},
+			borrow_loan_blance=#{borrowNewLoanBlance},
+			PLATFORM_OVERDUE_TIME=#{platformOverdueTime},
+			PLATFORM_OVERDUE_MONEY=#{platformOverdueMoney}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_gqget_com_info
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateByApplyNo">
+		UPDATE cre_gqget_com_info SET 	
+			apply_no = #{applyNo},
+			overall_ranking = #{overallRanking},
+			introduction_of_mainborrower = #{intrOfMainborrower},
+			introduction_of_company = #{intrOfCompany},
+			mix_loan_usage = #{mixLoanUsage},
+			other = #{other},
+			operate_actuality = #{operateActuality},
+			property_house = #{propertyHouse},
+			property_car = #{propertyCar},
+			property_other = #{propertyOther},
+			product_type = #{productType},
+			source_of_pepayment1 = #{sourceOfDepayment1},
+			source_of_pepayment2 = #{sourceOfDepayment2},
+			source_of_pepayment3 = #{sourceOfDepayment3},
+			source_of_pepayment4 = #{sourceOfDepayment4},
+			audit_opintion = #{auditOpintion},
+			introduction_of_com_production = #{intrOfComProduction},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			borrow_mate_punish=#{borrowAndMatePunish},
+			borrow_invole_info=#{borrowInvolveInfo},
+			borrow_crima_admin_punish=#{borrowCrimaAdminPunish},
+			borrow_loan_blance=#{borrowNewLoanBlance},
+			PLATFORM_OVERDUE_TIME=#{platformOverdueTime},
+			PLATFORM_OVERDUE_MONEY=#{platformOverdueMoney}
+		WHERE apply_no = #{applyNo}
+	</update>
+	
+	<select id="getGqgetComInfoByApplyNo" resultType="GqgetComInfo">
+		SELECT 
+			<include refid="gqgetComInfoColumns"/>
+		FROM cre_gqget_com_info a
+		<where>
+			<if test="applyNo != null and applyNo != ''">
+				AND a.apply_no = #{applyNo}
+		    </if>
+		</where>
+	</select>
+
+	<insert id="saveRepaySource">
+		insert into cre_gqget_com_info (
+			id,
+			apply_no,
+			source_of_pepayment1,
+			source_of_pepayment2,
+			source_of_pepayment3,
+			source_of_pepayment4
+		) values (
+			#{id},
+			#{applyNo},
+			#{sourceOfDepayment1},
+			#{sourceOfDepayment2},
+			#{sourceOfDepayment3},
+			#{sourceOfDepayment4}
+		)
+	</insert>
+
+	<update id="updateRepaySource">
+		update cre_gqget_com_info set
+		source_of_pepayment1 = #{sourceOfDepayment1},
+		source_of_pepayment2 = #{sourceOfDepayment2},
+		source_of_pepayment3 = #{sourceOfDepayment3},
+		source_of_pepayment4 = #{sourceOfDepayment4}
+		where apply_no = #{applyNo}
+	</update>
+	<update id="updateZichan">
+		update cre_gqget_com_info set
+			other = #{other},
+			property_house = #{propertyHouse},
+			property_car = #{propertyCar},
+			property_other = #{propertyOther}
+		where apply_no = #{applyNo}
+	</update>
+</mapper>

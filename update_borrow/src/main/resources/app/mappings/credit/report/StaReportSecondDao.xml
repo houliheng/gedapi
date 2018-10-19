@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.report.dao.StaReportSecondDao">
+
+	<sql id="staReportSecondColumns">
+		a.cust_name AS "custName",
+		a.apply_no AS "applyNo",
+		a.data_month AS "dataMonth",
+		a.org_level4 AS "orgLevel4",
+		a.org_level3 AS "orgLevel3",
+		a.org_level2 AS "orgLevel2",
+		a.app_time_dq AS "appTimeDq",
+		a.app_status_dq AS "appStatusDq",
+		a.app_time_zb AS "appTimeZb",
+		a.app_status_zb AS "appStatusZb"
+	</sql>
+
+	<sql id="staReportSecondJoins">
+	</sql>
+    
+	<!-- <select id="get" resultType="StaReportSecond">
+		SELECT 
+			<include refid="staReportSecondColumns"/>
+		FROM cre_sta_report_second a
+		<include refid="staReportSecondJoins"/>
+		WHERE a.id = #{id}
+	</select> -->
+
+	<select id="findList" resultType="StaReportSecond">
+		SELECT
+		<include refid="staReportSecondColumns" />
+		FROM cre_sta_report_second a
+		<!-- LEFT JOIN sys_office o on a.org_id = o.id -->
+		<!-- <where> -->
+		WHERE <!-- a.TASK_DEF_KEY in ('utask_dqfkzysh','utask_dqfkjlsh','utask_zgsfksh','utask_zgsjlsh','utask_zgszjlsh') -->
+		1=1
+			<!-- <if test="company != null and company != '' and company.id != null and company.id != '' and company.parentIds != null and company.parentIds != '' ">
+				and (a.ORG_LEVEL4 = #{company.id} OR o.parent_ids LIKE concat(#{company.parentIds},#{company.id},',%'))
+			</if> -->
+		<if test="dataMonth != null and dataMonth != ''">
+			AND a.DATA_MONTH LIKE CONCAT('%',#{dataMonth},'%')
+		</if>
+			<!-- <if test="taskDefKey != null and taskDefKey != ''">
+				AND a.TASK_DEF_KEY LIKE CONCAT('%',#{taskDefKey},'%')
+			</if> 
+			<if test="orgName != null and orgName != ''">
+				AND a.ORG_NAME LIKE CONCAT('%',#{orgName},'%')
+			</if>-->
+		ORDER BY a.DATA_MONTH desc
+		<!-- </where> -->
+		<!-- <choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose> -->
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(1)
+		FROM cre_sta_report_second a
+		<include refid="staReportSecondJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="StaReportSecond">
+		SELECT
+		<include refid="staReportSecondColumns" />
+		FROM cre_sta_report_second a
+		<include refid="staReportSecondJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListFirst" resultType="java.util.Map">
+		SELECT
+		a.data_month AS "dataMonth",
+		a.ORG_NAME AS "orgName",
+		a.AVE_CONTRACT_AMOUNT AS "aveContractAmount",
+		a.SERVICE_FEE AS "serviceFee",
+		a.LOAN_AMOUNT AS "loanAmount",
+		a.APPLY_AMOUNT AS "applyAmount",
+		a.COMPANY_AMOUNT AS "companyAmount",
+		a.REGISTER_AMOUNT AS "registerAmount"
+		FROM cre_sta_report_first a
+		inner join sys_office t3 on t3.id = a.org_id
+		WHERE 1=1
+		AND (t3.id = #{orgId} OR t3.parent_ids LIKE CONCAT(#{orgParentId},#{orgId},',%'))
+		<if test="dataMonthEnd != null and dataMonthEnd != '' and dataMonthStart != null and dataMonthStart != '' ">
+			AND a.DATA_MONTH between #{dataMonthStart} and #{dataMonthEnd}
+		</if>
+		<if test="companyId != null and companyId != ''">
+			AND (t3.id = #{companyId} OR t3.parent_ids LIKE CONCAT('%,',#{companyId},'%'))
+		</if>
+		ORDER BY a.DATA_MONTH desc
+	</select>
+
+	<select id="findListSecond" resultType="java.util.Map">
+		SELECT
+		a.cust_name AS "custName",
+		a.apply_no AS "applyNo",
+		a.data_month AS "dataMonth",
+		s3.name AS "orgLevel2",
+		s2.name AS "orgLevel3",
+		s1.name AS "orgLevel4",
+		a.app_time_dq AS "appTimeDq",
+		a.app_status_dq AS "appStatusDq",
+		a.app_time_zb AS "appTimeZb",
+		a.app_status_zb AS
+		"appStatusZb"
+		FROM cre_sta_report_second a
+		inner join cre_apply_register b on a.apply_no = b.apply_no
+		inner JOIN sys_office s1 on a.org_level4 = s1.id
+		inner JOIN sys_office s2 on s2.id = s1.parent_id
+		inner JOIN sys_office s3 on s3.id = s2.parent_id
+		inner join sys_office t3 on
+		t3.id = b.org_id
+		WHERE 1=1
+		AND (t3.id = #{orgId} OR t3.parent_ids LIKE CONCAT(#{orgParentId},#{orgId},',%'))
+		<if test="dataMonthEnd != null and dataMonthEnd != '' and dataMonthStart != null and dataMonthStart != '' ">
+			AND a.DATA_MONTH between #{dataMonthStart} and #{dataMonthEnd}
+		</if>
+		<if test="companyId != null and companyId != ''">
+			AND (t3.id = #{companyId} OR t3.parent_ids LIKE CONCAT('%,',#{companyId},'%'))
+		</if>
+		ORDER BY a.DATA_MONTH desc
+	</select>
+
+	<select id="findListFourth" resultType="java.util.Map">
+		SELECT
+		count(*) as "count",
+		y.INDU_NAME AS "induName"
+		FROM
+		cre_company_info i
+		INNER JOIN cre_apply_relation r ON r.CUST_ID = i.ID
+		INNER JOIN cre_apply_register c on c.APPLY_NO = r.APPLY_NO
+		INNER JOIN sys_office o on c.ORG_ID = o.id
+		INNER JOIN cre_apply_loan_status s ON
+		s.APPLY_NO = r.APPLY_NO
+		LEFT JOIN sys_industry y ON
+		i.CATEGORY_MAIN = y.INDU_CODE
+		WHERE
+		r.ROLE_TYPE = '5'
+		<if test="orgId != null and orgId != ''">
+			and (c.ORG_ID = #{orgId} OR o.parent_ids LIKE CONCAT('%,',#{orgId},',%'))
+		</if>
+		AND i.DEL_FLAG = '0'
+		AND s.LOAN_STATUS = '22'
+		AND i.CATEGORY_MAIN IS NOT NULL
+		GROUP BY i.CATEGORY_MAIN ORDER BY COUNT(*) DESC LIMIT 0,20
+	</select>
+
+	<select id="findPageSecond" resultType="com.thinkgem.jeesite.modules.act.entity.MyMap">
+		SELECT
+		a.cust_name AS "custName",
+		a.apply_no AS "applyNo",
+		a.data_month AS "dataMonth",
+		s3.name AS "orgLevel2",
+		s2.name AS "orgLevel3",
+		s1.name AS "orgLevel4",
+		a.app_time_dq AS "appTimeDq",
+		a.app_status_dq AS "appStatusDq",
+		a.app_time_zb AS "appTimeZb",
+		a.app_status_zb AS
+		"appStatusZb"
+		FROM cre_sta_report_second a
+		LEFT JOIN sys_office s1 on a.org_level4 = s1.id
+		LEFT JOIN sys_office s2 on s2.id = s1.parent_id
+		LEFT JOIN sys_office s3 on s3.id = s2.parent_id
+		WHERE 1=1
+		AND (t3.id = #{orgId} OR t3.parent_ids LIKE
+		CONCAT(#{orgParentId},#{orgId},',%'))
+		<if test="dataMonthEnd != null and dataMonthEnd != '' and dataMonthStart != null and dataMonthStart != '' ">
+			AND a.DATA_MONTH between #{dataMonthStart} and #{dataMonthEnd}
+		</if>
+		<if test="companyId != null and companyId != ''">
+			AND (t3.id = #{companyId} OR t3.parent_ids LIKE CONCAT('%,',#{companyId},'%'))
+		</if>
+		ORDER BY a.DATA_MONTH desc
+	</select>
+
+	<select id="findOfficeLevelTwoList" resultType="StaReportFirst">
+		select id as "orgId",
+		name as "orgName"
+		from sys_office where levelnum = '1' and type = '1' and del_flag = '0'
+	</select>
+
+</mapper>

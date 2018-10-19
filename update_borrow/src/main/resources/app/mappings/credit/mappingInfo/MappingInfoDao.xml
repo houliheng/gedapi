@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.mappingInfo.dao.MappingInfoDao">
+    
+	<sql id="mappingInfoColumns">
+		a.id AS "id",
+		a.contract_no_first AS "contractNoFirst",
+		a.contract_no_second AS "contractNoSecond",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="mappingInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="MappingInfo">
+		SELECT 
+			<include refid="mappingInfoColumns"/>
+		FROM cre_mapping_info a
+		<include refid="mappingInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="MappingInfo">
+		SELECT 
+			<include refid="mappingInfoColumns"/>
+		FROM cre_mapping_info a
+		<include refid="mappingInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_mapping_info a
+		<include refid="mappingInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="MappingInfo">
+		SELECT 
+			<include refid="mappingInfoColumns"/>
+		FROM cre_mapping_info a
+		<include refid="mappingInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_mapping_info(
+			id,
+			contract_no_first,
+			contract_no_second,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{contractNoFirst},
+			#{contractNoSecond},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_mapping_info SET 	
+			contract_no_first = #{contractNoFirst},
+			contract_no_second = #{contractNoSecond},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_mapping_info
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateFlags">
+		UPDATE cre_mapping_info SET 	
+			contract_no_first = #{contractNoFirst},
+			contract_no_second = #{contractNoSecond},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

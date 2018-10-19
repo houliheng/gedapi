@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.mortgageEvaluateInfo.dao.MortgageEvaluateItemsDao">
+
+	<select id="findItemsList" resultType="MortgageEvaluateItems">
+		select
+		info_Id as "infoId",
+		ID as "id",
+		APPLY_NO as "applyNo",
+		CHECK_ITEMS as "checkItems",
+		CHECK_VALUE as "checkValue",
+		DESCRIPTION as "description"
+		from pl_mortgage_evaluate_items where INFO_Id=#{infoId}
+		<where>
+			
+		</where>
+	</select>
+	
+	<update id="saveEdit">
+		UPDATE pl_mortgage_evaluate_items SET 	
+			APPLY_NO = #{applyNo},
+			check_value = #{checkValue},
+			description = #{description}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="showEdit" resultType="MortgageEvaluateItems">
+		SELECT 
+		ID as "id",
+		info_Id as "infoId",
+		APPLY_NO as "applyNo",
+		CHECK_ITEMS as "checkItems",
+		CHECK_VALUE as "checkValue",
+		DESCRIPTION as "description"
+		FROM pl_mortgage_evaluate_items a
+		WHERE a.id = #{id}
+	</select>
+	
+		<insert id="insertCheck">
+		INSERT INTO pl_mortgage_evaluate_items(
+			id,
+			apply_no,
+			check_items,
+			info_id
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{checkItems},
+			#{infoId}
+		)
+	</insert>
+<!-- 	取得检查项目类别 -->
+		<select id="getcheckItems" resultType="String">
+			select value from sys_dict where type = 'CHECK_ITEMS' 
+		</select>
+	
+</mapper>

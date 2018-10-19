@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.userGroup.dao.UserGroupDao">
+<sql id="rateCapitalColumns">
+	a.id AS "id",
+	a.product_type_code AS "productTypeCode",
+	a.loan_repay_type AS "loanRepayType",
+	a.loan_repay_desc AS "loanRepayDesc",
+	a.period_value AS "periodValue",
+	a.period_num AS "periodNum",
+	a.rate_capital_curr AS "rateCapitalCurr",
+	a.rate_capital_remain AS "rateCapitalRemain" 
+	
+</sql>
+
+<select id="findUserGroupById" resultType="UserGroup">
+	SELECT
+		a.id,
+		b.allyname as "allyName",
+		a.allyid as "allyId"
+	FROM
+		sys_user_ally a
+	INNER JOIN sys_ally b ON a.allyid = b.id
+	WHERE  	1=1 
+	<if test="userId != null and userId != ''">
+		and	a.userid = #{userId}
+	</if> 
+</select>
+<select id="findUserGroup" resultType="UserGroup">
+		SELECT id,
+		allyname as "allyName" from sys_ally
+</select>
+
+<update id="deleteUserGroup">
+		DELETE FROM sys_user_ally
+		WHERE userid = #{userId}
+</update>
+<insert id="insertUserGroup">
+		INSERT INTO sys_user_ally(
+			id,
+			userid,
+			allyid	
+		) VALUES
+		<foreach item="allyIdList" collection="allyIdList" index="index" separator=",">
+		 (
+			replace(UUID(),'-',''),
+			#{userId},
+			#{allyIdList}
+		)
+		</foreach>
+	</insert>
+</mapper>

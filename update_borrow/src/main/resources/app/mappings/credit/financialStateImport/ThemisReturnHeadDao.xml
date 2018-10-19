@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.financialStateImport.dao.ThemisReturnHeadDao">
+    
+	<sql id="themisReturnHeadColumns">
+		a.companycode AS "companycode",
+		a.returncode AS "returncode",
+		a.returnmessage AS "returnmessage"
+	</sql>
+	
+	<sql id="themisReturnHeadJoins">
+	</sql>
+    
+	<select id="get" resultType="ThemisReturnHead">
+		SELECT 
+			<include refid="themisReturnHeadColumns"/>
+		FROM ift_themis_return_head a
+		<include refid="themisReturnHeadJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ThemisReturnHead">
+		SELECT 
+			<include refid="themisReturnHeadColumns"/>
+		FROM ift_themis_return_head a
+		<include refid="themisReturnHeadJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_themis_return_head a
+		<include refid="themisReturnHeadJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ThemisReturnHead">
+		SELECT 
+			<include refid="themisReturnHeadColumns"/>
+		FROM ift_themis_return_head a
+		<include refid="themisReturnHeadJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ift_themis_return_head(
+			companycode,RETURNCODE,RETURNMESSAGE,APPLY_NO
+		) VALUES (
+			#{companycode},#{returncode}
+			,#{returnmessage},#{applyNo}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_themis_return_head SET 	
+			companycode = #{companycode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_themis_return_head
+		WHERE id = #{id}
+	</update>
+	<delete id="deleteByApplyNo">
+		delete FROM ift_themis_return_head WHERE apply_no=#{applyNo};
+	</delete>
+</mapper>

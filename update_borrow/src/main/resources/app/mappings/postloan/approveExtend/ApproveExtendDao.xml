@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.approveExtend.dao.ApproveExtendDao">
+    
+	<sql id="approveExtendColumns">
+		a.contract_no AS "contractNo",
+		a.extend_amount AS "extendAmount",
+		a.approve_result AS "approveResult",
+		a.company_manager AS "companyManager",
+		a.company_deputy_manager AS "companyDeputyManager",
+		a.region_pl_manager AS "regionPlManager",
+		a.region_risk_manager AS "regionRiskManager",
+		a.approve_person AS "approvePerson",
+		a.approve_date AS "approveDate"
+	</sql>
+	
+	<sql id="approveExtendJoins">
+	</sql>
+    
+	<select id="get" resultType="ApproveExtend">
+		SELECT 
+			<include refid="approveExtendColumns"/>
+		FROM pl_approve_extend a
+		<include refid="approveExtendJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ApproveExtend">
+		SELECT 
+			<include refid="approveExtendColumns"/>
+		FROM pl_approve_extend a
+		<include refid="approveExtendJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_approve_extend a
+		<include refid="approveExtendJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="ApproveExtend">
+		SELECT 
+			<include refid="approveExtendColumns"/>
+		FROM pl_approve_extend a
+		<include refid="approveExtendJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_approve_extend(
+			contract_no,
+			extend_amount,
+			approve_result,
+			company_manager,
+			company_deputy_manager,
+			region_pl_manager,
+			region_risk_manager,
+			approve_person,
+			approve_date
+		) VALUES (
+			#{contractNo},
+			#{extendAmount},
+			#{approveResult},
+			#{companyManager},
+			#{companyDeputyManager},
+			#{regionPlManager},
+			#{regionRiskManager},
+			#{approvePerson},
+			#{approveDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_approve_extend SET 	
+			contract_no = #{contractNo},
+			extend_amount = #{extendAmount},
+			approve_result = #{approveResult},
+			company_manager = #{companyManager},
+			company_deputy_manager = #{companyDeputyManager},
+			region_pl_manager = #{regionPlManager},
+			region_risk_manager = #{regionRiskManager},
+			approve_person = #{approvePerson},
+			approve_date = #{approveDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_approve_extend
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.deductApply.dao.DeductApplyVODao">
+	<sql id="deductApplyVOColumns">
+		a.data_dt AS "dataDt",
+		a.deduct_cust_id AS "deductCustId",
+		a.DEDUCT_APPLY_NO AS "streamNo",
+		a.deduct_amount AS "deductAmount",
+		a.contract_no AS "contractNo",
+		a.capital_terrace_no AS
+		"capitalTerraceNo",
+		a.deduct_time AS "deductTime",
+		a.is_lock AS
+		"isLock",
+		a.period_num
+		AS "periodNum",
+		a.stream_type as "streamType",
+		a.deduct_type as "deductType"
+	</sql>
+
+	<sql id="deductApplyVOJoins">
+	</sql>
+
+	<select id="get" resultType="DeductApplyVO">
+		SELECT
+		cc.cust_name AS "custName",
+		a.contract_no AS "contractNo",
+		b.stream_No AS "streamNo",
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		a.DEDUCT_AMOUNT AS "applyDeductAmount",
+		b.DEDUCT_AMOUNT AS "deductAmountResult",
+		cc.ORG_LEVEL4 AS
+		"orgLevel4.id",
+		x. NAME AS "orgLevel4.name",
+		y.id AS "orgLevel3.id",
+		y. NAME AS "orgLevel3.name",
+		z.id AS "orgLevel2.id",
+		z. NAME AS "orgLevel2.name",
+		IFNULL(b.DEDUCT_RESULT,'4') AS "deductResult",
+		b.STREAM_TIME AS "streamTime",
+		date_format(b.STREAM_TIME,'%Y-%m-%d') AS "streamTimeStr",
+		a.stream_type AS "streamType",
+		a.deduct_type AS "deductType",
+		a.DEDUCT_CUST_ID as "deductCustId",
+		su. NAME AS "deductCustName",
+		b.strike_flg as "strikeFlag",
+		b.DESCRIPTION as "description"
+		FROM acc_deduct_apply a
+		LEFT
+		JOIN acc_deduct_result b ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN acc_contract cc ON a.contract_no = cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		WHERE a.DEDUCT_APPLY_NO = #{deductApplyNo}
+	</select>
+
+	<select id="getDeductApplyVOByDeductApplyNo" resultType="DeductApplyVO">
+		SELECT
+		b.SYS_SEQ_NO as "sysSeqNo",
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		b.STREAM_TIME as "streamTime"
+		FROM acc_deduct_result b
+		WHERE b.DEDUCT_APPLY_NO = #{deductApplyNo}
+	</select>
+
+	<select id="findList" resultType="DeductApplyVO">
+		SELECT
+		cc.cust_name AS "custName",
+		a.contract_no AS "contractNo",
+		b.stream_No AS "streamNo",
+		b.DEDUCT_APPLY_NO as "deductApplyNo",
+		a.DEDUCT_AMOUNT AS "applyDeductAmount",
+		b.DEDUCT_AMOUNT AS "deductAmountResult",
+		cc.ORG_LEVEL4 AS "orgLevel4.id",
+		x. NAME AS "orgLevel4.name",
+		y.id AS "orgLevel3.id",
+		y. NAME AS "orgLevel3.name",
+		z.id AS "orgLevel2.id",
+		z. NAME AS "orgLevel2.name",
+		IFNULL(b.DEDUCT_RESULT,'4') AS "deductResult",
+		b.STREAM_TIME AS "streamTime",
+		date_format(b.STREAM_TIME,'%Y-%m-%d') AS "streamTimeStr",
+		a.stream_type AS
+		"streamType",
+		a.deduct_type AS "deductType",
+		a.DEDUCT_CUST_ID as "deductCustId",
+		su. NAME AS "deductCustName",
+		b.strike_flg as "strikeFlag",
+		d.REPAY_CONTRACT_STATUS as "description",
+		b.TRANSFER_DEDUCT_RESULT as "transferDeductResult",
+		b.DEDUCT_MSG as "deductMsg"
+		FROM
+		acc_deduct_apply a
+		LEFT JOIN acc_deduct_result b ON a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		INNER JOIN
+		acc_contract cc ON a.contract_no = cc.contract_no
+		left JOIN sys_office x ON cc.ORG_LEVEL4 = x.id
+		left JOIN sys_office y ON x.parent_id = y.id
+		left JOIN sys_office z ON y.parent_id = z.id
+		INNER JOIN sys_user su ON su.id = a.DEDUCT_CUST_ID
+		INNER JOIN sys_office o ON cc.OPERATE_ORG_ID = o.id
+		INNER JOIN
+		acc_sta_contract_status d ON a.contract_no = d.contract_no
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="transferDeductResult != null and transferDeductResult != ''">
+				and b.TRANSFER_DEDUCT_RESULT = #{transferDeductResult}
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="deductCustId !=null and deductCustId != '' ">
+				and su.name like CONCAT('%',#{deductCustId},'%')
+			</if>
+			<if test="deductResult !=null and deductResult != '' and deductResult != 4 ">
+				and b.DEDUCT_RESULT = #{deductResult}
+			</if>
+			<if test="deductResult == 4">
+				and b.DEDUCT_APPLY_NO is null
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' and streamEndTime !=null and streamEndTime != '' ">
+				and b.STREAM_TIME between #{streamStartTime} and
+				#{streamEndTime}
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' ">
+				and  <![CDATA[b.STREAM_TIME >= #{streamStartTime}]]>
+			</if>
+			<if test="streamEndTime !=null and streamEndTime != '' ">
+				and  <![CDATA[b.STREAM_TIME <= #{streamEndTime}]]>
+			</if>
+		</where>
+		order by b.STREAM_TIME desc ,a.DEDUCT_TIME desc
+	</select>
+
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM acc_deduct_result b
+		inner JOIN acc_deduct_apply a
+		ON
+		a.DEDUCT_APPLY_NO = b.DEDUCT_APPLY_NO
+		inner JOIN acc_contract cc ON
+		b.contract_no = cc.contract_no
+		left join sys_office x on cc.ORG_LEVEL4 =x.id
+		left join sys_office y on x.parent_id = y.id
+		left join sys_office z on y.parent_id = z.id
+		inner JOIN sys_user su on su.id = a.DEDUCT_CUST_ID
+		inner join sys_office o on cc.OPERATE_ORG_ID = o.id
+		<where>
+			and (cc.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			<if test="custName != null and custName != ''">
+				and cc.cust_name like CONCAT('%',#{custName},'%')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and b.contract_no like CONCAT(#{contractNo},'%')
+			</if>
+			<if test="orgLevel4 != null and orgLevel4 != '' and orgLevel4.id != null and orgLevel4.id != ''">
+			and x.id = #{orgLevel4.id}
+		</if>
+		<if test="orgLevel3 != null and orgLevel3 != '' and orgLevel3.id != null and orgLevel3.id != ''">
+			and y.id = #{orgLevel3.id}
+		</if>
+		<if test="orgLevel2 != null and orgLevel2 != '' and orgLevel2.id != null and orgLevel2.id != ''">
+			and z.id = #{orgLevel2.id}
+		</if>
+			<if test="deductResult !=null and deductResult != ''">
+				and b.DEDUCT_RESULT = #{deductResult}
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' and streamStartTime !=null and streamStartTime != '' ">
+				and b.STREAM_TIME between #{streamStartTime} and
+				#{streamEndTime}
+			</if>
+			<if test="streamStartTime !=null and streamStartTime != '' ">
+				and  <![CDATA[b.STREAM_TIME >= #{streamStartTime}]]>
+			</if>
+			<if test="streamEndTime !=null and streamEndTime != '' ">
+				and  <![CDATA[b.STREAM_TIME <= #{streamEndTime}]]>
+			</if>
+		</where>
+		order by b.STREAM_TIME desc ,a.DEDUCT_TIME desc
+	</select>
+
+	<select id="findAllList" resultType="DeductApplyVO">
+		SELECT
+		<include refid="deductApplyVOColumns" />
+		FROM acc_deduct_apply a
+		<include refid="deductApplyVOJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO ACC_DEDUCT_RESULT
+		(
+		DATA_DT,
+		CAPITAL_TERRACE_NO,
+		CONTRACT_NO,
+		SYS_SEQ_NO,
+		DEDUCT_APPLY_NO,
+		STREAM_NO,
+		STREAM_TIME,
+		DEDUCT_AMOUNT,
+		DEDUCT_RESULT,
+		DEDUCT_USER_ID,
+		IS_LOCK,
+		STRIKE_FLG,
+		DESCRIPTION
+		)
+		VALUES (
+		#{dataDt},
+		#{capitalTerraceNo},
+		#{contractNo},
+		#{sysSeqNo},
+		<if test="deductApplyNo != null and deductApplyNo != ''">
+			#{deductApplyNo},
+		</if>
+		<if test="deductApplyNo == null or deductApplyNo == ''">
+			uuid_short(),
+		</if>
+		#{streamNo},
+		#{streamTime},
+		#{deductAmountResult},
+		#{deductResult},
+		#{deductCustId},
+		#{isLock},
+		#{strikeFlag},
+		#{description}
+		)
+	</insert>
+	<update id="updateDeductResultIsLock">
+		update ACC_DEDUCT_RESULT SET is_lock = '1'
+		WHERE DEDUCT_APPLY_NO = #{deductApplyNo}
+	</update>
+</mapper>

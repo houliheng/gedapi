@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.credit.PLRepayPlan.dao.RepayPlanDao">
+	<!-- 当期应还本金比率值 -->
+	<select id="getRateCapitalCurr" resultType="PLRateCapital">
+		select
+		a.rate_capital_curr as "rateCapitalCurr",
+		a.period_Num as "periodNum",
+		a.period_Value as "periodValue",
+		a.rate_Capital_Remain as
+		"rateCapitalRemain",
+		b.rate_Interest as "plRateInterest.rateInterest"
+		from cre_rate_capital a inner join cre_rate_interest b
+		on
+		a.LOAN_REPAY_TYPE = b.LOAN_REPAY_TYPE and a.PERIOD_VALUE =
+		b.PERIOD_VALUE and a.PRODUCT_TYPE_CODE = b.PRODUCT_TYPE_CODE 
+		and a.loan_repay_type= #{loanRepayType} and
+		a.period_value=#{periodValue} and a.PRODUCT_TYPE_CODE = #{approProductTypeCode}    
+	</select>
+
+	<select id="getInterestByApplyNo" resultType="String">
+		SELECT
+		APPRO_YEAR_RATE
+		FROM cre_check_approve
+		WHERE apply_no = #{applyNo}
+	</select>
+
+	<select id="getOverduePenalty" resultType="java.util.Map">
+		SELECT
+		value as "value",label as "label",type as "type"
+		FROM sys_dict
+		WHERE type like 'OVERDUEPENALTY%' order by sort asc
+	</select>
+
+</mapper>

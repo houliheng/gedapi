@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="creDataScope_user">
+	<!-- /**
+	 * @reqno:H1507220018
+	 * @date-designer:20150727-chenshaojia
+	 * @db-z : sys_user : 用户表
+	 * @date-author:20150727-chenshaojia:优化用户管理的数据权限的实现
+	 */ -->
+    <!-- 用户本身 -->
+	<sql id="userSelf">
+		AND ${sqlMap.ResoftFramework_userSelfColumnName} = #{sqlMap.ResoftFramework_user.id}
+	</sql>
+	
+	<!-- 在多角色，多权限范围情况下，明细的权限范围与其他几种范围是取并集的关系 -->
+	<sql id="dataScopeFilter">
+		<trim suffixOverrides="AND | OR">
+			<choose>
+				<when test = "sqlMap.ResoftFramework_dataScope == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_COMPANY_AND_CHILD">
+					<include refid="creDataScope_base.companyAndChild"/>
+				</when>
+				<when test = "sqlMap.ResoftFramework_dataScope == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_COMPANY">
+					<include refid="creDataScope_base.company"/>
+				</when>
+				<when test = "sqlMap.ResoftFramework_dataScope == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_OFFICE_AND_CHILD">
+					<include refid="creDataScope_base.officeAndChild"/>
+				</when>
+				<when test = "sqlMap.ResoftFramework_dataScope == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_OFFICE">
+					<include refid="creDataScope_base.office"/>
+				</when>
+				<when test = "sqlMap.ResoftFramework_dataScope == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_SELF">
+					<include refid="dataScope_user.userSelf"/>
+				</when>
+				<otherwise>
+				
+				</otherwise>
+			</choose>
+			<if test = "sqlMap.ResoftFramework_dataScopeCustom == @com.thinkgem.jeesite.modules.sys.entity.Role@DATA_SCOPE_CUSTOM">
+				<include refid="creDataScope_base.custom"/>
+			</if>
+		</trim>
+	</sql>
+</mapper>

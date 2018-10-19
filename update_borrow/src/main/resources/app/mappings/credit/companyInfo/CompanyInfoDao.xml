@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.companyInfo.dao.CompanyInfoDao">
+
+	<sql id="companyInfoColumns">
+		a.id AS "id",
+		a.busi_reg_name AS "busiRegName",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.un_soc_credit_start_date AS "unSocCreditStartDate",
+		a.un_soc_credit_end_date AS "unSocCreditEndDate",
+		a.organization_no AS "organizationNo",
+		a.organization_start_date AS
+		"organizationStartDate",
+		a.organization_end_date AS "organizationEndDate",
+		a.corporation_name AS "corporationName",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.busi_lic_reg_start_date AS "busiLicRegStartDate",
+		a.busi_lic_reg_end_date AS "busiLicRegEndDate",
+		a.register_national_tax_no AS "registerNationalTaxNo",
+		a.company_status AS "companyStatus",
+		a.register_nat_tax_start_date AS "registerNatTaxStartDate",
+		a.register_nat_tax_end_date AS "registerNatTaxEndDate",
+		a.found_date AS "foundDate",
+		a.register_land_tax_no AS
+		"registerLandTaxNo",
+		a.curr_staff_num AS "currStaffNum",
+		a.register_land_tax_start_date AS "registerLandTaxStartDate",
+		a.register_land_tax_end_date AS "registerLandTaxEndDate",
+		a.last_staff_num AS "lastStaffNum",
+		a.core_business AS "coreBusiness",
+		a.company_land_use AS
+		"companyLandUse",
+		a.operate_type AS "operateType",
+		a.company_type AS "companyType",
+		a.register_capital AS "registerCapital",
+		a.PAID_CAPITAL AS "paidCapital",
+		a.company_property AS "companyProperty",
+		a.register_code AS "registerCode",
+		a.register_date AS "registerDate",
+		a.reg_province AS "regProvince",
+		a.reg_city AS "regCity",
+		a.corporation_card_type AS "corporationCardType",
+		a.reg_distinct AS "regDistinct",
+		a.corporation_card_id_no AS "corporationCardIdNo",
+		a.reg_details AS "regDetails",
+		a.corporation_mobile AS "corporationMobile",
+		a.company_site AS "companySite",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.is_addr_resi AS "isAddrResi",
+		a.category_main AS "categoryMain",
+		a.category_large AS "categoryLarge",
+		a.category_medium
+		AS "categoryMedium",
+		a.category_small AS "categorySmall",
+		a.operate_areas AS "operateAreas",
+		a.operate_period AS "operatePeriod",
+		a.main_business AS "mainBusiness",
+		a.annual_turnover AS "annualTurnover",
+		a.special_operate_permit AS "specialOperatePermit",
+		a.special_operate_start_date AS "specialOperateStartDate",
+		a.special_operate_end_date AS "specialOperateEndDate",
+		<!-- a.land_end_date AS "landEndDate", -->
+		a.is_have_houses AS "isHaveHouses",
+		a.state_of_taxation AS "stateOfTaxation",
+		a.capital_structure_com AS "capitalStructureCom",
+		a.curr_office_lifetime AS "currOfficeLifetime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.IS_EARNINGS AS "isEarnings",
+		a.OPERATE_AREA as "operateArea"
+	</sql>
+
+	<sql id="companyInfoJoins">
+		INNER JOIN cre_apply_relation ar ON ar.cust_id = a.id
+	</sql>
+
+	<select id="get" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		<where>
+		a.del_flag = '0'
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<select id="findListByParams" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		<where>
+			ar.del_flag = '0'
+			and a.del_flag = '0'
+			AND ar.apply_no = #{applyNo}
+			<if test="roleType != null and roleType != ''">
+				AND ar.ROLE_TYPE = #{roleType}
+			</if>
+			<if test="busiLicRegNo != null and busiLicRegNo != ''">
+				AND a.BUSI_LIC_REG_NO = #{busiLicRegNo}
+			</if>
+			<if test="unSocCreditNo != null and unSocCreditNo != ''">
+				AND a.UN_SOC_CREDIT_NO = #{unSocCreditNo}
+			</if>
+			<if test="organizationNo != null and organizationNo != ''">
+				AND a.ORGANIZATION_NO = #{organizationNo}
+			</if>
+			<if test="registerCode != null and registerCode != ''">
+				AND a.REGISTER_CODE = #{registerCode}
+			</if>
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		<where>
+			a.del_flag = '0'
+			<if test="roleType != null and roleType != ''">
+				AND ar.ROLE_TYPE = #{roleType}
+			</if>
+			<if test="applyNo != null and applyNo != ''">
+				AND ar.apply_no = #{applyNo}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		<where>
+			a.del_flag = '0'
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cre_company_info(
+		id,
+		busi_reg_name,
+		<if test="unSocCreditNo != null and unSocCreditNo != '' " >
+			un_soc_credit_no,
+		</if>
+		un_soc_credit_start_date,
+		un_soc_credit_end_date,
+		organization_no,
+		organization_start_date,
+		organization_end_date,
+		corporation_name,
+		<if test="busiLicRegNo != null and busiLicRegNo != ''" >
+			busi_lic_reg_no,
+		</if>
+		busi_lic_reg_start_date,
+		busi_lic_reg_end_date,
+		register_national_tax_no,
+		company_status,
+		register_nat_tax_start_date,
+		register_nat_tax_end_date,
+		register_land_tax_no,
+		found_date,
+		register_land_tax_start_date,
+		curr_staff_num,
+		last_staff_num,
+		register_land_tax_end_date,
+		core_business,
+		company_land_use,
+		company_type,
+		operate_type,
+		register_capital,
+		PAID_CAPITAL,
+		company_property,
+		register_code,
+		register_date,
+		reg_province,
+		reg_city,
+		corporation_card_type,
+		corporation_card_id_no,
+		reg_distinct,
+		reg_details,
+		corporation_mobile,
+		company_site,
+		operate_province,
+		operate_city,
+		operate_distinct,
+		operate_details,
+		is_addr_resi,
+		category_main,
+		category_large,
+		category_medium,
+		category_small,
+		operate_areas,
+		operate_period,
+		main_business,
+		annual_turnover,
+		special_operate_permit,
+		special_operate_start_date,
+		special_operate_end_date,
+			<!-- land_end_date, -->
+		is_have_houses,
+		state_of_taxation,
+		capital_structure_com,
+		curr_office_lifetime,
+		create_by,
+		create_date,
+		update_by,
+		update_date,
+		is_earnings,
+		OPERATE_AREA
+		) VALUES (
+		#{id},
+		#{busiRegName},
+		<if test="unSocCreditNo != null and unSocCreditNo != '' " >
+		#{unSocCreditNo},
+		</if>
+		#{unSocCreditStartDate},
+		#{unSocCreditEndDate},
+		#{organizationNo},
+		#{organizationStartDate},
+		#{organizationEndDate},
+		#{corporationName},
+		<if test="busiLicRegNo != null and busiLicRegNo != ''" >
+		#{busiLicRegNo},
+		</if>
+		#{busiLicRegStartDate},
+		#{busiLicRegEndDate},
+		#{registerNationalTaxNo},
+		#{companyStatus},
+		#{registerNatTaxStartDate},
+		#{registerNatTaxEndDate},
+		#{registerLandTaxNo},
+		#{foundDate},
+		#{registerLandTaxStartDate},
+		#{currStaffNum},
+		#{lastStaffNum},
+		#{registerLandTaxEndDate},
+		#{coreBusiness},
+		#{companyLandUse},
+		#{companyType},
+		#{operateType},
+		#{registerCapital},
+		#{paidCapital},
+		#{companyProperty},
+		#{registerCode},
+		#{registerDate},
+		#{regProvince},
+		#{regCity},
+		#{corporationCardType},
+		#{corporationCardIdNo},
+		#{regDistinct},
+		#{regDetails},
+		#{corporationMobile},
+		#{companySite},
+		#{operateProvince},
+		#{operateCity},
+		#{operateDistinct},
+		#{operateDetails},
+		#{isAddrResi},
+		#{categoryMain},
+		#{categoryLarge},
+		#{categoryMedium},
+		#{categorySmall},
+		#{operateAreas},
+		#{operatePeriod},
+		#{mainBusiness},
+		#{annualTurnover},
+		#{specialOperatePermit},
+		#{specialOperateStartDate},
+		#{specialOperateEndDate},
+			<!-- #{landEndDate}, -->
+		#{isHaveHouses},
+		#{stateOfTaxation},
+		#{capitalStructureCom},
+		#{currOfficeLifetime},
+		#{createBy.id},
+		#{createDate},
+		#{updateBy.id},
+		#{updateDate},
+		#{isEarnings},
+		#{operateArea}
+		)
+	</insert>
+	
+	<!--<update id="saveRegisterType">-->
+		<!--UPDATE cre_company_info SET-->
+			<!--REGISTER_TYPE = #{flag}-->
+		<!--WHERE id = #{id}-->
+	<!--</update>-->
+	<update id="update">
+		UPDATE cre_company_info SET
+		busi_reg_name = #{busiRegName},
+		un_soc_credit_no = #{unSocCreditNo},
+		un_soc_credit_start_date = #{unSocCreditStartDate},
+		un_soc_credit_end_date = #{unSocCreditEndDate},
+		organization_no = #{organizationNo},
+		organization_start_date = #{organizationStartDate},
+		organization_end_date = #{organizationEndDate},
+		corporation_name = #{corporationName},
+		busi_lic_reg_no = #{busiLicRegNo},
+		busi_lic_reg_start_date = #{busiLicRegStartDate},
+		busi_lic_reg_end_date = #{busiLicRegEndDate},
+		register_national_tax_no = #{registerNationalTaxNo},
+		company_status = #{companyStatus},
+		register_nat_tax_start_date = #{registerNatTaxStartDate},
+		register_nat_tax_end_date = #{registerNatTaxEndDate},
+		found_date = #{foundDate},
+		register_land_tax_no = #{registerLandTaxNo},
+		curr_staff_num = #{currStaffNum},
+		register_land_tax_start_date = #{registerLandTaxStartDate},
+		register_land_tax_end_date = #{registerLandTaxEndDate},
+		last_staff_num = #{lastStaffNum},
+		core_business = #{coreBusiness},
+		company_land_use = #{companyLandUse},
+		operate_type = #{operateType},
+		company_type = #{companyType},
+		register_capital = #{registerCapital},
+		PAID_CAPITAL = #{paidCapital},
+		company_property = #{companyProperty},
+		register_code = #{registerCode},
+		register_date = #{registerDate},
+		reg_province = #{regProvince},
+		reg_city = #{regCity},
+		corporation_card_type = #{corporationCardType},
+		reg_distinct = #{regDistinct},
+		corporation_card_id_no = #{corporationCardIdNo},
+		reg_details = #{regDetails},
+		corporation_mobile = #{corporationMobile},
+		company_site = #{companySite},
+		operate_province = #{operateProvince},
+		operate_city = #{operateCity},
+		operate_distinct = #{operateDistinct},
+		operate_details = #{operateDetails},
+		is_addr_resi = #{isAddrResi},
+		category_main = #{categoryMain},
+		category_large = #{categoryLarge},
+		category_medium = #{categoryMedium},
+		category_small = #{categorySmall},
+		operate_areas = #{operateAreas},
+		operate_period = #{operatePeriod},
+		main_business = #{mainBusiness},
+		annual_turnover = #{annualTurnover},
+		special_operate_permit = #{specialOperatePermit},
+		special_operate_start_date = #{specialOperateStartDate},
+		special_operate_end_date = #{specialOperateEndDate},
+			<!-- land_end_date = #{landEndDate}, -->
+		is_have_houses = #{isHaveHouses},
+		state_of_taxation = #{stateOfTaxation},
+		capital_structure_com = #{capitalStructureCom},
+		curr_office_lifetime = #{currOfficeLifetime},
+		update_by = #{updateBy.id},
+		update_date = #{updateDate},
+		is_earnings = #{isEarnings},
+		OPERATE_AREA=#{operateArea}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cre_company_info
+		WHERE id = #{id}
+	</update>
+
+	<select id="getByApplyNo" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		WHERE a.APPLY_NO = #{applyNo} and a.del_flag = '0'
+	</select>
+
+	<select id="getByApplyNoAndRoleType" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		WHERE
+		ar.APPLY_NO = #{applyNo}
+		and ar.role_type = #{roleType}
+	</select>
+	
+	
+	<select id="getByFourNo" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		where ((un_soc_credit_no is not null and ))
+	</select>
+
+	<!-- 批量删除 -->
+	<update id="banchDelete">
+		UPDATE cre_apply_relation a
+		SET a.DEL_FLAG = '1',
+		a.IS_PUSH = '0'
+		WHERE a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		AND a.CUST_ID IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+			#{idList}
+		</foreach>
+	</update>
+
+
+	<!--根据主键添加社会统一信用代码-->
+	<update id="InsertunSocCreditNo">
+         update cre_company_info set UN_SOC_CREDIT_NO = #{unSocCreditNo}
+         where ID = #{id}
+	</update>
+	
+	
+	<update id="banchGuaranteeDelete">
+		UPDATE cre_apply_company_relation a
+		SET a.DEL_FLAG = '1'
+		WHERE a.APPLY_NO = #{applyNo}
+		and a.role_type='2'
+		and a.company_id=#{guaranteeCompanyId}
+		AND a.CUST_ID IN
+		<foreach item="idList" collection="idList" open="(" close=")" separator=",">
+			#{idList}
+		</foreach>
+	</update>
+
+	<select id="getCompanyInfoByApplyNoAndCustId" resultType="CompanyInfo">
+		select
+		a.id AS "id",
+		a.busi_reg_name AS "busiRegName",
+		a.un_soc_credit_no AS "unSocCreditNo",
+		a.un_soc_credit_start_date AS "unSocCreditStartDate",
+		a.un_soc_credit_end_date AS "unSocCreditEndDate",
+		a.organization_no AS "organizationNo",
+		a.organization_start_date AS
+		"organizationStartDate",
+		a.organization_end_date AS "organizationEndDate",
+		a.corporation_name AS "corporationName",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.busi_lic_reg_start_date AS "busiLicRegStartDate",
+		a.busi_lic_reg_end_date AS "busiLicRegEndDate",
+		a.register_national_tax_no AS "registerNationalTaxNo",
+		a.company_status AS "companyStatus",
+		a.register_nat_tax_start_date AS "registerNatTaxStartDate",
+		a.register_nat_tax_end_date AS "registerNatTaxEndDate",
+		a.found_date AS "foundDate",
+		a.register_land_tax_no AS
+		"registerLandTaxNo",
+		a.curr_staff_num AS "currStaffNum",
+		a.register_land_tax_start_date AS "registerLandTaxStartDate",
+		a.register_land_tax_end_date AS "registerLandTaxEndDate",
+		a.last_staff_num AS "lastStaffNum",
+		a.core_business AS "coreBusiness",
+		a.company_land_use AS
+		"companyLandUse",
+		a.operate_type AS "operateType",
+		a.company_type AS "companyType",
+		a.register_capital AS "registerCapital",
+		a.PAID_CAPITAL AS "paidCapital",
+		a.company_property AS "companyProperty",
+		a.register_code AS "registerCode",
+		a.register_date AS "registerDate",
+		sa1.name AS "regProvince",
+		sa2.name AS "regCity",
+		a.corporation_card_type AS "corporationCardType",
+		sa3.name AS "regDistinct",
+		a.corporation_card_id_no AS "corporationCardIdNo",
+		a.reg_details AS "regDetails",
+		a.corporation_mobile AS "corporationMobile",
+		a.company_site AS "companySite",
+		sa4.name AS "operateProvince",
+		sa5.name AS "operateCity",
+		sa6.name AS "operateDistinct",
+		a.operate_province AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS "operateDetails",
+		a.is_addr_resi AS "isAddrResi",
+		a.category_main AS "categoryMain",
+		a.category_large AS "categoryLarge",
+		a.category_medium
+		AS "categoryMedium",
+		a.category_small AS "categorySmall",
+		a.operate_areas AS "operateAreas",
+		a.operate_period AS "operatePeriod",
+		a.main_business AS "mainBusiness",
+		a.annual_turnover AS "annualTurnover",
+		a.special_operate_permit AS "specialOperatePermit",
+		a.special_operate_start_date AS "specialOperateStartDate",
+		a.special_operate_end_date AS "specialOperateEndDate",
+		<!-- a.land_end_date AS "landEndDate", -->
+		a.is_have_houses AS "isHaveHouses",
+		a.state_of_taxation AS "stateOfTaxation",
+		a.capital_structure_com AS "capitalStructureCom",
+		a.curr_office_lifetime AS "currOfficeLifetime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.IS_EARNINGS AS "isEarnings"
+		from cre_company_info a
+		inner join sys_area sa1 on a.reg_province = sa1.id
+		inner join sys_area sa2 on a.reg_city = sa2.id
+		inner join sys_area sa3 on a.reg_distinct = sa3.id
+		inner join sys_area sa4 on a.operate_province = sa4.id
+		inner join sys_area sa5 on a.operate_city = sa5.id
+		inner join sys_area sa6 on a.operate_distinct = sa6.id
+		<if test="applyNo != null and applyNo != ''">
+			LEFT JOIN cre_apply_relation b on a.ID = b.CUST_ID
+			where b.APPLY_NO = #{applyNo} and b.ROLE_TYPE = '5'
+		</if>
+		<if test="approId != null and approId != ''">
+			LEFT JOIN cre_check_approve_union c on c.CUST_ID = a.ID
+			where c.ID = #{approId}
+		</if>
+	</select>
+	
+	<select id="findGedListByParams" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />,
+		ar.ROLE_TYPE AS "roleType"
+		FROM cre_company_info a
+		<include refid="companyInfoJoins" />
+		LEFT JOIN cre_check_approve_union c ON c.cust_id = a.id
+		<where>
+			ar.del_flag = '0'
+			and a.del_flag = '0'
+			AND ar.apply_no = #{applyNo}
+			AND ar.ROLE_TYPE in (#{roleType2},#{roleType})
+			AND c.id IS NOT NULL
+			<!-- AND (ar.ROLE_TYPE = #{roleType1} or ar.ROLE_TYPE = #{roleType2}) -->
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<!-- 批量借款企业 -->
+	<select id="findGedDanBaoListByParams" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		left join cre_apply_company_relation ar on ar.COMPANY_ID = a.id
+		LEFT JOIN cre_check_approve_union c ON c.cust_id = a.id and c.cust_id = ar.COMPANY_ID
+		<where>
+			ar.del_flag = '0'
+			and a.del_flag = '0'
+			AND ar.apply_no = #{applyNo}
+			AND c.id IS NOT NULL
+			<!-- AND (ar.ROLE_TYPE = #{roleType1} or ar.ROLE_TYPE = #{roleType2}) -->
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="getCredit" resultType="String">
+		SELECT
+			b.un_soc_credit_no
+		FROM cre_apply_relation a 
+		left join  cre_company_info b 
+		on	a.cust_id = b.id
+		<where>
+			b.del_flag = '0'
+			and a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			AND a.ROLE_TYPE = #{roleType}
+		</where>
+	</select>
+	
+	
+	<select id="getRoleIsMainOrBatch" resultType="String">
+		SELECT
+			a.role_type
+		FROM cre_apply_relation a 
+		<where>
+			a.del_flag = '0'
+			and a.del_flag = '0'
+			AND a.apply_no = #{applyNo}
+			AND a.cust_id = #{companyId}
+		</where>
+	</select>
+	
+	<select id="findBatchGuarantee" resultType="CompanyInfo">
+		SELECT
+			<include refid="companyInfoColumns" />
+		FROM
+			cre_apply_company_relation b
+		LEFT JOIN cre_company_info a ON a.ID = b.CUST_ID
+		WHERE
+			b.APPLY_NO = #{applyNo}
+		AND b.COMPANY_ID = #{companyId}
+		AND b.ROLE_TYPE = '2'
+		and b.DEL_FLAG = '0'
+	</select>
+	
+	<select id="findGuaranteeListByParams" resultType="CompanyInfo">
+		SELECT
+		<include refid="companyInfoColumns" />
+		FROM cre_company_info a
+		left join cre_apply_company_relation b on b.cust_id = a.id
+		<where>
+			 a.del_flag = '0'
+			and b.del_flag = '0'
+			AND b.apply_no = #{applyNo}
+			and b.id is not null
+			and b.role_type= '2'
+			and b.COMPANY_ID = #{companyId}
+		</where>
+		ORDER BY a.update_date DESC
+	</select>
+	
+	<select id="getCompanyNameByApproId" resultType="CompanyInfo">
+		SELECT
+			<include refid="companyInfoColumns" />
+		FROM
+			cre_check_approve_union b
+		LEFT JOIN cre_company_info a ON a.ID = b.CUST_ID
+		WHERE
+			b.id = #{approId}
+	</select>
+	
+</mapper>

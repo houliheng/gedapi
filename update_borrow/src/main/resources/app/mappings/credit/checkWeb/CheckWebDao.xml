@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.checkWeb.dao.CheckWebDao">
+    
+	<sql id="checkWebColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.role_type AS "roleType",
+		a.cust_id AS "custId",
+		a.cust_name AS "custName",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.mobile_num AS "mobileNum",
+		a.zhixing_court_gov_flg AS "zhixingCourtGovFlg",
+		a.zhixing_court_gov_desc AS "zhixingCourtGovDesc",
+		a.baidu_flg AS "baiduFlg",
+		a.baidu_desc AS "baiduDesc",
+		a.nacao_org_flg AS "nacaoOrgFlg",
+		a.nacao_org_desc AS "nacaoOrgDesc",
+		a.judgements_online_flg AS "judgementsOnlineFlg",
+		a.judgements_online_desc AS "judgementsOnlineDesc",
+		a.cfda_flg AS "cfdaFlg",
+		a.cfda_desc AS "cfdaDesc",
+		a.bjygscx_flg AS "bjygscxFlg",
+		a.bjygscx_desc AS "bjygscxDesc",
+		a.zhongdengwang_org_flg AS "zhongdengwangOrgFlg",
+		a.zhongdengwang_org_desc AS "zhongdengwangOrgDesc",
+		a.gacprc_flg AS "gacprcFlg",
+		a.gacprc_desc AS "gacprcDesc",
+		a.gsxt_saic_gov_flg AS "gsxtSaicGovFlg",
+		a.gsxt_saic_gov_desc AS "gsxtSaicGovDesc",
+		a.check_date AS "checkDate",
+		a.check_user_id AS "checkUserId",
+		a.check_user_name AS "checkUserName",
+		a.national_Promise_To_Be_Executed_Flag AS "nationalPromiseToBeExecutedFlag",
+		a.national_Promise_To_Be_Executed_Desc AS "nationalPromiseToBeExecutedDesc",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="checkWebJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckWeb">
+		SELECT 
+			<include refid="checkWebColumns"/>
+		FROM cre_check_web a
+		<include refid="checkWebJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckWeb">
+		SELECT 
+			<include refid="checkWebColumns"/>
+		FROM cre_check_web a
+		<include refid="checkWebJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_check_web a
+		<include refid="checkWebJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckWeb">
+		SELECT 
+			<include refid="checkWebColumns"/>
+		FROM cre_check_web a
+		<include refid="checkWebJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_check_web(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			id_type,
+			id_num,
+			mobile_num,
+			zhixing_court_gov_flg,
+			zhixing_court_gov_desc,
+			baidu_flg,
+			baidu_desc,
+			nacao_org_flg,
+			nacao_org_desc,
+			judgements_online_flg,
+			judgements_online_desc,
+			cfda_flg,
+			cfda_desc,
+			bjygscx_flg,
+			bjygscx_desc,
+			zhongdengwang_org_flg,
+			zhongdengwang_org_desc,
+			gacprc_flg,
+			gacprc_desc,
+			gsxt_saic_gov_flg,
+			gsxt_saic_gov_desc,
+			check_date,
+			check_user_id,
+			check_user_name,
+			national_Promise_To_Be_Executed_Flag,
+			national_Promise_To_Be_Executed_Desc,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{roleType},
+			#{custId},
+			#{custName},
+			#{idType},
+			#{idNum},
+			#{mobileNum},
+			#{zhixingCourtGovFlg},
+			#{zhixingCourtGovDesc},
+			#{baiduFlg},
+			#{baiduDesc},
+			#{nacaoOrgFlg},
+			#{nacaoOrgDesc},
+			#{judgementsOnlineFlg},
+			#{judgementsOnlineDesc},
+			#{cfdaFlg},
+			#{cfdaDesc},
+			#{bjygscxFlg},
+			#{bjygscxDesc},
+			#{zhongdengwangOrgFlg},
+			#{zhongdengwangOrgDesc},
+			#{gacprcFlg},
+			#{gacprcDesc},
+			#{gsxtSaicGovFlg},
+			#{gsxtSaicGovDesc},
+			#{checkDate},
+			#{checkUserId},
+			#{checkUserName},
+			#{nationalPromiseToBeExecutedFlag},
+			#{nationalPromiseToBeExecutedDesc},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_check_web SET 	
+			apply_no = #{applyNo},
+			role_type = #{roleType},
+			cust_id = #{custId},
+			cust_name = #{custName},
+			id_type = #{idType},
+			id_num = #{idNum},
+			mobile_num = #{mobileNum},
+			zhixing_court_gov_flg = #{zhixingCourtGovFlg},
+			zhixing_court_gov_desc = #{zhixingCourtGovDesc},
+			baidu_flg = #{baiduFlg},
+			baidu_desc = #{baiduDesc},
+			nacao_org_flg = #{nacaoOrgFlg},
+			nacao_org_desc = #{nacaoOrgDesc},
+			judgements_online_flg = #{judgementsOnlineFlg},
+			judgements_online_desc = #{judgementsOnlineDesc},
+			cfda_flg = #{cfdaFlg},
+			cfda_desc = #{cfdaDesc},
+			bjygscx_flg = #{bjygscxFlg},
+			bjygscx_desc = #{bjygscxDesc},
+			zhongdengwang_org_flg = #{zhongdengwangOrgFlg},
+			zhongdengwang_org_desc = #{zhongdengwangOrgDesc},
+			gacprc_flg = #{gacprcFlg},
+			gacprc_desc = #{gacprcDesc},
+			gsxt_saic_gov_flg = #{gsxtSaicGovFlg},
+			gsxt_saic_gov_desc = #{gsxtSaicGovDesc},
+			check_date = #{checkDate},
+			check_user_id = #{checkUserId},
+			check_user_name = #{checkUserName},
+			national_Promise_To_Be_Executed_Flag = #{nationalPromiseToBeExecutedFlag},
+			national_Promise_To_Be_Executed_Desc = #{nationalPromiseToBeExecutedDesc},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_check_web
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getCheckWebCount" resultType="String">
+	   select count(*) from CRE_CHECK_WEB t 
+	    <where>
+	        <if test="applyNo != null and applyNo != ''">
+				AND t.apply_no = #{applyNo}
+		    </if>
+		    <if test="custId != null and custId != ''">
+				AND t.cust_id = #{custId}
+		    </if>
+		    <if test="roleType != null and roleType != ''">
+				AND t.role_type = #{roleType}
+		    </if>
+	    </where>
+	</select>
+	
+	
+	<select id="getCheckWebByApplyNo" resultType="CheckWeb">
+		SELECT 
+			<include refid="checkWebColumns"/>
+		FROM cre_check_web a where a.apply_no = #{applyNo}
+	</select>
+	
+</mapper>

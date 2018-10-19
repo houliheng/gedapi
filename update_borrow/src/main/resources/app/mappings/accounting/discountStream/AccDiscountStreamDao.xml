@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.accounting.discountStream.dao.AccDiscountStreamDao">
+    
+	<sql id="accDiscountStreamColumns">
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.from_discount_account AS "fromDiscountAccount",
+		a.to_account AS "toAccount",
+		a.seq_no AS "seqNo",
+		a.discount_status AS "discountStatus",
+		a.discount_type AS "discountType",
+		a.operate_name AS "operateName",
+		a.discount_date AS "discountDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.TO_CAPITAL_NO as toCapitalNo,
+		a.FROM_CAPITAL_NO as fromCapitalNo,
+		a.DISCOUNT_FEE as discountFee
+	</sql>
+	
+	<sql id="accDiscountStreamJoins">
+	</sql>
+    
+	<select id="get" resultType="AccDiscountStream">
+		SELECT 
+			<include refid="accDiscountStreamColumns"/>
+		FROM acc_discount_stream a
+		<include refid="accDiscountStreamJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AccDiscountStream">
+		SELECT
+		a.id AS "id",
+		a.contract_no AS "contractNo",
+		a.period_num AS "periodNum",
+		a.from_discount_account AS "fromDiscountAccount",
+		a.to_account AS "toAccount",
+		a.seq_no AS "seqNo",
+		a.discount_status AS "discountStatus",
+		a.discount_type AS "discountType",
+		a.operate_name AS "operateName",
+		a.discount_date AS "discountDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.TO_CAPITAL_NO as toCapitalNo,
+		a.FROM_CAPITAL_NO as fromCapitalNo,
+		a.DISCOUNT_FEE as discountFee,
+		x.NAME AS "orgLevel4.name",
+		y.NAME AS "orgLevel3.name",
+		z.NAME AS "orgLevel2.name",
+		a.CUST_NAME as custName,
+		a.fact_discount_fee as factDiscountFee
+		from acc_discount_stream a
+		LEFT JOIN acc_contract b ON a.CONTRACT_NO = b.CONTRACT_NO
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office x ON b.ORG_LEVEL4 = x.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office y ON x.parent_id = y.id
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office z ON y.parent_id = z.id
+		INNER JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office o ON b.OPERATE_ORG_ID = o.id
+		LEFT JOIN acc_sta_repay_plan_status e on a.CONTRACT_NO = e.CONTRACT_NO and a.PERIOD_NUM = e.PERIOD_NUM
+		<where>
+			and (b.OPERATE_ORG_ID
+			= #{currentUser.company.id} OR o.parent_ids LIKE
+			concat(#{currentUser.company.parentIds},#{currentUser.company.id},',%'))
+			and a.DEL_FLAG = '0'
+			<if test="discountDate != null and discountDate !=  ''">
+				and a.DISCOUNT_DATE=#{discountDate}
+			</if>
+			<if test="contractNo != null and contractNo !=  ''">
+				and a.contract_no LIKE concat('%',#{contractNo},'%')
+			</if>
+			<if test="periodNumStatus != null and periodNumStatus !=  ''">
+				and e.REPAY_PERIOD_STATUS = #{periodNumStatus}
+			</if>
+			<if test="fromDiscountAccount != null and fromDiscountAccount !=  ''">
+				and a.FROM_DISCOUNT_ACCOUNT LIKE concat('%',#{fromDiscountAccount},'%')
+			</if>
+			
+		</where>
+		<choose>
+			<when test="contractNo != null and contractNo !=  ''">
+				ORDER BY a.period_num asc
+			</when>
+			<otherwise>
+				ORDER BY a.UPDATE_DATE desc
+			</otherwise>
+		</choose>
+		
+		<!-- <choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.PERIOD_NUM asc,a.UPDATE_DATE desc
+			</otherwise>
+		</choose> -->
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM acc_discount_stream a
+		<include refid="accDiscountStreamJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="AccDiscountStream">
+		SELECT 
+			<include refid="accDiscountStreamColumns"/>
+		FROM acc_discount_stream a
+		<include refid="accDiscountStreamJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO acc_discount_stream(
+			id,
+			contract_no,
+			period_num,
+			from_discount_account,
+			to_account,
+			seq_no,
+			discount_status,
+			discount_type,
+			operate_name,
+			discount_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			TO_CAPITAL_NO,
+			FROM_CAPITAL_NO,
+			DISCOUNT_FEE,
+			CUST_NAME,
+			fact_discount_fee
+		) VALUES (
+			#{id},
+			#{contractNo},
+			#{periodNum},
+			#{fromDiscountAccount},
+			#{toAccount},
+			#{seqNo},
+			#{discountStatus},
+			#{discountType},
+			#{operateName},
+			#{discountDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{toCapitalNo},
+			#{fromCapitalNo},
+			#{discountFee},
+			#{custName},
+			#{factDiscountFee}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE acc_discount_stream SET 	
+			contract_no = #{contractNo},
+			period_num = #{periodNum},
+			from_discount_account = #{fromDiscountAccount},
+			to_account = #{toAccount},
+			seq_no = #{seqNo},
+			discount_status = #{discountStatus},
+			discount_type = #{discountType},
+			operate_name = #{operateName},
+			discount_date = #{discountDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			TO_CAPITAL_NO = #{toCapitalNo},
+			FROM_CAPITAL_NO = #{fromCapitalNo},
+			DISCOUNT_FEE = #{discountFee}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE acc_discount_stream SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<select id="queryDisStrBycontractNoAndPer" resultType="AccDiscountStream">
+		SELECT 
+			<include refid="accDiscountStreamColumns"/>
+		FROM acc_discount_stream a
+		<include refid="accDiscountStreamJoins"/> 
+		where
+		a.CONTRACT_NO = #{contractNo} and a.PERIOD_NUM = #{periodNum} and a.DISCOUNT_STATUS = '0' and a.DEL_FLAG = '0'
+	</select>
+	
+	<select id="getByContract" resultType="AccDiscountStream">
+		SELECT 
+			<include refid="accDiscountStreamColumns"/>
+		FROM acc_discount_stream a
+		<include refid="accDiscountStreamJoins"/> 
+		where
+		a.CONTRACT_NO = #{contractNo} and a.DISCOUNT_STATUS = '0' and a.DEL_FLAG = '0'
+	</select>
+	
+	
+	
+	<select id="findContractDiscountDetail" resultType="com.resoft.accounting.discountStream.entity.ContractDetailVo">
+		SELECT
+	a.cust_name AS custName,
+	a.contract_no AS contractNo,
+	SUM(
+		IFNULL(c.SERVICE_FEE,0)+IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) + (
+			CASE
+			WHEN e.FINE_AMOUNT IS NOT NULL THEN
+				IFNULL(c.OVERDUE_PENALTY, 0)
+			ELSE
+				0.00
+			END
+		) + IFNULL(e.FINE_AMOUNT, 0) - IFNULL(d.FACT_REPAY_AMOUNT, 0) - IFNULL(d.FACT_PENALTY_AMOUNT, 0) - IFNULL(d.FACT_FINE_AMOUNT, 0) - IFNULL(f.PENALTY_EXEMPT_AMOUNT, 0) - IFNULL(f.FINE_EXEMPT_AMOUNT, 0) - IFNULL(j.DISCOUNT_FEE, 0)
+	) AS stayMoney,
+	SUM(
+		IFNULL(d.FACT_REPAY_AMOUNT, 0) + IFNULL(d.FACT_PENALTY_AMOUNT, 0) + IFNULL(d.FACT_FINE_AMOUNT, 0)
+	) AS factMoney,
+	q.REPAY_CONTRACT_STATUS AS borrowLoanStatus,
+	SUM(IFNULL(j.DISCOUNT_FEE, 0)) AS discountFee,
+	SUM(
+		IFNULL(h.FACT_DISCOUNT_FEE, 0)
+	) AS factDiscountFee
+FROM
+	acc_contract a
+LEFT JOIN acc_repay_plan c ON a.contract_no = c.CONTRACT_NO
+LEFT JOIN acc_sta_repay_plan_status d ON c.CONTRACT_NO = d.CONTRACT_NO
+AND c.PERIOD_NUM = d.PERIOD_NUM
+LEFT JOIN acc_sta_overdue_status e ON e.CONTRACT_NO = c.contract_no
+AND c.PERIOD_NUM = e.PERIOD_NUM
+LEFT JOIN acc_sta_penalty_fine_exempt f ON f.CONTRACT_NO = c.CONTRACT_NO
+AND f.PERIOD_NUM = c.PERIOD_NUM
+LEFT JOIN acc_sta_contract_status q ON a.CONTRACT_NO = q.CONTRACT_NO
+LEFT JOIN acc_discount j ON c.CONTRACT_NO = j.CONTRACT_NO
+AND j.PERIOD_NUM = c.PERIOD_NUM
+LEFT JOIN acc_discount_stream h ON j.CONTRACT_NO = h.CONTRACT_NO
+AND j.PERIOD_NUM = h.PERIOD_NUM
+where a.contract_no = #{contractNo}
+GROUP BY
+	a.CONTRACT_NO
+	</select>
+	
+	
+	
+	<select id="queryDiscountDetails" resultType="com.resoft.accounting.discountStream.entity.PeriodDiscountDetail">
+		SELECT
+	a.contract_no AS contractNo,
+	IFNULL(c.SERVICE_FEE,0)+IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) + (
+			CASE
+			WHEN e.FINE_AMOUNT IS NOT NULL THEN
+				IFNULL(c.OVERDUE_PENALTY, 0)
+			ELSE
+				0.00
+			END
+		) + IFNULL(e.FINE_AMOUNT, 0) - IFNULL(d.FACT_REPAY_AMOUNT, 0) - IFNULL(d.FACT_PENALTY_AMOUNT, 0) - IFNULL(d.FACT_FINE_AMOUNT, 0) - IFNULL(f.PENALTY_EXEMPT_AMOUNT, 0) - IFNULL(f.FINE_EXEMPT_AMOUNT, 0) - IFNULL(j.DISCOUNT_FEE, 0)
+	 AS stayMoney,
+		IFNULL(d.FACT_REPAY_AMOUNT, 0) + IFNULL(d.FACT_PENALTY_AMOUNT, 0) + IFNULL(d.FACT_FINE_AMOUNT, 0)
+	 AS factMoney,
+	d.REPAY_PERIOD_STATUS  AS periodStatus,
+	IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0)
+	 AS repayMoney,
+	IFNULL(j.DISCOUNT_FEE, 0) AS discountFee,
+	IFNULL(h.FACT_DISCOUNT_FEE, 0) AS factDiscountFee,
+	IFNULL(c.SERVICE_FEE,0)+IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) + (
+			CASE
+			WHEN e.FINE_AMOUNT IS NOT NULL THEN
+				IFNULL(c.OVERDUE_PENALTY, 0)
+			ELSE
+				0.00
+			END
+		) + IFNULL(e.FINE_AMOUNT, 0) as totalMoney,
+			IFNULL(c.CAPITAL_AMOUNT, 0) + IFNULL(c.INTEREST_AMOUNT, 0) + IFNULL(c.MANAGEMENT_FEE, 0) as capitalInte,
+		c.DEDUCT_DATE as deductDate,
+		h.DISCOUNT_DATE as discountDate,
+		c.PERIOD_NUM as periodNum,
+		CASE
+			WHEN h.DISCOUNT_STATUS = '0' THEN
+				'已贴息'
+			ELSE
+				'未贴息'
+			END as discountStatus
+FROM
+	acc_contract a
+LEFT JOIN acc_repay_plan c ON a.contract_no = c.CONTRACT_NO
+LEFT JOIN acc_sta_repay_plan_status d ON c.CONTRACT_NO = d.CONTRACT_NO
+AND c.PERIOD_NUM = d.PERIOD_NUM
+LEFT JOIN acc_sta_overdue_status e ON e.CONTRACT_NO = c.contract_no
+AND c.PERIOD_NUM = e.PERIOD_NUM
+LEFT JOIN acc_sta_penalty_fine_exempt f ON f.CONTRACT_NO = c.CONTRACT_NO
+AND f.PERIOD_NUM = c.PERIOD_NUM
+LEFT JOIN acc_sta_contract_status q ON a.CONTRACT_NO = q.CONTRACT_NO
+LEFT JOIN acc_discount j ON c.CONTRACT_NO = j.CONTRACT_NO
+AND j.PERIOD_NUM = c.PERIOD_NUM
+LEFT JOIN acc_discount_stream h ON j.CONTRACT_NO = h.CONTRACT_NO
+AND j.PERIOD_NUM = h.PERIOD_NUM
+where a.contract_no = #{contractNo}
+GROUP BY
+	c.CONTRACT_NO,c.PERIOD_NUM
+	</select>
+</mapper>

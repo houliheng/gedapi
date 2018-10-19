@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.repayPlan.dao.RepayPlanDao">
+    
+	<sql id="repayPlanColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.contract_no AS "contractNo",
+		a.duebill_id AS "duebillId",
+		a.period_num AS "periodNum",
+		a.repay_amount AS "repayAmount",
+		a.interest_amount AS "interestAmount",
+		a.service_fee AS "serviceFee",
+		a.management_fee AS "managementFee",
+		a.capital_amount AS "capitalAmount",
+		a.deduct_date AS "deductDate",
+		a.overdue_penalty AS "overduePenalty",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.task_def_key AS "taskDefKey",
+		
+		a.bid_capital_amount AS "bidCapitalAmount",
+		a.bid_interest_amount AS "bidInterestAmount",
+		a.bid_repay_amount AS "bidRepayAmount",
+		a.dif_capital_amount AS "difCapitalAmount",
+		a.dif_interest_amount AS "difInterestAmount"
+		
+	</sql>
+	
+	<sql id="repayPlanJoins">
+	</sql>
+    
+	<select id="get" resultType="RepayPlan">
+		SELECT 
+			<include refid="repayPlanColumns"/>
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getUnderRepay" resultType="com.resoft.outinterface.rest.newged.entity.OrderContractReqForm">
+		SELECT
+		   sum(ifnull(a.management_fee,0)) AS "accountManageFee"
+	  FROM cre_repay_plan a
+	  WHERE a.task_def_key = #{taskDefKey}  and a.apply_no =#{applyNo} order by a.period_num
+	 </select>
+	
+	<select id="findList" resultType="RepayPlan">
+		SELECT 
+			<include refid="repayPlanColumns"/>
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="getByContractNo" resultType="com.resoft.outinterface.rest.ged.entity.response.GedRepayPlanResponse">
+		SELECT 
+			a.MANAGEMENT_FEE AS "managementFee",
+			a.PERIOD_NUM AS "periodNum",
+			a.DEDUCT_DATE AS "deductDate",
+			a.SERVICE_FEE AS "serviceFee"
+		FROM cre_repay_plan a
+		where a.apply_no=#{contractNo}  and a.task_def_key = #{taskDefKey} 
+	</select>
+	
+	
+	<select id="getRepayAndContract" resultType="com.resoft.outinterface.rest.newged.entity.OrderContractReqForm">
+		SELECT 
+		   sum(ifnull(a.MANAGEMENT_FEE,0)) AS "accountManageFee",
+		   sum(ifnull(a.SERVICE_FEE,0))  AS "serviceFee",
+		   b.CONTRACT_PROVINCE as "contractProvince",
+		   b.CONTRACT_CITY AS "contractCity",
+		   b.CONTRACT_DISTINCT AS "contractDistinct"
+	  FROM cre_repay_plan a
+	  left join cre_contract b on a.contract_no = b.contract_no
+	  where a.apply_no=#{applyNo}  and a.task_def_key = #{taskDefKey} 
+	</select>
+	
+	
+	
+	
+	<select id="findAllList" resultType="RepayPlan">
+		SELECT 
+			<include refid="repayPlanColumns"/>
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_repay_plan(
+			id,
+			apply_no,
+			contract_no,
+			duebill_id,
+			period_num,
+			repay_amount,
+			interest_amount,
+			service_fee,
+			management_fee,
+			capital_amount,
+			deduct_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			
+			bid_capital_amount,
+			bid_interest_amount,
+			bid_repay_amount,
+			dif_capital_amount,
+			dif_interest_amount 
+			
+			
+		) VALUES (
+			#{id},
+			#{applyNo},
+			#{contractNo},
+			#{duebillId},
+			#{periodNum},
+			#{repayAmount},
+			#{interestAmount},
+			#{serviceFee},
+			#{managementFee},
+			#{capitalAmount},
+			#{deductDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			
+			#{bidCapitalAmount},
+			#{bidInterestAmount},
+			#{bidRepayAmount},
+			#{difCapitalAmount},
+			#{difInterestAmout}
+			
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_repay_plan SET 	
+			id = #{id},
+			apply_no = #{applyNo},
+			contract_no = #{contractNo},
+			duebill_id = #{duebillId},
+			period_num = #{periodNum},
+			repay_amount = #{repayAmount},
+			interest_amount = #{interestAmount},
+			service_fee = #{serviceFee},
+			management_fee = #{managementFee},
+			capital_amount = #{capitalAmount},
+			deduct_date = #{deductDate},
+			create_by = #{createBy.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cre_repay_plan
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getRepayPlanByApplyNo" resultType="RepayPlan">
+		SELECT 
+			<include refid="repayPlanColumns"/>
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		WHERE a.apply_no = #{applyNo} 
+		<if test="taskDefKey != null and taskDefKey != ''">
+		  and a.task_def_key = #{taskDefKey}
+		</if>
+		 order by a.period_num 
+	</select>
+	
+	<select id="getRepayPlanByApplyNoAndTaskDefKey" resultType="RepayPlan">
+		SELECT 
+			<include refid="repayPlanColumns"/>
+		FROM cre_repay_plan a
+		<include refid="repayPlanJoins"/>
+		WHERE a.task_def_key = #{taskDefKey}  and a.apply_no =#{applyNo} order by a.period_num 
+	</select>
+	
+	<insert id="insertRepayPlanList" parameterType="RepayPlan">
+		INSERT INTO cre_repay_plan(
+			id,
+			apply_no,
+			contract_no,
+			period_num,
+			repay_amount,
+			interest_amount,
+			service_fee,
+			management_fee,
+			capital_amount,
+			deduct_date,
+			overdue_penalty,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			task_def_key,
+			bid_capital_amount,
+			bid_interest_amount,
+			bid_repay_amount,
+			dif_capital_amount,
+			dif_interest_amount 
+			
+		) VALUES
+		
+		<foreach item="repayPlan" collection="repayPlanList" index="index" separator=",">
+		 (
+			#{repayPlan.id},
+			#{repayPlan.applyNo},
+			#{repayPlan.contractNo},
+			#{repayPlan.periodNum},
+			#{repayPlan.repayAmount},
+			#{repayPlan.interestAmount},
+			#{repayPlan.serviceFee},
+			#{repayPlan.managementFee},
+			#{repayPlan.capitalAmount},
+			#{repayPlan.deductDate},
+			#{repayPlan.overduePenalty},
+			#{repayPlan.createBy.id},
+			#{repayPlan.createDate},
+			#{repayPlan.updateBy.id},
+			#{repayPlan.updateDate}, 
+			#{repayPlan.taskDefKey},
+			#{repayPlan.bidCapitalAmount},
+			#{repayPlan.bidInterestAmount},
+			#{repayPlan.bidRepayAmount},
+			#{repayPlan.difCapitalAmount},
+			#{repayPlan.difInterestAmount}
+			 
+		)
+		</foreach>
+	</insert>
+	
+	<update id="deleteRepayPlanByApplyNoAndContractNo">
+		DELETE FROM cre_repay_plan
+		WHERE apply_no = #{applyNo} and (contract_no is null or contract_no = '')
+	</update>
+	
+	<update id="deleteRepayPlanByApplyNo">
+		DELETE FROM cre_repay_plan
+		WHERE apply_no = #{applyNo}
+		<if test="taskDefKey != null and taskDefKey != ''">
+		   and task_def_key = #{taskDefKey}
+		</if>
+	</update>
+	
+	<select id="getOverduePenalty" resultType="java.util.Map">
+		SELECT 
+		value as "value",label as "label",type as "type"
+		FROM sys_dict 
+		WHERE type like 'OVERDUEPENALTY%' order by sort asc
+	</select>
+	
+	<select id="listWithContractNoList" resultType="RepayPlan">
+		select
+			contract_no as "contractNo",
+			period_num as "periodNum",
+			deduct_date as "deductDate",
+			repay_amount as "repayAmount"
+		from ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_repay_plan
+		<where>
+			<choose>
+				<when test="contractNoList != null and contractNoList.size() > 0">
+					contract_no in
+					<foreach collection="contractNoList" item="contractNo" index="index"
+							 open="(" separator="," close=")">
+						#{contractNo}
+					</foreach>
+				</when>
+				<otherwise>
+					0 = 1
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+</mapper>

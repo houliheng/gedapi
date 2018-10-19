@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.checkDaily.dao.CheckDailyAllocateDao">
+    
+	<sql id="checkDailyAllocateColumns">
+		a.contract_no AS "contractNo",
+		a.allocate_by_id AS "allocateById",
+		a.allocate_by AS "allocateBy",
+		a.checked_by_id AS "checkedById",
+		a.checked_by AS "checkedBy",
+		a.allocate_type AS "allocateType"
+	</sql>
+	
+	<sql id="checkDailyAllocateJoins">
+	</sql>
+    
+	<select id="get" resultType="CheckDailyAllocate">
+		SELECT 
+			<include refid="checkDailyAllocateColumns"/>
+		FROM pl_check_daily_allocate a
+		<include refid="checkDailyAllocateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CheckDailyAllocate">
+		SELECT 
+			<include refid="checkDailyAllocateColumns"/>
+		FROM pl_check_daily_allocate a
+		<include refid="checkDailyAllocateJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM pl_check_daily_allocate a
+		<include refid="checkDailyAllocateJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="CheckDailyAllocate">
+		SELECT 
+			<include refid="checkDailyAllocateColumns"/>
+		FROM pl_check_daily_allocate a
+		<include refid="checkDailyAllocateJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pl_check_daily_allocate(
+			id,
+			check_daily_id,
+			contract_no,
+			allocate_by_id,
+			allocate_by,
+			checked_by_id,
+			checked_by,
+			allocate_type
+		) VALUES (
+			#{id},
+			#{checkDailyId},
+			#{contractNo},
+			#{allocateById},
+			#{allocateBy},
+			#{checkedById},
+			#{checkedBy},
+			#{allocateType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pl_check_daily_allocate SET 	
+			contract_no = #{contractNo},
+			allocate_by_id = #{allocateById},
+			allocate_by = #{allocateBy},
+			checked_by_id = #{checkedById},
+			checked_by = #{checkedBy},
+			allocate_type = #{allocateType}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateAllocateType">
+		UPDATE pl_check_daily_allocate SET 	
+			allocate_type = #{allocateType},
+			checked_date = #{checkedDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pl_check_daily_allocate
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

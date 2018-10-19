@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVCustWorkInfoDao">
+    
+	<sql id="sVCustWorkInfoColumns">
+		a.id AS "id",
+		a.id_type AS "idType",
+		a.id_num AS "idNum",
+		a.company_name AS "companyName",
+		a.com_nature AS "comNature",
+		a.post_type AS "postType",
+		a.post_level AS "postLevel",
+		a.post_name AS "postName",
+		a.department AS "department",
+		a.com_phone_ar AS "comPhoneAr",
+		a.com_phone_sb AS "comPhoneSb",
+		a.com_phone_ex AS "comPhoneEx",
+		a.work_in_date AS "workInDate",
+		a.salary_mode AS "salaryMode",
+		a.month_income AS "monthIncome",
+		a.other_month_income AS "otherMonthIncome",
+		a.salart_day AS "salartDay",
+		a.company_province AS "companyProvince",
+		a.company_city AS "companyCity",
+		a.company_distinct AS "companyDistinct",
+		a.company_details AS "companyDetails",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="sVCustWorkInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustWorkInfo">
+		SELECT 
+			<include refid="sVCustWorkInfoColumns"/>
+		FROM ift_sv_cust_work_info a
+		<include refid="sVCustWorkInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustWorkInfo">
+		SELECT 
+			<include refid="sVCustWorkInfoColumns"/>
+		FROM ift_sv_cust_work_info a
+		<include refid="sVCustWorkInfoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM ift_sv_cust_work_info a
+		<include refid="sVCustWorkInfoJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCustWorkInfo">
+		SELECT 
+			<include refid="sVCustWorkInfoColumns"/>
+		FROM ift_sv_cust_work_info a
+		<include refid="sVCustWorkInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_cust_work_info(
+			id,
+			id_type,
+			id_num,
+			company_name,
+			com_nature,
+			post_type,
+			post_level,
+			post_name,
+			department,
+			com_phone_ar,
+			com_phone_sb,
+			com_phone_ex,
+			work_in_date,
+			salary_mode,
+			month_income,
+			other_month_income,
+			salart_day,
+			company_province,
+			company_city,
+			company_distinct,
+			company_details,
+			create_date
+		) VALUES 
+		<foreach item="custWorkInfo" collection="list" index="index" separator=",">
+		(
+			REPLACE(UUID(),'-',''),
+			#{custWorkInfo.idType},
+			#{custWorkInfo.idNum},
+			#{custWorkInfo.companyName},
+			#{custWorkInfo.comNature},
+			#{custWorkInfo.postType},
+			#{custWorkInfo.postLevel},
+			#{custWorkInfo.postName},
+			#{custWorkInfo.department},
+			#{custWorkInfo.comPhoneAr},
+			#{custWorkInfo.comPhoneSb},
+			#{custWorkInfo.comPhoneEx},
+			#{custWorkInfo.workInDate},
+			#{custWorkInfo.salaryMode},
+			#{custWorkInfo.monthIncome},
+			#{custWorkInfo.otherMonthIncome},
+			#{custWorkInfo.salartDay},
+			#{custWorkInfo.companyProvince},
+			#{custWorkInfo.companyCity},
+			#{custWorkInfo.companyDistinct},
+			#{custWorkInfo.companyDetails},
+			CURRENT_TIMESTAMP
+		)
+		</foreach>
+		
+	</insert>
+	
+	<update id="update">
+		UPDATE ift_sv_cust_work_info SET 	
+			id_type = #{idType},
+			id_num = #{idNum},
+			company_name = #{companyName},
+			com_nature = #{comNature},
+			post_type = #{postType},
+			post_level = #{postLevel},
+			post_name = #{postName},
+			department = #{department},
+			com_phone_ar = #{comPhoneAr},
+			com_phone_sb = #{comPhoneSb},
+			com_phone_ex = #{comPhoneEx},
+			work_in_date = #{workInDate},
+			salary_mode = #{salaryMode},
+			month_income = #{monthIncome},
+			other_month_income = #{otherMonthIncome},
+			salart_day = #{salartDay},
+			company_province = #{companyProvince},
+			company_city = #{companyCity},
+			company_distinct = #{companyDistinct},
+			company_details = #{companyDetails}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ift_sv_cust_work_info
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.postloan.debtColletion.dao.DebtCollectionDao">
+
+	<sql id="debtCollectionColumns">
+		A.ID AS "id",
+		a.contract_no AS "contractNo",
+		a.data_dt AS
+		"dataDt",
+		a.cust_name AS "custName",
+		a.risk_lelve AS "riskLelve",
+		ifnull(a.collection_times,0) AS "collectionTimes",
+		a.ta_overdue_times
+		AS
+		"taOverdueTimes",
+		a.contract_amount AS "contractAmount",
+		a.curr_overdue_amount AS "currOverdueAmount",
+		o.name AS
+		"operateOrgName",
+		a.operate_org_id AS
+		"operateOrgId",
+		a.curr_collection_type AS
+		"currCollectionType",
+		a.curr_collection_from
+		AS "currCollectionFrom",
+		a.curr_collection_status AS
+		"currCollectionStatus",
+		a.curr_collector AS
+		"currCollector"
+	</sql>
+
+	<sql id="debtCollectionJoins">
+		left join
+		${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.sys_office
+		o on a.operate_org_id = o.id
+	</sql>
+
+	<select id="get" resultType="DebtCollection">
+		SELECT
+		<include refid="debtCollectionColumns" />
+		FROM pl_debt_collection a
+		<include refid="debtCollectionJoins" />
+		WHERE a.id = #{id}
+		and a.curr_collection_status != '3'
+	</select>
+
+	<select id="getDebtCollectionByLegalToClean" resultType="DebtCollection">
+		SELECT
+		<include refid="debtCollectionColumns" />
+		FROM pl_debt_collection a
+		<include refid="debtCollectionJoins" />
+		WHERE 
+		a.contract_no = #{contractNo}
+		and a.curr_collection_status = #{currCollectionStatus}
+		and a.curr_collection_type = #{currCollectionType}
+	</select>
+
+
+	<select id="findList" resultType="DebtCollection">
+		SELECT
+		<include refid="debtCollectionColumns" />
+		FROM pl_debt_collection a
+		<include refid="debtCollectionJoins" />
+		<where>
+			and (a.OPERATE_ORG_ID = #{operateOrgId} OR o.parent_ids LIKE
+			concat('%',#{operateOrgId},',%'))
+			<if test="riskLelve != null and riskLelve != ''">
+				and a.RISK_LELVE = #{riskLelve}
+			</if>
+			<if test=" currCollectionStatus != null and currCollectionStatus != '' ">
+				and a.CURR_COLLECTION_STATUS = #{currCollectionStatus}
+			</if>
+			<if
+				test=" currCollectionType != null and currCollectionType != '' and currCollectionType != 2 ">
+				and a.curr_collection_type = #{currCollectionType}
+			</if>
+			<if test="currCollectionType == 2 ">
+				and a.curr_collection_type in ('1','2')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="currCollector != null and currCollector != ''">
+				and a.curr_collector = #{currCollector}
+			</if>
+		</where>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(*)
+		FROM pl_debt_collection a
+		<include refid="debtCollectionJoins" />
+		<where>
+			and (a.OPERATE_ORG_ID = #{operateOrgId} OR o.parent_ids LIKE
+			concat('%',#{operateOrgId},',%'))
+			<if test="riskLelve != null and riskLelve != ''">
+				and a.RISK_LELVE = #{riskLelve}
+			</if>
+			<if test=" currCollectionStatus != null and currCollectionStatus != '' ">
+				and a.CURR_COLLECTION_STATUS = #{currCollectionStatus}
+			</if>
+			<if
+				test=" currCollectionType != null and currCollectionType != '' and currCollectionType != 2 ">
+				and a.curr_collection_type = #{currCollectionType}
+			</if>
+			<if test="currCollectionType == 2 ">
+				and a.curr_collection_type in ('1','2')
+			</if>
+			<if test="contractNo != null and contractNo != ''">
+				and a.contract_no like concat(#{contractNo},'%')
+			</if>
+			<if test="custName != null and custName != ''">
+				and a.cust_name like concat('%',#{custName},'%')
+			</if>
+			<if test="currCollector != null and currCollector != ''">
+				and a.curr_collector = #{currCollector}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="DebtCollection">
+		SELECT
+		<include refid="debtCollectionColumns" />
+		FROM pl_debt_collection a
+		<include refid="debtCollectionJoins" />
+		where a.curr_collection_type = #{currCollectionType}
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pl_debt_collection(
+		id,
+		contract_no,
+		data_dt,
+		cust_name,
+		risk_lelve,
+		collection_times,
+		ta_overdue_times,
+		contract_amount,
+		curr_overdue_amount,
+		operate_org_id,
+		curr_collection_type,
+		curr_collection_from,
+		curr_collection_status,
+		curr_collector
+		) VALUES (
+		#{id},
+		#{contractNo},
+		#{dataDt},
+		#{custName},
+		#{riskLelve},
+		#{collectionTimes},
+		#{taOverdueTimes},
+		#{contractAmount},
+		#{currOverdueAmount},
+		#{operateOrgId},
+		#{currCollectionType},
+		#{currCollectionFrom},
+		#{currCollectionStatus},
+		#{currCollector}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pl_debt_collection SET
+		data_dt = #{dataDt},
+		cust_name = #{custName},
+		risk_lelve = #{riskLelve},
+		collection_times =
+		#{collectionTimes},
+		ta_overdue_times = #{taOverdueTimes},
+		contract_amount = #{contractAmount},
+		curr_overdue_amount =
+		#{currOverdueAmount},
+		operate_org_id = #{operateOrgId},
+		curr_collection_type = #{currCollectionType},
+		curr_collection_from =
+		#{currCollectionFrom},
+		curr_collection_status =
+		#{currCollectionStatus},
+		curr_collector = #{currCollector}
+		WHERE
+		contract_no = #{contractNo}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pl_debt_collection
+		WHERE contract_no =
+		#{contractNo}
+	</update>
+
+	<update id="updateCollectionStatusAndType">
+		update pl_debt_collection
+		SET DATA_DT=CURDATE()
+		,COLLECT_BY = #{collectBy}
+		,curr_collector = #{currCollector}
+		,CURR_COLLECTION_STATUS="2"
+		WHERE
+		id=#{id}
+	</update>
+
+	<update id="updateToDoDebtCollection">
+		update pl_debt_collection set
+		CURR_COLLECTOR = #{currCollector}
+		<if test="riskLelve != null and riskLelve != ''">
+			,RISK_LELVE = #{riskLelve}
+		</if>
+		<if test="newCollectionType != null and newCollectionType != ''">
+			,CURR_COLLECTION_TYPE = #{newCollectionType}
+		</if>
+		<if test="currCollectionFrom != null and currCollectionFrom != ''">
+			,CURR_COLLECTION_FROM = #{currCollectionFrom}
+		</if>
+		<if test="currCollectionStatus != null and currCollectionStatus != ''">
+			,CURR_COLLECTION_STATUS = #{currCollectionStatus}
+		</if>
+		where id = #{id}
+	</update>
+
+	<update id="updateCurrCollectionStatus">
+		update pl_debt_collection set CURR_COLLECTION_STATUS
+		=
+		#{currCollectionStatus}
+		<if test="collectionTimes != null and collectionTimes != '' ">
+			,COLLECTION_TIMES = #{collectionTimes}
+		</if>
+		where
+		id = #{debtId}
+	</update>
+
+</mapper>

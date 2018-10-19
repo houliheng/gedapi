@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.videoDir.dao.VideoUploadDao">
+
+	<sql id="videoDirColumns">
+		a.id AS "id",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.file_dir AS "fileDir",
+		a.type AS "type",
+		a.del_flag AS "delFlag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="videoDirJoins">
+	</sql>
+
+	<select id="get" resultType="VideoDir">
+		SELECT
+			<include refid="videoDirColumns"/>
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		WHERE a.id = #{id}
+		UNION
+		SELECT
+			<include refid="videoDirColumns"/>
+		FROM cre_video_cust_dir a
+		<include refid="videoDirJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="VideoDir">
+		SELECT
+			a.id AS "id",
+			a.parent_id AS "parent.id",
+			a.parent_ids AS "parentIds",
+			'' AS "applyNo",
+			a.name AS "name",
+			a.sort AS "sort",
+			a.file_dir AS "fileDir",
+			a.type AS "type"
+		FROM cre_video_dir a
+		WHERE
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+
+		UNION
+		SELECT
+			b.id AS "id",
+			b.parent_id AS "parent.id",
+			b.parent_ids AS "parentIds",
+			b.apply_no AS "applyNo",
+			b.name AS "name",
+			b.sort AS "sort",
+			b.file_dir AS "fileDir",
+			b.type AS "type"
+		FROM cre_video_cust_dir b
+
+		WHERE
+			b.del_flag = #{DEL_FLAG_NORMAL}
+			AND b.type = #{type}
+			AND b.apply_no = #{applyNo}
+
+		<!-- ORDER BY sort -->
+	</select>
+
+	<select id="getIdByName" resultType="String">
+		SELECT
+			a.id AS "id"
+		FROM cre_video_dir a
+		WHERE
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.type = #{type}
+		AND a.name LIKE
+			<include refid="SYS_PUBLICTAG.stringConcatePrefix"/>#{name}<include refid="SYS_PUBLICTAG.stringConcateSuffix"/>
+	</select>
+
+	<select id="getFileNameById" resultType="String">
+		SELECT
+			a.name
+		FROM cre_video_cust_dir a
+		WHERE
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.type = #{type}
+		AND a.id = #{parent.id}
+
+	</select>
+
+	<select id="getNumByName" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM cre_video_cust_dir a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		AND a.type = #{type}
+		AND a.apply_no = #{applyNo}
+		AND a.name LIKE CONCAT('%', #{name} , '%')
+	</select>
+
+	<select id="findAllList" resultType="VideoDir">
+		SELECT
+			<include refid="videoDirColumns"/>
+		FROM cre_video_dir a
+		<include refid="videoDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+			<if test="id != null and id != ''">
+				AND (a.parent_Id = #{id}
+				OR a.id = #{id})
+			</if>
+		</where>
+		ORDER BY a.sort
+	</select>
+
+	<select id="findCustList" resultType="VideoDir">
+		SELECT
+			<include refid="videoDirColumns"/>,
+			a.apply_no AS applyNo
+		FROM cre_video_cust_dir a
+		<include refid="videoDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+			AND a.apply_no = #{applyNo}
+			AND a.parent_Ids = '-1'
+			<if test="id != null and id != ''">
+				AND (a.parent_Id = #{id}
+				OR a.id = #{id})
+			</if>
+		</where>
+		ORDER BY a.sort
+	</select>
+	
+	<select id="isExist" resultType="VideoDir">
+		SELECT
+			a.id AS "id",
+			a.name AS "name",
+			a.file_dir AS "fileDir"
+		FROM cre_video_cust_dir a
+		<include refid="videoDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.type = #{type}
+			AND a.apply_no = #{applyNo}
+			AND a.name = #{name}
+			AND a.parent_id = '0'
+		</where>
+		UNION
+		SELECT
+			b.id AS "id",
+			b.name AS "name",
+			b.file_dir AS "fileDir"
+		FROM cre_video_dir b
+		<include refid="videoDirJoins"/>
+		<where>
+			b.del_flag = #{DEL_FLAG_NORMAL}
+			AND b.type = #{type}
+			AND b.name = #{name}
+			AND b.parent_id = '0'
+		</where>
+	</select>
+
+	<insert id="insertColumn" parameterType="VideoDir">
+		INSERT INTO cre_video_cust_dir(
+			id,
+			parent_id,
+			parent_ids,
+			apply_no,
+			name,
+			sort,
+			file_dir,
+			type,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES
+		<foreach item="videoDir" collection="videoDirList" index="index" separator=",">
+		 (
+			#{videoDir.id},
+			#{videoDir.parent.id},
+			#{videoDir.parentIds},
+			#{videoDir.applyNo},
+			#{videoDir.name},
+			#{videoDir.sort},
+			#{videoDir.fileDir},
+			#{videoDir.type},
+			#{videoDir.delFlag},
+			#{videoDir.createBy.id},
+			#{videoDir.createDate},
+			#{videoDir.updateBy.id},
+			#{videoDir.updateDate}
+		)
+		</foreach>
+	</insert>
+
+	<insert id="insert">
+		INSERT INTO cre_video_cust_dir(
+			id,
+			parent_id,
+			parent_ids,
+			apply_no,
+			name,
+			sort,
+			file_dir,
+			type,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES(
+			#{id},
+			#{parent.id},
+			#{parentIds},
+			#{applyNo},
+			#{name},
+			#{sort},
+			#{fileDir},
+			#{type},
+			#{delFlag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cre_video_dir SET
+			parent_id = #{parent.id},
+			name = #{name},
+			sort = #{sort},
+			file_dir = #{fileDir},
+			type = #{type}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE cre_video_dir SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<update id="lockVideoMessageByApplyNoAndTaskDefKey">
+		UPDATE cre_video_path SET
+			LOCK_FLAG = #{lockFlag}
+		WHERE APPLY_NO = #{applyNo} and TASK_DEF_KEY = #{taskDefKey}
+	</update>
+</mapper>

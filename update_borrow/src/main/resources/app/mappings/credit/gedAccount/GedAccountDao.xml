@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.credit.GedAccount.dao.GedAccountDao">
+    
+	<sql id="gedAccountColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.company_bank_of_deposit AS "companyBankOfDeposit",
+		a.company_account AS "companyAccount",
+		a.company_bank_branch_name AS "companyBankBranchName",
+		a.province_name AS "provinceName",
+		a.city_name AS "cityName",
+		a.status AS "status",
+		a.create_id AS "createId",
+		a.create_time AS "createTime",
+		a.modify_id AS "modifyId",
+		a.modify_time AS "modifyTime",
+		a.com_id_num as comIdNum,
+		a.legal_per_phone as legalPerPhone,
+		a.LEGAL_PER_NAME as legalPerName,
+		a.COMPANY_NAME as companyName,
+		a.LEGAL_PER_NUM as legalPerNum,
+		a.cust_id as custId
+	</sql>
+	
+	<sql id="gedAccountJoins">
+		LEFT JOIN sys_user u2 ON u2.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		<include refid="gedAccountJoins"/>
+		WHERE a.id = #{id} 
+	</select>
+
+	<select id="getByApplyNo" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		<include refid="gedAccountJoins"/>
+		inner join cre_under_cust_info b on a.LEGAL_PER_PHONE = b.MOBILE_NUM
+		WHERE b.apply_no = #{applyNo}
+	</select>
+
+	<select id="findList" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		<include refid="gedAccountJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getCount" resultType="long">
+		SELECT 
+			count(a.id)
+		FROM cre_ged_account a
+		<include refid="gedAccountJoins"/>
+		<where>
+			
+		</where>
+	</select>
+	
+	<select id="findAllList" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		<include refid="gedAccountJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cre_ged_account(
+			id,
+			user_id,
+			company_bank_of_deposit,
+			company_account,
+			company_bank_branch_name,
+			province_name,
+			city_name,
+			status,
+			create_id,
+			modify_id,
+			com_id_num,
+		    legal_per_phone,
+		    LEGAL_PER_NAME,
+		    COMPANY_NAME,
+		    LEGAL_PER_NUM,
+		    CREATE_TIME,
+		    cust_id
+		) VALUES (
+			#{id},
+			#{userId},
+			#{companyBankOfDeposit},
+			#{companyAccount},
+			#{companyBankBranchName},
+			#{provinceName},
+			#{cityName},
+			#{status},
+			#{createId},
+			#{modifyId},
+			#{comIdNum},
+		    #{legalPerPhone},
+			#{legalPerName},
+			#{companyName},
+			#{legalPerNum},
+			#{createTime},
+			#{custId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cre_ged_account SET 	
+			user_id = #{userId},
+			company_bank_of_deposit = #{companyBankOfDeposit},
+			company_account = #{companyAccount},
+			company_bank_branch_name = #{companyBankBranchName},
+			province_name = #{provinceCode},
+			city_name = #{cityCode},
+			status = #{status},
+			create_id = #{createId},
+			create_time = #{createTime},
+			modify_id = #{modifyId},
+			modify_time = #{modifyTime},
+			com_id_num = #{comIdNum},
+		    legal_per_phone = #{legalPerPhone},
+		    LEGAL_PER_NAME =#{legalPerName},
+		    COMPANY_NAME = #{companyName},
+		    LEGAL_PER_NUM = #{legalPerNum},
+		    cust_id = #{custId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateByLegalPerPhone">
+		UPDATE cre_ged_account SET
+			user_id = #{userId},
+			company_bank_of_deposit = #{companyBankOfDeposit},
+			company_account = #{companyAccount},
+			company_bank_branch_name = #{companyBankBranchName},
+			province_name = #{provinceCode},
+			city_name = #{cityCode},
+			status = #{status},
+			create_id = #{createId},
+			create_time = #{createTime},
+			modify_id = #{modifyId},
+			modify_time = #{modifyTime},
+			com_id_num = #{comIdNum},
+		    LEGAL_PER_NAME =#{legalPerName},
+		    COMPANY_NAME = #{companyName},
+		    LEGAL_PER_NUM = #{legalPerNum},
+		    cust_id = #{custId}
+		WHERE legal_per_phone = #{legalPerPhone}
+	</update>
+
+
+
+	<update id="delete">
+		DELETE FROM cre_ged_account
+		WHERE id = #{id}
+	</update>
+
+	<update id="deleteByCustId">
+		DELETE FROM cre_ged_account
+		WHERE cust_id = #{custId}
+	</update>
+
+
+	<select id="getByLegalPerPhone" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		WHERE a.LEGAL_PER_PHONE = #{legalPerPhone}
+	</select>
+
+
+	<select id="findGedAccountByComIdNum" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		WHERE a.com_id_num = #{soclalCreditCode} and status = '4'
+	</select>
+
+	<select id="findGedAccountByPhoneNum" resultType="GedAccount">
+  		SELECT
+   		<include refid="gedAccountColumns"/>
+ 		 FROM cre_ged_account a
+ 		 WHERE a.LEGAL_PER_NUM = #{corporationMobile} and status = '4'
+ 	</select>
+
+	<select id="findGedAccountByIdNum" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		WHERE a.LEGAL_PER_NUM = #{idNum}
+	</select>
+
+	<select id="getByPhone" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		WHERE a.LEGAL_PER_PHONE = #{mobileNum}
+	</select>
+ 	
+ 	<select id="getCustIdByContract" resultType="String">
+ 		SELECT
+			c.CUST_ID
+		FROM
+			${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_register a
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.acc")}.acc_contract b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_apply_relation d ON d.APPLY_NO=b.APPLY_NO
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_company_info e ON e.ID= d.CUST_ID
+		LEFT JOIN ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_ged_account c ON c.COM_ID_NUM = e.UN_SOC_CREDIT_NO
+		WHERE
+			b.CONTRACT_NO = #{contractNo} and d.ROLE_TYPE= '5' and c.status='4'
+ 	</select>
+ 	
+ 	
+ 	<select id="getByBankNo" resultType="String">
+ 		SELECT
+			c.CUST_ID
+		FROM
+		 ${@com.thinkgem.jeesite.common.config.Global@getConfig("schema.cre")}.cre_ged_account c 
+		WHERE
+			c.COMPANY_ACCOUNT = #{recBankcardNo}
+ 	</select>
+ 	
+ 	<select id="getLHCustIdByContract" resultType="String">
+ 		SELECT
+			c.CUST_ID
+		FROM
+			cre_contract a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account_company c ON c.social_credit_code = b.UN_SOC_CREDIT_NO
+		WHERE
+			CONTRACT_NO = #{contractNo} and c.status='7'
+ 	</select>
+
+	<select id="getUnderCustIdByContract" resultType="String">
+ 		SELECT
+			c.CUST_ID
+		FROM
+			cre_contract a
+		LEFT JOIN cre_under_cust_info b ON a.apply_no = b.apply_no
+		LEFT JOIN cre_ged_account c ON c.LEGAL_PER_PHONE = b.MOBILE_NUM
+		WHERE
+
+			CONTRACT_NO = #{contractNo}
+ 	</select>
+
+ 	
+ 	<select id="checkIsOpenAccount" resultType="String">
+ 		SELECT
+			c.id
+		FROM
+			cre_check_approve_union a
+		LEFT JOIN cre_company_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c ON c.COM_ID_NUM = b.UN_SOC_CREDIT_NO
+		WHERE
+			a.APPLY_NO = #{applyNo} and c.status='4'
+ 	</select>
+ 	
+ 	
+ 	<select id="checkDanBaoIsOpenAccount" resultType="String">
+ 		SELECT
+			c.id
+		FROM
+			cre_apply_company_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		left join cre_check_approve_union d on d.cust_id = a.company_id and d.apply_no = a.apply_no
+		LEFT JOIN cre_ged_account c ON c.COM_ID_NUM = b.UN_SOC_CREDIT_NO
+		WHERE
+			a.APPLY_NO = #{applyNo}
+			and a.DEL_FLAG='0' and c.status='4'
+ 	</select>
+ 	
+ 	
+ 	<select id="checkDanBaoInfoIsOpenAccount" resultType="String">
+ 		SELECT
+			c.id
+		FROM
+			cre_apply_company_relation a
+		LEFT JOIN cre_guarantee_company b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c ON c.COM_ID_NUM = b.UN_SOC_CREDIT_NO
+		WHERE
+			a.APPLY_NO = #{applyNo}
+			and a.DEL_FLAG='0' and c.status='4'
+ 	</select>
+ 	
+ 	<select id="checkInfoAccount" resultType="String">
+ 		SELECT
+			c.ID
+		FROM
+			cre_guarantee_relation a
+		LEFT JOIN cre_cust_info b ON a.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account c ON c.LEGAL_PER_PHONE = b.MOBILE_NUM
+		WHERE
+			a.COMPANY_ID = #{custId}
+		AND a.ROLE_TYPE = '1'
+		and a.apply_no = #{applyNo} and c.status='4'
+ 	</select>
+ 	
+ 	
+ 	
+ 	<select id="getByCustID" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>,
+			c.cust_id AS "companyId"
+		FROM
+			cre_check_approve_union c
+		LEFT JOIN cre_company_info b ON c.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account a on a.COM_ID_NUM = b.UN_SOC_CREDIT_NO
+		where c.ID=#{custId}	and a.status='4'
+ 	</select>
+
+
+	<select id="getByComCredit" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>,
+		c.id AS "companyId"
+		FROM
+		cre_apply_relation b
+		LEFT JOIN cre_company_info c ON b.CUST_ID = c.ID
+		LEFT JOIN cre_ged_account a ON a.COM_ID_NUM = c.UN_SOC_CREDIT_NO
+		WHERE b.APPLY_NO = #{applyNo}
+		and b.ROLE_TYPE="5"
+	</select>
+
+	<select id="getByCustPhoneID" resultType="GedAccount">
+		SELECT
+		<include refid="gedAccountColumns"/>,
+		c.cust_id AS "companyId"
+		FROM
+		cre_check_approve_union c
+		LEFT JOIN cre_company_info b ON c.CUST_ID = b.ID
+		LEFT JOIN cre_ged_account a a.LEGAL_PER_PHONE = b.CORPORATION_MOBILE
+		where c.ID=#{custId}
+	</select>
+
+ 	<select id="getFarenByCustID" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		LEFT JOIN cre_company_info b ON b.CORPORATION_MOBILE  = a.LEGAL_PER_PHONE
+		WHERE
+			b.id = #{custId} and a.status='4'
+ 	</select>
+ 
+ 	
+ 	<select id="getSingleByCustID" resultType="GedAccount">
+		SELECT 
+			<include refid="gedAccountColumns"/>
+		FROM cre_ged_account a
+		WHERE
+			a.CUST_ID = #{custId} and a.status='4'
+ 	</select>
+
+ 	<select id="getCustByCompany" resultType="java.lang.String">
+		SELECT
+			c.CUST_ID
+		FROM
+			cre_contract a
+		LEFT JOIN cre_apply_relation b ON a.APPLY_NO = b.APPLY_NO
+		LEFT JOIN cre_company_info d on b.CUST_ID = d.ID
+		LEFT JOIN cre_ged_account_company c ON c.social_credit_code = d.UN_SOC_CREDIT_NO
+		WHERE
+			CONTRACT_NO = #{contractNo} and c.status='7' AND b.ROLE_TYPE = '5'
+	</select>
+
+ 	<select id="queryByBankNo" resultType="GedAccount">
+ 		SELECT
+			<include refid="gedAccountColumns"/>
+		FROM
+		 cre_ged_account a
+		WHERE
+			a.COMPANY_ACCOUNT = #{recBankcardNo}
+ 	</select>
+</mapper>

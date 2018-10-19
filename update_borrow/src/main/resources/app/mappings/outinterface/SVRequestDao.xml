@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVRequestDao">
+	<select id="findSVCompanyList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCompany">
+		SELECT
+		a.COMPANY_ID AS
+		"companyId"
+		a.COMPANY_NAME AS "name"
+		FROM cre_credit_company a
+		WHERE
+		a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE =
+		#{roleType}
+	</select>
+
+	<select id="findSVPersonList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCompany">
+		SELECT
+		a.CUST_ID AS
+		"custId"
+		a.CUST_NAME AS "name"
+		FROM cre_credit_cust a
+		WHERE a.del_flag =
+		'0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+	</select>
+
+	<select id="findSVLineBankList" resultType="com.resoft.outinterface.SV.server.entry.request.SVLineBank">
+		SELECT
+		a.line_month AS
+		"lineMonth",
+		b.BALANCE_AMOUNT AS "balanceAmount",
+		a.income_amount AS
+		"incomeAmount",
+		a.expense_amount AS "expenseAmount",
+		b.PRINTING_DATE AS
+		"printingDate",
+		b.BANK_NAME AS "bankName"
+		FROM
+		cre_credit_line_bank_detail a
+		INNER JOIN
+		cre_credit_line_bank b ON b.id
+		= a.line_bank_id
+		WHERE a.del_flag = '0'
+		AND b.APPLY_NO = #{applyNo}
+		AND
+		a.ROLE_TYPE = #{roleType}
+		AND a.CUST_ID = #{custId}
+	</select>
+
+	<select id="getCompanyCredit" resultType="com.resoft.outinterface.SV.server.entry.request.SVCreditCompany">
+		SELECT
+		a.company_phone
+		AS "companyPhone",
+		a.credit_months AS "creditMonths",
+		a.guarantee_out_amount AS "guaranteeOutAmount",
+		a.printing_time AS
+		"printingTime",
+		a.sum_overdue_amount AS "sumOverdueAmount"
+		FROM
+		cre_credit_company a
+		WHERE a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE = #{roleType}
+		AND a.COMPANY_ID = #{companyId}
+	</select>
+
+	<select id="getPersonCredit" resultType="com.resoft.outinterface.SV.server.entry.request.SVCreditCompany">
+		SELECT
+		a.QUERY_NUM_YEAR
+		AS "queryYear",
+		a.QUERY_NUM_SEASON AS "querySeason",
+		a.QUERY_NUM_MONTH
+		AS "queryMonth",
+		a.QUERY_REPORT_DATE_MINUS AS "reportMinus",
+		a.CREDIT_MONTHS AS "creditMonths",
+		a.MOBILE_NO AS "mobileNo",
+		a.COMPANY_PHONE_NO AS "companyPhoneNo",
+		a.PRINTING_DATE AS "printDate",
+		a.ALL_CREDIT_CARD_NUM AS "creditCardNum",
+		a.OVERDUE_CARD_NUM AS
+		"overdueCardNum",
+		a.UNUSED_CARD_NUM AS "unusedCardNum",
+		a.ABNORMAL_CARD_NUM AS "abnormalCardNum",
+		a.ALL_CREDIT_AMOUNT AS
+		"creditAmount",
+		a.ALL_USED_AMOUNT AS "usedAmount",
+		a.ALL_BALANCE_AMOUNT
+		AS "balanceAmount",
+		a.ALL_OVERDUE_AMOUNT AS "overdueAmount",
+		a.USED_CREDIT_CARD_RATE AS "cardUsedRate",
+		a.MAX_CREDIT_AMOUNT AS
+		"maxCreditAmount",
+		a.MAX_USED_AMOUNT AS "maxUsedAmount",
+		a.CONTINUE_OVERDUE_NUM AS "continueOverdueNum",
+		a.ALL_OVERDUE_NUM AS
+		"sumOverdueNum",
+		a.CREDIT_CARD_STATUS AS "cardStatus",
+		a.SUM_OVERDUE_AMOUNT AS "sumOverdueAmount"
+		FROM cre_credit_cust a
+		WHERE
+		a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE =
+		#{roleType}
+		AND a.CUST_ID = #{custId}
+	</select>
+
+	<select id="findAssetsList" resultType="com.resoft.outinterface.SV.server.entry.request.SVCreditCompany">
+		SELECT
+		a.ASSETS_NAME AS
+		"assetsName",
+		a.MARKET_VALUE AS "marketValue"
+		FROM cre_credit_assets a
+		WHERE a.del_flag = '0'
+		AND a.APPLY_NO = #{applyNo}
+		AND a.ROLE_TYPE =
+		#{roleType}
+		AND a.ASSETS_OWNER_ID = #{assetsOwnerId}
+	</select>
+
+	<insert id="saveSVRequestBaseData" parameterType="java.util.List">
+		INSERT INTO cre_video_path (
+		REGISTER_DATE,
+		APPLY_NO,
+		FILE_DIR,
+		FILE_NAME,
+		FILE_STORAGE_PATH,
+		THUMBNAIL_STORAGE_PATH,
+		AUTHORITY,
+		CREATE_BY,
+		CREATE_DATE
+		)VALUES
+		<foreach item="SVRequestBaseData" collection="allSVRequestBaseData" index="index" separator=",">
+			(
+			CURRENT_DATE,
+			'${applyNo}',
+			<if test="SVRequestBaseData.fileDir == null">
+				'/',
+			</if>
+			<if test="SVRequestBaseData.fileDir != null">
+			(select VIDEO_DIR from cre_video_mapping where VIDEO_VALUE='${SVRequestBaseData.fileDir}'),
+			</if>
+			'${SVRequestBaseData.fileName}',
+			'${SVRequestBaseData.packagePath}',
+			<if test="SVRequestBaseData.thumbnailUrl == null">
+			'${SVRequestBaseData.packagePath}',
+			</if>
+			<if test="SVRequestBaseData.thumbnailUrl ==''">
+			'${SVRequestBaseData.packagePath}',
+			</if>
+			<if test="SVRequestBaseData.thumbnailUrl != null">
+				<if test="SVRequestBaseData.thumbnailUrl != ''">
+				'${SVRequestBaseData.thumbnailUrl}',
+				</if>
+			</if>
+			2,
+			'系统管理员',
+			'${createDate}'
+			)
+		</foreach>
+	</insert>
+
+	<insert id="saveCreditCust">
+		INSERT INTO cre_credit_cust(
+		id,
+		apply_no,
+		role_type,
+		cust_id,
+		cust_name,
+		id_type,
+		id_num,
+		printing_date,
+		query_num_year,
+		query_num_season,
+		query_num_month,
+		query_report_date_minus,
+		credit_months,
+		mobile_no,
+		company_phone_no,
+		all_credit_card_num,
+		overdue_card_num,
+		unused_card_num,
+		abnormal_card_num,
+		all_credit_amount,
+		all_used_amount,
+		all_balance_amount,
+		all_overdue_amount,
+		used_credit_card_rate,
+		max_credit_amount,
+		max_used_amount,
+		continue_overdue_num,
+		all_overdue_num,
+		credit_card_status,
+		sum_loan_amount,
+		sum_balance_amount,
+		sum_overdue_amount,
+		is_white,
+		mortgage_house_num,
+		create_date,
+		del_flag
+		) VALUES
+		<foreach item="creditCust" collection="list" index="index" separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{applyNo},
+			#{creditCust.roleType},
+			#{creditCust.custInfo.id},
+			#{creditCust.custInfo.custName},
+			#{creditCust.custInfo.idType},
+			#{creditCust.custInfo.idNum},
+			#{creditCust.printingDate},
+			#{creditCust.queryNumYear},
+			#{creditCust.queryNumSeason},
+			#{creditCust.queryNumMonth},
+			#{creditCust.queryReportDateMinus},
+			#{creditCust.creditMonths},
+			#{creditCust.mobileNo},
+			#{creditCust.companyPhoneNo},
+			#{creditCust.allCreditCardNum},
+			#{creditCust.overdueCardNum},
+			#{creditCust.unusedCardNum},
+			#{creditCust.abnormalCardNum},
+			#{creditCust.allCreditAmount},
+			#{creditCust.allUsedAmount},
+			#{creditCust.allBalanceAmount},
+			#{creditCust.allOverdueAmount},
+			#{creditCust.usedCreditCardRate},
+			#{creditCust.maxCreditAmount},
+			#{creditCust.maxUsedAmount},
+			#{creditCust.continueOverdueNum},
+			#{creditCust.allOverdueNum},
+			#{creditCust.creditCardStatus},
+			#{creditCust.sumLoanAmount},
+			#{creditCust.sumBalanceAmount},
+			#{creditCust.sumOverdueAmount},
+			#{creditCust.isWhite},
+			#{creditCust.mortgageHouseNum},
+			CURRENT_TIMESTAMP,
+			'0'
+			)
+		</foreach>
+	</insert>
+
+	<insert id="saveCreditCompany">
+		INSERT INTO cre_credit_company(
+		id,
+		apply_no,
+		role_type,
+		company_id,
+		company_name,
+		credit_months,
+		id_num,
+		guarantee_out_amount,
+		company_phone,
+		printing_time,
+		is_company_up_down,
+		six_month_company_income_avg,
+		create_date,
+		sum_loan_amount,
+		sum_balance_amount,
+		sum_overdue_amount,
+		state_of_taxation,
+		del_flag,
+		total_payment_one_year_amount
+		) VALUES
+		<foreach item="creditCompany" collection="list"
+			index="index" separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{applyNo},
+			#{creditCompany.roleType},
+			#{creditCompany.companyInfo.id},
+			#{creditCompany.companyInfo.busiRegName},
+			#{creditCompany.creditMonths},
+			#{creditCompany.idNum},
+			#{creditCompany.guaranteeOutAmount},
+			#{creditCompany.companyPhone},
+			#{creditCompany.printingTime},
+			#{creditCompany.isCompanyUpDown},
+			#{creditCompany.sixMonthCompanyIncomeAvg},
+			CURRENT_TIMESTAMP,
+			#{creditCompany.sumLoanAmount},
+			#{creditCompany.sumBalanceAmount},
+			#{creditCompany.sumsumOverdueAmount},
+			#{creditCompany.stateOfTaxation},
+			'0',
+			#{creditCompany.totalPaymentOneYearAmount}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="saveAssets">
+		INSERT INTO cre_credit_assets(
+		id,
+		apply_no,
+		role_type,
+		assets_owner_id,
+		assets_owner_name,
+		assets_name,
+		market_value,
+		is_mortgage,
+		is_check,
+		detail_comment,
+		remarks,
+		del_flag,
+		create_date
+		) VALUES
+		<foreach item="creditAssets" collection="list" index="index" separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{applyNo},
+			#{creditAssets.roleType},
+			<if test="creditAssets.custInfo != null and creditAssets.custInfo.id != null and creditAssets.custInfo.id != ''">
+				#{creditAssets.custInfo.id},
+				#{creditAssets.custInfo.custName},
+			</if>
+			<if test="creditAssets.companyInfo != null and creditAssets.companyInfo.id != null and creditAssets.companyInfo.id != ''">
+				#{creditAssets.companyInfo.id},
+				#{creditAssets.companyInfo.busiRegName},
+			</if>
+			#{creditAssets.assetsName},
+			#{creditAssets.marketValue},
+			#{creditAssets.isMortgage},
+			#{creditAssets.isCheck},
+			#{creditAssets.detailComment},
+			'',
+			'0',
+			CURRENT_TIMESTAMP
+			)
+		</foreach>
+	</insert>
+
+	<insert id="saveLineBank">
+		INSERT INTO cre_credit_line_bank(
+			id,
+			apply_no,
+			role_type,
+			cust_id,
+			cust_name,
+			id_num,
+			id_type,
+			bank_name,
+			bankcard_no,
+			balance_amount,
+			AVG_CURRE_VALID_LINE_AMOUNT,
+			SUM_INCOME_AMOUNT,
+			SUM_EXPENSE_AMOUNT,
+			printing_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES
+		<foreach item="lineBank" collection="list" index="index"
+			separator=",">
+			(
+			REPLACE(UUID(),'-',''),
+			#{applyNo},
+			#{roleType},
+			<if test="lineBank.custInfo != null and lineBank.custInfo.id != null and lineBank.custInfo.id != ''">
+				#{lineBank.custInfo.id},
+				#{lineBank.custInfo.custName},
+				#{lineBank.custInfo.idNum},
+				#{lineBank.custInfo.idType},
+			</if>
+			<if test="lineBank.companyInfo != null and lineBank.companyInfo.id != null and lineBank.companyInfo.id != ''">
+				#{lineBank.companyInfo.id},
+				#{lineBank.companyInfo.busiRegName},
+				<if test="lineBank.companyInfo.organizationNo != null and lineBank.companyInfo.organizationNo != ''">
+				#{lineBank.companyInfo.organizationNo},
+				</if>
+				<if test="lineBank.companyInfo.organizationNo == null or lineBank.companyInfo.organizationNo == ''">
+				'',
+				</if>
+				'',
+			</if>
+			#{lineBank.bankName},
+			#{lineBank.bankcardNo},
+			#{lineBank.balanceAmount},
+			#{lineBank.avgCurreValidLineAmount},
+			#{lineBank.sumIncomeAmount},
+			#{lineBank.sumExpenseAmount},
+			#{lineBank.printingDate},
+			'',
+			CURRENT_TIMESTAMP,
+			'',
+			CURRENT_TIMESTAMP,
+			'0'
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="saveLineBankDetail">
+		INSERT INTO cre_credit_line_bank_detail(
+			id,
+			line_bank_id,
+			line_month,
+			curre_valid_line_amount,
+			income_amount,
+			expense_amount,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES 
+		<foreach item="lineBankDetail" collection="list" index="index"
+			separator=",">
+		(
+			REPLACE(UUID(),'-',''),
+			#{lineBankDetail.creditLineBank.id},
+			#{lineBankDetail.lineMonth},
+			#{lineBankDetail.curreValidLineAmount},
+			#{lineBankDetail.incomeAmount},
+			#{lineBankDetail.expenseAmount},
+			'',
+			CURRENT_TIMESTAMP,
+			'',
+			CURRENT_TIMESTAMP,
+			0
+		)
+		</foreach>
+	</insert>
+
+</mapper>

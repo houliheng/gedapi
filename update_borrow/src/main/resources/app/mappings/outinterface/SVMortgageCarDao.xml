@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.outinterface.SV.dao.SVMortgageCarDao">
+
+	<sql id="sVMortgageCarColumns">
+		a.id AS "id",
+		a.apply_no AS "applyNo",
+		a.property_right AS
+		"propertyRight",
+		a.mortgage_type AS "mortgageType",
+		a.property_co_name
+		AS "propertyCoName",
+		a.property_name AS "propertyName",
+		a.buy_date AS
+		"buyDate",
+		a.vehicle_no AS "vehicleNo",
+		a.vehicle_brand AS
+		"vehicleBrand",
+		a.vehicle_type AS "vehicleType",
+		a.vehicle_series AS
+		"vehicleSeries",
+		a.property_of_com_owners AS "propertyOfComOwners",
+		a.other_information AS "otherInformation",
+		a.busi_reg_name AS
+		"busiRegName",
+		a.busi_lic_reg_no AS "busiLicRegNo",
+		a.operate_province
+		AS "operateProvince",
+		a.operate_city AS "operateCity",
+		a.operate_distinct AS "operateDistinct",
+		a.operate_details AS
+		"operateDetails",
+		a.corporation_name AS "corporationName",
+		a.corporation_card_id_no AS "corporationCardIdNo",
+		a.client_name AS
+		"clientName",
+		a.client_id_no AS "clientIdNo",
+		a.client_phone AS
+		"clientPhone",
+		a.client_company_relation AS "clientCompanyRelation",
+		a.create_date AS "createDate",
+		a.motor_vehi_regi_certi_no AS
+		"motorVehiRegiCertiNo",
+		a.engine_num AS "engineNum",
+		a.vehicle_shelf_no
+		AS "vehicleShelfNo",
+		a.mortgage_rate AS "mortgageRate",
+		a.net_purchase_price AS "netPurchasePrice",
+		a.is_procedure_complete AS
+		"isProcedureComplete",
+		a.travel_kms AS "travelKms",
+		a.annual_inspection_status AS "annualInspectionStatus",
+		a.use_property
+		AS "useProperty",
+		a.car_status AS "carStatus",
+		a.is_keep_papers AS
+		"isKeepPapers",
+		a.is_handle AS "isHandle",
+		a.used_changes AS
+		"usedChanges",
+		a.used_years AS "usedYears",
+		a.is_common AS "isCommon",
+		a.car_evaluate_price AS "carEvaluatePrice",
+		a.market_price1 AS
+		"marketPrice1",
+		a.market_phone1 AS "marketPhone1",
+		a.market_price2 AS
+		"marketPrice2",
+		a.market_phone2 AS "marketPhone2",
+		a.market_price3 AS
+		"marketPrice3",
+		a.market_phone3 AS "marketPhone3"
+	</sql>
+
+	<sql id="sVMortgageCarJoins">
+	</sql>
+
+	<select id="get"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageCar">
+		SELECT
+		<include refid="sVMortgageCarColumns" />
+		FROM ift_sv_mortgage_car a
+		<include refid="sVMortgageCarJoins" />
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageCar">
+		SELECT
+		<include refid="sVMortgageCarColumns" />
+		FROM ift_sv_mortgage_car a
+		<include refid="sVMortgageCarJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="long">
+		SELECT
+		count(a.id)
+		FROM ift_sv_mortgage_car a
+		<include refid="sVMortgageCarJoins" />
+		<where>
+
+		</where>
+	</select>
+
+	<select id="findAllList"
+		resultType="com.resoft.outinterface.SV.server.entry.request.SVMortgageCar">
+		SELECT
+		<include refid="sVMortgageCarColumns" />
+		FROM ift_sv_mortgage_car a
+		<include refid="sVMortgageCarJoins" />
+		<where>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert" parameterType="map">
+		INSERT INTO ift_sv_mortgage_car(
+		id,
+		apply_no,
+		property_right,
+		mortgage_type,
+		property_co_name,
+		property_name,
+		buy_date,
+		vehicle_no,
+		vehicle_brand,
+		vehicle_type,
+		vehicle_series,
+		property_of_com_owners,
+		other_information,
+		busi_reg_name,
+		busi_lic_reg_no,
+		operate_province,
+		operate_city,
+		operate_distinct,
+		operate_details,
+		corporation_name,
+		corporation_card_id_no,
+		client_name,
+		client_id_no,
+		client_phone,
+		client_company_relation,
+		create_date,
+		motor_vehi_regi_certi_no,
+		engine_num,
+		vehicle_shelf_no,
+		mortgage_rate,
+		net_purchase_price,
+		is_procedure_complete,
+		travel_kms,
+		annual_inspection_status,
+		use_property,
+		car_status,
+		is_keep_papers,
+		is_handle,
+		used_changes,
+		used_years,
+		is_common,
+		car_evaluate_price,
+		market_price1,
+		market_phone1,
+		market_price2,
+		market_phone2,
+		market_price3,
+		market_phone3
+		) VALUES
+		<foreach item="car" collection="list" index="index" separator=",">
+			(
+				REPLACE(UUID(),'-',''),
+				#{applyNo},
+				#{car.propertyRight},
+				#{car.mortgageType},
+				#{car.propertyCoName},
+				#{car.propertyName},
+				#{car.buyDate},
+				#{car.vehicleNo},
+				#{car.vehicleBrand},
+				#{car.vehicleType},
+				#{car.vehicleSeries},
+				#{car.propertyOfComOwners},
+				#{car.otherInformation},
+				#{car.busiRegName},
+				#{car.busiLicRegNo},
+				#{car.operateProvince},
+				#{car.operateCity},
+				#{car.operateDistinct},
+				#{car.operateDetails},
+				#{car.corporationName},
+				#{car.corporationCardIdNo},
+				#{car.clientName},
+				#{car.clientIdNo},
+				#{car.clientPhone},
+				#{car.clientCompanyRelation},
+				CURRENT_TIMESTAMP,
+				#{car.motorVehiRegiCertiNo},
+				#{car.engineNum},
+				#{car.vehicleShelfNo},
+				#{car.mortgageRate},
+				#{car.netPurchasePrice},
+				#{car.isProcedureComplete},
+				#{car.travelKms},
+				#{car.annualInspectionStatus},
+				#{car.useProperty},
+				#{car.carStatus},
+				#{car.isKeepPapers},
+				#{car.isHandle},
+				#{car.usedChanges},
+				#{car.usedYears},
+				#{car.isCommon},
+				#{car.carEvaluatePrice},
+				#{car.marketPrice1},
+				#{car.marketPhone1},
+				#{car.marketPrice2},
+				#{car.marketPhone2},
+				#{car.marketPrice3},
+				#{car.marketPhone3}
+			)
+		</foreach>
+	</insert>
+
+	<update id="update">
+		UPDATE ift_sv_mortgage_car SET
+		apply_no = #{applyNo},
+		property_right = #{propertyRight},
+		mortgage_type = #{mortgageType},
+		property_co_name = #{propertyCoName},
+		property_name = #{propertyName},
+		buy_date = #{buyDate},
+		vehicle_no = #{vehicleNo},
+		vehicle_brand =
+		#{vehicleBrand},
+		vehicle_type = #{vehicleType},
+		vehicle_series =
+		#{vehicleSeries},
+		property_of_com_owners = #{propertyOfComOwners},
+		other_information = #{otherInformation},
+		busi_reg_name =
+		#{busiRegName},
+		busi_lic_reg_no = #{busiLicRegNo},
+		operate_province =
+		#{operateProvince},
+		operate_city = #{operateCity},
+		operate_distinct =
+		#{operateDistinct},
+		operate_details = #{operateDetails},
+		corporation_name = #{corporationName},
+		corporation_card_id_no =
+		#{corporationCardIdNo},
+		client_name = #{clientName},
+		client_id_no =
+		#{clientIdNo},
+		client_phone = #{clientPhone},
+		client_company_relation =
+		#{clientCompanyRelation},
+		motor_vehi_regi_certi_no =
+		#{motorVehiRegiCertiNo},
+		engine_num = #{engineNum},
+		vehicle_shelf_no =
+		#{vehicleShelfNo},
+		mortgage_rate = #{mortgageRate},
+		net_purchase_price =
+		#{netPurchasePrice},
+		is_procedure_complete = #{isProcedureComplete},
+		travel_kms = #{travelKms},
+		annual_inspection_status =
+		#{annualInspectionStatus},
+		use_property = #{useProperty},
+		car_status =
+		#{carStatus},
+		is_keep_papers = #{isKeepPapers},
+		is_handle = #{isHandle},
+		used_changes = #{usedChanges},
+		used_years = #{usedYears},
+		is_common =
+		#{isCommon},
+		car_evaluate_price = #{carEvaluatePrice},
+		market_price1 =
+		#{marketPrice1},
+		market_phone1 = #{marketPhone1},
+		market_price2 =
+		#{marketPrice2},
+		market_phone2 = #{marketPhone2},
+		market_price3 =
+		#{marketPrice3},
+		market_phone3 = #{marketPhone3}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM ift_sv_mortgage_car
+		WHERE id = #{id}
+	</update>
+
+</mapper>

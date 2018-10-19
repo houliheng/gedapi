@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.resoft.multds.postloan.pushdatatopl.dao.PlMortgageOtherInfoDao">
+				
+	<insert id="insertOtherDataToPl" parameterType="java.util.List">
+		INSERT INTO pl_mortgage_other_info(
+			id,
+			apply_no,
+			assets_name,
+			 count_num,
+			value_num,
+			cont_details, 
+			description,
+			del_flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			is_push_data
+		) VALUES 
+		<foreach item="mortgageOtherInfoList" collection="mortgageOtherInfoList" index="index" separator=",">
+		(
+			#{mortgageOtherInfoList.id},
+			#{mortgageOtherInfoList.applyNo},
+			#{mortgageOtherInfoList.assetsName},
+		    #{mortgageOtherInfoList.countNum},
+			#{mortgageOtherInfoList.valueNum},
+			#{mortgageOtherInfoList.contDetails}, 
+			#{mortgageOtherInfoList.description},
+			'0',
+			#{mortgageOtherInfoList.createBy.id},
+			#{mortgageOtherInfoList.createDate},
+			#{mortgageOtherInfoList.updateBy.id},
+			#{mortgageOtherInfoList.updateDate},
+			'0'
+		)
+		</foreach>
+	</insert>
+	
+</mapper>
